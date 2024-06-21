@@ -1,0 +1,11 @@
+{
+    "name": "FcmCentral",
+    "alias": "fcmcentral",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\FcmCentral\\Providers\\FcmCentralServiceProvider"
+    ],
+    "files": []
+}
