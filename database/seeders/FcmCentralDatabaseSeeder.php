@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\database\seeders;
+namespace Modules\FcmCentral\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 

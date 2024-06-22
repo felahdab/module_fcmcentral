@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\FcmCentral\Http\Controllers\FcmCentralController;
+use Modules\FcmCentral\Api\v1\EventController;
 
 /*
  *--------------------------------------------------------------------------
@@ -15,5 +15,8 @@ use Modules\FcmCentral\Http\Controllers\FcmCentralController;
 */
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    //Route::apiResource('fcmcentral', FcmCentralController::class)->names('fcmcentral');
+    Route::post('postevent', [EventController::class, 'postevent'])->name('post-event');
+    Route::post('get_user_uuid', [EventController::class, 'get_user_uuid'])->name('get_user_uuid');
+    Route::post('get_user_history', [EventController::class, 'get_user_history'])->name('get_user_history');
+    
 });
