@@ -1,10 +1,11 @@
 {
-    "name": "nwidart/fcmcentral",
-    "description": "",
+    "name": "fanlab/fcmcentral-module",
+    "description": "Module de gestion de la FCM destine au niveau de synthese et de pilotage",
+    "type": "laravel-module",
     "authors": [
         {
-            "name": "Nicolas Widart",
-            "email": "n.widart@gmail.com"
+            "name": "FANLAB",
+            "email": "alfan-fanlab-toulon.accueil.fct@intradef.gouv.fr"
         }
     ],
     "extra": {

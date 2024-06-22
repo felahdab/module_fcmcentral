@@ -15,5 +15,5 @@ use Modules\FcmCentral\Http\Controllers\FcmCentralController;
 */
 
 Route::group([], function () {
-    Route::resource('fcmcentral', FcmCentralController::class)->names('fcmcentral');
+    //Route::resource('fcmcentral', FcmCentralController::class)->names('fcmcentral');
 });

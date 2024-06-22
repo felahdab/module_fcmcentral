@@ -34,7 +34,9 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapWebRoutes(): void
     {
-        Route::middleware('web')->group(module_path('FcmCentral', '/routes/web.php'));
+        Route::middleware('web')
+            ->prefix(config('skeletor.prefixe_instance'))
+            ->group(module_path('FcmCentral', '/routes/web.php'));
     }
 
     /**
@@ -44,6 +46,8 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes(): void
     {
-        Route::middleware('api')->prefix('api')->name('api.')->group(module_path('FcmCentral', '/routes/api.php'));
+        Route::middleware('api')
+            ->prefix(config('skeletor.prefixe_instance'). '/api')
+            ->name('api.')->group(module_path('FcmCentral', '/routes/api.php'));
     }
 }
