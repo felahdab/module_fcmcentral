@@ -20,7 +20,7 @@ class ParcoursResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?int $navigationSort = 1;
-    
+
     protected static ?string $navigationGroup = 'Parcours';
 
     public static function form(Form $form): Form
@@ -42,7 +42,8 @@ class ParcoursResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('libelle_long')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('libelle_court')
