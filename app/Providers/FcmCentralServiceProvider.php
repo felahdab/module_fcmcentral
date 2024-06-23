@@ -5,6 +5,8 @@ namespace Modules\FcmCentral\Providers;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
+use Modules\FcmCentral\Console\TestParcoursArchitecture;
+
 class FcmCentralServiceProvider extends ServiceProvider
 {
     protected string $moduleName = 'FcmCentral';
@@ -37,7 +39,7 @@ class FcmCentralServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([TestParcoursArchitecture::class]);
     }
 
     /**
