@@ -13,6 +13,10 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\ObjectifsRelationManager;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\StagesRelationManager;
+
+
 class SavoirFaireResource extends Resource
 {
     protected static ?string $model = SavoirFaire::class;
@@ -73,7 +77,8 @@ class SavoirFaireResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ObjectifsRelationManager::class,
+            StagesRelationManager::class
         ];
     }
 

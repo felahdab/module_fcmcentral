@@ -13,6 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\FonctionResource\RelationManagers\CompetencesRelationManager;
+
+
 class FonctionResource extends Resource
 {
     protected static ?string $model = Fonction::class;
@@ -73,7 +76,7 @@ class FonctionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CompetencesRelationManager::class,
         ];
     }
 

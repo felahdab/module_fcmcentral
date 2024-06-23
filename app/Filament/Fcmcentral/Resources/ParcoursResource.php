@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\FonctionsRelationManager;
+
 class ParcoursResource extends Resource
 {
     protected static ?string $model = Parcours::class;
@@ -73,7 +75,7 @@ class ParcoursResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            FonctionsRelationManager::class
         ];
     }
 
