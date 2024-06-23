@@ -31,7 +31,7 @@ class SavoirFaire extends Model
 
     public function competences(): BelongsToMany
     {
-        return $this->belongsToMany(Fonction::class, 'fcmcentral_competence_savoirfaire', 'savoirfaire_id', 'competence_id')
+        return $this->belongsToMany(Competence::class, 'fcmcentral_competence_savoirfaire', 'savoirfaire_id', 'competence_id')
         ->withTimestamps();
     }
 
