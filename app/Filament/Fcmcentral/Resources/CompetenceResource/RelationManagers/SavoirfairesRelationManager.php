@@ -21,6 +21,9 @@ class SavoirfairesRelationManager extends RelationManager
                 Forms\Components\TextInput::make('libelle_court')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('libelle_long')
+                    ->required()
+                    ->maxLength(255),
             ]);
     }
 
@@ -30,6 +33,7 @@ class SavoirfairesRelationManager extends RelationManager
             ->recordTitleAttribute('libelle_court')
             ->columns([
                 Tables\Columns\TextColumn::make('libelle_court'),
+                Tables\Columns\TextColumn::make('libelle_long'),
             ])
             ->filters([
                 //
