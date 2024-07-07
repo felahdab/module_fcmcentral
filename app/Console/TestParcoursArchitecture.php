@@ -100,12 +100,14 @@ class TestParcoursArchitecture extends Command
      */
     public function handle()
     {
-        $p=Parcours::with('fonctions.competences.savoirfaires.activites')->first();
+        $p1=Parcours::query()->get()->first();
+        $p2=Parcours::query()->get()->last();
 
-        $dto = ParcoursDto::from($p);
-        dd($this->transform_for_treeview([$dto->toArray()]));
+        $dto1 = ParcoursDto::from($p1);
+        $dto2 = ParcoursDto::from($p2);
+        dd($this->transform_for_treeview([$dto1->toArray(), $dto2->toArray()]));
 
-        dd($this->get_roots_for_treeview([$dto->toArray()]));
+        dd($this->get_roots_for_treeview([$dto1->toArray(), $dto2->toArray()]));
 
         $arr = $dto->toArray();
         //dd($arr);

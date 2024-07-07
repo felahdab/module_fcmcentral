@@ -26,6 +26,8 @@ class Parcours extends Model
         return ParcoursFactory::new();
     }
 
+    protected $with = ['fonctions.competences.savoirfaires.activites'];
+
     /**
      * Les fonctions qui constituent un parcours
      */
