@@ -15,6 +15,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('libelle_long');
             $table->string('libelle_court');
+            $table->string('url')->nullable();
+            $table->string('code_sicomp')->nullable();
+            $table->string('niveau');
 
             $table->timestamps();
         });

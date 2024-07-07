@@ -2,9 +2,9 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\StageResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\StageResource\RelationManagers;
-use Modules\FcmCentral\Models\Stage;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource\Pages;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource\RelationManagers;
+use App\Models\Activite;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,9 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class StageResource extends Resource
+class ActiviteResource extends Resource
 {
-    protected static ?string $model = Stage::class;
+    protected static ?string $model = Activite::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -33,6 +33,17 @@ class StageResource extends Resource
                 Forms\Components\TextInput::make('libelle_court')
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('url')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('duree_validite')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('prerequis')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('type')
+                    ->required(),
             ]);
     }
 
@@ -42,12 +53,19 @@ class StageResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('libelle_long')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('libelle_court')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('url')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('duree_validite')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('prerequis')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('type'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -80,9 +98,9 @@ class StageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListStages::route('/'),
-            'create' => Pages\CreateStage::route('/create'),
-            'edit' => Pages\EditStage::route('/{record}/edit'),
+            'index' => Pages\ListActivites::route('/'),
+            'create' => Pages\CreateActivite::route('/create'),
+            'edit' => Pages\EditActivite::route('/{record}/edit'),
         ];
     }
 }

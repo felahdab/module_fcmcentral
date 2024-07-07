@@ -5,14 +5,14 @@ namespace Modules\FcmCentral\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-use Modules\FcmCentral\Models\Stage;
+use Modules\FcmCentral\Models\Activite;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TransformationHistory>
  */
-class StageFactory extends Factory
+class ActiviteFactory extends Factory
 {
-    protected $model = Stage::class;
+    protected $model = Activite::class;
 
     /**
      * Define the model's default state.
@@ -26,6 +26,10 @@ class StageFactory extends Factory
         return [
             "libelle_long" => $libelle,
             "libelle_court" => Str::limit($libelle, 10),
+            "url" => fake()->url(),
+            "type" => "STAGE",
+            "duree_validite" => "1 semaine",
+            "prerequis" => "aucun",
         ];
     }
 }

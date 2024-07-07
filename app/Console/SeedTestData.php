@@ -8,18 +8,22 @@ use Symfony\Component\Console\Input\InputArgument;
 
 use Modules\FcmCommun\DataObjects\ParcoursDto;
 use Modules\FcmCentral\Models\Parcours;
+use Modules\FcmCentral\Models\Fonction;
+use Modules\FcmCentral\Models\Competence;
+use Modules\FcmCentral\Models\SavoirFaire;
+use Modules\FcmCentral\Models\Activite;
 
-class TestParcoursArchitecture extends Command
+class SeedTestData extends Command
 {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'fcmcentral:test-serialization';
+    protected $signature = 'fcmcentral:seed-data';
 
     /**
      * The console command description.
      */
-    protected $description = 'Teste la serialization du parcours';
+    protected $description = 'Genere des donnees de parcours pour les tests';
 
     /**
      * Create a new command instance.
@@ -29,26 +33,23 @@ class TestParcoursArchitecture extends Command
         parent::__construct();
     }
 
-    public function transform_for_treeview($dto)
-    {
-
-    }
-
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $p=Parcours::with('fonctions.competences.savoirfaires.activites')->first();
+        $a = Activite::factory(2)->create();
+        $b = SavoirFaire::factory(1)->create();
+        $b->first()->activites()->attach($a, ['coeff' => "1", "duree" => "1 semaine", "ordre" => 1]);
 
-        $dto = ParcoursDto::from($p);
-        dd($dto);
+        $c = Competence::factory(1)->create();
+        $c->first()->savoirfaires()->attach($b);
 
-        $arr = $dto->toArray();
-        //dd($arr);
+        $d = Fonction::factory(1)->create();
+        $d->first()->competences()->attach($c);
 
-            // $dtoback = ParcoursDto::from($arr);
-            // dd($dtoback);
+        $e=Parcours::factory(1)->create();
+        $e->first()->fonctions()->attach($d);
     }
 
     /**

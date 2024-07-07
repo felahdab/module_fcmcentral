@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fcmcentral_stages', function (Blueprint $table) {
+        Schema::create('fcmcentral_activites', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('libelle_long');
             $table->string('libelle_court');
+            $table->string('url')->nullable();
+            $table->string('duree_validite')->nullable();
+            $table->string('prerequis')->nullable();
+            $table->enum('type', ['STAGE', 'OBJECTIF']);
 
             $table->timestamps();
         });
@@ -25,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fcmcentral_stages');
+        Schema::dropIfExists('fcmcentral_activites');
     }
 };

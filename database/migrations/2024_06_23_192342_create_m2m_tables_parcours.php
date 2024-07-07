@@ -35,21 +35,17 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('fcmcentral_savoirfaire_stage', function (Blueprint $table) {
+        Schema::create('fcmcentral_savoirfaire_activite', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('savoirfaire_id')->references('id')->on('fcmcentral_savoir_faires');
-            $table->foreignUuid('stage_id')->references('id')->on('fcmcentral_stages');
+            $table->foreignUuid('activite_id')->references('id')->on('fcmcentral_activites');
+            $table->float('coeff');
+            $table->string('duree');
+            $table->integer('ordre');
 
             $table->timestamps();
         });
 
-        Schema::create('fcmcentral_savoirfaire_objectif', function (Blueprint $table) {
-            $table->id();
-            $table->foreignUuid('savoirfaire_id')->references('id')->on('fcmcentral_savoir_faires');
-            $table->foreignUuid('objectif_id')->references('id')->on('fcmcentral_objectifs');
-
-            $table->timestamps();
-        });
     }
 
     /**
@@ -60,8 +56,7 @@ return new class extends Migration
         Schema::dropIfExists('fcmcentral_fonction_parcours');
         Schema::dropIfExists('fcmcentral_competence_fonction');
         Schema::dropIfExists('fcmcentral_competence_savoirfaire');
-        Schema::dropIfExists('fcmcentral_savoirfaire_stage');
-        Schema::dropIfExists('fcmcentral_savoirfaire_objectif');
+        Schema::dropIfExists('fcmcentral_savoirfaire_activite');
 
     }
 

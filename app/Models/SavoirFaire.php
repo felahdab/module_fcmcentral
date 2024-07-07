@@ -32,18 +32,14 @@ class SavoirFaire extends Model
     public function competences(): BelongsToMany
     {
         return $this->belongsToMany(Competence::class, 'fcmcentral_competence_savoirfaire', 'savoirfaire_id', 'competence_id')
-        ->withTimestamps();
+                ->withTimestamps();
     }
 
-    public function stages(): BelongsToMany
+    public function activites(): BelongsToMany
     {
-        return $this->belongsToMany(Stage::class, 'fcmcentral_savoirfaire_stage', 'savoirfaire_id', 'stage_id')
-        ->withTimestamps();
+        return $this->belongsToMany(Activite::class, 'fcmcentral_savoirfaire_activite', 'savoirfaire_id', 'activite_id')
+                ->withPivot('coeff', 'duree', 'ordre')
+                ->withTimestamps();
     }
 
-    public function objectifs(): BelongsToMany
-    {
-        return $this->belongsToMany(Objectif::class, 'fcmcentral_savoirfaire_objectif', 'savoirfaire_id', 'objectif_id')
-        ->withTimestamps();
-    }
 }

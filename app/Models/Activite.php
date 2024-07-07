@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-use Modules\FcmCentral\Database\Factories\ObjectifFactory;
+use Modules\FcmCentral\Database\Factories\ActiviteFactory;
 
 use Modules\FcmCentral\Traits\HasTablePrefix;
 
 
-class Objectif extends Model
+class Activite extends Model
 {
     use HasFactory;
     use HasTablePrefix;
@@ -22,16 +22,22 @@ class Objectif extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ["libelle_long","libelle_court"];
+    protected $fillable = [ "libelle_long",
+                            "libelle_court", 
+                            "url", 
+                            "duree_validite", 
+                            "prerequis", 
+                            "type"];
     
-    protected static function newFactory(): ObjectifFactory
+    protected static function newFactory(): ActiviteFactory
     {
-        return ObjectifFactory::new();
+        return ActiviteFactory::new();
     }
 
     public function savoirfaires(): BelongsToMany
     {
         return $this->belongsToMany(SavoirFaire::class, 'fcmcentral_savoirfaire_objectif', 'objectif_id', 'savoirfaire_id')
+        ->withPivot('coefficient', 'duree', 'ordre')
         ->withTimestamps();
     }
 }

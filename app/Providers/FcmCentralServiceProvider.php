@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 use Modules\FcmCentral\Console\TestParcoursArchitecture;
+use Modules\FcmCentral\Console\SeedTestData;
 
 class FcmCentralServiceProvider extends ServiceProvider
 {
@@ -39,7 +40,10 @@ class FcmCentralServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        $this->commands([TestParcoursArchitecture::class]);
+        $this->commands([
+                    TestParcoursArchitecture::class,
+                    SeedTestData::class,
+                ]);
     }
 
     /**

@@ -26,6 +26,8 @@ class FonctionFactory extends Factory
         return [
             "libelle_long" => $libelle,
             "libelle_court" => Str::limit($libelle, 10),
+            "url" => fake()->url()
+
         ];
     }
 }
