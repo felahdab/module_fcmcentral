@@ -6,6 +6,9 @@ use Illuminate\Support\Arr;
 use Carbon\Carbon;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Models\UserParcours;
+
+use Modules\FcmCommun\DataObjects\ParcoursDto;
 
 class ParcoursService
 {
@@ -20,7 +23,12 @@ class ParcoursService
                 
                 $fonctions = Arr::pull($arr, "fonctions");
                 $arr["children"]= Arr::pluck($fonctions, "id");
-                $arr["state"] = [];
+                if (! array_key_exists("state", $arr)){
+                    $arr["state"] = [
+                        "checked" => false,
+                        "opened" => false
+                    ];
+                }
 
                 $fonctions = static::transform_for_treeview($fonctions);
 
@@ -31,7 +39,12 @@ class ParcoursService
             elseif (Arr::exists($arr, "competences")){
                 $competences = Arr::pull($arr, "competences");
                 $arr["children"]= Arr::pluck($competences, "id");
-                $arr["state"] = [];
+                if (! array_key_exists("state", $arr)){
+                    $arr["state"] = [
+                        "checked" => false,
+                        "opened" => false
+                    ];
+                }
 
                 $competences = static::transform_for_treeview($competences);
 
@@ -42,7 +55,12 @@ class ParcoursService
             elseif (Arr::exists($arr, "savoirfaires")){
                 $savoirfaires = Arr::pull($arr, "savoirfaires");
                 $arr["children"]= Arr::pluck($savoirfaires, "id");
-                $arr["state"] = [];
+                if (! array_key_exists("state", $arr)){
+                    $arr["state"] = [
+                        "checked" => false,
+                        "opened" => false
+                    ];
+                }
 
                 $savoirfaires = static::transform_for_treeview($savoirfaires);
 
@@ -53,7 +71,12 @@ class ParcoursService
             elseif (Arr::exists($arr, "activites")){
                 $activites = Arr::pull($arr, "activites");
                 $arr["children"]= Arr::pluck($activites, "id");
-                $arr["state"] = [];
+                if (! array_key_exists("state", $arr)){
+                    $arr["state"] = [
+                        "checked" => false,
+                        "opened" => false
+                    ];
+                }
 
                 $activites = static::transform_for_treeview($activites);
 
@@ -62,7 +85,12 @@ class ParcoursService
 
             }
             else {
-                $arr["state"] = [];
+                if (! array_key_exists("state", $arr)){
+                    $arr["state"] = [
+                        "checked" => false,
+                        "opened" => false
+                    ];
+                }
                 $ret[] = $arr;
             }
         }        
@@ -96,6 +124,34 @@ class ParcoursService
             "date_fin" => Carbon::tomorrow(), 
             "parcours" => $parcoursdto->toArray()
         ]);
+
+    }
+
+    // Dans un premier temps, travail sur ParcoursSerialize. Mais devra être le parcours d'un user en vrai.
+    public static function applyChanges(UserParcours $parcours, $changes){
+        //ddd($changes);
+
+        $dto = ParcoursDto::from($parcours->parcours);
+        
+        foreach($dto->fonctions as $fonction){
+            foreach($fonction->competences as $competence){
+                foreach ($competence->savoirfaires as $savoirfaire){
+                    foreach($savoirfaire->activites as $activite){
+                        if (Arr::exists($changes, $activite->id)){
+                            //dump('updating parcours: ');
+                            //dump($changes[$activite->id]["state"]);
+                            $activite->state = $changes[$activite->id]["state"]["checked"] == "set" ? ["checked"=> true] : ["checked" => false ] ;
+                            // Raise an event for the modification of the state of the parcours.
+                        }
+                        //if ($changes)
+                    }
+                }
+            }
+        }
+        $parcours->parcours=$dto;
+        $parcours->save();
+        //ddd($dto);
+
 
     }
 }

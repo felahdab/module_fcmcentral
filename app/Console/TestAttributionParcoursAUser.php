@@ -8,24 +8,24 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
 use Modules\FcmCommun\DataObjects\ParcoursDto;
-use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Models\UserParcours;
+
+use App\Models\User;
 
 use Modules\FcmCentral\Services\ParcoursService;
 
-
-
-class TestParcoursArchitecture extends Command
+class TestAttributionParcoursAUser extends Command
 {
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'fcmcentral:test-serialization';
+    protected $signature = 'fcmcentral:test-set-user-parcours';
 
     /**
      * The console command description.
      */
-    protected $description = 'Teste la serialization du parcours';
+    protected $description = 'Attribue un parcours a un utilisateur';
 
     /**
      * Create a new command instance.
@@ -40,24 +40,15 @@ class TestParcoursArchitecture extends Command
      */
     public function handle()
     {
-        $p1=Parcours::query()->get()->first();
-        $p2=Parcours::query()->get()->last();
+        $p=ParcoursSerialise::query()->get()->first();
+        $u=User::query()->get()->first();
 
-        $dto1 = ParcoursDto::from($p1);
-        //dd($dto1->toArray());
-        ParcoursService::serialize_parcours($dto1);
-        return;
-        
-        $dto2=ParcoursDto::from(ParcoursSerialise::first()->parcours);
-        dd($dto2);
+        $up = new UserParcours();
+        $up->user_id     = $u->uuid;
+        $up->parcours_id = $p->id;
+        $up->parcours    = $p->parcours;
 
-        $dto2 = ParcoursDto::from($p2);
-        dd(ParcoursService::transform_for_treeview([$dto1->toArray(), $dto2->toArray()]));
-
-        dd(ParcoursService::get_roots_for_treeview([$dto1->toArray(), $dto2->toArray()]));
-
-        $arr = $dto1->toArray();
-
+        $up->save();
     }
 
     /**

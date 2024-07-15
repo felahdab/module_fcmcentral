@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 
 use Modules\FcmCentral\Console\TestParcoursArchitecture;
 use Modules\FcmCentral\Console\SeedTestData;
+use Modules\FcmCentral\Console\TestAttributionParcoursAUser;
 
 class FcmCentralServiceProvider extends ServiceProvider
 {
@@ -43,6 +44,7 @@ class FcmCentralServiceProvider extends ServiceProvider
         $this->commands([
                     TestParcoursArchitecture::class,
                     SeedTestData::class,
+                    TestAttributionParcoursAUser::class,
                 ]);
     }
 
