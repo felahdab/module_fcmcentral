@@ -47,7 +47,8 @@ class ParcoursSerialiseResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('libelle_long')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('libelle_court')
