@@ -3,7 +3,6 @@
 namespace Modules\FcmCentral\Services;
 
 use Illuminate\Support\Arr;
-use Carbon\Carbon;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\UserParcours;
@@ -103,7 +102,7 @@ class ParcoursService
         return Arr::pluck($arrs, "id");
     }
 
-    public static function serialize_parcours($parcoursdto){
+    public static function serialize_parcours($parcoursdto, $date_de_debut){
         $previous = ParcoursSerialise::where('uuid', $parcoursdto->id)->orderBy('version')->get()->last();
         $newversion = null;
         if ($previous){
@@ -120,10 +119,17 @@ class ParcoursService
             "libelle_long" => $parcoursdto->libelle_long,
             "libelle_court"=> $parcoursdto->libelle_court, 
             "version" => $newversion, 
-            "date_debut" => Carbon::now(), 
-            "date_fin" => Carbon::tomorrow(), 
+            "date_debut" => $date_de_debut, 
+            "date_fin" => null,
             "parcours" => $parcoursdto->toArray()
         ]);
+
+        ParcoursSerialise::where('uuid', $parcoursdto->id)
+            ->where('version', '<', $newversion)
+            ->where('date_fin', null)
+            ->update(['date_fin' => $date_de_debut->add(-1, 'day')]);
+
+        return $p;
 
     }
 

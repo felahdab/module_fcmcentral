@@ -22,7 +22,7 @@ class SavoirFaireResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 14;
 
     protected static ?string $navigationGroup = 'Parcours';
 

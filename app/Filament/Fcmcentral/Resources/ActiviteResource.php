@@ -19,7 +19,7 @@ class ActiviteResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 15;
 
     protected static ?string $navigationGroup = 'Parcours';
 
