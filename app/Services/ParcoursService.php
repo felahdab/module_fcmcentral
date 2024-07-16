@@ -8,6 +8,9 @@ use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\UserParcours;
 
 use Modules\FcmCommun\DataObjects\ParcoursDto;
+use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
+
+use Carbon\Carbon;
 
 class ParcoursService
 {
@@ -109,10 +112,20 @@ class ParcoursService
             
             $previousversion = intval($previous->version);
             $newversion = $previousversion + 1;
+
+            if ((new Carbon($previous->date_debut))->isAfter((new Carbon ($date_de_debut)))  ){
+                return null; 
+            }
         }
         else {
             $newversion = 1;
+
+            if (Carbon::now()->isAfter((new Carbon ($date_de_debut)))  ){
+                return null; 
+            }
         }
+
+        
 
         $p=ParcoursSerialise::create([
             "uuid" => $parcoursdto->id,
@@ -133,10 +146,19 @@ class ParcoursService
 
     }
 
+    public static function firstPossibleNewVersionDate($parcours){
+        $uuid = $parcours->id;
+        $previous = ParcoursSerialise::where('uuid', $uuid)->orderBy('version')->get()->last();
+        if ($previous){
+            return (new Carbon($previous->date_debut))->addDay()->startOfDay();
+        }
+        else {
+            return Carbon::now()->addDay()->startOfDay();
+        }
+    }
+
     // Dans un premier temps, travail sur ParcoursSerialize. Mais devra être le parcours d'un user en vrai.
     public static function applyChanges(UserParcours $parcours, $changes){
-        //ddd($changes);
-
         $dto = ParcoursDto::from($parcours->parcours);
         
         foreach($dto->fonctions as $fonction){
@@ -144,20 +166,46 @@ class ParcoursService
                 foreach ($competence->savoirfaires as $savoirfaire){
                     foreach($savoirfaire->activites as $activite){
                         if (Arr::exists($changes, $activite->id)){
-                            //dump('updating parcours: ');
-                            //dump($changes[$activite->id]["state"]);
                             $activite->state = $changes[$activite->id]["state"]["checked"] == "set" ? ["checked"=> true] : ["checked" => false ] ;
                             // Raise an event for the modification of the state of the parcours.
+
+                            $event = new UserGeneratedEvent(
+                                event_type: $changes[$activite->id]["state"]["checked"] == "set" ? "activite_validee" : "activite_devalidee",
+                                user_id: auth()->user()->uuid,
+                                object_class: get_class($parcours),
+                                object_uuid: $parcours->id,
+                                detail: [
+                                    "user_id" => $parcours->user_id, // Pas strictement necessaire puisque le UserParcours est deja attache a un user.
+                                    "activite_id" => $activite->id
+                                ]
+                            );
+
+                            event($event);
                         }
-                        //if ($changes)
                     }
+
+                    if (Arr::exists($changes, $savoirfaire->id)){
+                        $savoirfaire->state = $changes[$savoirfaire->id]["state"]["checked"] == "set" ? ["checked"=> true] : ["checked" => false ] ;
+                        // Raise an event for the modification of the state of the parcours.
+
+                        $event = new UserGeneratedEvent(
+                            event_type: $changes[$savoirfaire->id]["state"]["checked"] == "set" ? "savoirfaire_valide" : "savoirfaire_devalide",
+                            user_id: auth()->user()->uuid,
+                            object_class: get_class($parcours),
+                            object_uuid: $parcours->id,
+                            detail: [
+                                "user_id" => $parcours->user_id, // Pas strictement necessaire puisque le UserParcours est deja attache a un user.
+                                "savoirfaire_id" => $savoirfaire->id
+                            ]
+                        );
+
+                        event($event);
+                    }
+
                 }
             }
         }
         $parcours->parcours=$dto;
         $parcours->save();
-        //ddd($dto);
-
-
     }
 }
