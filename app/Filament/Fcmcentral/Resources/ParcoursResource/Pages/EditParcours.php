@@ -19,12 +19,18 @@ class EditParcours extends EditRecord
 {
     protected static string $resource = ParcoursResource::class;
 
+    protected function authorizeUser()
+    {
+        return true;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Actions\DeleteAction::make(),
             Action::make('figer')
                 ->requiresConfirmation()
+                ->visible($this->authorizeUser())
                 ->form([
                     DatePicker::make('date de debut')
                     ->minDate(Carbon::now()->today()->max(ParcoursService::firstPossibleNewVersionDate($this->getRecord())))
