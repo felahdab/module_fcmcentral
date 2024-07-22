@@ -4,7 +4,7 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\RelationManagers;
-use App\Models\ParcoursSerialise;
+use Modules\FcmCentral\Models\ParcoursSerialise;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
