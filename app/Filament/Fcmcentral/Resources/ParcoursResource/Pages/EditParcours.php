@@ -19,6 +19,13 @@ class EditParcours extends EditRecord
 {
     protected static string $resource = ParcoursResource::class;
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ParcoursResource\Widgets\NbVersionsParcoursWidget::class,
+        ];
+    }
+
     protected function authorizeUser()
     {
         return true;

@@ -3,6 +3,7 @@
 namespace Modules\FcmCentral\Models;
 
 use Modules\FcmCommun\Models\UserParcours as BaseModel;
+use Modules\RH\Entities\Personne as User;
 
 class UserParcours extends BaseModel
 {
@@ -11,5 +12,10 @@ class UserParcours extends BaseModel
     public function parcoursserialise() 
     {
         return $this->belongsTo(ParcoursSerialise::class, 'parcours_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, "user_id");
     }
 }
