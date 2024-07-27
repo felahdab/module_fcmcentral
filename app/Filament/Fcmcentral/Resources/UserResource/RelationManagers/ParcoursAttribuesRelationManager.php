@@ -16,9 +16,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Actions\AttachAction;
+
 class ParcoursAttribuesRelationManager extends RelationManager
 {
     protected static string $relationship = 'parcours_attribues';
+
+    protected static ?string $title = 'Parcours attribués à cet utilisateur';
 
     public function form(Form $form): Form
     {
@@ -47,8 +51,8 @@ class ParcoursAttribuesRelationManager extends RelationManager
             ])
             ->headerActions([
                 //Tables\Actions\CreateAction::make(),
-                AttachAction::make('essai')
-                    ->label('essai'),
+                AttachAction::make('attribuer')
+                    ->label('Attribuer un parcours'),
             ])
             ->actions([
                 //Tables\Actions\EditAction::make(),

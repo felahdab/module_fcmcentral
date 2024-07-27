@@ -17,8 +17,10 @@ class NbVersionsParcoursWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        $nbversions=ParcoursSerialise::where('uuid', $this->record->id)->count();
-        $nbmarins=UserParcours::where('parcours_id', $this->record->id)->count();
+        $parcoursserialises = ParcoursSerialise::where('uuid', $this->record->id)->get();
+        $nbversions=$parcoursserialises->count();
+        
+        $nbmarins=UserParcours::whereIn('parcours_id', $parcoursserialises->pluck('id'))->count();
 
         return [
             Stat::make('Nombre de versions figées de ce parcours', $nbversions),

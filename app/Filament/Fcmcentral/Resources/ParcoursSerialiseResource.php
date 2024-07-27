@@ -53,12 +53,13 @@ class ParcoursSerialiseResource extends Resource
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('libelle_long')
+                Tables\Columns\TextColumn::make('version')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('libelle_court')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('version')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('libelle_long')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('date_debut')
                     ->date()
                     ->sortable(),

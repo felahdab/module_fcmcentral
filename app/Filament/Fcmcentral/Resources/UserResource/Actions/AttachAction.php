@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\FcmCentral\Resources\UserResource\RelationManagers;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Actions;
 
 use Closure;
 use Filament\Actions\Concerns\CanCustomizeProcess;
@@ -49,6 +49,7 @@ class AttachAction extends BaseAction
             $this->process(function () use ($data, $record, $relationship) {
 
                 $parcours = $record;
+                //ddd($parcours);
                 $user = $relationship->getParent();
 
                 $event = new UserGeneratedEvent(
@@ -57,13 +58,13 @@ class AttachAction extends BaseAction
                     object_class: get_class($user),
                     object_uuid: $user->uuid,
                     detail: [
-                        "parcours" => $parcours->uuid,
-                        "version" => $parcours->version,
+                        "parcoursserialise" => $parcours->id,
+                        // "parcours" => $parcours->uuid,
+                        // "version" => $parcours->version,
                     ]
                 );
 
                 event($event);
-                ddd($event);
             }, []);
 
             if ($arguments['another'] ?? false) {

@@ -6,6 +6,7 @@
     "priority": 0,
     "providers": [
         "Modules\\FcmCentral\\Providers\\FcmCentralServiceProvider",
+        "Modules\\FcmCentral\\Providers\\EventServiceProvider",
         "Modules\\FcmCentral\\Providers\\Filament\\FcmcentralPanelProvider"
     ],
     "files": []

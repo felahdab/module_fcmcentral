@@ -132,7 +132,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ParcoursAttribuesRelationManager::class
+            //ParcoursAttribuesRelationManager::class
         ];
     }
 
@@ -143,6 +143,7 @@ class UserResource extends Resource
             'create' => Pages\CreateUser::route('/create'),
             'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
+            'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),
         ];
     }
 }
