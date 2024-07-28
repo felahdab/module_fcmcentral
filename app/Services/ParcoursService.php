@@ -13,6 +13,7 @@ use Modules\FcmCommun\DataObjects\ParcoursDto;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class ParcoursService
 {
@@ -159,59 +160,61 @@ class ParcoursService
         }
     }
 
-    public static function applyChanges(UserParcours $userparcours, $changes, $commentaire){
-        $dto = ParcoursDto::from($userparcours->parcours);
-        
-        foreach($dto->fonctions as $fonction){
-            foreach($fonction->competences as $competence){
-                foreach ($competence->savoirfaires as $savoirfaire){
-                    foreach($savoirfaire->activites as $activite){
-                        if (Arr::exists($changes, $activite->id)){
-                            $activite->state = $changes[$activite->id]["state"]["checked"] == "set" ? ["checked"=> true] : ["checked" => false ] ;
+    public static function applyChanges(Collection $alluserparcours, $changes, $commentaire){
+        foreach($alluserparcours as $userparcours){
+            $dto = ParcoursDto::from($userparcours->parcours);
+            
+            foreach($dto->fonctions as $fonction){
+                foreach($fonction->competences as $competence){
+                    foreach ($competence->savoirfaires as $savoirfaire){
+                        foreach($savoirfaire->activites as $activite){
+                            if (Arr::exists($changes, $activite->id)){
+                                $activite->state = $changes[$activite->id]["state"]["checked"] == "set" ? ["checked"=> true] : ["checked" => false ] ;
+                                // Raise an event for the modification of the state of the parcours.
+
+                                $event = new UserGeneratedEvent(
+                                    event_type: $changes[$activite->id]["state"]["checked"] == "set" ? "activite_validee" : "activite_devalidee",
+                                    user_id: auth()->user()->uuid,
+                                    object_class: User::class, 
+                                    object_uuid: $userparcours->user_id,
+                                    detail: [
+                                        "userparcours_id" => $userparcours->id,
+                                        "parcours_id" => $userparcours->parcours_id,
+                                        "activite_id" => $activite->id,
+                                        "commentaire" => $commentaire
+                                    ]
+                                );
+
+                                event($event);
+                            }
+                        }
+
+                        if (Arr::exists($changes, $savoirfaire->id)){
+                            $savoirfaire->state = $changes[$savoirfaire->id]["state"]["checked"] == "set" ? ["checked"=> true] : ["checked" => false ] ;
                             // Raise an event for the modification of the state of the parcours.
 
                             $event = new UserGeneratedEvent(
-                                event_type: $changes[$activite->id]["state"]["checked"] == "set" ? "activite_validee" : "activite_devalidee",
+                                event_type: $changes[$savoirfaire->id]["state"]["checked"] == "set" ? "savoirfaire_valide" : "savoirfaire_devalide",
                                 user_id: auth()->user()->uuid,
                                 object_class: User::class, 
                                 object_uuid: $userparcours->user_id,
                                 detail: [
                                     "userparcours_id" => $userparcours->id,
                                     "parcours_id" => $userparcours->parcours_id,
-                                    "activite_id" => $activite->id,
+                                    "savoirfaire_id" => $savoirfaire->id,
                                     "commentaire" => $commentaire
                                 ]
                             );
 
                             event($event);
                         }
+
                     }
-
-                    if (Arr::exists($changes, $savoirfaire->id)){
-                        $savoirfaire->state = $changes[$savoirfaire->id]["state"]["checked"] == "set" ? ["checked"=> true] : ["checked" => false ] ;
-                        // Raise an event for the modification of the state of the parcours.
-
-                        $event = new UserGeneratedEvent(
-                            event_type: $changes[$savoirfaire->id]["state"]["checked"] == "set" ? "savoirfaire_valide" : "savoirfaire_devalide",
-                            user_id: auth()->user()->uuid,
-                            object_class: User::class, 
-                            object_uuid: $userparcours->user_id,
-                            detail: [
-                                "userparcours_id" => $userparcours->id,
-                                "parcours_id" => $userparcours->parcours_id,
-                                "savoirfaire_id" => $savoirfaire->id,
-                                "commentaire" => $commentaire
-                            ]
-                        );
-
-                        event($event);
-                    }
-
                 }
             }
+            $userparcours->parcours=$dto;
+            $userparcours->save();
         }
-        $userparcours->parcours=$dto;
-        $userparcours->save();
     }
 
     public static function attribuer_parcours_a_un_user($user, $parcours)
