@@ -10,8 +10,13 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\TableWidget as BaseWidget;
 
+use Filament\Tables\Filters\TernaryFilter;
+use Illuminate\Database\Eloquent\Builder;
+
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\UserParcours;
+
+use Modules\FcmCentral\Services\ParcoursService;
 
 class SelectionDeParcours extends BaseWidget
 {
@@ -25,24 +30,41 @@ class SelectionDeParcours extends BaseWidget
                                                 ->get()
                                                 ->pluck('parcours_id');
 
-        //ddd($liste_des_parcours_deja_attribues);
-
         return $table
+            ->heading("Parcours attribués")
             ->query(
                 ParcoursSerialise::query()
-                    ->whereNotIn('id', $liste_des_parcours_deja_attribues)
             )
             ->columns([
                 TextColumn::make('version'),
                 TextColumn::make('libelle_court'),
             ])
+            ->filters([
+                TernaryFilter::make('est_attribue')
+                    ->label("Parcours attribues")
+                    ->placeholder('Tous les parcours')
+                    ->default(true)
+                    ->trueLabel('Parcours attribués à cet utilisateur')
+                    ->falseLabel('Parcours non attribués à cet utilisateur')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereIn('id', $liste_des_parcours_deja_attribues), 
+                        false: fn (Builder $query): Builder => $query->whereNotIn('id', $liste_des_parcours_deja_attribues),
+                        blank: fn (Builder $query): Builder => $query
+                    )
+            ])
             ->actions([
-                Action::make("essai")
-                ->requiresConfirmation()
-                ->action(function()
-                {
-                    return;
-                })
+                Action::make("Attribuer ce parcours au marin")
+                        ->requiresConfirmation()
+                        ->action(function($record)
+                        {
+                            ParcoursService::attribuer_parcours_a_un_user($this->record, $record);
+                        }),
+                Action::make("Retirer ce parcours au marin")
+                        ->requiresConfirmation()
+                        ->action(function($record)
+                        {
+                            ParcoursService::retirer_parcours_a_un_user($this->record, $record);
+                        })
             ]);
     }
 }

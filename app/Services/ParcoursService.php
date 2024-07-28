@@ -6,6 +6,8 @@ use Illuminate\Support\Arr;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\UserParcours;
+use Modules\FcmCentral\Models\User;
+
 
 use Modules\FcmCommun\DataObjects\ParcoursDto;
 use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
@@ -157,9 +159,8 @@ class ParcoursService
         }
     }
 
-    // Dans un premier temps, travail sur ParcoursSerialize. Mais devra être le parcours d'un user en vrai.
-    public static function applyChanges(UserParcours $parcours, $changes){
-        $dto = ParcoursDto::from($parcours->parcours);
+    public static function applyChanges(UserParcours $userparcours, $changes, $commentaire){
+        $dto = ParcoursDto::from($userparcours->parcours);
         
         foreach($dto->fonctions as $fonction){
             foreach($fonction->competences as $competence){
@@ -172,11 +173,13 @@ class ParcoursService
                             $event = new UserGeneratedEvent(
                                 event_type: $changes[$activite->id]["state"]["checked"] == "set" ? "activite_validee" : "activite_devalidee",
                                 user_id: auth()->user()->uuid,
-                                object_class: get_class($parcours),
-                                object_uuid: $parcours->id,
+                                object_class: User::class, 
+                                object_uuid: $userparcours->user_id,
                                 detail: [
-                                    "user_id" => $parcours->user_id, // Pas strictement necessaire puisque le UserParcours est deja attache a un user.
-                                    "activite_id" => $activite->id
+                                    "userparcours_id" => $userparcours->id,
+                                    "parcours_id" => $userparcours->parcours_id,
+                                    "activite_id" => $activite->id,
+                                    "commentaire" => $commentaire
                                 ]
                             );
 
@@ -191,11 +194,13 @@ class ParcoursService
                         $event = new UserGeneratedEvent(
                             event_type: $changes[$savoirfaire->id]["state"]["checked"] == "set" ? "savoirfaire_valide" : "savoirfaire_devalide",
                             user_id: auth()->user()->uuid,
-                            object_class: get_class($parcours),
-                            object_uuid: $parcours->id,
+                            object_class: User::class, 
+                            object_uuid: $userparcours->user_id,
                             detail: [
-                                "user_id" => $parcours->user_id, // Pas strictement necessaire puisque le UserParcours est deja attache a un user.
-                                "savoirfaire_id" => $savoirfaire->id
+                                "userparcours_id" => $userparcours->id,
+                                "parcours_id" => $userparcours->parcours_id,
+                                "savoirfaire_id" => $savoirfaire->id,
+                                "commentaire" => $commentaire
                             ]
                         );
 
@@ -205,7 +210,41 @@ class ParcoursService
                 }
             }
         }
-        $parcours->parcours=$dto;
-        $parcours->save();
+        $userparcours->parcours=$dto;
+        $userparcours->save();
+    }
+
+    public static function attribuer_parcours_a_un_user($user, $parcours)
+    {
+        $event = new UserGeneratedEvent(
+            event_type: "parcours_attribue",
+            user_id: auth()->user()->uuid,
+            object_class: get_class($user),
+            object_uuid: $user->uuid,
+            detail: [
+                "parcoursserialise" => $parcours->id,
+                // "parcours" => $parcours->uuid,
+                // "version" => $parcours->version,
+            ]
+        );
+
+        event($event);
+    }
+
+    public static function retirer_parcours_a_un_user($user, $parcours)
+    {
+        $event = new UserGeneratedEvent(
+            event_type: "parcours_retire",
+            user_id: auth()->user()->uuid,
+            object_class: get_class($user),
+            object_uuid: $user->uuid,
+            detail: [
+                "parcoursserialise" => $parcours->id,
+                // "parcours" => $parcours->uuid,
+                // "version" => $parcours->version,
+            ]
+        );
+
+        event($event);
     }
 }
