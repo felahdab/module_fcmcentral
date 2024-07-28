@@ -2,18 +2,16 @@
 
 namespace Modules\FcmCentral\Services;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
+
+use Modules\FcmCommun\DataObjects\ParcoursDto;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\UserParcours;
 use Modules\FcmCentral\Models\User;
-
-
-use Modules\FcmCommun\DataObjects\ParcoursDto;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 
 class ParcoursService
 {
