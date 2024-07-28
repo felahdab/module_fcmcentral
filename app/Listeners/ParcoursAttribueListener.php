@@ -5,7 +5,7 @@ namespace Modules\FcmCentral\Listeners;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\UserParcours;

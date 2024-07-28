@@ -5,7 +5,7 @@ namespace Modules\FcmCentral\Listeners;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCommun\DataObjects\RemoteGeneratedEvent;
 
 use Modules\FcmCentral\Models\StoredEvent;

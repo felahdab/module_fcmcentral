@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 use App\Http\Controllers\Controller;
 
-use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCommun\Listeners\LocalUserGeneratedEventListener;
 
 use Modules\FcmCentral\Models\User;

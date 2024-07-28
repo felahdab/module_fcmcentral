@@ -10,7 +10,7 @@ use Modules\FcmCentral\Models\User;
 
 
 use Modules\FcmCommun\DataObjects\ParcoursDto;
-use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 use Carbon\Carbon;
 

@@ -4,7 +4,7 @@ namespace Modules\FcmCentral\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
-use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Listeners\ParcoursAttribueListener;
 use Modules\FcmCentral\Listeners\ParcoursRetireListener;
 

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 
 use Modules\FcmCentral\Services\ParcoursService;
 
-use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 use Filament\Tables\Actions\AttachAction as BaseAction;
 

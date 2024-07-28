@@ -12,7 +12,7 @@ use Filament\Forms\Components\DatePicker;
 use Carbon\Carbon;
 
 use Modules\FcmCommun\DataObjects\ParcoursDto;
-use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Services\ParcoursService;
 
 class EditParcours extends EditRecord
