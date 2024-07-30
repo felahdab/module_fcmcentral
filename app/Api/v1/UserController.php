@@ -13,6 +13,9 @@ use Modules\FcmCommun\Listeners\LocalUserGeneratedEventListener;
 use Modules\FcmCentral\Models\User;
 use Modules\FcmCentral\Models\StoredEvent;
 
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
+
 use Modules\FcmCentral\Api\v1\Requests\ApiGetUserUuidRequest;
 
 class UserController extends Controller
@@ -58,21 +61,44 @@ class UserController extends Controller
     *       required=true,
     *       in="path",
     *     ),
+    *   @OA\Parameter(
+    *       name="filter[event_uuid]",
+    *       description="Identifiant unique de l'evenement voulu",
+    *       required=false,
+    *       in="query",
+    *     ),
+    *   @OA\Parameter(
+    *       name="filter[after]",
+    *       description="Date a partir de laquelle on veut les evenements",
+    *       required=false,
+    *       in="query",
+    *     ),
+    *   @OA\Parameter(
+    *       name="filter[before]",
+    *       description="Date avant laquelle on veut les evenements",
+    *       required=false,
+    *       in="query",
+    *     ),
     *   @OA\Response(response= 200, description= "Récupérer l'historique complet d'une utilisateur.")
     * )
     */
 
    public function get_user_history($uuid)
    {
-        //$uuid = $request->input('uuid');
         $user = User::where('uuid', $uuid)->first();
         if ($user == null) {
           return response(["error" => "user not found"], 400);
-                    //->header('Content-Type', 'application/json');
         }
 
         $history = StoredEvent::where("object_uuid", $uuid)
-               ->orderBy('event_datetime', 'asc')
+               ->orderBy('event_datetime', 'asc');
+
+        $history = QueryBuilder::for($history)
+               ->allowedFilters([
+                    'event_uuid', 
+                    AllowedFilter::scope('after'),
+                    AllowedFilter::scope('before'),
+               ])
                ->get();
         // $events = StoredEvent::where('object_class', User::class)
         // ->where('object_uuid', $uuid)
