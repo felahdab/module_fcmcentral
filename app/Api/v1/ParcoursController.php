@@ -47,5 +47,18 @@ class ParcoursController extends Controller
         return $versions;
     }
 
+        /**
+    * @OA\Get(
+    *   path= "/api/fcmcentral/v1/tous_parcours_serialises",
+    *   security={{"api token": {}}},
+    *   @OA\Response(response= 200, description= "La liste des parcours serialises existants avec leur description complete.")
+    * )
+    */
+    public function get_tous_parcours_serialises()
+    {
+          $parcours = ParcoursSerialise::all();
+          return $parcours;
+    }
+
 
 }
