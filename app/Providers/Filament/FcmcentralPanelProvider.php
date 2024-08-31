@@ -18,18 +18,30 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+use Filament\FontProviders\SpatieGoogleFontProvider;
+use App\Filament\AvatarProviders\AnnudefAvatarProvider;
+use App\Providers\Filament\Traits\UsesSkeletorPrefixAndMultitenancyTrait;
+
+use App\Http\Middleware\InitializeTenancyByPath;
+use App\Http\Middleware\SetTenantCookieMiddleware;
+use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
+
 class FcmcentralPanelProvider extends PanelProvider
 {
+    use UsesSkeletorPrefixAndMultitenancyTrait;
+
     private string $module = "FcmCentral";
     public function panel(Panel $panel): Panel
     {
         $moduleNamespace = $this->getModuleNamespace();
         return $panel
             ->id('fcmcentral::fcmcentral')
-            ->path(config('skeletor.prefixe_instance') . '/fcmcentral')
+            ->path($this->prefix . '/fcmcentral')
             ->colors([
                 'primary' => Color::Teal,
             ])
+            ->font('Inter', provider: SpatieGoogleFontProvider::class)
+            ->defaultAvatarProvider(AnnudefAvatarProvider::class)
             ->discoverResources(in: module_path($this->module, 'app/Filament/Fcmcentral/Resources'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Resources")
             ->discoverPages(in: module_path($this->module, 'app/Filament/Fcmcentral/Pages'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Pages")
             ->pages([
@@ -44,6 +56,9 @@ class FcmcentralPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                InitializeTenancyByPath::class,
+                SetTenantDefaultForRoutesMiddleware::class,
+                SetTenantCookieMiddleware::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,

@@ -13,8 +13,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-use Modules\FcmCentral\Filament\FcmCentral\Resources\UserResource\RelationManagers\ParcoursAttribuesRelationManager;
-
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -121,6 +119,9 @@ class UserResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('livret-de-fcm')
+                                    ->label("Livret de FCM")
+                                    ->url(fn (User $record) : string => static::getUrl('livret-de-fcm', ['record' => $record]))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

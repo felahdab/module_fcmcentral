@@ -14,9 +14,14 @@ class EditUser extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        $resource = static::getResource();
+
         return [
             Actions\ViewAction::make(),
             Actions\DeleteAction::make(),
+            Actions\Action::make('livret-de-fcm')
+                ->label("Livret de FCM")
+                ->url($resource::getUrl('livret-de-fcm', ['record' => $this->record]))
         ];
     }
 

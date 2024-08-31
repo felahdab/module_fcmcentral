@@ -4,7 +4,7 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource\RelationManagers;
-use App\Models\Activite;
+use Modules\FcmCentral\Models\Activite;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -42,7 +42,11 @@ class ActiviteResource extends Resource
                 Forms\Components\TextInput::make('prerequis')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('type')
+                Forms\Components\Select::make('type')
+                ->options([
+                    'STAGE' => 'Stage',
+                    'OBJECTIF' => 'Objectif',
+                ])
                     ->required(),
             ]);
     }
@@ -55,10 +59,11 @@ class ActiviteResource extends Resource
                     ->label('ID')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('libelle_long')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('libelle_court')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('libelle_long')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('url')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('duree_validite')

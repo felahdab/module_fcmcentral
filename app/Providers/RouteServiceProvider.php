@@ -47,7 +47,7 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapApiRoutes(): void
     {
         Route::middleware('api')
-            ->prefix(config('skeletor.prefixe_instance'). '/api/fcmcentral')
+            ->prefix(config('skeletor.prefixe_instance'). 'api/fcmcentral')
             ->name('api.')->group(module_path('FcmCentral', '/routes/api.php'));
     }
 }

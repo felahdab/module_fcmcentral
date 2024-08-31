@@ -31,7 +31,16 @@ class SelectionDeParcours extends BaseWidget
                                                 ->pluck('parcours_id');
 
         return $table
-            ->heading("Parcours attribués")
+            ->heading(function() use ($table) 
+            { 
+                $filter_state = $table->getFilter('est_attribue')->getState()["value"];
+
+                return match($filter_state) {
+                    "" => "Tous les parcours",
+                    "1" => "Parcours déjà attribués à cet utilisateur",
+                    "0" => "Parcours non attribués à cet utilisateur"
+                }; 
+            })
             ->query(
                 ParcoursSerialise::query()
             )
@@ -43,7 +52,8 @@ class SelectionDeParcours extends BaseWidget
                 TernaryFilter::make('est_attribue')
                     ->label("Parcours attribues")
                     ->placeholder('Tous les parcours')
-                    ->default(true)
+                    ->selectablePlaceholder(false)
+                    ->default("1")
                     ->trueLabel('Parcours attribués à cet utilisateur')
                     ->falseLabel('Parcours non attribués à cet utilisateur')
                     ->queries(
@@ -55,12 +65,30 @@ class SelectionDeParcours extends BaseWidget
             ->actions([
                 Action::make("Attribuer ce parcours au marin")
                         ->requiresConfirmation()
+                        ->visible(function(Table $table){
+                            $filter_state = $table->getFilter('est_attribue')->getState()["value"];
+                            
+                            return match($filter_state) {
+                                "" => false,
+                                "1" => false,
+                                "0" => true
+                            }; 
+                        })
                         ->action(function($record)
                         {
                             ParcoursService::attribuer_parcours_a_un_user($this->record, $record);
                         }),
                 Action::make("Retirer ce parcours au marin")
                         ->requiresConfirmation()
+                        ->visible(function(Table $table){
+                            $filter_state = $table->getFilter('est_attribue')->getState()["value"];
+                            
+                            return match($filter_state) {
+                                "" => false,
+                                "1" => true,
+                                "0" => false
+                            }; 
+                        })
                         ->action(function($record)
                         {
                             ParcoursService::retirer_parcours_a_un_user($this->record, $record);

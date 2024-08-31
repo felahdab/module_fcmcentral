@@ -4,16 +4,35 @@ namespace Modules\FcmCentral\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 use Modules\FcmCentral\Console\TestParcoursArchitecture;
 use Modules\FcmCentral\Console\SeedTestData;
 use Modules\FcmCentral\Console\TestAttributionParcoursAUser;
+
+use Modules\FcmCentral\Models;
+use Modules\FcmCentral\Policies;
+
 
 class FcmCentralServiceProvider extends ServiceProvider
 {
     protected string $moduleName = 'FcmCentral';
 
     protected string $moduleNameLower = 'fcmcentral';
+
+    /**
+     * The policy mappings for the application.
+     *
+     * @var array<class-string, class-string>
+     */
+    protected $policies = [
+        Models\Parcours::class => Policies\ParcoursPolicy::class,
+        Models\ParcoursSerialise::class => Policies\ParcoursSerialisePolicy::class,
+        Models\Fonction::class => Policies\FonctionPolicy::class,
+        Models\Competence::class => Policies\CompetencePolicy::class,
+        Models\SavoirFaire::class => Policies\SavoirFairePolicy::class,
+        Models\Activite::class => Policies\ActivitePolicy::class
+    ];
 
     /**
      * Boot the application events.
@@ -34,6 +53,32 @@ class FcmCentralServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->register(RouteServiceProvider::class);
+
+        $this->booting(function () {
+            $this->registerPolicies();
+        });
+    }
+
+    /**
+     * Register the application's policies.
+     *
+     * @return void
+     */
+    public function registerPolicies()
+    {
+        foreach ($this->policies() as $model => $policy) {
+            Gate::policy($model, $policy);
+        }
+    }
+
+    /**
+     * Get the policies defined on the provider.
+     *
+     * @return array<class-string, class-string>
+     */
+    public function policies()
+    {
+        return $this->policies;
     }
 
     /**
