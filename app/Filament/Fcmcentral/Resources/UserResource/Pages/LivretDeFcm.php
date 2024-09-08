@@ -12,7 +12,12 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Livewire;
 
-use Modules\FcmCommun\Http\Livewire\LivretDeTransformation as LivretDeTransformationLivewire;
+//use Modules\FcmCommun\Http\Livewire\LivretDeTransformation as LivretDeTransformationLivewire;
+//use Modules\FcmCommun\Http\Livewire\Treeview as LivretDeTransformationLivewire;
+use Modules\FcmCommun\Http\Livewire\Livret as LivretDeTransformationLivewire;
+
+//use Modules\FcmCommun\Http\Livewire\TestComponent as LivretDeTransformationLivewire;
+
 
 class LivretDeFcm extends ViewRecord
 {
@@ -28,7 +33,6 @@ class LivretDeFcm extends ViewRecord
         return $form
         ->schema([
             Section::make('Informations sur le marin')
-                //->description('Prevent abuse by limiting the number of requests per period')
                 ->schema([
                     Grid::make(2)
                     ->schema([
@@ -42,7 +46,6 @@ class LivretDeFcm extends ViewRecord
                     ]),
                 ]),
             Section::make('Livret de FCM')
-                //->description('Prevent abuse by limiting the number of requests per period')
                 ->schema([    
                     //Livewire::make(LivretDeTransformationLivewire::class, ["uuid" => "2bb1800f-c247-434b-abef-4eab4cff0836"]),
                     Livewire::make(LivretDeTransformationLivewire::class, ["uuid" => $this->record->uuid]),
