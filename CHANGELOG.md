@@ -1,0 +1,45 @@
+## 0.0.1 (September 09, 2024)
+- Created VERSION, Created CHANGELOG.md, Bumped to 0.0.1
+- wip
+- Implementation de spatie Query Builder dans le UserController
+- wip API
+- Modification du livret de transformation et du service ParcoursService pour permettre l'emploi de classes dynamiques dans les modules FcmCentral et FcmUnite.
+- Refactoring des use du service Parcours
+- Adaptations pour gérer plusieurs parcours simultanément.
+- Séparation des events par modules.
+- wip affichage utilisateur, choix des parcours attribues
+- wip events, actions, user interface
+- wip.
+- Ajout du widget de changement de panneau au panneau FcmCentral
+- wip sur API pour historique utilisateur et parcours serialises
+- Conversion du modele UserParcours en modele commun.
+- La ressource Filament doit faire appel au modele du module.
+- Le modele ParcoursSerialise etend le modele commun et redefinit son prefixe de table.
+- Conversion des migrations parcours serialises et user_parcours pour faire appel à la definition commune dans FcmCommun
+- Ajour de la logique d'autorisation a l'action de figement des parcours.
+- Ajout du modele StoredEvent et de la migration associee, qui etend la migration du module FcmCommun
+- Ajustement de l'action Figer pour contraindre les dates de validité de la nouvelle version figée.
+- Ajout de la possibilite de figer les parcours en parcours serialises. Ajustement automatique de la date de fin de validité des versions précédentes à la veille du jour d'entrée en vigueur du nouveau parcours sérialisé.
+- Retrait du bouton creer pour les ParcoursSerialises. Ajout de l'action "Figer" à la page Editer de la ressource Parcours.
+- wip validation et devalidation des elements du parcours
+- Creation du modele de parcours serialise et et de la ressource Filament pour les gerer.
+- Ajout d'un menu et d'un lien pointant vers le panneau Filament.
+- wip serialization parcours
+- wip serialization pour vue3-treeview
+- Adaptation du modele de donnees aux besoins de la FCM.
+- Commande de test elementaire pour la serialisation et la deserialisation
+- Ajustement des gestionnaires de relation pour aligner les formulaires de creation et les tables
+- Ajout des relations manager permettant de gérer la constitution des parcours.
+- Occultation de l'id par défaut
+- Creation des ressources associees aux elements constitutifs des parcours.
+- Creation des controlleurs et requetes par defaut pour les modeles.
+- Correction erreur de definition de la relation SavoirFaire Competence
+- Configuration des modeles. Definition des relations. Configuration des factories.
+- Creation des migrations pour les modeles des parcours et les tables pivots
+- Ajout du slug du module comme prefixe de table en base
+- Ajout du slug du module dans les url des routes api
+- Reprise des travaux exploratoires
+- Ajout d'un panel Filament par défaut.
+- Ajout du prefixe de l'instance, mise a jour composer.json et ajout des parametres utilisateur dans config.php
+- Initial commit after creation
+
