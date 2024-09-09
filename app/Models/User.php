@@ -2,7 +2,7 @@
 
 namespace Modules\FcmCentral\Models;
 
-use Modules\RH\Entities\Personne as BaseUser;
+use Modules\RH\Models\Personne as BaseUser;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
 

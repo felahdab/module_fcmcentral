@@ -3,7 +3,7 @@
 namespace Modules\FcmCentral\Models;
 
 use Modules\FcmCommun\Models\UserParcours as BaseModel;
-use Modules\RH\Entities\Personne as User;
+use Modules\RH\Models\Personne as User;
 
 class UserParcours extends BaseModel
 {
