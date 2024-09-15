@@ -26,7 +26,7 @@ class SelectionDeParcours extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $liste_des_parcours_deja_attribues = UserParcours::where('user_id', $this->record->uuid)
+        $liste_des_parcours_deja_attribues = UserParcours::where('user_id', $this->record->id)
                                                 ->get()
                                                 ->pluck('parcours_id');
 

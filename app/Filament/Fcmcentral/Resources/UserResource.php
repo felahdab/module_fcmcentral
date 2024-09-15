@@ -4,7 +4,7 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\RelationManagers;
-use Modules\FcmCentral\Models\User;
+use Modules\FcmCentral\Models\Marin;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
-    protected static ?string $model = User::class;
+    protected static ?string $model = Marin::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -28,7 +28,7 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('nom')
                     ->maxLength(255)
                     ->default(null),
                     Forms\Components\TextInput::make('prenom')
@@ -48,7 +48,7 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('nom')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
@@ -121,7 +121,7 @@ class UserResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('livret-de-fcm')
                                     ->label("Livret de FCM")
-                                    ->url(fn (User $record) : string => static::getUrl('livret-de-fcm', ['record' => $record]))
+                                    ->url(fn (Marin $record) : string => static::getUrl('livret-de-fcm', ['record' => $record]))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
