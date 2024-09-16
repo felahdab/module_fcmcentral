@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Models\UserParcours;
+use Modules\FcmCentral\Models\MarinParcours;
 
 class NbVersionsParcoursWidget extends BaseWidget
 {
@@ -20,7 +20,7 @@ class NbVersionsParcoursWidget extends BaseWidget
         $parcoursserialises = ParcoursSerialise::where('uuid', $this->record->id)->get();
         $nbversions=$parcoursserialises->count();
         
-        $nbmarins=UserParcours::whereIn('parcours_id', $parcoursserialises->pluck('id'))->count();
+        $nbmarins=MarinParcours::whereIn('parcours_id', $parcoursserialises->pluck('id'))->count();
 
         return [
             Stat::make('Nombre de versions figées de ce parcours', $nbversions),

@@ -50,26 +50,11 @@ class MarinResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('nom')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('prenom')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('matricule')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('nid')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('date_embarq')
                     ->date()
@@ -94,21 +79,6 @@ class MarinResource extends Resource
                 Tables\Columns\TextColumn::make('unite_id')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('unite_destination_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('user_comment')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('display_name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('nid')
-                    ->searchable(),
-                Tables\Columns\IconColumn::make('comete')
-                    ->boolean(),
-                Tables\Columns\IconColumn::make('socle')
-                    ->boolean(),
-                Tables\Columns\IconColumn::make('admin')
-                    ->boolean(),
                 Tables\Columns\TextColumn::make('uuid')
                     ->label('UUID')
                     ->searchable(),

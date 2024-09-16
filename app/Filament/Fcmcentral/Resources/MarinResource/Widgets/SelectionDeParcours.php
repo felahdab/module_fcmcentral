@@ -14,7 +14,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Builder;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Models\UserParcours;
+use Modules\FcmCentral\Models\MarinParcours;
 
 use Modules\FcmCentral\Services\ParcoursService;
 
@@ -26,7 +26,7 @@ class SelectionDeParcours extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $liste_des_parcours_deja_attribues = UserParcours::where('user_id', $this->record->id)
+        $liste_des_parcours_deja_attribues = MarinParcours::where('marin_id', $this->record->id)
                                                 ->get()
                                                 ->pluck('parcours_id');
 

@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Models\UserParcours;
+use Modules\FcmCentral\Models\MarinParcours;
 
 class ParcoursRetireListener
 {
@@ -39,7 +39,7 @@ class ParcoursRetireListener
         //     ]
         // );
 
-        $u = UserParcours::where('user_id', $event->object_uuid)
+        $u = MarinParcours::where('marin_id', $event->object_uuid)
             ->where('parcours_id', $event->detail['parcoursserialise'])
             ->first();
 

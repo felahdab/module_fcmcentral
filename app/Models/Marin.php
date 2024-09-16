@@ -2,7 +2,7 @@
 
 namespace Modules\FcmCentral\Models;
 
-use Modules\RH\Models\Marin as BaseMarin;
+use Modules\FcmCommun\Models\Marin as BaseMarin;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
 

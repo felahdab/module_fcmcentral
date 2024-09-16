@@ -4,32 +4,33 @@ namespace Modules\FcmCentral\Models;
 
 use Modules\FcmCommun\Models\ParcoursSerialise as  ParcoursSerialiseBase;
 
-use Modules\FcmCommun\Models\User;
+use Modules\FcmCommun\Models\Marin;
+use Modules\FcmCommun\Models\MarinParcours;
 
 class ParcoursSerialise extends ParcoursSerialiseBase
 {
     protected $prefix = 'fcmcentral_';
 
-    public function users()
+    public function marins()
     {
         // return $this->hasManyThrough(
         //         related: User::class,
-        //         through: UserParcours::class,
+        //         through: MarinParcours::class,
         //         firstKey: 'parcours_id',
         //         secondKey: 'uuid',
         //         localKey: 'id',
         //         secondLocalKey: 'user_id'
         //     );
         return $this->belongsToMany(
-            related: User::class,
+            related: Marin::class,
             table: 'fcmcentral_user_parcours',
             foreignPivotKey: 'parcours_id',
             relatedPivotKey: 'user_id'
         );
     }
 
-    public function userparcours()
+    public function marinparcours()
     {
-        return $this->hasMany(UserParcours::class, 'parcours_id');
+        return $this->hasMany(MarinParcours::class, 'parcours_id');
     }
 }
