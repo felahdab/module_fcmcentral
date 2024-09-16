@@ -37,9 +37,10 @@ class SelectionDeParcours extends BaseWidget
                 $filter_state = $table->getFilter('est_attribue')->getState()["value"];
 
                 return match($filter_state) {
-                    "" => "Tous les parcours",
-                    "1" => "Parcours déjà attribués à cet utilisateur",
-                    "0" => "Parcours non attribués à cet utilisateur"
+                    null => "Tous les parcours", 
+                    ""   => "Tous les parcours",
+                    "1"  => "Parcours déjà attribués à cet utilisateur",
+                    "0"  => "Parcours non attribués à cet utilisateur"
                 }; 
             })
             ->query(
@@ -51,7 +52,7 @@ class SelectionDeParcours extends BaseWidget
             ])
             ->filters([
                 TernaryFilter::make('est_attribue')
-                    ->label("Parcours attribues")
+                    ->label("Parcours affichés")
                     ->placeholder('Tous les parcours')
                     ->selectablePlaceholder(false)
                     ->default("1")
@@ -70,9 +71,10 @@ class SelectionDeParcours extends BaseWidget
                             $filter_state = $table->getFilter('est_attribue')->getState()["value"];
                             
                             return match($filter_state) {
-                                "" => false,
-                                "1" => false,
-                                "0" => true
+                                null => false,
+                                ""   => false,
+                                "1"  => false,
+                                "0"  => true
                             }; 
                         })
                         ->action(function($record)
@@ -89,9 +91,10 @@ class SelectionDeParcours extends BaseWidget
                             $filter_state = $table->getFilter('est_attribue')->getState()["value"];
                             
                             return match($filter_state) {
-                                "" => false,
-                                "1" => true,
-                                "0" => false
+                                null => false,
+                                ""   => false,
+                                "1"  => true,
+                                "0"  => false
                             }; 
                         })
                         ->action(function($record)
