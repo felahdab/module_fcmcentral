@@ -25,12 +25,12 @@ class ParcoursAttribueListener
      */
     public function handle(UserGeneratedEvent $event): void
     {
-        if (! $event->isOfType('parcours_attribue')){
+        if (! $event->isOfType('attribue_parcours')){
             return;
         }
 
         // $event = new UserGeneratedEvent(
-        //     event_type: "parcours_attribue",
+        //     event_type: "attribue_parcours",
         //     user_id: auth()->user()->uuid,
         //     object_class: get_class($user),
         //     object_uuid: $user->uuid,

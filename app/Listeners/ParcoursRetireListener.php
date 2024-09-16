@@ -25,12 +25,12 @@ class ParcoursRetireListener
      */
     public function handle(UserGeneratedEvent $event): void
     {
-        if (! $event->isOfType('parcours_retire')){
+        if (! $event->isOfType('retire_parcours')){
             return;
         }
 
         // $event = new UserGeneratedEvent(
-        //     event_type: "parcours_retire",
+        //     event_type: "retire_parcours",
         //     user_id: auth()->user()->uuid,
         //     object_class: get_class($user),
         //     object_uuid: $user->uuid,

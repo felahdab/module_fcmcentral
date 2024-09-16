@@ -7,14 +7,14 @@ use Carbon\Carbon;
 use Modules\FcmCommun\Services\ParcoursService as BaseService;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Models\User;
+use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 class ParcoursService extends BaseService
 {
     public static $UserGeneratedEvent = UserGeneratedEvent::class;
     public static $ParcoursSerialise = ParcoursSerialise::class;
-    public static $User = User::class;
+    public static $Marin = Marin::class;
 
     public static function serialize_parcours($parcoursdto, $date_de_debut){
         $previous = static::$ParcoursSerialise::where('uuid', $parcoursdto->id)->orderBy('version')->get()->last();
