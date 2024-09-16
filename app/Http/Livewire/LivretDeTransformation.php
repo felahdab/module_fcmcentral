@@ -2,7 +2,7 @@
 
 namespace Modules\FcmCentral\Http\Livewire;
 
-use Modules\FcmCommun\Http\Livewire\LivretDeTransformation as BaseLivretDeTransformation;
+use Modules\FcmCommun\Http\Livewire\Livret as BaseLivretDeTransformation;
 
 use Modules\FcmCentral\Services\ParcoursService;
 use Modules\FcmCentral\Models\ParcoursSerialise;

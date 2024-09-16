@@ -1,16 +1,16 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Pages;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Widgets\SelectionDeParcours;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Widgets\SelectionDeParcours;
 
-class EditUser extends EditRecord
+class EditMarin extends EditRecord
 {
-    protected static string $resource = UserResource::class;
+    protected static string $resource = MarinResource::class;
 
     protected function getHeaderActions(): array
     {

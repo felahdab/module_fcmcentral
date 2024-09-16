@@ -2,8 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\RelationManagers;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\RelationManagers;
 use Modules\FcmCentral\Models\Marin;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,7 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class UserResource extends Resource
+class MarinResource extends Resource
 {
     protected static ?string $model = Marin::class;
 
@@ -140,10 +140,10 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'view' => Pages\ViewUser::route('/{record}'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => Pages\ListMarins::route('/'),
+            'create' => Pages\CreateMarin::route('/create'),
+            'view' => Pages\ViewMarin::route('/{record}'),
+            'edit' => Pages\EditMarin::route('/{record}/edit'),
             'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),
         ];
     }

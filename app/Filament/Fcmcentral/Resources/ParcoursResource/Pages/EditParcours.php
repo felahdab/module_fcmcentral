@@ -68,7 +68,7 @@ class EditParcours extends EditRecord
                         ->body('Nouvelle version de ce parcours: ' . $newParcours->version)
                         ->send();
 
-                        $event = new UserGeneratedEvent(
+                    $event = new UserGeneratedEvent(
                         event_type: "parcours_fige",
                         user_id: auth()->user()->uuid,
                         object_class: get_class($parcours),

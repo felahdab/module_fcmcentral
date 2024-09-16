@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Widgets;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Widgets;
 
 use Illuminate\Database\Eloquent\Model;
 

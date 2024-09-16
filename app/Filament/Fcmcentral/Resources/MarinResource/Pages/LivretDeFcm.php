@@ -1,8 +1,8 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Pages;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 
 use Filament\Resources\Pages\ViewRecord;
 
@@ -12,16 +12,12 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Livewire;
 
-//use Modules\FcmCommun\Http\Livewire\LivretDeTransformation as LivretDeTransformationLivewire;
-//use Modules\FcmCommun\Http\Livewire\Treeview as LivretDeTransformationLivewire;
-use Modules\FcmCommun\Http\Livewire\Livret as LivretDeTransformationLivewire;
 
-//use Modules\FcmCommun\Http\Livewire\TestComponent as LivretDeTransformationLivewire;
-
+use Modules\FcmCentral\Http\Livewire\LivretDeTransformation as LivretDeTransformationLivewire;
 
 class LivretDeFcm extends ViewRecord
 {
-    protected static string $resource = UserResource::class;
+    protected static string $resource = MarinResource::class;
 
     public function getRelationManagers(): array
     {
