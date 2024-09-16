@@ -12,6 +12,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\MarinParcours;
@@ -76,6 +77,10 @@ class SelectionDeParcours extends BaseWidget
                         })
                         ->action(function($record)
                         {
+                            $data = $this->record->data;
+                            Arr::set($data, "fcm.en_fcm", true);
+                            $this->record->data = $data;
+                            $this->record->save();
                             ParcoursService::attribuer_parcours_a_un_user($this->record, $record);
                         }),
                 Action::make("Retirer ce parcours au marin")

@@ -5,7 +5,8 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-
+use Illuminate\Support\Arr;
+use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Widgets\SelectionDeParcours;
 
 class EditMarin extends EditRecord
@@ -21,6 +22,9 @@ class EditMarin extends EditRecord
             Actions\DeleteAction::make(),
             Actions\Action::make('livret-de-fcm')
                 ->label("Livret de FCM")
+                ->visible(function (Marin $record) {
+                    return Arr::get($record->data, "fcm.en_fcm", false);
+                }) 
                 ->url($resource::getUrl('livret-de-fcm', ['record' => $this->record]))
         ];
     }

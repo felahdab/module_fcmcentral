@@ -13,6 +13,10 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Support\Arr;
+
+
 class MarinResource extends Resource
 {
     protected static ?string $model = Marin::class;
@@ -84,14 +88,47 @@ class MarinResource extends Resource
                     ->searchable(),
             ])
             ->filters([
-                //
+                // TODO: inclure un filtre ternary sur le flag record->data->fcm, active par defaut.
+                SelectFilter::make('en-fcm')
+                    ->label("En FCM")
+                    ->options([
+                        'true' => 'En FCM seulement',
+                    ])
+                    ->attribute('data->fcm->en_fcm'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('livret-de-fcm')
                                     ->label("Livret de FCM")
-                                    ->url(fn (Marin $record) : string => static::getUrl('livret-de-fcm', ['record' => $record]))
+                                    ->visible(function (Marin $record) {
+                                        return Arr::get($record->data, "fcm.en_fcm", false);
+                                    }) 
+                                    ->url(fn (Marin $record) : string => static::getUrl('livret-de-fcm', ['record' => $record])),
+                Tables\Actions\Action::make('suivre-en-fcm')
+                                    ->label("Suivre en FCM")
+                                    ->visible(function (Marin $record) {
+                                        return ! Arr::get($record->data, "fcm.en_fcm", false);
+                                    }) 
+                                    ->requiresConfirmation()
+                                    ->action(function(Marin $record){
+                                        $data = $record->data;
+                                        $data["fcm"] = ["en_fcm" => true ];
+                                        $record->data = $data;
+                                        $record->save();
+                                    }),
+                Tables\Actions\Action::make('ne-plus-suivre-en-fcm')
+                                    ->label("Ne plus suivre en FCM")
+                                    ->visible(function (Marin $record) {
+                                        return Arr::get($record->data, "fcm.en_fcm", false);
+                                    }) 
+                                    ->requiresConfirmation()
+                                    ->action(function(Marin $record){
+                                        $data = $record->data;
+                                        $data["fcm"] = ["en_fcm" => false ];
+                                        $record->data = $data;
+                                        $record->save();
+                                    })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
