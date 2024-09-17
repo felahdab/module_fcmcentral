@@ -35,7 +35,7 @@ class FcmcentralPanelProvider extends PanelProvider
     {
         $moduleNamespace = $this->getModuleNamespace();
         return $panel
-            ->id('fcmcentral::fcmcentral')
+            ->id('FCM Central')
             ->path($this->prefix . '/fcmcentral')
             ->colors([
                 'primary' => Color::Teal,
