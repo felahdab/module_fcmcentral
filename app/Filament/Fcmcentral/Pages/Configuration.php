@@ -7,6 +7,8 @@ use Filament\Pages\Page;
 use App\Models\Setting;
 
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -14,6 +16,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Form;
 use Filament\Actions\Action;
+use Filament\Forms\Get;
 
 class Configuration extends Page implements HasForms, HasActions
 {
@@ -52,10 +55,18 @@ class Configuration extends Page implements HasForms, HasActions
     {
         return $form
             ->schema([
-                TextInput::make('setting1')
+                
+                Toggle::make('transmit_user_generated_events_to_remote_fcmcentral_instance')
+                    ->label("Transmettre les évènements locaux à une instance distante ?")
+                    ->live(),
+                TextInput::make('url_of_remote_fcmcentral_instance')
+                    ->label('URL de l\'instance distante')
+                    ->hidden(fn (Get $get) => ! $get('transmit_user_generated_events_to_remote_fcmcentral_instance'))
                     ->required(),
-                MarkdownEditor::make('content'),
-                // ...
+                TextInput::make('token_for_remote_fcmcentral_instance')
+                    ->label('Token à utiliser')
+                    ->hidden(fn (Get $get) => ! $get('transmit_user_generated_events_to_remote_fcmcentral_instance'))
+                    ->required(),
             ])
             ->statePath('data');
     }
