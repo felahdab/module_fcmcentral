@@ -11,6 +11,8 @@ use Modules\FcmCentral\Listeners\ParcoursRetireListener;
 use Modules\FcmCentral\Listeners\ValideActiviteListener;
 use Modules\FcmCentral\Listeners\ValideSavoirFaireListener;
 
+use Modules\FcmCentral\Listeners\TransmitUserGeneratedEventListener;
+
 use Modules\FcmCentral\Listeners\StoreUserGeneratedEventListener;
 
 class EventServiceProvider extends ServiceProvider
@@ -21,7 +23,8 @@ class EventServiceProvider extends ServiceProvider
             ParcoursRetireListener::class,
             StoreUserGeneratedEventListener::class,
             ValideActiviteListener::class,
-            ValideSavoirFaireListener::class
+            ValideSavoirFaireListener::class,
+            TransmitUserGeneratedEventListener::class
         ],
     ];
 }

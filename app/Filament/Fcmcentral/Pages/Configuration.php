@@ -8,8 +8,8 @@ use App\Models\Setting;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Fieldset;
 
-use Filament\Forms\Components\MarkdownEditor;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -55,18 +55,20 @@ class Configuration extends Page implements HasForms, HasActions
     {
         return $form
             ->schema([
-                
                 Toggle::make('transmit_user_generated_events_to_remote_fcmcentral_instance')
                     ->label("Transmettre les évènements locaux à une instance distante ?")
                     ->live(),
-                TextInput::make('url_of_remote_fcmcentral_instance')
-                    ->label('URL de l\'instance distante')
+                Fieldset::make('remote_transmit_settings')
+                    ->label('Paramètres de transmission à distance')
                     ->hidden(fn (Get $get) => ! $get('transmit_user_generated_events_to_remote_fcmcentral_instance'))
-                    ->required(),
-                TextInput::make('token_for_remote_fcmcentral_instance')
-                    ->label('Token à utiliser')
-                    ->hidden(fn (Get $get) => ! $get('transmit_user_generated_events_to_remote_fcmcentral_instance'))
-                    ->required(),
+                    ->schema([
+                        TextInput::make('url_of_remote_fcmcentral_instance')
+                            ->label('URL de l\'instance distante')
+                            ->required(),
+                        TextInput::make('token_for_remote_fcmcentral_instance')
+                            ->label('Token à utiliser')
+                            ->required(),
+                    ]),
             ])
             ->statePath('data');
     }

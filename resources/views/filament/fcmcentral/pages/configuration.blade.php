@@ -1,11 +1,9 @@
 <x-filament-panels::page>
     <form>
         {{ $this->form }}
-        
+
+        {{ $this->validateConfigurationAction() }}
     </form>
 
-    {{ $this->validateConfigurationAction() }}
-
-    
     <x-filament-actions::modals />
 </x-filament-panels::page>

@@ -28,11 +28,14 @@ class EventController extends Controller
     */
     public function postevent(UserGeneratedEvent $dto)
     {
-        $listener = new LocalUserGeneratedEventListener();
+        // $listener = new LocalUserGeneratedEventListener();
 
-        $listener->handle($dto);
+        // $listener->handle($dto);
+        //return response('Hello World', 500)->header('Content-Type', 'application/json');
 
-        Log::info($dto == null ? "null" : "pas null");
+        return response('Hello World', 200)->header('Content-Type', 'application/json');
+
+        Log::warning($dto->toJson());
     }
 
 }
