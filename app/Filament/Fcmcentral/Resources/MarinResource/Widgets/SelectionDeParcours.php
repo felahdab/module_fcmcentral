@@ -83,7 +83,7 @@ class SelectionDeParcours extends BaseWidget
                             Arr::set($data, "fcm.en_fcm", true);
                             $this->record->data = $data;
                             $this->record->save();
-                            ParcoursService::attribuer_parcours_a_un_user($this->record, $record);
+                            (new ParcoursService())->attribuer_parcours_a_un_user($this->record, $record);
                         }),
                 Action::make("Retirer ce parcours au marin")
                         ->requiresConfirmation()
@@ -99,7 +99,7 @@ class SelectionDeParcours extends BaseWidget
                         })
                         ->action(function($record)
                         {
-                            ParcoursService::retirer_parcours_a_un_user($this->record, $record);
+                            (new ParcoursService())->retirer_parcours_a_un_user($this->record, $record);
                         })
             ]);
     }
