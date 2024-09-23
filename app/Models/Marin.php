@@ -2,11 +2,11 @@
 
 namespace Modules\FcmCentral\Models;
 
-use Modules\RH\Models\Personne as BaseUser;
+use Modules\FcmCommun\Models\Marin as BaseMarin;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
 
-class User extends BaseUser
+class Marin extends BaseMarin
 {
     public function parcours_attribues()
     {

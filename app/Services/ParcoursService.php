@@ -7,17 +7,18 @@ use Carbon\Carbon;
 use Modules\FcmCommun\Services\ParcoursService as BaseService;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Models\User;
+use Modules\FcmCentral\Models\MarinParcours;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 class ParcoursService extends BaseService
 {
-    public static $UserGeneratedEvent = UserGeneratedEvent::class;
-    public static $ParcoursSerialise = ParcoursSerialise::class;
-    public static $User = User::class;
+    public function __construct(public string $user_generated_event_class = UserGeneratedEvent::class,
+                                public string $parcours_serialise_class = ParcoursSerialise::class,
+                                public string $marin_parcours_class = MarinParcours::class)
+    {}
 
-    public static function serialize_parcours($parcoursdto, $date_de_debut){
-        $previous = static::$ParcoursSerialise::where('uuid', $parcoursdto->id)->orderBy('version')->get()->last();
+    public function serialize_parcours($parcoursdto, $date_de_debut){
+        $previous = $this->parcours_serialise_class::where('uuid', $parcoursdto->id)->orderBy('version')->get()->last();
         $newversion = null;
         if ($previous){
             
@@ -36,7 +37,7 @@ class ParcoursService extends BaseService
             }
         }
 
-        $p=static::$ParcoursSerialise::create([
+        $p=$this->parcours_serialise_class::create([
             "uuid" => $parcoursdto->id,
             "libelle_long" => $parcoursdto->libelle_long,
             "libelle_court"=> $parcoursdto->libelle_court, 
@@ -46,7 +47,7 @@ class ParcoursService extends BaseService
             "parcours" => $parcoursdto->toArray()
         ]);
 
-        static::$ParcoursSerialise::where('uuid', $parcoursdto->id)
+        $this->parcours_serialise_class::where('uuid', $parcoursdto->id)
             ->where('version', '<', $newversion)
             ->where('date_fin', null)
             ->update(['date_fin' => $date_de_debut->add(-1, 'day')]);
@@ -55,9 +56,9 @@ class ParcoursService extends BaseService
 
     }
 
-    public static function firstPossibleNewVersionDate($parcours){
+    public function firstPossibleNewVersionDate($parcours){
         $uuid = $parcours->id;
-        $previous = static::$ParcoursSerialise::where('uuid', $uuid)->orderBy('version')->get()->last();
+        $previous = $this->parcours_serialise_class::where('uuid', $uuid)->orderBy('version')->get()->last();
         if ($previous){
             return (new Carbon($previous->date_debut))->addDay()->startOfDay();
         }

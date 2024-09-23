@@ -1,16 +1,17 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Pages;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Arr;
+use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Widgets\SelectionDeParcours;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Widgets\SelectionDeParcours;
-
-class EditUser extends EditRecord
+class EditMarin extends EditRecord
 {
-    protected static string $resource = UserResource::class;
+    protected static string $resource = MarinResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -21,6 +22,9 @@ class EditUser extends EditRecord
             Actions\DeleteAction::make(),
             Actions\Action::make('livret-de-fcm')
                 ->label("Livret de FCM")
+                ->visible(function (Marin $record) {
+                    return Arr::get($record->data, "fcm.en_fcm", false);
+                }) 
                 ->url($resource::getUrl('livret-de-fcm', ['record' => $this->record]))
         ];
     }

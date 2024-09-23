@@ -9,9 +9,9 @@ use Symfony\Component\Console\Input\InputArgument;
 
 use Modules\FcmCommun\DataObjects\ParcoursDto;
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Models\UserParcours;
+use Modules\FcmCentral\Models\MarinParcours;
 
-use App\Models\User;
+use Modules\FcmCentral\Models\Marin;
 
 use Modules\FcmCentral\Services\ParcoursService;
 
@@ -41,10 +41,10 @@ class TestAttributionParcoursAUser extends Command
     public function handle()
     {
         $p=ParcoursSerialise::query()->get()->first();
-        $u=User::query()->get()->first();
+        $u=Marin::query()->get()->first();
 
-        $up = new UserParcours();
-        $up->user_id     = $u->uuid;
+        $up = new MarinParcours();
+        $up->marin_id     = $u->uuid;
         $up->parcours_id = $p->id;
         $up->parcours    = $p->parcours;
 

@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Models\UserParcours;
+use Modules\FcmCentral\Models\MarinParcours;
 
 class ParcoursAttribueListener
 {
@@ -25,12 +25,12 @@ class ParcoursAttribueListener
      */
     public function handle(UserGeneratedEvent $event): void
     {
-        if (! $event->isOfType('parcours_attribue')){
+        if (! $event->isOfType('attribue_parcours')){
             return;
         }
 
         // $event = new UserGeneratedEvent(
-        //     event_type: "parcours_attribue",
+        //     event_type: "attribue_parcours",
         //     user_id: auth()->user()->uuid,
         //     object_class: get_class($user),
         //     object_uuid: $user->uuid,
@@ -41,8 +41,8 @@ class ParcoursAttribueListener
         //     ]
         // );
 
-        $u = new UserParcours();
-        $u->user_id = $event->object_uuid;
+        $u = new MarinParcours();
+        $u->marin_id = $event->object_uuid;
         $u->parcours_id = $event->detail["parcoursserialise"];
 
         $p = ParcoursSerialise::find($event->detail['parcoursserialise']);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Widgets;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Widgets;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,9 +12,10 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Models\UserParcours;
+use Modules\FcmCentral\Models\MarinParcours;
 
 use Modules\FcmCentral\Services\ParcoursService;
 
@@ -26,7 +27,7 @@ class SelectionDeParcours extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $liste_des_parcours_deja_attribues = UserParcours::where('user_id', $this->record->uuid)
+        $liste_des_parcours_deja_attribues = MarinParcours::where('marin_id', $this->record->id)
                                                 ->get()
                                                 ->pluck('parcours_id');
 
@@ -36,9 +37,10 @@ class SelectionDeParcours extends BaseWidget
                 $filter_state = $table->getFilter('est_attribue')->getState()["value"];
 
                 return match($filter_state) {
-                    "" => "Tous les parcours",
-                    "1" => "Parcours déjà attribués à cet utilisateur",
-                    "0" => "Parcours non attribués à cet utilisateur"
+                    null => "Tous les parcours", 
+                    ""   => "Tous les parcours",
+                    "1"  => "Parcours déjà attribués à cet utilisateur",
+                    "0"  => "Parcours non attribués à cet utilisateur"
                 }; 
             })
             ->query(
@@ -50,7 +52,7 @@ class SelectionDeParcours extends BaseWidget
             ])
             ->filters([
                 TernaryFilter::make('est_attribue')
-                    ->label("Parcours attribues")
+                    ->label("Parcours affichés")
                     ->placeholder('Tous les parcours')
                     ->selectablePlaceholder(false)
                     ->default("1")
@@ -69,14 +71,19 @@ class SelectionDeParcours extends BaseWidget
                             $filter_state = $table->getFilter('est_attribue')->getState()["value"];
                             
                             return match($filter_state) {
-                                "" => false,
-                                "1" => false,
-                                "0" => true
+                                null => false,
+                                ""   => false,
+                                "1"  => false,
+                                "0"  => true
                             }; 
                         })
                         ->action(function($record)
                         {
-                            ParcoursService::attribuer_parcours_a_un_user($this->record, $record);
+                            $data = $this->record->data;
+                            Arr::set($data, "fcm.en_fcm", true);
+                            $this->record->data = $data;
+                            $this->record->save();
+                            (new ParcoursService())->attribuer_parcours_a_un_user($this->record, $record);
                         }),
                 Action::make("Retirer ce parcours au marin")
                         ->requiresConfirmation()
@@ -84,14 +91,15 @@ class SelectionDeParcours extends BaseWidget
                             $filter_state = $table->getFilter('est_attribue')->getState()["value"];
                             
                             return match($filter_state) {
-                                "" => false,
-                                "1" => true,
-                                "0" => false
+                                null => false,
+                                ""   => false,
+                                "1"  => true,
+                                "0"  => false
                             }; 
                         })
                         ->action(function($record)
                         {
-                            ParcoursService::retirer_parcours_a_un_user($this->record, $record);
+                            (new ParcoursService())->retirer_parcours_a_un_user($this->record, $record);
                         })
             ]);
     }

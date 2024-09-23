@@ -1,8 +1,8 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Pages;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 
 use Filament\Resources\Pages\ViewRecord;
 
@@ -12,11 +12,12 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Livewire;
 
-use Modules\FcmCommun\Http\Livewire\LivretDeTransformation as LivretDeTransformationLivewire;
+
+use Modules\FcmCentral\Http\Livewire\LivretDeTransformation as LivretDeTransformationLivewire;
 
 class LivretDeFcm extends ViewRecord
 {
-    protected static string $resource = UserResource::class;
+    protected static string $resource = MarinResource::class;
 
     public function getRelationManagers(): array
     {
@@ -28,11 +29,10 @@ class LivretDeFcm extends ViewRecord
         return $form
         ->schema([
             Section::make('Informations sur le marin')
-                //->description('Prevent abuse by limiting the number of requests per period')
                 ->schema([
                     Grid::make(2)
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        Forms\Components\TextInput::make('nom')
                             ->maxLength(255)
                             ->default(null),
                         Forms\Components\TextInput::make('prenom')
@@ -42,10 +42,9 @@ class LivretDeFcm extends ViewRecord
                     ]),
                 ]),
             Section::make('Livret de FCM')
-                //->description('Prevent abuse by limiting the number of requests per period')
                 ->schema([    
                     //Livewire::make(LivretDeTransformationLivewire::class, ["uuid" => "2bb1800f-c247-434b-abef-4eab4cff0836"]),
-                    Livewire::make(LivretDeTransformationLivewire::class, ["uuid" => $this->record->uuid]),
+                    Livewire::make(LivretDeTransformationLivewire::class, ["uuid" => $this->record->id]),
                 ])
             ]);    
     }

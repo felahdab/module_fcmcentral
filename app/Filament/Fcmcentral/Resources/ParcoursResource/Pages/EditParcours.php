@@ -33,6 +33,8 @@ class EditParcours extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        $parcours_service = new ParcoursService();
+
         return [
             Actions\DeleteAction::make(),
             Action::make('figer')
@@ -40,19 +42,19 @@ class EditParcours extends EditRecord
                 ->visible($this->authorizeUser())
                 ->form([
                     DatePicker::make('date de debut')
-                    ->minDate(Carbon::now()->today()->max(ParcoursService::firstPossibleNewVersionDate($this->getRecord())))
+                    ->minDate(Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())))
                 ])
-                ->fillForm(function () {
+                ->fillForm(function () use ($parcours_service){
                     return 
                     [
-                    'date de debut' => Carbon::now()->tomorrow()->max(ParcoursService::firstPossibleNewVersionDate($this->getRecord())),
+                    'date de debut' => Carbon::now()->tomorrow()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())),
                     ];
                 })
-                ->action(function (array $data) {
+                ->action(function (array $data) use ($parcours_service) {
                     $parcours = $this->getRecord();
                     $dto = ParcoursDto::from($parcours);
                     $date_de_debut=new Carbon($data["date de debut"]);
-                    $newParcours = ParcoursService::serialize_parcours($dto, $date_de_debut);
+                    $newParcours = $parcours_service->serialize_parcours($dto, $date_de_debut);
 
                     if ($newParcours == null)
                     {
@@ -71,7 +73,7 @@ class EditParcours extends EditRecord
                     $event = new UserGeneratedEvent(
                         event_type: "parcours_fige",
                         user_id: auth()->user()->uuid,
-                        object_class: get_class($parcours),
+                        object_class: "Parcours",
                         object_uuid: $parcours->id,
                         detail: [
                             "version" => $newParcours->version,

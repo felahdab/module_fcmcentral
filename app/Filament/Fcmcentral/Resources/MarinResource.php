@@ -2,9 +2,9 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\UserResource\RelationManagers;
-use Modules\FcmCentral\Models\User;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\RelationManagers;
+use Modules\FcmCentral\Models\Marin;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,9 +13,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class UserResource extends Resource
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Support\Arr;
+
+
+class MarinResource extends Resource
 {
-    protected static ?string $model = User::class;
+    protected static ?string $model = Marin::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -28,7 +32,7 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('nom')
                     ->maxLength(255)
                     ->default(null),
                     Forms\Components\TextInput::make('prenom')
@@ -48,28 +52,13 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('nom')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
-                    ->dateTime()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('prenom')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('matricule')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('nid')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('date_embarq')
                     ->date()
@@ -94,34 +83,52 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('unite_id')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('unite_destination_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('user_comment')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('display_name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('nid')
-                    ->searchable(),
-                Tables\Columns\IconColumn::make('comete')
-                    ->boolean(),
-                Tables\Columns\IconColumn::make('socle')
-                    ->boolean(),
-                Tables\Columns\IconColumn::make('admin')
-                    ->boolean(),
                 Tables\Columns\TextColumn::make('uuid')
                     ->label('UUID')
                     ->searchable(),
             ])
             ->filters([
-                //
+                // TODO: inclure un filtre ternary sur le flag record->data->fcm, active par defaut.
+                SelectFilter::make('en-fcm')
+                    ->label("En FCM")
+                    ->options([
+                        'true' => 'En FCM seulement',
+                    ])
+                    ->attribute('data->fcm->en_fcm'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('livret-de-fcm')
                                     ->label("Livret de FCM")
-                                    ->url(fn (User $record) : string => static::getUrl('livret-de-fcm', ['record' => $record]))
+                                    ->visible(function (Marin $record) {
+                                        return Arr::get($record->data, "fcm.en_fcm", false);
+                                    }) 
+                                    ->url(fn (Marin $record) : string => static::getUrl('livret-de-fcm', ['record' => $record])),
+                Tables\Actions\Action::make('suivre-en-fcm')
+                                    ->label("Suivre en FCM")
+                                    ->visible(function (Marin $record) {
+                                        return ! Arr::get($record->data, "fcm.en_fcm", false);
+                                    }) 
+                                    ->requiresConfirmation()
+                                    ->action(function(Marin $record){
+                                        $data = $record->data;
+                                        $data["fcm"] = ["en_fcm" => true ];
+                                        $record->data = $data;
+                                        $record->save();
+                                    }),
+                Tables\Actions\Action::make('ne-plus-suivre-en-fcm')
+                                    ->label("Ne plus suivre en FCM")
+                                    ->visible(function (Marin $record) {
+                                        return Arr::get($record->data, "fcm.en_fcm", false);
+                                    }) 
+                                    ->requiresConfirmation()
+                                    ->action(function(Marin $record){
+                                        $data = $record->data;
+                                        $data["fcm"] = ["en_fcm" => false ];
+                                        $record->data = $data;
+                                        $record->save();
+                                    })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -140,10 +147,10 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'view' => Pages\ViewUser::route('/{record}'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => Pages\ListMarins::route('/'),
+            'create' => Pages\CreateMarin::route('/create'),
+            'view' => Pages\ViewMarin::route('/{record}'),
+            'edit' => Pages\EditMarin::route('/{record}/edit'),
             'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),
         ];
     }
