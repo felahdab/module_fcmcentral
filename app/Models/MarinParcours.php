@@ -16,6 +16,6 @@ class MarinParcours extends BaseModel
 
     public function marin()
     {
-        return $this->belongsTo(Marin::class, "marin_id");
+        return $this->belongsTo(Marin::class, "marin_id", "uuid");
     }
 }
