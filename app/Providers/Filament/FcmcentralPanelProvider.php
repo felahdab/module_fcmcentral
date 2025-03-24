@@ -26,6 +26,8 @@ use App\Http\Middleware\InitializeTenancyByPath;
 use App\Http\Middleware\SetTenantCookieMiddleware;
 use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 
+use Filament\Support\Assets\Theme;
+
 class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
@@ -34,7 +36,7 @@ class FcmcentralPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         $moduleNamespace = $this->getModuleNamespace();
-        return $panel
+        $panel
             ->id('FCM Central')
             ->path($this->prefix . '/fcmcentral')
             ->colors([
@@ -68,7 +70,9 @@ class FcmcentralPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')));
+        return $panel;
     }
 
     protected function getModuleNamespace(): string

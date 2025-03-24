@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
+use Filament\Support\Assets\Js;
+use Filament\Support\Assets\Css;
+use Filament\Support\Assets\Asset;
+use Filament\Support\Facades\FilamentAsset;
+
 use Modules\FcmCentral\Console\TestParcoursArchitecture;
 use Modules\FcmCentral\Console\SeedTestData;
 use Modules\FcmCentral\Console\TestAttributionParcoursAUser;
@@ -44,6 +49,7 @@ class FcmCentralServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+        $this->registerFilamentAssets();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
     }
 
@@ -163,5 +169,27 @@ class FcmCentralServiceProvider extends ServiceProvider
         }
 
         return $paths;
+    }
+
+    private function registerFilamentAssets()
+    {
+        FilamentAsset::register(
+            $this->getAssets(),
+            $this->getAssetPackageName()
+        );
+    }
+
+    private function getAssets()
+    {
+        return [
+            Css::make('module-fcmcentral', __DIR__.'/../../resources/dist/module-fcmcentral.css')->loadedOnRequest(),
+
+        ];
+    }
+
+    private function getAssetPackageName()
+    {
+        return 'fanlab/fcmcentral';
+
     }
 }
