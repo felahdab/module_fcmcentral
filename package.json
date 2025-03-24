@@ -2,8 +2,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build"
+    "dev": "npx tailwindcss --input resources/css/theme.css --config resources/css/tailwind.config.js --output /app/public/assets/css/fanlab/fcmcentral/module-fcmcentral.css",
+    "build": "npx tailwindcss --input resources/css/theme.css --config resources/css/tailwind.config.js --output resources/dist/module-fcmcentral.css"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.10",
