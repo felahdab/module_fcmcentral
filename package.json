@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx tailwindcss --input resources/css/theme.css --config resources/css/tailwind.config.js --output /app/public/assets/css/fanlab/fcmcentral/module-fcmcentral.css",
+    "dev": "npx tailwindcss --poll --watch --input resources/css/theme.css --config resources/css/tailwind.config.js --output /app/public/assets/css/fanlab/fcmcentral/module-fcmcentral.css",
     "build": "npx tailwindcss --input resources/css/theme.css --config resources/css/tailwind.config.js --output resources/dist/module-fcmcentral.css"
   },
   "devDependencies": {
