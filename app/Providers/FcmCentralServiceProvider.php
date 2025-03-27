@@ -5,7 +5,7 @@ namespace Modules\FcmCentral\Providers;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-
+use Livewire\Livewire;
 use Modules\FcmCentral\Console\TestParcoursArchitecture;
 use Modules\FcmCentral\Console\SeedTestData;
 use Modules\FcmCentral\Console\TestAttributionParcoursAUser;
@@ -26,6 +26,7 @@ class FcmCentralServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
+        Models\Marin::class => Policies\MarinPolicy::class,
         Models\Parcours::class => Policies\ParcoursPolicy::class,
         Models\ParcoursSerialise::class => Policies\ParcoursSerialisePolicy::class,
         Models\Fonction::class => Policies\FonctionPolicy::class,
@@ -143,6 +144,7 @@ class FcmCentralServiceProvider extends ServiceProvider
 
         $componentNamespace = str_replace('/', '\\', config('modules.namespace').'\\'.$this->moduleName.'\\'.ltrim(config('modules.paths.generator.component-class.path'), config('modules.paths.app_folder','')));
         Blade::componentNamespace($componentNamespace, $this->moduleNameLower);
+       
     }
 
     /**

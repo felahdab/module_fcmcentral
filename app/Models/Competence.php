@@ -5,7 +5,7 @@ namespace Modules\FcmCentral\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 
 use Modules\FcmCentral\Database\Factories\CompetenceFactory;
 
@@ -16,13 +16,19 @@ class Competence extends Model
 {
     use HasFactory;
     use HasTablePrefix;
-    use HasUuids;
+
 
 
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ["libelle_long","libelle_court"];
+    protected $fillable = [
+        "uuid",
+        "libelle_long",
+        "libelle_court",
+        "url",
+        "same",
+    ];
     
     protected static function newFactory(): CompetenceFactory
     {
@@ -37,7 +43,7 @@ class Competence extends Model
 
     public function savoirfaires(): BelongsToMany
     {
-        return $this->belongsToMany(SavoirFaire::class, 'fcmcentral_competence_savoirfaire', 'competence_id', 'savoirfaire_id')
+        return $this->belongsToMany(Savoirfaire::class, 'fcmcentral_competence_savoirfaire', 'competence_id', 'savoirfaire_id')
             ->withTimestamps();
     }
 }

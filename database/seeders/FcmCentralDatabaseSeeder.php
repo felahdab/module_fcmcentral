@@ -12,7 +12,9 @@ class FcmCentralDatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            SettingSeeder::class
+            SettingSeeder::class,
+            FcmSeeder::class,
+            
         ]);
     }
 }

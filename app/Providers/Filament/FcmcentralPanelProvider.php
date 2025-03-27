@@ -26,6 +26,8 @@ use App\Http\Middleware\InitializeTenancyByPath;
 use App\Http\Middleware\SetTenantCookieMiddleware;
 use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 
+use  Modules\FcmCommun\Helpers\NavigationFilamentHelper;
+
 class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
@@ -49,8 +51,8 @@ class FcmcentralPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: module_path($this->module, 'app/Filament/Fcmcentral/Widgets'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Widgets")
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                //Widgets\AccountWidget::class,
+                //Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -68,7 +70,16 @@ class FcmcentralPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            // Menu Side Bar Haut
+            ->topNavigation()
+            // Appel du Helper pour le Menu Modules
+            ->navigationItems([   
+                // Decompacte le tableau
+                ...NavigationFilamentHelper::registerNavigationsItems()
+            ])  
+            
+            ;
     }
 
     protected function getModuleNamespace(): string

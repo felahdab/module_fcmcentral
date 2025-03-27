@@ -3,16 +3,13 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
-use Modules\RH\Filament\RH\Resources\MarinResource\Pages as RhPages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\RelationManagers;
 use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCommun\Models\Cohorte;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -20,13 +17,13 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Arr;
 
 
-class MarinResource extends Resource
+class MarinResourceOld extends Resource
 {
     protected static ?string $model = Marin::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'Marins en FCM Central';
+    protected static ?string $navigationLabel = 'Marins en FCM';
 
     protected static ?string $navigationGroup = 'Marins';
 
@@ -55,41 +52,53 @@ class MarinResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('marin.nom')
-                    ->label('Nom Prenom')
-                    ->getStateUsing(function ($record){
-                            return $record->marin->nom.' '.$record->marin->prenom;
-                    })
+                Tables\Columns\TextColumn::make('nom')
                     ->searchable(),
-                TextColumn::make('cohorte.libelle_court')
-                   
-                    ->label('Cohorte')
-                    ->searchable(),    
-                TextColumn::make('data')
+                Tables\Columns\TextColumn::make('prenom')
                     ->searchable(),
-                TextColumn::make('mentor.nom')
-                ->label('Mentor')
-                ->getStateUsing(function ($record){
-                    return $record->mentor ? $record->mentor->nom.' '.$record->mentor->prenom : ' Aucun';
-            })
+                Tables\Columns\TextColumn::make('matricule')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('nid')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('date_embarq')
+                    ->date()
                     ->sortable(),
-                
-                TextColumn::make('marin.uuid')
+                Tables\Columns\TextColumn::make('date_debarq')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('photo')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('grade_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('specialite_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('diplome_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('secteur_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('unite_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('uuid')
                     ->label('UUID')
                     ->searchable(),
             ])
             ->filters([
                 // TODO: inclure un filtre ternary sur le flag record->data->fcm, active par defaut.
-                // SelectFilter::make('en-fcm')
-                //     ->label("En FCM")
-                //     ->options([
-                //         'true' => 'En FCM seulement',
-                //     ])
-                //     ->attribute('data->fcm->en_fcm'),
+                SelectFilter::make('en-fcm')
+                    ->label("En FCM")
+                    ->options([
+                        'true' => 'En FCM seulement',
+                    ])
+                    ->attribute('data->fcm->en_fcm'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                //Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('livret-de-fcm')
                                     ->label("Livret de FCM")
                                     ->visible(function (Marin $record) {
@@ -139,8 +148,7 @@ class MarinResource extends Resource
     {
         return [
             'index' => Pages\ListMarins::route('/'),
-            //'create' => Pages\CreateMarin::route('/create'),
-            'create' => RhPages\CreateMarin::route('/create'),
+            'create' => Pages\CreateMarin::route('/create'),
             'view' => Pages\ViewMarin::route('/{record}'),
             'edit' => Pages\EditMarin::route('/{record}/edit'),
             'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),

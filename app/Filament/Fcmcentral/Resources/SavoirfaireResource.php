@@ -4,7 +4,7 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers;
-use Modules\FcmCentral\Models\SavoirFaire;
+use Modules\FcmCentral\Models\Savoirfaire;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -16,9 +16,9 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\ActivitesRelationManager;
 
 
-class SavoirFaireResource extends Resource
+class SavoirfaireResource extends Resource
 {
-    protected static ?string $model = SavoirFaire::class;
+    protected static ?string $model = Savoirfaire::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -83,9 +83,9 @@ class SavoirFaireResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSavoirFaires::route('/'),
-            'create' => Pages\CreateSavoirFaire::route('/create'),
-            'edit' => Pages\EditSavoirFaire::route('/{record}/edit'),
+            'index' => Pages\ListSavoirfaires::route('/'),
+            'create' => Pages\CreateSavoirfaire::route('/create'),
+            'edit' => Pages\EditSavoirfaire::route('/{record}/edit'),
         ];
     }
 }

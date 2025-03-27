@@ -13,37 +13,51 @@ return new class extends Migration
     {
         Schema::create('fcmcentral_fonction_parcours', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('parcours_id')->references('id')->on('fcmcentral_parcours');
-			$table->foreignUuid('fonction_id')->references('id')->on('fcmcentral_fonctions');
-
+            //$table->foreignUuid('parcours_id')->references('id')->on('fcmcentral_parcours');
+			//$table->foreignUuid('fonction_id')->references('id')->on('fcmcentral_fonctions');
+            $table->foreignId('parcours_id')->constrained('fcmcentral_parcours');
+			$table->foreignId('fonction_id')->constrained('fcmcentral_fonctions');
             $table->timestamps();
         });
 
         Schema::create('fcmcentral_competence_fonction', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('fonction_id')->references('id')->on('fcmcentral_fonctions');
-            $table->foreignUuid('competence_id')->references('id')->on('fcmcentral_competences');
+            $table->foreignId('fonction_id')->constrained('fcmcentral_fonctions');
+            $table->foreignId('competence_id')->constrained('fcmcentral_competences');
 
             $table->timestamps();
         });
 
         Schema::create('fcmcentral_competence_savoirfaire', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('competence_id')->references('id')->on('fcmcentral_competences');
-            $table->foreignUuid('savoirfaire_id')->references('id')->on('fcmcentral_savoir_faires');
+            $table->foreignId('competence_id')->constrained('fcmcentral_competences');
+            $table->foreignId('savoirfaire_id')->constrained('fcmcentral_savoirfaires');
 
             $table->timestamps();
         });
 
-        Schema::create('fcmcentral_savoirfaire_activite', function (Blueprint $table) {
+        Schema::create('fcmcentral_activite_savoirfaire', function (Blueprint $table) {
             $table->id();
-            $table->foreignUuid('savoirfaire_id')->references('id')->on('fcmcentral_savoir_faires');
-            $table->foreignUuid('activite_id')->references('id')->on('fcmcentral_activites');
-            $table->float('coeff');
-            $table->string('duree');
-            $table->integer('ordre');
+            $table->foreignId('savoirfaire_id')->constrained('fcmcentral_savoirfaires');
+            $table->foreignId('activite_id')->constrained('fcmcentral_activites');
+            $table->json('data')->nullable();
+            $table->string('duree')->nullable();
+            $table->float('coeff')->default(0);
+            $table->integer('ordre')->default(0);
 
             $table->timestamps();
+        });
+
+        // Liaison avec table FcmCentralActivites et FcmCentralTypeAvtivites
+        // Schema::table('fcmcentral_activites', function (Blueprint $table){
+        //     $table->unsignedBigInteger('typeactivite_id')->nullable()->after('duree_validite');
+        //     $table->foreign('typeactivite_id')->references('id')->on('fcmcentral_typeactivites')->onDelete('cascade');
+        // });
+
+        // Liaison avec table FcmCentralDomaines et FcmCentralSavoirfaires
+        Schema::table('fcmcentral_savoirfaires', function (Blueprint $table){
+            $table->unsignedBigInteger('domaine_id')->nullable()->after('code_sicomp');
+            $table->foreign('domaine_id')->references('id')->on('fcmcentral_domaines')->onDelete('cascade');
         });
 
     }
@@ -54,9 +68,21 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('fcmcentral_fonction_parcours');
-        Schema::dropIfExists('fcmcentral_competence_fonction');
+        Schema::dropIfExists('fcmcentral_competence_fonctions');
         Schema::dropIfExists('fcmcentral_competence_savoirfaire');
-        Schema::dropIfExists('fcmcentral_savoirfaire_activite');
+        Schema::dropIfExists('fcmcentral_activite_savoirfaire');
+
+         // Supp relation et champ 
+        // Schema::table('fcmcentral_activites', function (Blueprint $table){
+        //     $table->dropForeign(['typeactivite_id']);
+        //     $table->dropColumn('typeactivite_id');
+        // });
+
+         // Supp relation et champ 
+        Schema::table('fcmcentral_savoirfaires', function (Blueprint $table){
+            $table->dropForeign(['domaine_id']);
+            $table->dropColumn('domaine_id');
+        });
 
     }
 

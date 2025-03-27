@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fcmcentral_marins', function (Blueprint $table) {
-            $table->id('id');
-            $table->foreignId('rh_marin_id')->constrained('rh_marins')->onDelete('cascade');
-            $table->json('data')->nullable();
+        Schema::create('fcmcentral_domaines', function (Blueprint $table) {
+            $table->id();
+            $table->string('libelle_long');
+            $table->string('libelle_court');
+            
+
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fcmcentral_marins');
+        Schema::dropIfExists('fcmcentral_domaines');
     }
 };

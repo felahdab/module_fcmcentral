@@ -19,13 +19,24 @@ class CompetenceFactory extends Factory
      *
      * @return array<string, mixed>
      */
+
+     // Compteur
+     private static $counter = 1;
+     // Libelle
+     private static $libelle = "Competence";
+
+
     public function definition()
     {
-        $libelle = fake()->text();
+        //$libelle = fake()->text();
+        $libcourt   =  strtoupper(Str::limit(self::$libelle, 3,' ')).' '.self::$counter;
+        $liblong    =  self::$libelle.' '.self::$counter++.' : n°'.$this->faker->numberBetween(1,11).',  '.$this->faker->sentence(6);
 
         return [
-            "libelle_long" => $libelle,
-            "libelle_court" => Str::limit($libelle, 10),
+            
+            "libelle_court" => $libcourt,
+            "libelle_long"  => $liblong,
+            "uuid"          =>  $this->faker->uuid,
             "url" => fake()->url()
         ];
     }

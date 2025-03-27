@@ -23,15 +23,21 @@ return new class extends Migration
             $default_value = DB::raw('(UUID())');
         }
 
-        Schema::create('fcmcentral_competences', function (Blueprint $table) use ($default_value) {
+
+        Schema::create('fcmcentral_savoirfaires', function (Blueprint $table) use ($default_value) {
             // $table->uuid('id')->primary();
             $table->id();
             $table->uuid('uuid')->default($default_value);
             $table->string('libelle_long');
             $table->string('libelle_court');
             $table->string('url')->nullable();
-            $table->string('same')->nullable();
-
+            $table->string('code_sicomp')->nullable();
+            // $table->string('niveau');
+            $table->float('coeff')->default(0);
+            $table->string('duree')->nullable();
+            $table->string('an_acquis')->nullable();
+            $table->integer('ordre')->default(0);
+            $table->string('mod_acquis')->nullable();
             $table->timestamps();
         });
     }
@@ -41,6 +47,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fcmcentral_competences');
+        Schema::dropIfExists('fcmcentral_savoirfaires');
     }
 };
