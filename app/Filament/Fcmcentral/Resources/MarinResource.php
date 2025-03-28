@@ -13,12 +13,13 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Arr;
-
+use Modules\FcmCentral\Events\SuivreMarinFcmEvent;
 
 class MarinResource extends Resource
 {
@@ -38,7 +39,7 @@ class MarinResource extends Resource
                 Forms\Components\TextInput::make('nom')
                     ->maxLength(255)
                     ->default(null),
-                    Forms\Components\TextInput::make('prenom')
+                Forms\Components\TextInput::make('prenom')
                     ->required()
                     ->maxLength(100)
                     ->default(''),
@@ -57,69 +58,90 @@ class MarinResource extends Resource
             ->columns([
                 TextColumn::make('marin.nom')
                     ->label('Nom Prenom')
-                    ->getStateUsing(function ($record){
-                            return $record->marin->nom.' '.$record->marin->prenom;
+                    ->getStateUsing(function ($record) {
+                        return $record->marin->nom . ' ' . $record->marin->prenom;
                     })
                     ->searchable(),
                 TextColumn::make('cohorte.libelle_court')
-                   
+
                     ->label('Cohorte')
-                    ->searchable(),    
+                    ->searchable(),
                 TextColumn::make('data')
                     ->searchable(),
                 TextColumn::make('mentor.nom')
-                ->label('Mentor')
-                ->getStateUsing(function ($record){
-                    return $record->mentor ? $record->mentor->nom.' '.$record->mentor->prenom : ' Aucun';
-            })
+                    ->label('Mentor')
+                    ->getStateUsing(function ($record) {
+                        return $record->mentor ? $record->mentor->nom . ' ' . $record->mentor->prenom : ' Aucun';
+                    })
                     ->sortable(),
-                
+
                 TextColumn::make('marin.uuid')
                     ->label('UUID')
                     ->searchable(),
+
+
+
             ])
             ->filters([
                 // TODO: inclure un filtre ternary sur le flag record->data->fcm, active par defaut.
-                // SelectFilter::make('en-fcm')
-                //     ->label("En FCM")
-                //     ->options([
-                //         'true' => 'En FCM seulement',
-                //     ])
-                //     ->attribute('data->fcm->en_fcm'),
+                SelectFilter::make('en-fcm')
+                    ->label("En FCM")
+                    ->options([
+                        'true' => 'En FCM seulement',
+                    ])
+                    ->attribute('data->fcm->en_fcm'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 //Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('livret-de-fcm')
-                                    ->label("Livret de FCM")
-                                    ->visible(function (Marin $record) {
-                                        return Arr::get($record->data, "fcm.en_fcm", false);
-                                    }) 
-                                    ->url(fn (Marin $record) : string => static::getUrl('livret-de-fcm', ['record' => $record])),
-                Tables\Actions\Action::make('suivre-en-fcm')
-                                    ->label("Suivre en FCM")
-                                    ->visible(function (Marin $record) {
-                                        return ! Arr::get($record->data, "fcm.en_fcm", false);
-                                    }) 
-                                    ->requiresConfirmation()
-                                    ->action(function(Marin $record){
-                                        $data = $record->data;
-                                        $data["fcm"] = ["en_fcm" => true ];
-                                        $record->data = $data;
-                                        $record->save();
-                                    }),
-                Tables\Actions\Action::make('ne-plus-suivre-en-fcm')
-                                    ->label("Ne plus suivre en FCM")
-                                    ->visible(function (Marin $record) {
-                                        return Arr::get($record->data, "fcm.en_fcm", false);
-                                    }) 
-                                    ->requiresConfirmation()
-                                    ->action(function(Marin $record){
-                                        $data = $record->data;
-                                        $data["fcm"] = ["en_fcm" => false ];
-                                        $record->data = $data;
-                                        $record->save();
-                                    })
+                Action::make('livret-de-fcm')
+                    ->label("Livret de FCM")
+                    ->button()
+                    ->color('warning')
+                    ->visible(function (Marin $record) {
+                        // return  Arr::get($record->marin->data, "fcm.en_fcm", false);
+                        $isFollowed = Arr::get($record->marin->data, 'fcm.en_fcm', false);
+                        return $isFollowed ? true : false;
+                    })
+                    ->url(fn (Marin $record): string => static::getUrl('livret-de-fcm', ['record' => $record])),
+                Action::make('suivre-en-fcm')
+                    ->label("Suivre en FCM")
+                    ->button()
+                    ->color('success')
+                    ->visible(function (Marin $record) {
+                        $isFollowed = Arr::get($record->marin->data, 'fcm.en_fcm', false);
+                        return $isFollowed ? false : true;
+                    })
+                    ->requiresConfirmation()
+                    // ->action(function(Marin $record){
+                    //     $data = $record->data;
+                    //     $data["fcm"] = ["en_fcm" => true ];
+                    //     $record->data = $data;
+                    //     $record->save();
+                    // }),
+                    ->action(function (Marin $record) {
+                        // Declencher Event
+
+                        $data["fcm"] = ["en_fcm" => true];
+                        event(new SuivreMarinFcmEvent($record->marin, $data));
+                    }),
+                Action::make('ne-plus-suivre-en-fcm')
+                    ->label("Ne plus suivre en FCM")
+                    ->button()
+                    ->color('danger')
+                    ->visible(function (Marin $record) {
+                        $isFollowed = Arr::get($record->marin->data, 'fcm.en_fcm', false);
+                        return $isFollowed ? true : false;
+                    })
+
+                    ->requiresConfirmation()
+                    ->action(function (Marin $record) {
+                        // Declencher Event
+                        // Recherche dans FcmXXX pour envoyer dans event collection RHmarin pour  mettre a jour Flag (a voir avec commandant)
+
+                        $data["fcm"] = ["en_fcm" => false];
+                        event(new SuivreMarinFcmEvent($record->marin, $data));
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
