@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fcmcentral_savoir_faires', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+        Schema::create('fcmcentral_domaines', function (Blueprint $table) {
+            $table->id();
             $table->string('libelle_long');
             $table->string('libelle_court');
-            $table->string('url')->nullable();
-            $table->string('code_sicomp')->nullable();
-            $table->string('niveau');
+            
 
             $table->timestamps();
         });
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fcmcentral_savoir_faires');
+        Schema::dropIfExists('fcmcentral_domaines');
     }
 };

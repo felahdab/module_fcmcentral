@@ -64,6 +64,7 @@ class ParcoursResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -85,6 +86,7 @@ class ParcoursResource extends Resource
             'index' => Pages\ListParcours::route('/'),
             'create' => Pages\CreateParcours::route('/create'),
             'edit' => Pages\EditParcours::route('/{record}/edit'),
+            'view' => Pages\ViewParcours::route('/{record}/view'),
         ];
     }
 }

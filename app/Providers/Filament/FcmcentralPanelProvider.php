@@ -28,6 +28,8 @@ use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 
 use Filament\Support\Assets\Theme;
 
+use  Modules\FcmCommun\Helpers\NavigationFilamentHelper;
+
 class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
@@ -70,6 +72,13 @@ class FcmcentralPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])
+            // Menu Side Bar Haut
+            ->topNavigation()
+            // Appel du Helper pour le Menu Modules
+            ->navigationItems([   
+                // Decompacte le tableau
+                ...NavigationFilamentHelper::registerNavigationsItems()
             ])
             ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')));
         return $panel;

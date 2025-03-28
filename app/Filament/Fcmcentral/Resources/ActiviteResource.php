@@ -45,7 +45,7 @@ class ActiviteResource extends Resource
                 Forms\Components\Select::make('type')
                 ->options([
                     'STAGE' => 'Stage',
-                    'OBJECTIF' => 'Objectif',
+                   // 'TACHE' => 'Tache',
                 ])
                     ->required(),
             ]);

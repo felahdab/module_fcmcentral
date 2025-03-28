@@ -23,9 +23,9 @@ class ParcoursSerialise extends ParcoursSerialiseBase
         //     );
         return $this->belongsToMany(
             related: Marin::class,
-            table: 'fcmcentral_user_parcours',
+            table: 'fcmcentral_marin_parcours',
             foreignPivotKey: 'parcours_id',
-            relatedPivotKey: 'user_id'
+            relatedPivotKey: $this->prefix.'marin_id'
         );
     }
 

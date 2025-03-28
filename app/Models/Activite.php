@@ -4,7 +4,6 @@ namespace Modules\FcmCentral\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 use Modules\FcmCentral\Database\Factories\ActiviteFactory;
@@ -16,7 +15,7 @@ class Activite extends Model
 {
     use HasFactory;
     use HasTablePrefix;
-    use HasUuids;
+  
 
 
     /**
@@ -25,9 +24,11 @@ class Activite extends Model
     protected $fillable = [ "libelle_long",
                             "libelle_court", 
                             "url", 
+                            "duree",
+                            "coeff",
                             "duree_validite", 
                             "prerequis", 
-                            "type"];
+                            "type_activite"];
     
     protected static function newFactory(): ActiviteFactory
     {
@@ -36,8 +37,8 @@ class Activite extends Model
 
     public function savoirfaires(): BelongsToMany
     {
-        return $this->belongsToMany(SavoirFaire::class, 'fcmcentral_savoirfaire_objectif', 'objectif_id', 'savoirfaire_id')
-        ->withPivot('coefficient', 'duree', 'ordre')
+        return $this->belongsToMany(Savoirfaire::class, 'fcmcentral_activite_savoirfaire', 'activite_id', 'savoirfaire_id')
+        ->withPivot('coeff', 'duree', 'ordre','data')
         ->withTimestamps();
     }
 }

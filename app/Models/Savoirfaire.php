@@ -4,29 +4,40 @@ namespace Modules\FcmCentral\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-use Modules\FcmCentral\Database\Factories\SavoirFaireFactory;
+use Modules\FcmCentral\Database\Factories\SavoirfaireFactory;
 
 use Modules\FcmCentral\Traits\HasTablePrefix;
 
 
-class SavoirFaire extends Model
+class Savoirfaire extends Model
 {
     use HasFactory;
     use HasTablePrefix;
-    use HasUuids;
+
 
 
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ["libelle_long","libelle_court"];
+    protected $fillable = [
+        "uuid",
+        "libelle_long",
+        "libelle_court",
+        "url",
+        "code_sicomp",
+        "coeff",
+        "duree",
+        "an_acquie",
+        "ordre",
+        "mod_acquis",
+        "domaine_id",
+    ];
     
-    protected static function newFactory(): SavoirFaireFactory
+    protected static function newFactory(): SavoirfaireFactory
     {
-        return SavoirFaireFactory::new();
+        return Savoirfairefactory::new();
     }
 
     public function competences(): BelongsToMany
@@ -37,8 +48,8 @@ class SavoirFaire extends Model
 
     public function activites(): BelongsToMany
     {
-        return $this->belongsToMany(Activite::class, 'fcmcentral_savoirfaire_activite', 'savoirfaire_id', 'activite_id')
-                ->withPivot('coeff', 'duree', 'ordre')
+        return $this->belongsToMany(Activite::class, 'fcmcentral_activite_savoirfaire', 'activite_id',  'savoirfaire_id')
+                ->withPivot('coeff', 'duree', 'ordre','data')
                 ->withTimestamps();
     }
 
