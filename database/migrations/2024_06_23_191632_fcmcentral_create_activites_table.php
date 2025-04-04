@@ -36,7 +36,7 @@ return new class extends Migration
             $table->string('duree_validite')->nullable();
             //$table->enum('type_activite', ['STAGE', 'TACHE']);
             $table->enum('type_activite', ['STAGE']);
-
+            $table->tinyInteger('ordre')->default(0);
             $table->timestamps();
         });
     }

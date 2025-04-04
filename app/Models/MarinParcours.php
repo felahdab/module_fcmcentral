@@ -3,13 +3,14 @@
 namespace Modules\FcmCentral\Models;
 
 use Modules\FcmCommun\Models\MarinParcours as BaseModel;
-//use Modules\FcmCommun\Models\Marin;
+use Modules\FcmCentral\Traits\HasTablePrefix;
 
 
 
 class MarinParcours extends BaseModel
 {
-    protected $prefix = 'fcmcentral_';    
+    use HasTablePrefix;
+    
 
     public function parcoursserialise() 
     {
@@ -19,7 +20,7 @@ class MarinParcours extends BaseModel
     
     public function marin()
     {
-        return $this->belongsTo(Marin::class, 'marin_id');
+        return $this->belongsTo(FcmMarin::class, 'marin_id');
     }
 
 

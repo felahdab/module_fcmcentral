@@ -2,11 +2,11 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource\Pages;
 use Modules\RH\Filament\RH\Resources\MarinResource\Pages as RhPages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\RelationManagers;
-use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCommun\Models\Cohorte;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource\RelationManagers;
+use Modules\FcmCentral\Models\FcmMarin;
+
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,9 +21,9 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Arr;
 use Modules\FcmCentral\Events\SuivreMarinFcmEvent;
 
-class MarinResource extends Resource
+class FcmMarinResource extends Resource
 {
-    protected static ?string $model = Marin::class;
+    protected static ?string $model = FcmMarin::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -98,17 +98,17 @@ class MarinResource extends Resource
                     ->label("Livret de FCM")
                     ->button()
                     ->color('warning')
-                    ->visible(function (Marin $record) {
+                    ->visible(function (FcmMarin $record) {
                         // return  Arr::get($record->marin->data, "fcm.en_fcm", false);
                         $isFollowed = Arr::get($record->marin->data, 'fcm.en_fcm', false);
                         return $isFollowed ? true : false;
                     })
-                    ->url(fn (Marin $record): string => static::getUrl('livret-de-fcm', ['record' => $record])),
+                    ->url(fn (FcmMarin $record): string => static::getUrl('livret-de-fcm', ['record' => $record])),
                 Action::make('suivre-en-fcm')
                     ->label("Suivre en FCM")
                     ->button()
                     ->color('success')
-                    ->visible(function (Marin $record) {
+                    ->visible(function (FcmMarin $record) {
                         $isFollowed = Arr::get($record->marin->data, 'fcm.en_fcm', false);
                         return $isFollowed ? false : true;
                     })
@@ -119,7 +119,7 @@ class MarinResource extends Resource
                     //     $record->data = $data;
                     //     $record->save();
                     // }),
-                    ->action(function (Marin $record) {
+                    ->action(function (FcmMarin $record) {
                         // Declencher Event
 
                         $data["fcm"] = ["en_fcm" => true];
@@ -129,13 +129,13 @@ class MarinResource extends Resource
                     ->label("Ne plus suivre en FCM")
                     ->button()
                     ->color('danger')
-                    ->visible(function (Marin $record) {
+                    ->visible(function (FcmMarin $record) {
                         $isFollowed = Arr::get($record->marin->data, 'fcm.en_fcm', false);
                         return $isFollowed ? true : false;
                     })
 
                     ->requiresConfirmation()
-                    ->action(function (Marin $record) {
+                    ->action(function (FcmMarin $record) {
                         // Declencher Event
                         // Recherche dans FcmXXX pour envoyer dans event collection RHmarin pour  mettre a jour Flag (a voir avec commandant)
 
@@ -160,11 +160,11 @@ class MarinResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListMarins::route('/'),
+            'index' => Pages\ListFcmMarins::route('/'),
             //'create' => Pages\CreateMarin::route('/create'),
             'create' => RhPages\CreateMarin::route('/create'),
-            'view' => Pages\ViewMarin::route('/{record}'),
-            'edit' => Pages\EditMarin::route('/{record}/edit'),
+            'view' => Pages\ViewFcmMarin::route('/{record}'),
+            'edit' => Pages\EditFcmMarin::route('/{record}/edit'),
             'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),
         ];
     }

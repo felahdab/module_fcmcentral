@@ -44,6 +44,7 @@ class ActiviteFactory extends Factory
             "duree_validite"=> $this->faker->randomElement(['6 mois','1 ans','2 ans','3 ans']),
             "prerequis"     => $this->faker->randomElement(['Aucun','BAT','Anglais','Bac+3']),
             "coeff"         => $this->faker->randomFloat(2,0,10),
+            "ordre"         => self::$counter,
         ];
     }
 }

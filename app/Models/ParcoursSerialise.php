@@ -6,10 +6,11 @@ use Modules\FcmCommun\Models\ParcoursSerialise as  ParcoursSerialiseBase;
 
 use Modules\FcmCommun\Models\Marin;
 use Modules\FcmCommun\Models\MarinParcours;
+use Modules\FcmCentral\Traits\HasTablePrefix;
 
 class ParcoursSerialise extends ParcoursSerialiseBase
 {
-    protected $prefix = 'fcmcentral_';
+    use HasTablePrefix;
 
     public function marins()
     {
