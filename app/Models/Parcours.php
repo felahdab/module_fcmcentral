@@ -48,6 +48,10 @@ class Parcours extends Model
                 ->withTimestamps();
     }
 
+    public function parcoursSerialise()
+	{
+		return $this->hasMany(ParcoursSerialise::class, 'parcours_id', 'id');
+	}
     
     
 }

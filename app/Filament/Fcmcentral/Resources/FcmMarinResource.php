@@ -16,9 +16,12 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Modules\FcmCentral\Models\ParcoursSerialise;
 
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Arr;
+use Modules\FcmCentral\Events\AssignerMarinParcoursEvent;
 use Modules\FcmCentral\Events\SuivreMarinFcmEvent;
 
 class FcmMarinResource extends Resource
@@ -66,8 +69,7 @@ class FcmMarinResource extends Resource
 
                     ->label('Cohorte')
                     ->searchable(),
-                TextColumn::make('data')
-                    ->searchable(),
+                
                 TextColumn::make('mentor.nom')
                     ->label('Mentor')
                     ->getStateUsing(function ($record) {
@@ -75,8 +77,30 @@ class FcmMarinResource extends Resource
                     })
                     ->sortable(),
 
-                TextColumn::make('marin.uuid')
-                    ->label('UUID')
+                    TextColumn::make('parcoursSerialise.libelle_court')
+                    ->label('Parcours')
+                    ->getStateUsing(function ($record){
+                        // Recup premier parcours assigné
+                        $parcours= $record->parcoursSerialises->first();
+                        if ($parcours){
+                            return $parcours->libelle_court.' V'.$parcours->version;
+                        }else{
+                            return 'Aucun';
+                        }
+                    })
+                    ->searchable(),
+
+                    TextColumn::make('parcoursSerialise.taux_global')
+                    ->label('Taux Global')
+                    ->getStateUsing(function ($record){
+                        // Recup premier parcours assigné
+                        $parcours= $record->parcoursSerialises->first();
+                        if ($parcours){
+                            return $parcours->pivot->taux_global.' %';
+                        }else{
+                            return 'Aucun';
+                        }
+                    })
                     ->searchable(),
 
 
@@ -142,6 +166,34 @@ class FcmMarinResource extends Resource
                         $data["fcm"] = ["en_fcm" => false];
                         event(new SuivreMarinFcmEvent($record->marin, $data));
                     }),
+
+                // Assigner Parcours Marin
+                Action::make('assignerParcours')
+                    ->label('Assigner Parcours')
+                    ->button()
+                    ->color('success')
+                    ->modalHeading('Assigner un Parcours à un Marin')
+                    ->modalWidth('lg')
+                    ->form([
+                        Select::make('parcoursserialise_id')
+                            ->label('Choisir un Parcours')
+                            ->options(ParcoursSerialise::pluck('libelle_court', 'id'))
+                            ->searchable()
+                            ->required(),
+                    ])
+                    // Pour enlever le bouton si il exist dans MarinParcours
+                    ->visible(function (FcmMarin $record){
+                        return !$record->parcoursSerialises()->exists();
+                    })
+                    ->action(function (FcmMarin $record, $data) {
+                        // Recup du parcours Serialise
+                        $parcoursSerialise = ParcoursSerialise::find($data['parcoursserialise_id']);
+                        if (!$parcoursSerialise) {
+                            throw new \Exception('Le Parcours serialise selectionne est introuvable');
+                        }
+                        event(new AssignerMarinParcoursEvent($record, $parcoursSerialise, $data));
+                    }),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -163,8 +215,9 @@ class FcmMarinResource extends Resource
             'index' => Pages\ListFcmMarins::route('/'),
             //'create' => Pages\CreateMarin::route('/create'),
             'create' => RhPages\CreateMarin::route('/create'),
-            'view' => Pages\ViewFcmMarin::route('/{record}'),
-            'edit' => Pages\EditFcmMarin::route('/{record}/edit'),
+            'view' => Pages\LivretDeFcm::route('/{record}'),
+            
+            //'edit' => Pages\EditFcmMarin::route('/{record}/edit'),
             'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),
         ];
     }

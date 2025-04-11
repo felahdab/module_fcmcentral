@@ -7,7 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Arr;
 use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Widgets\SelectionDeParcours;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource\Widgets\SelectionDeParcours;
 
 class EditFcmMarin extends EditRecord
 {

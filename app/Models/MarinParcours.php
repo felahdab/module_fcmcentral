@@ -11,21 +11,18 @@ class MarinParcours extends BaseModel
 {
     use HasTablePrefix;
     
-
-    public function parcoursserialise() 
+/*
+    public function parcoursSerialise() 
     {
         return $this->belongsTo(ParcoursSerialise::class, 'parcours_id');
     }
 
     
-    public function marin()
+    public function fcmMarin()
     {
         return $this->belongsTo(FcmMarin::class, 'marin_id');
     }
+*/
 
-
-    public function parcours()
-    {
-        return $this->belongsTo(Parcours::class);
-    }
+   
 }

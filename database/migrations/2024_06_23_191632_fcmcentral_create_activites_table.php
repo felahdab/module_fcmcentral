@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('libelle_court');
             $table->string('url')->nullable();
             $table->string('duree')->nullable();
-            $table->float('coeff')->default(0);
+            $table->decimal('coeff',5,2)->nullable();
             $table->string('prerequis')->nullable();
             $table->string('duree_validite')->nullable();
             //$table->enum('type_activite', ['STAGE', 'TACHE']);
