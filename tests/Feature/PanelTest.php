@@ -18,6 +18,8 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources;
 uses(RefreshDatabase::class);
 uses(Tests\TestCase::class);
 
+pest()->group("Fcm Central");
+
 beforeEach(function () {
     Filament::setCurrentPanel(
         Filament::getPanel('FCM Central'),
@@ -28,17 +30,17 @@ beforeEach(function () {
     $this->admin->save();
 });
 
-it('displays the RH panel', function() {
+it('displays the FCM Central panel', function() {
     Livewire::actingAs($this->admin)
         ->test(Dashboard::class)
         ->assertSee('Tableau de bord');
-})->only();
+});
 
 it('displays the configuration page', function() {
     Livewire::actingAs($this->admin)
         ->test(Configuration::class)
         ->assertSee('Configuration du module FCM Central');
-})->only();
+});
 
 it('saves configuration settings to fcmcentral settings', function() {
     Livewire::actingAs($this->admin)
@@ -53,7 +55,7 @@ it('saves configuration settings to fcmcentral settings', function() {
     $this->assertTrue(Setting::forKey('fcmcentral')->get('url_of_remote_fcmcentral_instance') == "url");
     $this->assertTrue(Setting::forKey('fcmcentral')->get('token_for_remote_fcmcentral_instance') == "token");
 
-})->only();
+});
 
 it('saves configuration settings to fcmcommun settings', function() {
     Livewire::actingAs($this->admin)
@@ -68,16 +70,16 @@ it('saves configuration settings to fcmcommun settings', function() {
     $this->assertTrue(Setting::forKey('fcmcommun')->get('cohortes_url_of_remote_fcmcentral_instance') == "url");
     $this->assertTrue(Setting::forKey('fcmcommun')->get('cohorte_token_for_remote_fcmcentral_instance') == "token");
 
-})->only();
+});
 
 it('shows cohorte list', function() {
     Livewire::actingAs($this->admin)
         ->test(Resources\CohorteResource\Pages\ListCohortes::class)
         ->assertSee('Cohortes');
-})->only();
+});
 
 it('shows marins en FCM list', function() {
     Livewire::actingAs($this->admin)
         ->test(Resources\FcmMarinResource\Pages\ListFcmMarins::class)
         ->assertSee('Fcm Marins');
-})->only();
+});
