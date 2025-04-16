@@ -2,21 +2,23 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
 
-use Filament\Pages\Page;
+use Illuminate\Support\Arr;
 
-use App\Models\Setting;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\Action;
 
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Fieldset;
 
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Form;
-use Filament\Actions\Action;
-use Filament\Forms\Get;
+use Filament\Pages\Page;
+
+use App\Models\Setting;
 
 class Configuration extends Page implements HasForms, HasActions
 {
@@ -34,7 +36,7 @@ class Configuration extends Page implements HasForms, HasActions
     
     public function mount(): void
     {
-        $this->data = Setting::forKey('fcmcentral')->data;
+        $this->data = array_merge(Setting::forKey('fcmcentral')->data ?? [], Setting::forKey('fcmcommun')->data ?? []);
         $this->form->fill($this->data);
     }
 
@@ -60,12 +62,26 @@ class Configuration extends Page implements HasForms, HasActions
                     ->live(),
                 Fieldset::make('remote_transmit_settings')
                     ->label('Paramètres de transmission à distance')
-                    ->hidden(fn (Get $get) => ! $get('transmit_user_generated_events_to_remote_fcmcentral_instance'))
+                    ->visible(fn (Get $get) => $get('transmit_user_generated_events_to_remote_fcmcentral_instance'))
                     ->schema([
                         TextInput::make('url_of_remote_fcmcentral_instance')
                             ->label('URL de l\'instance distante')
                             ->required(),
                         TextInput::make('token_for_remote_fcmcentral_instance')
+                            ->label('Token à utiliser')
+                            ->required(),
+                    ]),
+                Toggle::make('retreive_cohortes_from_distant_fcmcentral_module')
+                    ->label("Récupérer les cohortes auprès d'un serveur FCM Central distant ?")
+                    ->live(),
+                Fieldset::make('remote_cohorte_retreive_settings')
+                    ->label('Paramètres de récupération des cohortes à distance')
+                    ->visible(fn (Get $get) => $get('retreive_cohortes_from_distant_fcmcentral_module'))
+                    ->schema([
+                        TextInput::make('cohortes_url_of_remote_fcmcentral_instance')
+                            ->label('URL de l\'instance distante')
+                            ->required(),
+                        TextInput::make('cohorte_token_for_remote_fcmcentral_instance')
                             ->label('Token à utiliser')
                             ->required(),
                     ]),
@@ -75,6 +91,17 @@ class Configuration extends Page implements HasForms, HasActions
     
     public function save(): void
     {
-        Setting::forKey('fcmcentral')->updateSetting($this->form->getState());
+        $formdata = $this->form->getState();
+        $fcmcentralsettings = [];
+        $fcmcentralsettings['transmit_user_generated_events_to_remote_fcmcentral_instance'] = Arr::get($formdata, 'transmit_user_generated_events_to_remote_fcmcentral_instance') ;
+        $fcmcentralsettings['url_of_remote_fcmcentral_instance'] = Arr::get($formdata, 'url_of_remote_fcmcentral_instance') ;
+        $fcmcentralsettings['token_for_remote_fcmcentral_instance'] = Arr::get($formdata, 'token_for_remote_fcmcentral_instance') ;
+        Setting::forKey('fcmcentral')->updateSetting($fcmcentralsettings);
+
+        $fcmcommunsettings = [];
+        $fcmcommunsettings['retreive_cohortes_from_distant_fcmcentral_module'] = Arr::get($formdata, 'retreive_cohortes_from_distant_fcmcentral_module') ;
+        $fcmcommunsettings['cohortes_url_of_remote_fcmcentral_instance'] = Arr::get($formdata, 'cohortes_url_of_remote_fcmcentral_instance') ;
+        $fcmcommunsettings['cohorte_token_for_remote_fcmcentral_instance'] = Arr::get($formdata, 'cohorte_token_for_remote_fcmcentral_instance') ;
+        Setting::forKey('fcmcommun')->updateSetting($fcmcommunsettings);
     }
 }
