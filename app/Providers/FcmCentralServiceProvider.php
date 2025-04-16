@@ -95,7 +95,6 @@ class FcmCentralServiceProvider extends ServiceProvider
     {
         $this->commands([
                     TestParcoursArchitecture::class,
-                    SeedTestData::class,
                     TestAttributionParcoursAUser::class,
                 ]);
     }

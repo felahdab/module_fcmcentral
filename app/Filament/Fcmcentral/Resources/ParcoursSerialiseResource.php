@@ -10,8 +10,12 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+use Modules\FcmCentral\Http\Livewire\ParcoursDetails;
+use Filament\Forms\Components\Placeholder;
 
 class ParcoursSerialiseResource extends Resource
 {
@@ -27,21 +31,40 @@ class ParcoursSerialiseResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('libelle_long')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('libelle_court')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('version')
-                    ->required()
-                    ->maxLength(255)
-                    ->default(1),
-                Forms\Components\DatePicker::make('date_debut'),
-                Forms\Components\DatePicker::make('date_fin'),
-                Forms\Components\Textarea::make('parcours')
-                    ->required()
-                    ->columnSpanFull(),
+                
+                            Forms\Components\TextInput::make('libelle_long')
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('libelle_court')
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('version')
+                                ->required()
+                                ->maxLength(255)
+                                ->default(1),
+                            Forms\Components\DatePicker::make('date_debut'),
+                            Forms\Components\DatePicker::make('date_fin'),
+                        // Forms\Components\Textarea::make('parcours')
+                        // ->formatStateUsing(function ($record){
+                        //     return json_encode($record->parcours, JSON_PRETTY_PRINT);
+                        // })
+                        //     ->columnSpanFull()
+                        //     ->rows(20)
+                        //     ->disabled(),
+                   
+                    
+                    // Section "Parcours Serialisés"
+                    Section::make('Parcours Serialisés')
+                    ->schema([
+     
+                        Placeholder::make('')
+                        ->content(fn ($record) => view('fcmcentral::filament.fcmcentral.livewire.parcours.parcours-details',[
+                            //'parcours' =>json_decode($record?->parcours ?? '{}', true),
+                            'parcours' =>$record->parcours ,
+                        ])),
+                  
+                    ]),
+                    
             ]);
     }
 

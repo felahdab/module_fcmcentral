@@ -29,9 +29,7 @@ return new class extends Migration
             $table->uuid('uuid')->default($default_value);
             $table->string('libelle_long');
             $table->string('libelle_court');
-            //$table->string('version');
-            //$table->json('parcours')->nullable();
-            //$table->date('date_debut')->nullable();
+            $table->tinyInteger('ordre')->default(0);
             $table->timestamps();
         });
     }

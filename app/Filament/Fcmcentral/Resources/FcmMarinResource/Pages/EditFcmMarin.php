@@ -1,15 +1,15 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource\Pages;
 
 use Modules\RH\Filament\RH\Resources\MarinResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Arr;
 use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Widgets\SelectionDeParcours;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource\Widgets\SelectionDeParcours;
 
-class EditMarin extends EditRecord
+class EditFcmMarin extends EditRecord
 {
     protected static string $resource = MarinResource::class;
 

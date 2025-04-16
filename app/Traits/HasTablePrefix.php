@@ -9,4 +9,6 @@ trait HasTablePrefix
     use BasePrefixTrait;
 
     protected $prefix = 'fcmcentral_';
+
+    
 }

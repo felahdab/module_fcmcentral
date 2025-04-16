@@ -38,6 +38,7 @@ class ParcoursFactory extends Factory
             "libelle_court" => $libcourt,
             "libelle_long"  => $liblong,
             "uuid"          =>  $this->faker->uuid,
+            "ordre"         => self::$counter,
         ];
     }
 }

@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('url')->nullable();
             $table->string('code_sicomp')->nullable();
             // $table->string('niveau');
-            $table->float('coeff')->default(0);
+            $table->decimal('coeff',5,2)->nullable();
             $table->string('duree')->nullable();
             $table->string('an_acquis')->nullable();
             $table->integer('ordre')->default(0);

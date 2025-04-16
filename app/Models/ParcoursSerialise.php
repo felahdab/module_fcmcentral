@@ -6,11 +6,14 @@ use Modules\FcmCommun\Models\ParcoursSerialise as  ParcoursSerialiseBase;
 
 use Modules\FcmCommun\Models\Marin;
 use Modules\FcmCommun\Models\MarinParcours;
+use Modules\FcmCentral\Traits\HasTablePrefix;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ParcoursSerialise extends ParcoursSerialiseBase
 {
-    protected $prefix = 'fcmcentral_';
+    use HasTablePrefix;
 
+    // A supp debut
     public function marins()
     {
         // return $this->hasManyThrough(
@@ -33,4 +36,22 @@ class ParcoursSerialise extends ParcoursSerialiseBase
     {
         return $this->hasMany(MarinParcours::class, 'parcours_id');
     }
+    // A Supp Fin
+
+
+    // Relation entre FcmCentral  ParcoursSerialises et FcmMarins
+    public function fcmMarins(): BelongsToMany
+    {
+        return $this->belongsToMany(FcmMarin::class, 'fcmcentral_marin_parcours', 'parcoursserialise_id', 'fcmmarin_id')
+        ->withPivot('taux_global', 'taux_stage', 'taux_activite','parcoursmarin')
+        ->withTimestamps();
+    }
+
+    public function parcours()
+    {
+        return $this->belongsTo(Parcours::class, "parcours_id", "id");
+    }
+
+
+
 }

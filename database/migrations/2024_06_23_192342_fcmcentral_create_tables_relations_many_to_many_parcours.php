@@ -42,7 +42,7 @@ return new class extends Migration
             $table->foreignId('activite_id')->constrained('fcmcentral_activites');
             $table->json('data')->nullable();
             $table->string('duree')->nullable();
-            $table->float('coeff')->default(0);
+            $table->decimal('coeff',5,2)->nullable();
             $table->integer('ordre')->default(0);
 
             $table->timestamps();

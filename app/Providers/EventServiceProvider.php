@@ -8,6 +8,7 @@ use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Events\SaveFcmMarinEvent;
 use Modules\FcmCentral\Events\SuivreMarinFcmEvent;
 use Modules\FcmCentral\Events\AssignerMarinParcoursEvent;
+use Modules\FcmCentral\Events\SerializeParcoursEvent;
 use Modules\FcmCentral\Listeners\ParcoursAttribueListener;
 use Modules\FcmCentral\Listeners\ParcoursRetireListener;
 
@@ -21,6 +22,7 @@ use Modules\FcmCentral\Listeners\StoreUserGeneratedEventListener;
 use Modules\FcmCommun\Listeners\Save\SaveFcmMarinListener;
 use Modules\FcmCommun\Listeners\Save\SaveSuivreMarinFcmListener;
 use Modules\FcmCommun\Listeners\Save\SaveAssignerMarinParcoursListener;
+use Modules\FcmCommun\Listeners\Save\SaveSerializeParcoursListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -47,6 +49,11 @@ class EventServiceProvider extends ServiceProvider
         // Methode dans FcmCommun pour changer attribuer un parcours a un marin
         AssignerMarinParcoursEvent::class => [
             SaveAssignerMarinParcoursListener::class,
+        ],
+
+         // Methode dans FcmCommun pour serialiser le Parcours des  tables FCM_Central_XXX 
+         SerializeParcoursEvent::class => [
+            SaveSerializeParcoursListener::class,
         ],
 
 

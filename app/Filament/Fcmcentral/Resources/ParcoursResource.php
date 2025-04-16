@@ -10,10 +10,16 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Illuminate\Validation\Rule;
+use Modules\FcmCentral\Events\SerializeParcoursEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\FonctionsRelationManager;
+use Modules\FcmCentral\Models\ParcoursSerialise;
 
 class ParcoursResource extends Resource
 {
@@ -65,6 +71,54 @@ class ParcoursResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
+                Action::make('serializeParcours')
+                ->label('Figer')
+                ->button()
+                ->color('success')
+                ->modalHeading('Figer le Parcours')
+                ->modalWidth('lg')
+                ->form([
+                    TextInput::make('version')
+                    ->label('Version')
+                    ->required()
+                    
+                    // va chercher dans ParcoursSerialize de FcmCentral , a etudier si FcmUnite
+                    ->default(function ($record){
+                        // Verification su un parcours existe
+                        if ($record){
+                            $maxVersion = ParcoursSerialise::where('parcours_id',$record->id)
+                                            ->max('version');
+                            // Incrementation
+                            return $maxVersion ? $maxVersion +1 : 1;
+                        }
+                        // Si aucun record
+                        return 1;
+                    })
+                    ,
+                    DatePicker::make('date_debut')
+                    ->label('Date')
+                    ->required()
+                    ->default(today())
+                    //->minDate(today())
+                    ,
+                    TextInput::make('libelle_court')
+                    ->label('Libelle Court')
+                    ->default(function ($record){
+                        return $record->libelle_court;
+                    })
+                    ->required(),
+                    Textarea::make('libelle_long')
+                    ->label('Libelle Long')
+                    ->rows(6)
+                    ->default(function ($record){
+                        return $record->libelle_long;
+                    })
+                    ,
+                ])
+
+                ->action(function ($record,$data){
+                    event (new SerializeParcoursEvent($record,$data));
+                })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

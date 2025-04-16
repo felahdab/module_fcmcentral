@@ -6,10 +6,11 @@ use Carbon\Carbon;
 
 use Illuminate\Database\Eloquent\Builder;
 use Modules\FcmCommun\Models\StoredEvent as StoredEventBase;
+use Modules\FcmCentral\Traits\HasTablePrefix;
 
 class StoredEvent extends StoredEventBase
 {
-    protected $prefix = 'fcmcentral_';
+    use HasTablePrefix;
 
     public function scopeAfter(Builder $query, $date): Builder
     {
