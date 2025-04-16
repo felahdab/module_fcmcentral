@@ -1,3 +1,43 @@
+## 0.0.3 (April 16, 2025)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.2 –> 0.0.3
+- Merge branch 'tuleap-419581-refonte-tables-fcmcentral-modification-filament-fcmcentral'
+- Ajustement PSR-4
+- Duplication des pages de gestion des cohortes dans le module FCM Central
+- implements art #419581
+- implements art #419581
+- Suppression fichier inutile.
+- Implements art #419581 : Update et ParcoursSerialise
+- Merge remote-tracking branch 'origin/tuleap-419581-refonte-tables-fcmcentral-modification-filament-fcmcentral'
+- Implements art #419581 : Mise a jour Events Listener pour Fcm Suivi Marin Creation des Events Listeners pour l'enregistrement des marins en FCM Notification avec Filament , logs ...
+- Refonte des Tables Migration + Seeders ligne commande : php artisan julien:refresh-db Gestion  des Parcours, page Parcours View Travaux sur plusieurs modules FcmCommun, FcmCentral, FcmUnite, RH
+- Ajustement des scripts npm pour le dev.
+- Ajustement de la commande de dev npm pour mettre à jour automatiquement le theme lors du développement.
+- Ajustement configuration tailwind et npm
+- Merge remote-tracking branch 'internet/master'
+- Introduction du nécessaire pour la customization CSS
+- Merge branch 'tuleap-418609-creation-tables-fcm-marins' into tuleap-419581-refonte-tables-fcmcentral-modification-filament-fcmcentral
+- Implements art #418609 :  Moduel FcmCentral : creation tables FcmCentral|UniteMarins , creations models et modification model RH_marin pour la liaison OneToMany
+- Suppression des widgets inutiles du dashboard
+- Merge remote-tracking branch 'internet/master'
+- WIP api
+- wip
+- Wip events et API
+- wip configuration du module
+- Creation d'une page de configuration du module.
+- Changement id du panneau pour affichage
+- wip
+- wip
+- Correction bug en cas de retrait du filtre par la croix
+- wip
+- wip
+- wip
+- Nettoyage
+- UserResource is now MarinResource
+- Ajustement des elements pour tenir compte du module RH
+- Ajustement des migrations.
+- Correction typo routes api
+- Utilisation du livret Livewire.
+
 ## 0.0.2 (September 09, 2024)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.1 –> 0.0.2
 - ajout bump-version
