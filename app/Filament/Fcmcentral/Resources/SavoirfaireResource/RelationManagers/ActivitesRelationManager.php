@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Form;
