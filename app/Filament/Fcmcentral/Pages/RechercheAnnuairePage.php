@@ -9,11 +9,8 @@ use Illuminate\Support\Facades\Blade;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Wizard;
-use Filament\Forms;
-use Filament\Forms\Get;
+
 use Filament\Support\Enums;
 
 use App\Events\UnUtilisateurLocalDoitEtreCreeEvent;
@@ -22,14 +19,12 @@ use App\Models\Role;
 use App\Models\User;
 
 use Modules\RH\Events\UnMarinDoitEtreCreeEvent;
-
-use Modules\RH\Models\Marin;
-use Modules\RH\Models\Grade;
-use Modules\RH\Models\Specialite;
-use Modules\RH\Models\Brevet;
-use Modules\RH\Models\Unite;
-
+use Modules\FcmCommun\Models\Marin;
+use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\RH\Filament\RH\Pages\RechercheAnnuaireForms\RechercheAnnuaireCreateUserOrMarinForm;
+
+use Modules\FcmCentral\Events\SaveFcmMarinEvent;
+use Modules\FcmCentral\Events\AssignerMarinParcoursEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuaireForms\RechercheAnnuaireForm;
 
 class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
@@ -54,7 +49,7 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                 ->submitAction(new HtmlString(Blade::render(<<<BLADE
                 <x-filament::button
                     type="submit"
-                    size="sm"
+                    size="md"
                 >
                     Valider
                 </x-filament::button>
@@ -62,47 +57,64 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                 
             ])
             ->action(function ($record, $data){
-                // array:11 [▼ // vendor/spatie/laravel-ignition/src/helpers.php:14
-                //   "marin" => true
-                //   "matricule" => "123"
-                //   "nid" => "321"
-                //   "date_embarq" => null
-                //   "date_debarq" => null
-                //   "grade_id" => "9"
-                //   "specialite_id" => "8"
-                //   "brevet_id" => "3"
-                //   "unite_id" => "8"
-                //   "user" => true
-                //   "roles" => array:1 [▶]
-                // ]
+                /**
+                 * #attributes: array:6 [▼
+                *    "id" => 1
+                *    "nom" => "EL-AHDAB"
+                *    "prenom" => "Florian"
+                *    "email" => "florian.el-ahdab@intradef.gouv.fr"
+                *    "unite" => "MARINE/FRSTRIKEFOR/C2N - CENTRE COMBAT NAVAL/DIRECTEUR"
+                *    "nid" => "0012030028"
+                *  ]
+                 */
+                /**
+                 * $record contient nom, prenom, email, unite et nid
+                 */
                 
                 if (Arr::get($data, 'user'))
                 {
-                    UnUtilisateurLocalDoitEtreCreeEvent::dispatch($record->toArray(), $data['roles']);
+                    if (! User::where('email', $record->email)->first())
+                    {
+                        UnUtilisateurLocalDoitEtreCreeEvent::dispatch($record->toArray(), $data['roles']);
+                    }
                 }
 
                 if (Arr::get($data, 'marin'))
                 {
-                    $creation_data = array_merge($record->toArray(), $data);
-                    if (Arr::get($data, 'user'))
-                    {
-                        $newUser= User::where('email', $record->email)->first();
-                        $creation_data['user_id'] = $newUser->id;
+                    if (! Marin::where("nid", $record->nid)->first()){
+                        $creation_data = array_merge($record->toArray(), $data);
+                        if (Arr::get($data, 'user'))
+                        {
+                            $newUser= User::where('email', $record->email)->first();
+                            $creation_data['user_id'] = $newUser->id;
+                        }
+                        UnMarinDoitEtreCreeEvent::dispatch($creation_data);
                     }
-                    UnMarinDoitEtreCreeEvent::dispatch($creation_data);
+
+
                 }
-                
+                $marin = Marin::where("email", $record->email)->first();
+                if (Arr::get($data, 'suivre_en_fcm'))
+                {
+                    // $marin->suivi_en_fcm = true;
+                }
                 if (Arr::get($data, 'cohorte'))
                 {
-
+                    // $event = ["cohorte_id" =>Arr::get($data, 'cohorte') ];
+                    // event(new SaveFcmMarinEvent($marin, $event));
                 }
                 if (Arr::get($data, 'mentor_id'))
                 {
-
+                    // $event = ["mentor_id" =>Arr::get($data, 'mentor_id') ];
+                    // event(new SaveFcmMarinEvent($marin, $event));
                 }
                 if (Arr::get($data, 'parcoursserialise_id'))
                 {
-
+                    // $parcoursSerialise = ParcoursSerialise::find($data['parcoursserialise_id']);
+                    // if (!$parcoursSerialise) {
+                    //     throw new \Exception('Le Parcours serialise selectionne est introuvable');
+                    // }
+                    // event(new AssignerMarinParcoursEvent($marin, $parcoursSerialise, []));
                 }
 
             })

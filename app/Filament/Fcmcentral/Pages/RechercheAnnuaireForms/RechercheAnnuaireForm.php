@@ -5,6 +5,7 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuaireForms;
 use Illuminate\Support\Facades\DB;
 
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
 
 use Modules\FcmCommun\Models\Cohorte;
@@ -18,7 +19,10 @@ class RechercheAnnuaireForm
     {
     return [
         Wizard\Step::make('FCM')
+                ->hidden(true)
                 ->schema([
+                    Toggle::make('suivre_en_fcm')
+                        ->label("Suivre en FCM"),
                     Select::make('cohorte')
                         ->label("Cohorte de ce marin")
                         ->options(Cohorte::all()->pluck('libelle_long', 'id')),
@@ -35,7 +39,6 @@ class RechercheAnnuaireForm
                         ->label('Choisir un Parcours')
                         ->options(ParcoursSerialise::pluck('libelle_court', 'id'))
                         ->searchable()
-                        ->required()
                     ]
                 ),     
         ];
