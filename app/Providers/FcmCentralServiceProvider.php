@@ -31,7 +31,6 @@ class FcmCentralServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        Models\Marin::class => Policies\MarinPolicy::class,
         Models\Parcours::class => Policies\ParcoursPolicy::class,
         Models\ParcoursSerialise::class => Policies\ParcoursSerialisePolicy::class,
         Models\Fonction::class => Policies\FonctionPolicy::class,
