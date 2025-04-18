@@ -81,7 +81,7 @@ class FcmMarinResource extends Resource
                     ->label('Parcours')
                     ->getStateUsing(function ($record){
                         // Recup premier parcours assigné
-                        $parcours= $record->parcoursSerialises->first();
+                        $parcours= $record->parcoursSerialises?->first();
                         if ($parcours){
                             return $parcours->libelle_court.' V'.$parcours->version;
                         }else{
@@ -94,7 +94,7 @@ class FcmMarinResource extends Resource
                     ->label('Taux Global')
                     ->getStateUsing(function ($record){
                         // Recup premier parcours assigné
-                        $parcours= $record->parcoursSerialises->first();
+                        $parcours= $record->parcoursSerialises?->first();
                         if ($parcours){
                             return $parcours->pivot->taux_global.' %';
                         }else{
