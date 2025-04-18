@@ -19,6 +19,10 @@ class MarinResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Marins';
+
+    protected static ?string $navigationLabel = "Tous les marins";
+
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
