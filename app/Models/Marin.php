@@ -71,6 +71,7 @@ class Marin extends BaseMarin
 
     /**
      * Scope permettant de filtrer les marins qui sont des mentors FCM.
+     * Exemple: Marin::mentor()->get() : renvoie tous les mentors
      */
     public function scopeMentor(Builder $query)
     {
