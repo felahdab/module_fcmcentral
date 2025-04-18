@@ -1,3 +1,21 @@
+## 0.0.4 (April 18, 2025)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.3 –> 0.0.4
+- Ajustement de l'affichage dans la liste des marins.
+- Ajustement du formulaire de l'action de la page de recherche dans l'annuaire.
+- Merge branch 'master' into tuleap-459003-deplacer-la-page-listant-les-marins-en-fcm-dans-les-modules-fcm-central-et-fcm-unite
+- Modification mineure pour éviter les exceptions lorsqu'un marien n'a pas de parcours sérialisé.
+- Mise en place de la liste des marins dans le menu "Marins".
+- Rajout d'une resource reposant sur le modèle Marin de FcmCentral dans le panneau FcmCentral. Permet d'afficher la liste des marins connus dans l'instance et de leur appliquer des actions spécifiques à la FCM si on le souhite.
+- Création des méthodes pour faciliter l'accès aux données de la FCM depuis les objets de type Marin.
+- Ajout commentaire sur scope mentor.
+- Retrait de la Policy destinée au Marin du module FcmCentral: la policy doit reposer sur celle du module RH.
+- Définition de l'attribut complements_fcm, du scope cohorte, du scope mentorePar et du scope mentor.
+- Création de la page de recherche dans l'annuaire. Reste à définir les actions à réaliser.
+- Création de la page de recherche dans l'annuaire avec les formulaires associés.
+- Ajout d'un groupe aux tests pour faciliter le test partiel.
+- Adaptation de la page de configuration du module pour la récupération des cohortes. Définition des premiers tests du module.
+- Création d'un endpoint API pour exposer les cohortes connues.
+
 ## 0.0.3 (April 16, 2025)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.2 –> 0.0.3
 - Merge branch 'tuleap-419581-refonte-tables-fcmcentral-modification-filament-fcmcentral'
