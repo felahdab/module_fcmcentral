@@ -74,45 +74,56 @@ class MarinResource extends Resource
                     ->label('UUID')
                     ->searchable()
                     ->hidden(true),
+                Tables\Columns\TextColumn::make('grade.libelle_court')
+                    ->searchable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('nom')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('prenom')
+                    ->searchable(),
+                Tables\Columns\IconColumn::make('suiviEnFcm')
+                    ->boolean()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('complements_fcm.cohorte.libelle_court')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('complements_fcm.mentor.nom')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.parcours_serialise.libelle_court')
+                    ->label("Parcours attribué")
                     ->searchable(),
                 Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('suiviEnFcm')
+                    ->label("Taux global")
                     ->searchable(),
                 Tables\Columns\TextColumn::make('matricule')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('nid')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('date_embarq')
+                    ->label('Date d\'embarquement')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date_debarq')
+                    ->label('Date de débarquement')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('grade_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('specialite_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('brevet_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('unite_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('specialite.libelle_court')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->badge(),
+                Tables\Columns\TextColumn::make('brevet.libelle_court')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->badge(),
+                Tables\Columns\TextColumn::make('unite.libelle_court')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('user_id')
+                //     ->numeric()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -127,9 +138,8 @@ class MarinResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('display_name')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('code_sirh_user')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
             ])
             ->filters([
