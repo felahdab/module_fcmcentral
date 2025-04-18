@@ -2,16 +2,24 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\RelationManagers;
-use Modules\FcmCentral\Models\Marin;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Filters\Filter;
+
+use Modules\FcmCommun\Models\Cohorte;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\RelationManagers;
+use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource;
 
 class MarinResource extends Resource
 {
@@ -21,11 +29,11 @@ class MarinResource extends Resource
 
     protected static ?string $navigationGroup = 'Marins';
 
-    protected static ?string $navigationLabel = "Tous les marins";
+    protected static ?string $navigationLabel = "Liste des marins";
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        return Marin::enFcm()->count();
     }
 
     public static function form(Form $form): Form
@@ -121,9 +129,6 @@ class MarinResource extends Resource
                 Tables\Columns\TextColumn::make('unite.libelle_court')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                // Tables\Columns\TextColumn::make('user_id')
-                //     ->numeric()
-                //     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -137,16 +142,85 @@ class MarinResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('email')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('code_sirh_user')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
             ])
             ->filters([
-                //
+                Filter::make('en_fcm')
+                    ->form([
+                        Toggle::make('en_fcm')
+                            ->default(true),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['en_fcm'],
+                                fn (Builder $query, $date): Builder => $query->enFcm(),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! $data['en_fcm']) {
+                            return null;
+                        }
+                
+                        return 'Marins en FCM seulement';
+                    })
+                    
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make("suivre_en_fcm")
+                    ->label("Suivre en FCM")
+                    ->hidden(function($record) {
+                        return $record->suiviEnFcm;
+                    })
+                    ->action(function ($record){
+                        $record->suiviEnFcm=true;
+                    }),
+                Tables\Actions\Action::make('livret-de-fcm')
+                    ->label("Livret de FCM")
+                    ->button()
+                    ->color('warning')
+                    ->visible(function ($record) {
+                        return $record->suiviEnFcm && $record->complements_fcm;
+                    })
+                    ->url(fn ($record): string => FcmMarinResource::getUrl('livret-de-fcm', ['record' => $record->complements_fcm])),
+                Tables\Actions\Action::make("ne_plus_suivre_en_fcm")
+                    ->label("Ne plus suivre en FCM")
+                    ->button()
+                    ->color('danger')
+                    ->visible(function($record) {
+                        return $record->suiviEnFcm;
+                    })
+                    ->action(function ($record){
+                        $record->suiviEnFcm=false;
+                    }),
+                Tables\Actions\Action::make('attribuer-cohorte-et-mentor')
+                        ->label("Attribuer cohorte et mentor")
+                        ->button()
+                        ->visible(fn ($record) => $record->suiviEnFcm)
+                        ->requiresConfirmation()
+                        ->form([
+                            Forms\Components\Select::make('cohorte')
+                                ->label("Cohorte de ce marin")
+                                ->options(Cohorte::all()->pluck('libelle_long', 'id')),
+                            Forms\Components\Select::make('mentor_id')
+                                ->label("Choisir un mentor")
+                                ->options(Marin::all()->pluck('fullNameAndGrade','id'))
+                                ->searchable(),
+                            Forms\Components\Select::make('parcoursserialise_id')
+                                ->label('Choisir un Parcours')
+                                ->options(ParcoursSerialise::pluck('libelle_court', 'id'))
+                                ->searchable()
+                        ])
+                        ->action(function ($record, $data)
+                        {
+
+                        }),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
