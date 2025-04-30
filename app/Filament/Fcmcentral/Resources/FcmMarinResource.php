@@ -21,11 +21,15 @@ use Modules\FcmCentral\Models\ParcoursSerialise;
 
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Arr;
-use Modules\FcmCentral\Events\AssignerMarinParcoursEvent;
-use Modules\FcmCentral\Events\SuivreMarinFcmEvent;
+
+
+
+use Modules\FcmCommun\Services\EventTriggerService;
 
 class FcmMarinResource extends Resource
 {
+    
+    
     protected static ?string $model = FcmMarin::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -146,8 +150,16 @@ class FcmMarinResource extends Resource
                     ->action(function (FcmMarin $record) {
                         // Declencher Event
 
-                        $data["fcm"] = ["en_fcm" => true];
-                        event(new SuivreMarinFcmEvent($record->marin, $data));
+                        
+                       //Data + Recuperer le prefix
+                       $data["fcm"] = ["en_fcm" => true];
+                       $data['marinUuid'] = $record->marin->uuid;
+                      
+
+                       
+                       // Utiliser le service pour déclencher l'événement
+                       EventTriggerService::triggerEvent($data, $record);
+
                     }),
                 Action::make('ne-plus-suivre-en-fcm')
                     ->label("Ne plus suivre en FCM")
@@ -164,7 +176,13 @@ class FcmMarinResource extends Resource
                         // Recherche dans FcmXXX pour envoyer dans event collection RHmarin pour  mettre a jour Flag (a voir avec commandant)
 
                         $data["fcm"] = ["en_fcm" => false];
-                        event(new SuivreMarinFcmEvent($record->marin, $data));
+                        $data['marinUuid'] = $record->marin->uuid;
+                     
+
+                
+                       
+                       // Utiliser le service pour déclencher l'événement
+                       EventTriggerService::triggerEvent($data, $record);
                     }),
 
                 // Assigner Parcours Marin
@@ -187,11 +205,15 @@ class FcmMarinResource extends Resource
                     })
                     ->action(function (FcmMarin $record, $data) {
                         // Recup du parcours Serialise
-                        $parcoursSerialise = ParcoursSerialise::find($data['parcoursserialise_id']);
-                        if (!$parcoursSerialise) {
-                            throw new \Exception('Le Parcours serialise selectionne est introuvable');
-                        }
-                        event(new AssignerMarinParcoursEvent($record, $parcoursSerialise, $data));
+                        // $parcoursSerialise = ParcoursSerialise::find($data['parcoursserialise_id']);
+                        // if (!$parcoursSerialise) {
+                        //     throw new \Exception('Le Parcours serialise selectionne est introuvable');
+                        // }
+                        // event(new AssignerMarinParcoursEvent($record, $parcoursSerialise, $data));
+                         // Data
+                         $data['marinUuid'] = $record->marin->uuid;   
+                        // Utiliser le service pour déclencher l'événement
+                        EventTriggerService::triggerEvent($data, $record);
                     }),
 
             ])

@@ -21,8 +21,17 @@ use Modules\FcmCentral\Events\SerializeParcoursEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\FonctionsRelationManager;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 
+use Modules\FcmCommun\Services\UserGeneratedEventService;
+use Modules\FcmCommun\Services\EventDataBuilderService;
+use Modules\FcmCommun\Services\EventTypeService;
+use Modules\FcmCentral\Traits\HasTablePrefix;
+use Modules\FcmCommun\Services\EventTriggerService;
+
 class ParcoursResource extends Resource
 {
+
+    use HasTablePrefix;
+
     protected static ?string $model = Parcours::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -117,7 +126,16 @@ class ParcoursResource extends Resource
                 ])
 
                 ->action(function ($record,$data){
-                    event (new SerializeParcoursEvent($record,$data));
+                   // event (new SerializeParcoursEvent($record,$data));
+
+                    //Data + Recuperer le prefix
+                    $data['marinUuid'] = null;
+                    //$prefix = (new static())->getTablePrefix();
+
+                   
+                    
+                    // Utiliser le service pour déclencher l'événement
+                    EventTriggerService::triggerEvent($data, $record);
                 })
             ])
             ->bulkActions([

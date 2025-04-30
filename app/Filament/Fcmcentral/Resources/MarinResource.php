@@ -21,8 +21,15 @@ use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource;
 
+
+use Modules\FcmCommun\Services\EventTriggerService;
+
+
 class MarinResource extends Resource
 {
+
+    
+
     protected static ?string $model = Marin::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -51,7 +58,7 @@ class MarinResource extends Resource
                     ->unique(
                         table: 'rh_marins',
                         column: 'email',
-                        ignoreRecord : true
+                        ignoreRecord: true
                     )
                     ->required(),
                 Forms\Components\TextInput::make('nid')
@@ -162,24 +169,33 @@ class MarinResource extends Resource
                             );
                     })
                     ->indicateUsing(function (array $data): ?string {
-                        if (! $data['en_fcm']) {
+                        if (!$data['en_fcm']) {
                             return null;
                         }
-                
+
                         return 'Marins en FCM seulement';
                     })
-                    
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make("suivre_en_fcm")
                     ->label("Suivre en FCM")
-                    ->hidden(function($record) {
+                    ->hidden(function ($record) {
                         return $record->suiviEnFcm;
                     })
-                    ->action(function ($record){
-                        $record->suiviEnFcm=true;
+                    ->action(function ($record) {
+
+                        //Data + Recuperer le prefix
+                        $data['marinUuid'] = $record->uuid;
+                        $data["fcm"] = ["en_fcm" => true];
+                    
+                       
+
+                        // Utiliser le service pour déclencher l'événement
+                        EventTriggerService::triggerEvent($data, $record);
                     }),
+
                 Tables\Actions\Action::make('livret-de-fcm')
                     ->label("Livret de FCM")
                     ->button()
@@ -188,38 +204,53 @@ class MarinResource extends Resource
                         return $record->suiviEnFcm && $record->complements_fcm;
                     })
                     ->url(fn ($record): string => FcmMarinResource::getUrl('livret-de-fcm', ['record' => $record->complements_fcm])),
+
                 Tables\Actions\Action::make("ne_plus_suivre_en_fcm")
                     ->label("Ne plus suivre en FCM")
                     ->button()
                     ->color('danger')
-                    ->visible(function($record) {
+                    ->visible(function ($record) {
                         return $record->suiviEnFcm;
                     })
-                    ->action(function ($record){
-                        $record->suiviEnFcm=false;
-                    }),
-                Tables\Actions\Action::make('attribuer-cohorte-et-mentor')
-                        ->label("Attribuer cohorte et mentor")
-                        ->button()
-                        ->visible(fn ($record) => $record->suiviEnFcm)
-                        ->requiresConfirmation()
-                        ->form([
-                            Forms\Components\Select::make('cohorte')
-                                ->label("Cohorte de ce marin")
-                                ->options(Cohorte::all()->pluck('libelle_long', 'id')),
-                            Forms\Components\Select::make('mentor_id')
-                                ->label("Choisir un mentor")
-                                ->options(Marin::all()->pluck('fullNameAndGrade','id'))
-                                ->searchable(),
-                            Forms\Components\Select::make('parcoursserialise_id')
-                                ->label('Choisir un Parcours')
-                                ->options(ParcoursSerialise::pluck('libelle_court', 'id'))
-                                ->searchable()
-                        ])
-                        ->action(function ($record, $data)
-                        {
+                    ->action(function ($record) {
 
-                        }),
+                        //Data + Recuperer le prefix
+                        $data['marinUuid'] = $record->uuid;
+                        $data["fcm"] = ["en_fcm" => false];
+                       
+
+                        // Utiliser le service pour déclencher l'événement
+                        EventTriggerService::triggerEvent($data, $record);
+                    }),
+
+                Tables\Actions\Action::make('attribuer-cohorte-et-mentor')
+                    ->label("Attribuer cohorte et mentor")
+                    ->button()
+                    ->visible(fn ($record) => $record->suiviEnFcm)
+                    ->requiresConfirmation()
+                    ->form([
+                        Forms\Components\Select::make('cohorte_id')
+                            ->label("Cohorte de ce marin")
+                            ->options(Cohorte::all()->pluck('libelle_long', 'id')),
+                        Forms\Components\Select::make('mentor_id')
+                            ->label("Choisir un mentor")
+                            ->options(Marin::all()->pluck('fullNameAndGrade', 'id'))
+                            ->searchable(),
+                        Forms\Components\Select::make('parcoursserialise_id')
+                            ->label('Choisir un Parcours')
+                            ->options(ParcoursSerialise::pluck('libelle_court', 'id'))
+                            ->searchable()
+                    ])
+                    ->action(function ($record, $data) {
+
+                        //Data + Recuperer le prefix
+                        $data['marinUuid'] = $record->uuid;
+                       
+                        
+                        
+                        // Utiliser le service pour déclencher l'événement
+                        EventTriggerService::triggerEvent($data, $record);
+                    }),
 
             ])
             ->bulkActions([

@@ -27,6 +27,11 @@ use Modules\FcmCentral\Events\SaveFcmMarinEvent;
 use Modules\FcmCentral\Events\AssignerMarinParcoursEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuaireForms\RechercheAnnuaireForm;
 
+use Modules\FcmCommun\Services\UserGeneratedEventService;
+use Modules\FcmCommun\Services\EventDataBuilderService;
+use Modules\FcmCommun\Services\EventTypeService;
+use Modules\FcmCommun\Services\EventTriggerService;
+
 class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
 {
     protected static ?string $navigationGroup = 'Marins';
@@ -79,7 +84,7 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                     }
                 }
 
-                if (Arr::get($data, 'marin'))
+                elseif (Arr::get($data, 'marin'))
                 {
                     if (! Marin::where("nid", $record->nid)->first()){
                         $creation_data = array_merge($record->toArray(), $data);
@@ -93,29 +98,43 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
 
 
                 }
-                $marin = Marin::where("email", $record->email)->first();
-                if (Arr::get($data, 'suivre_en_fcm'))
-                {
-                    // $marin->suivi_en_fcm = true;
-                }
-                if (Arr::get($data, 'cohorte'))
-                {
-                    // $event = ["cohorte_id" =>Arr::get($data, 'cohorte') ];
-                    // event(new SaveFcmMarinEvent($marin, $event));
-                }
-                if (Arr::get($data, 'mentor_id'))
-                {
-                    // $event = ["mentor_id" =>Arr::get($data, 'mentor_id') ];
-                    // event(new SaveFcmMarinEvent($marin, $event));
-                }
-                if (Arr::get($data, 'parcoursserialise_id'))
-                {
-                    // $parcoursSerialise = ParcoursSerialise::find($data['parcoursserialise_id']);
-                    // if (!$parcoursSerialise) {
-                    //     throw new \Exception('Le Parcours serialise selectionne est introuvable');
-                    // }
-                    // event(new AssignerMarinParcoursEvent($marin, $parcoursSerialise, []));
-                }
+                else{
+                 $marin = Marin::where("email", $record->email)->first();
+
+                // $prefix = (new static())->getTablePrefix();
+
+                $prefix  ='fcmcentral_';
+
+                dd($record,$data);
+
+                
+
+                // Utiliser le service pour déclencher l'événement
+                EventTriggerService::triggerEvent($data, $record, $prefix);
+            }
+
+                // if (Arr::get($data, 'suivre_en_fcm'))
+                // {
+                //     // $marin->suivi_en_fcm = true;
+                // }
+                // if (Arr::get($data, 'cohorte_id'))
+                // {
+                //     // $event = ["cohorte_id" =>Arr::get($data, 'cohorte') ];
+                //     // event(new SaveFcmMarinEvent($marin, $event));
+                // }
+                // if (Arr::get($data, 'mentor_id'))
+                // {
+                //     // $event = ["mentor_id" =>Arr::get($data, 'mentor_id') ];
+                //     // event(new SaveFcmMarinEvent($marin, $event));
+                // }
+                // if (Arr::get($data, 'parcoursserialise_id'))
+                // {
+                //     // $parcoursSerialise = ParcoursSerialise::find($data['parcoursserialise_id']);
+                //     // if (!$parcoursSerialise) {
+                //     //     throw new \Exception('Le Parcours serialise selectionne est introuvable');
+                //     // }
+                //     // event(new AssignerMarinParcoursEvent($marin, $parcoursSerialise, []));
+                // }
 
             })
         ];

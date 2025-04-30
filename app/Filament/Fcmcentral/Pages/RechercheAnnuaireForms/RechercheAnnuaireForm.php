@@ -22,7 +22,7 @@ class RechercheAnnuaireForm
                     Forms\Components\Toggle::make('suivre_en_fcm')
                         ->label("Suivre en FCM")
                         ->live(),
-                    Forms\Components\Select::make('cohorte')
+                    Forms\Components\Select::make('cohorte_id')
                         ->visible(fn(Get $get) => $get('suivre_en_fcm'))
                         ->label("Cohorte de ce marin")
                         ->options(Cohorte::all()->pluck('libelle_long', 'id')),
