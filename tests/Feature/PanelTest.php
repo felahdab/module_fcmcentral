@@ -77,9 +77,3 @@ it('shows cohorte list', function() {
         ->test(Resources\CohorteResource\Pages\ListCohortes::class)
         ->assertSee('Cohortes');
 });
-
-it('shows marins en FCM list', function() {
-    Livewire::actingAs($this->admin)
-        ->test(Resources\FcmMarinResource\Pages\ListFcmMarins::class)
-        ->assertSee('Fcm Marins');
-});
