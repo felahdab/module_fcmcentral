@@ -37,6 +37,8 @@ class FcmMarinResource extends Resource
     protected static ?string $navigationLabel = 'Marins en FCM Central';
 
     protected static ?string $navigationGroup = 'Marins';
+    
+    protected static bool $shouldRegisterNavigation = false;
 
 
     public static function form(Form $form): Form
@@ -155,8 +157,6 @@ class FcmMarinResource extends Resource
                        $data["fcm"] = ["en_fcm" => true];
                        $data['marinUuid'] = $record->marin->uuid;
                       
-
-                       
                        // Utiliser le service pour déclencher l'événement
                        EventTriggerService::triggerEvent($data, $record);
 
@@ -175,14 +175,13 @@ class FcmMarinResource extends Resource
                         // Declencher Event
                         // Recherche dans FcmXXX pour envoyer dans event collection RHmarin pour  mettre a jour Flag (a voir avec commandant)
 
-                        $data["fcm"] = ["en_fcm" => false];
-                        $data['marinUuid'] = $record->marin->uuid;
-                     
-
-                
+                        $eventdata  = [
+                            "fcm" => ["en_fcm" => false],
+                            "marinUuid" => $record->marin->uuid
+                        ];
                        
                        // Utiliser le service pour déclencher l'événement
-                       EventTriggerService::triggerEvent($data, $record);
+                       EventTriggerService::triggerEvent($eventdata, $record->marin);
                     }),
 
                 // Assigner Parcours Marin
@@ -204,16 +203,13 @@ class FcmMarinResource extends Resource
                         return !$record->parcoursSerialises()->exists();
                     })
                     ->action(function (FcmMarin $record, $data) {
-                        // Recup du parcours Serialise
-                        // $parcoursSerialise = ParcoursSerialise::find($data['parcoursserialise_id']);
-                        // if (!$parcoursSerialise) {
-                        //     throw new \Exception('Le Parcours serialise selectionne est introuvable');
-                        // }
-                        // event(new AssignerMarinParcoursEvent($record, $parcoursSerialise, $data));
-                         // Data
-                         $data['marinUuid'] = $record->marin->uuid;   
+
+                         $eventdata  = [
+                            "parcoursserialise_id" =>$data["parcoursserialise_id"],
+                            "marinUuid" => $record->marin->uuid
+                        ];
                         // Utiliser le service pour déclencher l'événement
-                        EventTriggerService::triggerEvent($data, $record);
+                        EventTriggerService::triggerEvent($eventdata, $record->marin);
                     }),
 
             ])
