@@ -1,3 +1,9 @@
+## 0.0.5 (May 02, 2025)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.4 –> 0.0.5
+- La ressource FcmMarin ne semble plus nécessaire. Retirée temporairement pour vérifier.
+- Passage du livret de FCM dans la ressource Marin.  Adaptation du Livret de FCM pour travailler depuis une page de ressource Marin et non FcmMarin. Ajustement des actions de la ressource Marin pour utiliser les évènements de FcmCommun. Ajustement des actions de la page de recherche Annuaire pour la même chose.
+- Implements art #463585 Creation Event Sauve
+
 ## 0.0.4 (April 18, 2025)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.3 –> 0.0.4
 - Ajustement de l'affichage dans la liste des marins.
