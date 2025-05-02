@@ -203,7 +203,7 @@ class MarinResource extends Resource
                     ->visible(function ($record) {
                         return $record->suiviEnFcm && $record->complements_fcm;
                     })
-                    ->url(fn ($record): string => FcmMarinResource::getUrl('livret-de-fcm', ['record' => $record->complements_fcm])),
+                    ->url(fn ($record): string => MarinResource::getUrl('livret-de-fcm', ['record' => $record->complements_fcm])),
 
                 Tables\Actions\Action::make("ne_plus_suivre_en_fcm")
                     ->label("Ne plus suivre en FCM")
@@ -251,6 +251,32 @@ class MarinResource extends Resource
                         // Utiliser le service pour déclencher l'événement
                         EventTriggerService::triggerEvent($data, $record);
                     }),
+                Tables\Actions\Action::make('assignerParcours')
+                    ->label('Assigner Parcours')
+                    ->button()
+                    ->color('success')
+                    ->modalHeading('Assigner un Parcours à un Marin')
+                    ->modalWidth('lg')
+                    ->form([
+                        Forms\Components\Select::make('parcoursserialise_id')
+                            ->label('Choisir un Parcours')
+                            ->options(ParcoursSerialise::pluck('libelle_court', 'id'))
+                            ->searchable()
+                            ->required(),
+                    ])
+                    // Pour enlever le bouton si il exist dans MarinParcours
+                    // ->visible(function (FcmMarin $record){
+                    //     return !$record->parcoursSerialises()->exists();
+                    // })
+                    ->action(function ($record, $data) {
+
+                         $eventdata  = [
+                            "parcoursserialise_id" =>$data["parcoursserialise_id"],
+                            "marinUuid" => $record->uuid
+                        ];
+                        // Utiliser le service pour déclencher l'événement
+                        EventTriggerService::triggerEvent($eventdata, $record);
+                    }),
 
             ])
             ->bulkActions([
@@ -271,6 +297,7 @@ class MarinResource extends Resource
     {
         return [
             'index' => Pages\ListMarins::route('/'),
+            'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),
             //'create' => Pages\CreateMarin::route('/create'),
             //'edit' => Pages\EditMarin::route('/{record}/edit'),
         ];
