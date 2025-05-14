@@ -15,8 +15,12 @@ use Modules\FcmCentral\Console\TestParcoursArchitecture;
 use Modules\FcmCentral\Console\SeedTestData;
 use Modules\FcmCentral\Console\TestAttributionParcoursAUser;
 
+use App\Filament\PanelRegistry\DirectMenuItem;
+use App\Filament\PanelRegistry\ModuleDefinedMenusRegistry;
+
 use Modules\FcmCentral\Models;
 use Modules\FcmCentral\Policies;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
 
 
 class FcmCentralServiceProvider extends ServiceProvider
@@ -63,6 +67,21 @@ class FcmCentralServiceProvider extends ServiceProvider
         $this->booting(function () {
             $this->registerPolicies();
         });
+
+        $this->registerDirectMenuItems();
+    }
+
+    public function registerDirectMenuItems()
+    {
+        app(ModuleDefinedMenusRegistry::class)->registerDirectMenuItems([
+            DirectMenuItem::make()
+                ->name('FCM central')
+                ->children([
+                    DirectMenuItem::make()
+                    ->name('Liste des marins')
+                    ->url(fn() => ListMarins::getUrl())
+                ])
+        ]);
     }
 
     /**
