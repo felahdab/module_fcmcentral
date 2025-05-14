@@ -1,3 +1,8 @@
+## 0.0.6 (May 14, 2025)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.5 –> 0.0.6
+- Rajout d'un élément d'accès direct pour illustrer la possibilité.
+- Retrait du test de la ressource FcmMarin.
+
 ## 0.0.5 (May 02, 2025)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.4 –> 0.0.5
 - La ressource FcmMarin ne semble plus nécessaire. Retirée temporairement pour vérifier.
