@@ -79,7 +79,7 @@ class FcmCentralServiceProvider extends ServiceProvider
                 ->children([
                     DirectMenuItem::make()
                     ->name('Liste des marins')
-                    ->url(fn() => ListMarins::getUrl())
+                    ->url(fn() => ListMarins::getUrl(panel: 'FCM Central'))
                 ])
         ]);
     }
