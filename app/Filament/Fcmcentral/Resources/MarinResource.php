@@ -19,7 +19,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\RelationManagers;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource;
+//use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource;
 
 
 use Modules\FcmCommun\Services\EventTriggerService;
@@ -203,7 +203,7 @@ class MarinResource extends Resource
                     ->visible(function ($record) {
                         return $record->suiviEnFcm && $record->complements_fcm;
                     })
-                    ->url(fn ($record): string => MarinResource::getUrl('livret-de-fcm', ['record' => $record->complements_fcm])),
+                    ->url(fn ($record): string => MarinResource::getUrl('livret-de-fcm', ['record' => $record->id])),
 
                 Tables\Actions\Action::make("ne_plus_suivre_en_fcm")
                     ->label("Ne plus suivre en FCM")

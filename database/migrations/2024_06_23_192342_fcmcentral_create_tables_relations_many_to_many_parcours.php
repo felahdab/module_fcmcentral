@@ -68,7 +68,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('fcmcentral_fonction_parcours');
-        Schema::dropIfExists('fcmcentral_competence_fonctions');
+        Schema::dropIfExists('fcmcentral_competence_fonction');
         Schema::dropIfExists('fcmcentral_competence_savoirfaire');
         Schema::dropIfExists('fcmcentral_activite_savoirfaire');
 

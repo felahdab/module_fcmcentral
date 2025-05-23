@@ -126,6 +126,8 @@ class ParcoursResource extends Resource
                 ])
 
                 ->action(function ($record,$data){
+
+                   
                    // event (new SerializeParcoursEvent($record,$data));
 
                     //Data + Recuperer le prefix
