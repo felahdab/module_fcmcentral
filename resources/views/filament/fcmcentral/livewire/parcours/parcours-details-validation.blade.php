@@ -34,8 +34,10 @@
                                 'libelleCourt'  => $fonction['libelle_court'],
                                 'etatValid'     => $fonction['etat_valid'],
                                 'dateValidation'=> $fonction['date_validation'],
+                                'dateProposition'=> $fonction['date_proposition'],
                                 'valideur'      => $fonction['valideur'],
                                 'commentaire'   => $fonction['commentaire'],
+                                'commentaireProposition'   => $fonction['commentaire_proposition'],
                                 'finDeCourse'   => (empty($fonction['competences'])?true:false),
                                 'infos'         => [],
                                 
@@ -69,8 +71,10 @@
                                                     'libelleCourt'   => $competence['libelle_court'],
                                                     'etatValid'     => $competence['etat_valid'],
                                                     'dateValidation'=> $competence['date_validation'],
+                                                    'dateProposition'=> $competence['date_proposition'],
                                                     'valideur'      => $competence['valideur'],
                                                     'commentaire'   => $competence['commentaire'],
+                                                    'commentaireProposition'   => $competence['commentaire_proposition'],
                                                     'finDeCourse'   => (empty($competence['savoirfaires'])?true:false),
                                                     'infos'         => [],
                                                     
@@ -101,8 +105,10 @@
                                                                 'libelleCourt'   => $savoirFaire['libelle_court'],
                                                                 'etatValid'     => $savoirFaire['etat_valid'],
                                                                 'dateValidation'=> $savoirFaire['date_validation'],
+                                                                'dateProposition'=> $savoirFaire['date_proposition'],
                                                                 'valideur'      => $savoirFaire['valideur'],
                                                                 'commentaire'   => $savoirFaire['commentaire'],
+                                                                'commentaireProposition'   => $savoirFaire['commentaire_proposition'],
                                                                 'finDeCourse'   => (empty($savoirFaire['activites'])?true:false),
                                                                 'infos'         => ['coeff'=>$savoirFaire['coeff'],'duree'=>$savoirFaire['duree'],],
                                                                 
@@ -135,8 +141,10 @@
                                                                 'libelleCourt'   => $activite['libelle_court'],
                                                                 'etatValid'     => $activite['etat_valid'],
                                                                 'dateValidation'=> $activite['date_validation'],
+                                                                'dateProposition'=> $activite['date_proposition'],
                                                                 'valideur'      => $activite['valideur'],
                                                                 'commentaire'   => $activite['commentaire'],
+                                                                'commentaireProposition'   => $activite['commentaire_proposition'],
                                                                 'finDeCourse'   => true,
                                                                 'infos'         => ['coeff'=>$activite['pivot']['coeff'],'duree'=>$activite['pivot']['duree'],],
                                                                 
@@ -179,7 +187,7 @@
 
             <!-- Bouton Submit -->
             <div class="mt-6">
-                <x-filament::button wire:click="openModal" >
+                <x-filament::button wire:click="sauveModal" >
                Sauvegarder
             </x-filament::button>
             </div>
@@ -198,7 +206,8 @@
     <!-- Modal de commentaire 
     // slide-over  a gauche
     -->
-   
+ 
+    <!-- Modal Sauve -->
 <x-filament::modal 
 id="sauve" 
 alignment="center" 
@@ -210,7 +219,7 @@ icon="heroicon-o-information-circle"
         <h2 class="text-lg font-bold">Ajouter un commentaire</h2>
     </x-slot>
     <x-slot name="description">
-    <textarea wire:model="comment" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"></textarea>
+    <textarea wire:model="comment" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 "></textarea>
 </x-slot>
     <x-slot name="footer">
         <x-filament::button color="gray" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" wire:click="$dispatch('close-modal',{id:'sauve'})">Annuler</x-filament::button>
@@ -219,21 +228,21 @@ icon="heroicon-o-information-circle"
 </x-filament::modal>
 
 
- <!-- Modal Décoche -->
+ <!-- Modal Annul -->
  <x-filament::modal
  id="annul"
  alignment="center"
- width="lg"
+ width="3xl"
  icon="heroicon-o-x-circle"
 >
  <x-slot name="heading">
      <h2 class="text-lg font-bold">Confirmer la désactivation</h2>
  </x-slot>
  <x-slot name="description">
-     <p>Voulez-vous vraiment désactiver cette option ?</p>
+     <p class="p-8">Voulez-vous vraiment désactiver cette option ?</p>
      <textarea
          wire:model="comment"
-         class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 "
+         class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-primary-500  "
          placeholder="Ajoutez un commentaire (facultatif)"
      ></textarea>
  </x-slot>
@@ -241,6 +250,32 @@ icon="heroicon-o-information-circle"
      <x-filament::button wire:click="$dispatch('close-modal', { id: 'annul' })" color="secondary">Annuler</x-filament::button>
      <x-filament::button wire:click="save('annul')" color="danger">Confirmer</x-filament::button>
  </x-slot>
+</x-filament::modal>
+
+
+
+<!-- Modal Propos -->
+<x-filament::modal
+id="propos"
+alignment="center"
+width="3xl"
+icon="heroicon-o-x-circle"
+>
+<x-slot name="heading">
+    <h2 class="text-lg font-bold">Confirmer la Proposition</h2>
+</x-slot>
+<x-slot name="description">
+    <p class="p-8">Vous souhaitez proposer a votre mentor ces validations</p>
+    <textarea
+        wire:model="comment"
+        class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-primary-500  "
+        placeholder="Ajoutez un commentaire (facultatif)"
+    ></textarea>
+</x-slot>
+<x-slot name="footer">
+    <x-filament::button wire:click="$dispatch('close-modal', { id: 'propos' })" color="secondary">Annuler</x-filament::button>
+    <x-filament::button wire:click="save('propos')" color="success">Confirmer</x-filament::button>
+</x-slot>
 </x-filament::modal>
 
 

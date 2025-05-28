@@ -13,6 +13,8 @@
   
    $isChecked = $etatValid?? false;
 
+   $isProposChecked = $dateProposition?? false;
+
    
    $duree = (($type === 'activites')||($type === 'savoirfaires') ? $infos['coeff'] :'');
    
@@ -72,6 +74,24 @@
 
                 @endif
                 {{-- Fin boucle etat --}}
+
+                @if(($type === 'activites')||($type === 'savoirfaires'))
+                @if (!$isProposChecked)
+                <x-filament::icon-button
+                size="lg"
+                color="gray"
+                icon="heroicon-c-document-plus"
+                tooltip="Proposition"
+                wire:click="proposModal('{{$type}}', {{$id}})"
+            /> @else
+            <x-filament::icon-button
+            size="lg"
+            color="success"
+            icon="heroicon-c-document-plus"
+            tooltip="Proposition le {{$dateProposition }} : {{$commentaireProposition}}"
+            />
+            @endif
+            @endif
                 
             @else
             
@@ -89,8 +109,11 @@
                 color="warning"
                 icon="heroicon-s-x-circle"
                 tooltip="Décochez"
-                wire:click="decocheModal('{{$type}}', {{$id}})"
+                wire:click="annulModal('{{$type}}', {{$id}})"
             />
+
+           
+
             @endif
             @endif
             {{-- Fin Si pas checke --}}
