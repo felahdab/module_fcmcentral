@@ -1,6 +1,5 @@
 <x-filament::card>
 
-  
     @if (!empty($parcours))
         <form>
             
@@ -201,7 +200,7 @@
     -->
    
 <x-filament::modal 
-id="comment" 
+id="sauve" 
 alignment="center" 
 width="3xl"
 icon="heroicon-o-information-circle"
@@ -214,15 +213,15 @@ icon="heroicon-o-information-circle"
     <textarea wire:model="comment" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"></textarea>
 </x-slot>
     <x-slot name="footer">
-        <x-filament::button color="gray" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" wire:click="$dispatch('close-modal',{id:'comment'})">Annuler</x-filament::button>
-        <x-filament::button color="success" class="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700" wire:click="saveForm">Valider</x-filament::button>
+        <x-filament::button color="gray" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" wire:click="$dispatch('close-modal',{id:'sauve'})">Annuler</x-filament::button>
+        <x-filament::button color="success" class="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700" wire:click="save('valid')">Valider</x-filament::button>
     </x-slot>
 </x-filament::modal>
 
 
  <!-- Modal Décoche -->
  <x-filament::modal
- id="decocheModal"
+ id="annul"
  alignment="center"
  width="lg"
  icon="heroicon-o-x-circle"
@@ -233,14 +232,14 @@ icon="heroicon-o-information-circle"
  <x-slot name="description">
      <p>Voulez-vous vraiment désactiver cette option ?</p>
      <textarea
-         wire:model.defer="comment"
-         class="w-full mt-2 border-gray-300 rounded-md"
+         wire:model="comment"
+         class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 "
          placeholder="Ajoutez un commentaire (facultatif)"
      ></textarea>
  </x-slot>
  <x-slot name="footer">
-     <x-filament::button wire:click="$dispatch('close-modal', { id: 'decocheModal' })" color="secondary">Annuler</x-filament::button>
-     <x-filament::button wire:click="setEtatValidFalse" color="danger">Confirmer</x-filament::button>
+     <x-filament::button wire:click="$dispatch('close-modal', { id: 'annul' })" color="secondary">Annuler</x-filament::button>
+     <x-filament::button wire:click="save('annul')" color="danger">Confirmer</x-filament::button>
  </x-slot>
 </x-filament::modal>
 
@@ -298,17 +297,7 @@ icon="heroicon-o-information-circle"
 
     </style>
 
-<script>
-    Livewire.on('close-modal', ({ id }) => {
-        const modal = document.getElementById(id);
-        if (modal?.close) modal.close(); // pour <dialog>
-        else modal?.classList.remove('is-active'); // ou autre si tu utilises un autre système
-    });
 
-    Livewire.on('refresh-livret-fcm', () => {
-        Livewire.dispatch('refresh'); // équivalent à $refresh
-    });
-</script>
 
 
   

@@ -83,6 +83,7 @@
             class="tree-checkbox"
            
         />
+        @if(($type === 'activites')||($type === 'savoirfaires'))
         <x-filament::icon-button
                 size="lg"
                 color="warning"
@@ -90,7 +91,7 @@
                 tooltip="Décochez"
                 wire:click="decocheModal('{{$type}}', {{$id}})"
             />
-
+            @endif
             @endif
             {{-- Fin Si pas checke --}}
             <strong  class="ml1">{{ $label }} </strong>
