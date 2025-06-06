@@ -2,9 +2,6 @@
 
     @if (!empty($parcours))
         <form>
-            
-
-     
 
             @foreach ($parcours as $parcoursItem)
         
@@ -14,174 +11,52 @@
                 <p class="text-sm">Taux Activité : {{ $parcoursItem['taux_activite'] ?? 'N/A' }}</p>
                 <p class="text-sm">Détails du parcours :</p>
                 --}}
+                <div class="flex items-center justify-between mt1 mb1 " >
                 <h3 class="text-2xl font-bold  mt1 mb1">{{ $parcoursItem['parcours']['libelle_long'] }}</h3>
+                <div class="flex items-center space-x-2">
+
+                        {{-- Bouton AValiderProposition --}}
+                        @if(!empty($selectedItems['aValiderPropos']))
+                        <x-filament::button wire:click="$dispatch('open-modal', { id: 'aValiderModal' })" 
+                        id="openAValiderModal" color="info" 
+                        data-modal-target="aValiderModal"
+                        >Voir les Propositions</x-filament::button>
+                        @endif
+
+                        {{-- Bouton Restore --}}
+                        <x-filament::icon-button
+                        icon="heroicon-m-arrow-uturn-left"
+                        tooltip="Restore Data"
+                        color="warning"
+                        size="lg"
+                        wire:click="$dispatch('open-modal', { id: 'restoreModal' })"
+                        class="mr1"
+                        />
+
+                        {{-- Bouton Reboot --}}
+                        <x-filament::icon-button
+                        icon="heroicon-m-arrow-path"
+                        tooltip="Reboot Data"
+                        size="lg"
+                        color="danger"
+                        wire:click="$dispatch('open-modal', { id: 'rebootModal' })"
+                        />
 
 
-                
-            
+
+
+                    </div>
+                </div>
+                    
                 <ul>
                     @foreach ($parcoursItem['parcours']['fonctions'] as $fonction)
-                        <li>
-
-                            <!-- Partie Fonction -->
-
-                            @include('fcmcentral::filament.fcmcentral.livewire.parcours.layouts.parcours-details-validation-ligne',[
-                                'parcoursId'    => $parcoursItem['id'],
-                                'type'          => "fonctions",
-                                'id'            => $fonction['id'],
-                                'label'         => 'Fonction : '.$fonction['libelle_long'],
-                                'libelleLong'   => $fonction['libelle_long'],
-                                'libelleCourt'  => $fonction['libelle_court'],
-                                'etatValid'     => $fonction['etat_valid'],
-                                'dateValidation'=> $fonction['date_validation'],
-                                'dateProposition'=> $fonction['date_proposition'],
-                                'valideur'      => $fonction['valideur'],
-                                'commentaire'   => $fonction['commentaire'],
-                                'commentaireProposition'   => $fonction['commentaire_proposition'],
-                                'finDeCourse'   => (empty($fonction['competences'])?true:false),
-                                'infos'         => [],
-                                
-
-                                
-                         ])
-
-                        
-                         
-                            <!-- Fin Partie Fonction -->  
-
-                    
-                          
-            
-                            <!-- Boucle pour les compétences -->
-                            @if (!empty($fonction['competences']))
-                            <ul class="collapsible  ml2 mb1 " style="display:{{ isset($openSections['fonctions_'.$fonction['id']])?'block':'none' }}">
-                                
-                                    @foreach ($fonction['competences'] as $competence)
-                                    <li>
-
-                                        
-                                            <!-- Partie Competence -->
-
-                                            @include('fcmcentral::filament.fcmcentral.livewire.parcours.layouts.parcours-details-validation-ligne',[
-                                                    'parcoursId'    => $parcoursItem['id'],
-                                                    'type'          => "competences",
-                                                    'id'            =>  $competence['id'],
-                                                    'label'         => 'Competence : '.$competence['libelle_long'],
-                                                    'libelleLong'   => $competence['libelle_long'],
-                                                    'libelleCourt'   => $competence['libelle_court'],
-                                                    'etatValid'     => $competence['etat_valid'],
-                                                    'dateValidation'=> $competence['date_validation'],
-                                                    'dateProposition'=> $competence['date_proposition'],
-                                                    'valideur'      => $competence['valideur'],
-                                                    'commentaire'   => $competence['commentaire'],
-                                                    'commentaireProposition'   => $competence['commentaire_proposition'],
-                                                    'finDeCourse'   => (empty($competence['savoirfaires'])?true:false),
-                                                    'infos'         => [],
-                                                    
-                                                      
-                                                    
-                                            ])
-
-                           
-                                        <!-- Fin Partie Competence -->  
-            
-                                            <!-- Boucle pour les savoir-faire -->
-                                            @if (!empty($competence['savoirfaires']))
-                                            <ul class="collapsible    highlight" style="display:{{ isset($openSections['competences_'.$competence['id']])?'block':'none' }}"> 
-                                                
-                                                    @foreach ($competence['savoirfaires'] as $savoirFaire)
-                                                    <li>
-
-
-
-                                                             <!-- Partie SavoirFaire -->
-
-                                                             @include('fcmcentral::filament.fcmcentral.livewire.parcours.layouts.parcours-details-validation-ligne',[
-                                                                'parcoursId'    => $parcoursItem['id'],
-                                                                'type'          => "savoirfaires",
-                                                                'id'            =>  $savoirFaire['id'],
-                                                                'label'         => 'Savoir Faire : '.$savoirFaire['libelle_long'],
-                                                                'libelleLong'   => $savoirFaire['libelle_long'],
-                                                                'libelleCourt'   => $savoirFaire['libelle_court'],
-                                                                'etatValid'     => $savoirFaire['etat_valid'],
-                                                                'dateValidation'=> $savoirFaire['date_validation'],
-                                                                'dateProposition'=> $savoirFaire['date_proposition'],
-                                                                'valideur'      => $savoirFaire['valideur'],
-                                                                'commentaire'   => $savoirFaire['commentaire'],
-                                                                'commentaireProposition'   => $savoirFaire['commentaire_proposition'],
-                                                                'finDeCourse'   => (empty($savoirFaire['activites'])?true:false),
-                                                                'infos'         => ['coeff'=>$savoirFaire['coeff'],'duree'=>$savoirFaire['duree'],],
-                                                                
-                                                      
-                                                    
-
-                                                                
-                                                        ])
-                            
-                                                                <!-- Fin Partie SavoirFaire -->  
-
-
-            
-                                                            <!-- Boucle pour les activités -->
-                                                            @if (!empty($savoirFaire['activites']))
-                                                            {{-- <ul class="collapsible  ml2 mb1" style="display:{{ isset($openSections['savoirfaires_'.$savoirFaire['id']])?'block':'none' }}"> --}}
-                                                                <ul class="collapsible  ml2 mb1" >
-                                                                    @foreach ($savoirFaire['activites'] as $activite)
-                                                                        <li>
-                                                                           
-                                                                            
-                                                                             <!-- Partie Activite -->
-
-                                                                             @include('fcmcentral::filament.fcmcentral.livewire.parcours.layouts.parcours-details-validation-ligne',[
-                                                                'parcoursId'    => $parcoursItem['id'],
-                                                                'type'          => "activites",
-                                                                'id'            =>  $activite['id'],
-                                                                'label'         => 'Activite : '.$activite['libelle_long'],
-                                                                'libelleLong'   => $activite['libelle_long'],
-                                                                'libelleCourt'   => $activite['libelle_court'],
-                                                                'etatValid'     => $activite['etat_valid'],
-                                                                'dateValidation'=> $activite['date_validation'],
-                                                                'dateProposition'=> $activite['date_proposition'],
-                                                                'valideur'      => $activite['valideur'],
-                                                                'commentaire'   => $activite['commentaire'],
-                                                                'commentaireProposition'   => $activite['commentaire_proposition'],
-                                                                'finDeCourse'   => true,
-                                                                'infos'         => ['coeff'=>$activite['pivot']['coeff'],'duree'=>$activite['pivot']['duree'],],
-                                                                
-                                                                
-                                                        ])
-                                                                                    
-                                                                            <!-- Fin Partie SavoirFaire -->  
-
-
-                                                                        </li>
-                                                                    @endforeach
-                                                                
-                                                            </ul>
-                                                            @endif
-                                                        </li>
-                                                    @endforeach
-                                                
-                                            </ul>
-                                            @endif
-                                        </li>
-                                    @endforeach
-                                
-                            </ul>
-                            @endif
-                        </li>
+                        @include('fcmcentral::filament.fcmcentral.livewire.parcours.layouts.parcoursDetailsValidation.fonction', [
+                            'parcoursId' => $parcoursItem['id'],
+                            'fonction' => $fonction,
+                            'openSections' => $openSections,
+                        ])
                     @endforeach
                 </ul>
-
-            
-
-
-
-
-
-
-
-
                 
             @endforeach
 
@@ -201,141 +76,23 @@
             {{ json_encode($selectedItems , JSON_PRETTY_PRINT)}}
            
         </pre>
-    </div> --}}
+    </div>  --}}
     
-    <!-- Modal de commentaire 
-    // slide-over  a gauche
-    -->
+  
  
     <!-- Modal Sauve -->
-<x-filament::modal 
-id="sauve" 
-alignment="center" 
-width="3xl"
-icon="heroicon-o-information-circle"
->
-    
-    <x-slot name="heading">
-        <h2 class="text-lg font-bold">Ajouter un commentaire</h2>
-    </x-slot>
-    <x-slot name="description">
-    <textarea wire:model="comment" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 "></textarea>
-</x-slot>
-    <x-slot name="footer">
-        <x-filament::button color="gray" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" wire:click="$dispatch('close-modal',{id:'sauve'})">Annuler</x-filament::button>
-        <x-filament::button color="success" class="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700" wire:click="save('valid')">Valider</x-filament::button>
-    </x-slot>
-</x-filament::modal>
+    @include('fcmcentral::filament.fcmcentral.livewire.parcours.layouts.parcoursDetailsValidation.modal')
 
 
- <!-- Modal Annul -->
- <x-filament::modal
- id="annul"
- alignment="center"
- width="3xl"
- icon="heroicon-o-x-circle"
->
- <x-slot name="heading">
-     <h2 class="text-lg font-bold">Confirmer la désactivation</h2>
- </x-slot>
- <x-slot name="description">
-     <p class="p-8">Voulez-vous vraiment désactiver cette option ?</p>
-     <textarea
-         wire:model="comment"
-         class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-primary-500  "
-         placeholder="Ajoutez un commentaire (facultatif)"
-     ></textarea>
- </x-slot>
- <x-slot name="footer">
-     <x-filament::button wire:click="$dispatch('close-modal', { id: 'annul' })" color="secondary">Annuler</x-filament::button>
-     <x-filament::button wire:click="save('annul')" color="danger">Confirmer</x-filament::button>
- </x-slot>
-</x-filament::modal>
+    @push('styles')
+    @include('fcmcentral::filament.fcmcentral.livewire.parcours.layouts.parcoursDetailsValidation.styles')
+    @endpush
 
+    @push('scripts')
+    @include('fcmcentral::filament.fcmcentral.livewire.parcours.layouts.parcoursDetailsValidation.scripts')
+    @endpush
+   
 
-
-<!-- Modal Propos -->
-<x-filament::modal
-id="propos"
-alignment="center"
-width="3xl"
-icon="heroicon-o-x-circle"
->
-<x-slot name="heading">
-    <h2 class="text-lg font-bold">Confirmer la Proposition</h2>
-</x-slot>
-<x-slot name="description">
-    <p class="p-8">Vous souhaitez proposer a votre mentor ces validations</p>
-    <textarea
-        wire:model="comment"
-        class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-primary-500  "
-        placeholder="Ajoutez un commentaire (facultatif)"
-    ></textarea>
-</x-slot>
-<x-slot name="footer">
-    <x-filament::button wire:click="$dispatch('close-modal', { id: 'propos' })" color="secondary">Annuler</x-filament::button>
-    <x-filament::button wire:click="save('propos')" color="success">Confirmer</x-filament::button>
-</x-slot>
-</x-filament::modal>
-
-
-<!-- Modal Infos -->
-<x-filament::modal
-id="infosModal"
-alignment="center"
-width="lg"
-icon="heroicon-o-information-circle"
->
-<x-slot name="heading">
-    <h2 class="text-lg font-bold">Informations</h2>
-</x-slot>
-<x-slot name="description">
-    <p><strong>Type :</strong> {{ $popupData['type'] ?? 'Non disponible' }}</p>
-    <p><strong>ID :</strong> {{ $popupData['id'] ?? 'Non disponible' }}</p>
-    <p><strong>Titre :</strong> {{ $popupData['libelleCourt'] ?? 'Non disponible' }}</p>
-    <p><strong>Description :</strong> {{ $popupData['libelleLong'] ?? 'Non disponible' }}</p>
-    <p><strong>Durée :</strong> {{ $popupData['duree'] ?? 'Non disponible' }}</p>
-    <p><strong>Date de validation :</strong> {{ $popupData['dateValidation'] ?? 'Non disponible' }}</p>
-    <p><strong>Validé par :</strong> {{ $popupData['valideur'] ?? 'Pas encore valide' }}</p>
-    <p><strong>Commentaire :</strong> {{ $popupData['commentaire'] ?? 'Aucun commentaire' }}</p>
-</x-slot>
-<x-slot name="footer">
-    <x-filament::button wire:click="$dispatch('close-modal', { id: 'infosModal' })" color="secondary">Fermer</x-filament::button>
-</x-slot>
-</x-filament::modal>
-
-
-
-
-
-    <style>
-        .collapsible {
-            transition: all 0.3s ease-in-out;
-            
-        }
-
-
-        .highlight {
-    border: 2px solid #f0f8ff; /* Bordure bleue */
-    
-    transition: all 0.3s ease-in-out; /* Transition fluide */
-    padding: 25px;
-    border-radius: 10px;
-}
-
-
-        .mt1{margin-top:15px;}
-        .mb1{margin-bottom:25px;}
-        .mr1{margin-right:10px;}
-        .ml2{margin-left:30px;}
-        .ml1{margin-left:15px;}
-
-    </style>
-
-
-
-
-  
 
     
 </x-filament::card>
