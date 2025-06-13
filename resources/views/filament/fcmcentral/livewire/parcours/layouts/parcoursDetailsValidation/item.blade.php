@@ -17,6 +17,11 @@
 
    
    $duree = (($type === 'activites')||($type === 'savoirfaires') ? $infos['coeff'] :'');
+
+   // Auth 
+   $user = auth()->user();
+   $isSuperAdmin = $user->hasRole('admin');
+   $isUser = $user->hasRole('user');
    
 
 
@@ -68,49 +73,52 @@
                         icon="heroicon-o-check-circle"
                         tooltip="Tout cocher"
                         wire:click="toggleCheck('{{$type}}', {{$id}});"
-                       
-                      
                     />
 
                 @endif
                 {{-- Fin boucle etat --}}
 
                 @if(($type === 'activites')||($type === 'savoirfaires'))
-                @if (!$isProposChecked)
-                <x-filament::icon-button
-                size="lg"
-                color="gray"
-                icon="heroicon-c-document-plus"
-                tooltip="Proposition"
-                wire:click="proposModal('{{$type}}', {{$id}})"
-            /> @else
-            <x-filament::icon-button
-            size="lg"
-            color="success"
-            icon="heroicon-c-document-plus"
-            tooltip="Proposition le {{$dateProposition }} : {{$commentaireProposition}}"
-            />
-            @endif
-            @endif
+                    @if (!$isProposChecked)
+                        @if ($isUser)
+                            <x-filament::icon-button
+                                size="lg"
+                                color="gray"
+                                icon="heroicon-c-document-plus"
+                                tooltip="Proposition"
+                                wire:click="proposModal('{{$type}}', {{$id}})"
+                            /> 
+                        @else
+                            
+                        @endif
+                    @else
+                        <x-filament::icon-button
+                            size="lg"
+                            color="success"
+                            icon="heroicon-c-document-plus"
+                            tooltip="Proposition le {{$dateProposition }} : {{$commentaireProposition}}"
+                        />
+                    @endif
+                @endif
                 
             @else
             
-            <x-filament::icon-button
-            size="lg"
-            color="success"
-            icon="heroicon-c-shield-check"
-            tooltip="Validation le {{$dateValidation }} par {{$valideur}}"
-            class="tree-checkbox"
-           
-        />
+                <x-filament::icon-button
+                    size="lg"
+                    color="success"
+                    icon="heroicon-c-shield-check"
+                    tooltip="Validation le {{$dateValidation }} par {{$valideur}}"
+                    class="tree-checkbox"
+                />
+
         @if(($type === 'activites')||($type === 'savoirfaires'))
-        <x-filament::icon-button
-                size="lg"
-                color="warning"
-                icon="heroicon-s-x-circle"
-                tooltip="Décochez"
-                wire:click="annulModal('{{$type}}', {{$id}})"
-            />
+                <x-filament::icon-button
+                    size="lg"
+                    color="warning"
+                    icon="heroicon-s-x-circle"
+                    tooltip="Décochez"
+                    wire:click="annulModal('{{$type}}', {{$id}})"
+                />
 
            
 

@@ -35,6 +35,10 @@ class Savoirfaire extends Model
         "domaine_id",
     ];
     
+    protected $casts =[
+        'data' => 'array',
+    ];
+    
     protected static function newFactory(): SavoirfaireFactory
     {
         return Savoirfairefactory::new();
@@ -48,7 +52,7 @@ class Savoirfaire extends Model
 
     public function activites(): BelongsToMany
     {
-        return $this->belongsToMany(Activite::class, 'fcmcentral_activite_savoirfaire', 'activite_id',  'savoirfaire_id')
+        return $this->belongsToMany(Activite::class, 'fcmcentral_activite_savoirfaire', 'savoirfaire_id',  'activite_id')
                 ->withPivot('coeff', 'duree', 'ordre','data')
                 ->withTimestamps();
     }

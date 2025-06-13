@@ -29,6 +29,10 @@ class Activite extends Model
                             "duree_validite", 
                             "prerequis", 
                             "type_activite"];
+                            
+    protected $casts =[
+                                'data' => 'array',
+                            ];
     
     protected static function newFactory(): ActiviteFactory
     {

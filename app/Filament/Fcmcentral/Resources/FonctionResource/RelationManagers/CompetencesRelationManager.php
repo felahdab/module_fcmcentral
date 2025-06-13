@@ -9,6 +9,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Modules\FcmCentral\Models\Competence;
+use Filament\Forms\Components\Select;
 
 class CompetencesRelationManager extends RelationManager
 {
@@ -18,12 +20,12 @@ class CompetencesRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('libelle_court')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('libelle_long')
-                        ->required()
-                        ->maxLength(255),
+                Select ::make('recordId')
+                ->label('Fonction')
+                ->otpions(Competence::all()->pluck('libelle_long','id'))
+                ->searchable()
+                ->required()
+                ->disabled(fn ($context): bool => $context === 'edit'),
             ]);
     }
 
@@ -39,18 +41,18 @@ class CompetencesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                //Tables\Actions\CreateAction::make(),
                 Tables\Actions\AttachAction::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                //Tables\Actions\EditAction::make(),
                 Tables\Actions\DetachAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                //Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DetachBulkAction::make(),
-                    Tables\Actions\DeleteBulkAction::make(),
+                    //Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

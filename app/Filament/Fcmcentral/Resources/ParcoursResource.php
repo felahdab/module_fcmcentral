@@ -27,6 +27,10 @@ use Modules\FcmCommun\Services\EventTypeService;
 use Modules\FcmCentral\Traits\HasTablePrefix;
 use Modules\FcmCommun\Services\EventTriggerService;
 
+use Filament\Tables\Columns\TextColumn;
+
+
+
 class ParcoursResource extends Resource
 {
 
@@ -44,10 +48,10 @@ class ParcoursResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('libelle_long')
+                TextInput::make('libelle_long')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('libelle_court')
+                TextInput::make('libelle_court')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -57,19 +61,19 @@ class ParcoursResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+               TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('libelle_long')
+                TextColumn::make('libelle_long')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('libelle_court')
+                TextColumn::make('libelle_court')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

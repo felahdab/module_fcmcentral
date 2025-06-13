@@ -10,10 +10,14 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\FonctionResource\RelationManagers\CompetencesRelationManager;
+
 
 
 class FonctionResource extends Resource
@@ -30,12 +34,16 @@ class FonctionResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('libelle_long')
+                TextInput::make('libelle_long')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('libelle_court')
+                TextInput::make('libelle_court')
                     ->required()
                     ->maxLength(255),
+                TextInput::make('url')
+                    ->label('Lien Url')
+                   
+                    ->maxLength(255),    
             ]);
     }
 
@@ -43,19 +51,19 @@ class FonctionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+               TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('libelle_long')
+               TextColumn::make('libelle_long')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('libelle_court')
+                TextColumn::make('libelle_court')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+               TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

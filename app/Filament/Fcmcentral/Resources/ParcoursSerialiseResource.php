@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\FcmCentral\Http\Livewire\ParcoursDetails;
 use Filament\Forms\Components\Placeholder;
 
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\RelationManagers\FcmMarinsRelationManager;
+
 class ParcoursSerialiseResource extends Resource
 {
     protected static ?string $model = ParcoursSerialise::class;
@@ -114,7 +116,7 @@ class ParcoursSerialiseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            FcmMarinsRelationManager::class
         ];
     }
 

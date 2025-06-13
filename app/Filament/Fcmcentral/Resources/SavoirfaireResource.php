@@ -12,6 +12,10 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Modules\FcmCentral\Models\Domaine;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\ActivitesRelationManager;
 
@@ -30,12 +34,39 @@ class SavoirfaireResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('libelle_long')
+                TextInput::make('libelle_long')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('libelle_court')
+                TextInput::make('libelle_court')
                     ->required()
                     ->maxLength(255),
+                TextInput::make('url')
+                    ->label('Lien Url')
+                    ->maxLength(255), 
+                TextInput::make('code_sicomp')
+                    ->label('Code Sicomp')
+                    ->maxLength(255),  
+                    Select::make('domaine')
+                    ->label('Domaine')
+                    ->options(Domaine::all()->pluck('libelle_court','id')),                    
+                TextInput::make('coeff')
+                    ->label('Coefficient')
+                    ->maxLength(255), 
+                TextInput::make('duree')
+                    ->label('Durée')
+                    ->maxLength(255),    
+                TextInput::make('an_acquis')
+                    ->label('Durée')
+                    ->maxLength(255), 
+                    TextInput::make('ordre')
+                    ->label('Ordre')
+                    ->maxLength(255),        
+                   Select::make('mod_acquis')
+                    ->label('Mod Acquis')
+                    ->options([
+                        'OUI' => 'Oui',
+                        'NON' => 'Non',
+                    ]),                         
             ]);
     }
 
@@ -43,19 +74,19 @@ class SavoirfaireResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('libelle_long')
+               TextColumn::make('libelle_long')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('libelle_court')
+                TextColumn::make('libelle_court')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+               TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

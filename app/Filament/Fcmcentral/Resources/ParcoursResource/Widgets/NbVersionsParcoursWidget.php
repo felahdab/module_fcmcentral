@@ -17,14 +17,16 @@ class NbVersionsParcoursWidget extends BaseWidget
 
     protected function getStats(): array
     {
-        $parcoursserialises = ParcoursSerialise::where('uuid', $this->record->id)->get();
-        $nbversions=$parcoursserialises->count();
+        $parcoursSerialises = ParcoursSerialise::where('parcours_id', $this->record->id)->get();
+        $nbversions=$parcoursSerialises->count();
+       
         
-        $nbmarins=MarinParcours::whereIn('parcours_id', $parcoursserialises->pluck('id'))->count();
+        $nbmarins=MarinParcours::whereIn('parcoursserialise_id', $parcoursSerialises->pluck('id'))->count();
+       
 
         return [
             Stat::make('Nombre de versions figées de ce parcours', $nbversions),
-            Stat::make('Nombre de marins ayant ce parcours attribué', $nbmarins),
+           Stat::make('Nombre de marins ayant ce parcours attribué', $nbmarins),
         ];
     }
 }
