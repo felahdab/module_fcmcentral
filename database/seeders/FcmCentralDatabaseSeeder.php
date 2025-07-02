@@ -14,7 +14,7 @@ class FcmCentralDatabaseSeeder extends Seeder
     {
         $this->call([
             SettingSeeder::class,
-            //FcmSeeder::class,
+            FcmSeeder::class,
             DeasmMasterSeeder::class,
             
         ]);

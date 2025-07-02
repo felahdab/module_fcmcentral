@@ -1,21 +1,22 @@
 <?php
-
+ 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
-
+ 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
-
+ 
 use Filament\Resources\Pages\ViewRecord;
+ 
 
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Placeholder;
-use Modules\FcmCentral\Http\Livewire\LivretFcm as LivretFcm;
-
-
-
+use Modules\FcmCommun\Http\Livewire\LivretFcm as LivretFcm;
+use Modules\FcmCommun\Http\Livewire\FilamentSpeedTest;
+use Modules\FcmCentral\Models\FcmMarin;
+use Illuminate\Support\Facades\Log;
+ 
 class LivretDeFcm extends ViewRecord
 {
     protected static string $resource = MarinResource::class;
@@ -29,7 +30,7 @@ class LivretDeFcm extends ViewRecord
     {
         return $form
         ->schema([
-            Section::make('Informations sur le marin')
+            Section::make('Informations sur le marin ')
                 ->schema([
                     Grid::make(2)
                     ->schema([
@@ -39,25 +40,58 @@ class LivretDeFcm extends ViewRecord
                         
                     ]),
                 ]),
-
+ 
                 
             Section::make('Livret de FCM')
                 ->schema([    
-                    //Livewire::make(LivretDeTransformationLivewire::class, ["uuid" => "2bb1800f-c247-434b-abef-4eab4cff0836"]),
-                    Livewire::make(LivretFcm::class, ["fcmMarinId" => $this->record->complements_fcm->id,"tablePrefix" => 'fcmcentral_']),
-                    // Placeholder::make('livret_fcm')
-                    // ->content(fn ($record) => view('fcmcentral::filament.fcmcentral.livewire.parcours.parcours-details-validation',[
-                    //     //'parcours' =>json_decode($record?->parcours ?? '{}', true),
-                    //     'fcmMarinId' =>$record->id ,
-                    // ])),
+                   // Livewire::make(FilamentSpeedTest::class),
+                    // DONNÉES PRÉ-CHARGÉES OBLIGATOIRES
+                    Livewire::make(LivretFcm::class, [
+                        "fcmMarinId" => $this->record->complements_fcm->id,
+                        "tablePrefix" => 'fcmcentral_',
+                        "parcoursMarin" => $this->getParcoursMarin($this->record->complements_fcm->id),
+                    ]),
                 ])
             ]);    
     }
-
+ 
     protected function getFooterWidgets(): array
     {
+        return [];
+    }
+ 
+    /**
+     *  CHARGEMENT OPTIMISÉ DES DONNÉES PARCOURS
+     * Une seule requête pour tout charger
+     */
+    protected function getParcoursMarin(int $fcmMarinId)
+    {
+        $startTime = microtime(true);
+        
+        //  REQUÊTE OPTIMISÉE - TOUS LES CHAMPS NÉCESSAIRES EN UNE FOIS
+        $fcmMarin = FcmMarin::select([
+            'id',
+            'rh_marin_id',
+        ])
+        ->with([
+            'parcoursSerialises:id,libelle_court,uuid',
+            //'parcoursSerialises.pivot:fcmmarin_id,parcoursserialise_id,parcoursmarin,taux_global,taux_stage,taux_activite',
+            'marin:id,uuid,nom,prenom'
+        ])
+        ->find($fcmMarinId);
+ 
+        $loadTime = round((microtime(true) - $startTime) * 1000, 2);
+        Log::info("Données parcours chargées en: {$loadTime}ms pour marin: {$fcmMarinId}");
+ 
+        if (!$fcmMarin) {
+            Log::error("Marin FCM non trouvé: {$fcmMarinId}");
+            return null;
+        }
+ 
+        //  RETOURNER DONNÉES STRUCTURÉES POUR LIVEWIRE
         return [
-            //LivretDeTransformationWidget::class
+            'fcmMarin' => $fcmMarin,
+            'parcoursSerialises' => $fcmMarin->parcoursSerialises,
         ];
     }
 }

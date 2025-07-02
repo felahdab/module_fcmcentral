@@ -201,9 +201,20 @@ class MarinResource extends Resource
                     ->button()
                     ->color('warning')
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm && $record->complements_fcm;
+                        
+                        return $record->suiviEnFcm && 
+                                $record->complements_fcm && 
+                                $record->complements_fcm->parcoursSerialises()->exists();
                     })
-                    ->url(fn ($record): string => MarinResource::getUrl('livret-de-fcm', ['record' => $record->id])),
+                    //->url(fn ($record): string => MarinResource::getUrl('livret-de-fcm', ['record' => $record->id])),
+                    ->action(function ($record){
+                        // Recupere le premier parcours Sérialisés
+                        $fcmMarinId = $record->complements_fcm->id;
+                        
+                        $url = static::getUrl('livret-de-fcm',['record' => $fcmMarinId]);
+                        return redirect($url);
+                       
+                    }),
 
                 Tables\Actions\Action::make("ne_plus_suivre_en_fcm")
                     ->label("Ne plus suivre en FCM")
@@ -265,9 +276,12 @@ class MarinResource extends Resource
                             ->required(),
                     ])
                     // Pour enlever le bouton si il exist dans MarinParcours
-                    // ->visible(function (FcmMarin $record){
-                    //     return !$record->parcoursSerialises()->exists();
-                    // })
+                    ->visible(function ($record) {
+                        
+                        return $record->suiviEnFcm && 
+                                $record->complements_fcm && 
+                                !$record->complements_fcm->parcoursSerialises()->exists();
+                    })
                     ->action(function ($record, $data) {
 
                          $eventdata  = [

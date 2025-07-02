@@ -181,8 +181,8 @@ class FcmMarinsRelationManager extends RelationManager
                         // Mettre à jour les données
                         $pivotData->parcoursmarin = json_encode($parcoursMarin);
                         $pivotData->taux_global = $parcoursMarin['taux_global'] ?? 0;
-                        $pivotData->taux_stage = $parcoursMarin['taux_stages'] ?? 0;
-                        $pivotData->taux_activite = $parcoursMarin['taux_activites'] ?? 0;
+                        $pivotData->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
+                        $pivotData->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
                         $pivotData->save();
 
                         $success++;
@@ -238,8 +238,8 @@ class FcmMarinsRelationManager extends RelationManager
             if ($calculTauxService->mettreAJourTauxDansJson($parcoursMarin)) {
                 $pivotData->parcoursmarin = json_encode($parcoursMarin);
                 $pivotData->taux_global = $parcoursMarin['taux_global'] ?? 0;
-                $pivotData->taux_stage = $parcoursMarin['taux_stages'] ?? 0;
-                $pivotData->taux_activite = $parcoursMarin['taux_activites'] ?? 0;
+                $pivotData->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
+                $pivotData->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
                 $pivotData->save();
 
                 Notification::make()
@@ -279,8 +279,8 @@ class FcmMarinsRelationManager extends RelationManager
                 if ($calculTauxService->mettreAJourTauxDansJson($parcoursMarin)) {
                     $pivotData->parcoursmarin = json_encode($parcoursMarin);
                     $pivotData->taux_global = $parcoursMarin['taux_global'] ?? 0;
-                    $pivotData->taux_stage = $parcoursMarin['taux_stages'] ?? 0;
-                    $pivotData->taux_activite = $parcoursMarin['taux_activites'] ?? 0;
+                    $pivotData->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
+                    $pivotData->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
                     $pivotData->save();
                     $success++;
                 } else {
