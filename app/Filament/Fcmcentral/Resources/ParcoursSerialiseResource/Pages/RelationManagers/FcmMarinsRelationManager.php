@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\RelationManagers;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Form;

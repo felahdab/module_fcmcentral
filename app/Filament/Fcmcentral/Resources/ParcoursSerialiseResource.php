@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\FcmCentral\Http\Livewire\ParcoursDetails;
 use Filament\Forms\Components\Placeholder;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\RelationManagers\FcmMarinsRelationManager;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages\RelationManagers\FcmMarinsRelationManager;
 
 class ParcoursSerialiseResource extends Resource
 {
