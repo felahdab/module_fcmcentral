@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 use Modules\FcmCentral\Database\Factories\SavoirfaireFactory;
+use Modules\FcmCentral\Models\ActiviteSavoirfairePivot;
 
 use Modules\FcmCentral\Traits\HasTablePrefix;
 
@@ -54,7 +55,8 @@ class Savoirfaire extends Model
     {
         return $this->belongsToMany(Activite::class, 'fcmcentral_activite_savoirfaire', 'savoirfaire_id',  'activite_id')
                 ->withPivot('coeff', 'duree', 'ordre','data')
-                ->withTimestamps();
+                ->withTimestamps()
+                ->using(ActiviteSavoirfairePivot::class);
     }
 
 }
