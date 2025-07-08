@@ -46,6 +46,12 @@ class Marin extends BaseMarin
     public function scopeCohorte(Builder $query, Cohorte $cohorte): void
     {
         $query->whereIn('id', FcmMarin::where('cohorte_id', $cohorte->id)->get()->pluck('rh_marin_id'));
+       // Optimisation requete
+    //    $query->whereIn('id', function($subQuery) use ($cohorte){
+    //         $subQuery->select('rh_marin_id')
+    //                     ->from('fcmcentral_fcm_marins')
+    //                     ->where('cohorte_id', $cohorte->id);
+    //    });
     }
 
     /**
@@ -76,6 +82,12 @@ class Marin extends BaseMarin
     public function scopeMentor(Builder $query)
     {
         $query->whereIn('id', FcmMarin::all()->pluck('mentor_id'));
+    //     $query->whereIn('id', function($subQuery) {
+    //         $subQuery->select('mentor_id')
+    //                     ->from('fcmcentral_fcm_marins')
+    //                     ->whereNotNull('mentor_id')
+    //                     ->distinct();
+    //    });
     }
 
 }

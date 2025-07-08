@@ -27,11 +27,11 @@ class Savoirfaire extends Model
         "libelle_court",
         "url",
         "code_sicomp",
-        "coeff",
-        "duree",
-        "an_acquie",
+        //"coeff",
+        //"duree",
+        //"an_acquie",
         "ordre",
-        "mod_acquis",
+        //"mod_acquis",
         "domaine_id",
     ];
     

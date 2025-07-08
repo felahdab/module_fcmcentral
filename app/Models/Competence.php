@@ -27,7 +27,7 @@ class Competence extends Model
         "libelle_long",
         "libelle_court",
         "url",
-        "same",
+        //"same",
     ];
     
     protected static function newFactory(): CompetenceFactory

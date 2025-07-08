@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\RelationManagers;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -18,7 +18,7 @@ use Filament\Notifications\Notification;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCommun\Services\CalculTauxParcoursService;
 
-class FcmMarinsRelationManager extends RelationManager
+class MarinsRelationManager extends RelationManager
 {
     protected static string $relationship = 'fcmMarins';
 

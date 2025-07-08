@@ -26,7 +26,7 @@ class ActivitesRelationManager extends RelationManager
         return $form
             ->schema([
                 Select ::make('recordId')
-                ->label('Activité')
+                ->label('Tâche ou stage')
                 ->otpions(Activite::all()->pluck('libelle_long','id'))
                 ->searchable()
                 ->required()
@@ -57,7 +57,8 @@ class ActivitesRelationManager extends RelationManager
                 ->label('Données JSON')
                 ->keyLabel('Clé')
                 ->valueLabel('Valeur')
-                ->reorderable(),
+                ->reorderable()
+                ->visible(auth()->user()->IsSuperAdmin()),
                     
             ]);
     }
@@ -68,7 +69,7 @@ class ActivitesRelationManager extends RelationManager
             ->recordTitleAttribute('libelle_long')
             ->columns([
                TextColumn::make('libelle_long')
-               ->label('Activité'),
+               ->label('Tache ou Stage'),
 
                TextColumn::make('pivot.coeff')
                ->label('Coefficient')
@@ -85,16 +86,10 @@ class ActivitesRelationManager extends RelationManager
                TextColumn::make('pivot.data')
                ->label('Données')
                ->limit(50)
-                ->formatStateUsing(function ($state){
-                    if (is_string($state)){
-                        $decoded = json_decode($state, true);
-                        return $decoded ? collect($decoded)->map(fn($v,$k)=> "$k: $v")->join(', ') : $state;
-                    }
-                    return is_array($state) ? collect($state)->map(fn($v,$k)=> "$k: $v")->join(', ') : '';
-                })
-                ->tooltip(function ($state){
-                    return is_string($state) ?  $state: json_encode($state, JSON_PRETTY_PRINT);
-                })
+               ->visible(auth()->user()->IsSuperAdmin())               
+               ->tooltip(function ($state){
+                   return is_string($state) ?  $state: json_encode($state, JSON_PRETTY_PRINT);
+               })
 
             ])
             ->filters([
@@ -121,14 +116,23 @@ class ActivitesRelationManager extends RelationManager
                     ->required()  ,  
 
                     KeyValue::make('data')
-                    ->label('Données JSON')
+                    ->label('Données')
                     ->keyLabel('Clé')
                     ->valueLabel('Valeur')
-                    ->reorderable(),
+                    ->reorderable()
+                    ->visible(auth()->user()->IsSuperAdmin())
                 ])
                 ,
             ])
             ->actions([
+                Tables\Actions\ViewAction::make()
+                ->iconButton()
+                ->icon('heroicon-m-eye')
+                ->modalHeading('Détail')
+                ->extraAttributes([
+                    'title' => 'Consulter',
+                    'class' => 'btn-consult',
+                    ]),
                 Tables\Actions\EditAction::make()
                 ->form([
                     TextInput::make('coeff')
@@ -148,12 +152,17 @@ class ActivitesRelationManager extends RelationManager
                     ->required()  ,  
 
                     KeyValue::make('data')
-                    ->label('Données JSON')
+                    ->label('Données')
                     ->keyLabel('Clé')
                     ->valueLabel('Valeur')
                     ->reorderable(),
                 ]),
-                Tables\Actions\DetachAction::make(),
+                Tables\Actions\DetachAction::make()
+                ->iconButton()
+                ->icon('heroicon-m-arrow-top-right-on-square')
+                ->extraAttributes([
+                    'title' => 'Détacher',
+                    ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

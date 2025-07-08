@@ -3,7 +3,7 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\RelationManagers;
+
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\FcmCentral\Http\Livewire\ParcoursDetails;
 use Filament\Forms\Components\Placeholder;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\RelationManagers\FcmMarinsRelationManager;
+use Modules\FcmCentral\Filament\fcmcentral\Resources\ParcoursResource\RelationManagers\MarinsRelationManager;
 
 class ParcoursSerialiseResource extends Resource
 {
@@ -116,7 +116,7 @@ class ParcoursSerialiseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            FcmMarinsRelationManager::class
+            MarinsRelationManager::class,
         ];
     }
 
