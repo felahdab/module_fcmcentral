@@ -39,8 +39,8 @@ class SavoirfaireFactory extends Factory
             "libelle_long"  => $liblong,
             "url" => fake()->url(),
             "uuid"          =>  $this->faker->uuid,
-            "code_sicomp"   => "code SICOMP",
-            "mod_acquis"   => $this->faker->randomElement(['OUI','NON']),
+            //"code_sicomp"   => "code SICOMP",
+            //"mod_acquis"   => $this->faker->randomElement(['OUI','NON']),
             "ordre"         => $this->faker->numberBetween(0,10),
             
            // "niveau" => "M"

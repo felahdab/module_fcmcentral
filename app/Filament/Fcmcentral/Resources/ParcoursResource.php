@@ -138,7 +138,7 @@ class ParcoursResource extends Resource
                     $data['marinUuid'] = null;
                     //$prefix = (new static())->getTablePrefix();
 
-                   
+                  
                     
                     // Utiliser le service pour déclencher l'événement
                     EventTriggerService::triggerEvent($data, $record);
