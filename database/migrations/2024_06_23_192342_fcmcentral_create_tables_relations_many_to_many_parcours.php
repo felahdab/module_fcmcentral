@@ -17,6 +17,7 @@ return new class extends Migration
 			//$table->foreignUuid('fonction_id')->references('id')->on('fcmcentral_fonctions');
             $table->foreignId('parcours_id')->constrained('fcmcentral_parcours');
 			$table->foreignId('fonction_id')->constrained('fcmcentral_fonctions');
+            $table->integer('ordre')->default(0);
             $table->timestamps();
         });
 
@@ -24,6 +25,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('fonction_id')->constrained('fcmcentral_fonctions');
             $table->foreignId('competence_id')->constrained('fcmcentral_competences');
+            $table->integer('ordre')->default(0);
+            $table->string('same')->nullable();
 
             $table->timestamps();
         });
@@ -32,6 +35,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('competence_id')->constrained('fcmcentral_competences');
             $table->foreignId('savoirfaire_id')->constrained('fcmcentral_savoirfaires');
+            $table->integer('ordre')->default(0);
+
+            $table->decimal('coeff', 5, 2)->default(0);
+            $table->string('duree')->nullable();
+            $table->string('an_acquis')->nullable();
+            $table->string('mod_acquis')->nullable();
 
             $table->timestamps();
         });

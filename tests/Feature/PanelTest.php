@@ -14,7 +14,10 @@ use App\Models\Setting;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\Configuration;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources;
- 
+
+use Modules\FcmCentral\Models;
+
+
 uses(RefreshDatabase::class);
 uses(Tests\TestCase::class);
 
@@ -76,4 +79,22 @@ it('shows cohorte list', function() {
     Livewire::actingAs($this->admin)
         ->test(Resources\CohorteResource\Pages\ListCohortes::class)
         ->assertSee('Cohortes');
+});
+
+it('has factories for all models', function(){
+    Models\Activite::factory()->create();
+    $this->assertTrue(Models\Activite::all()->count() == 1);
+
+    Models\Competence::factory()->create();
+    $this->assertTrue(Models\Competence::all()->count() == 1);
+
+    Models\Fonction::factory()->create();
+    $this->assertTrue(Models\Fonction::all()->count() == 1);
+
+    Models\Parcours::factory()->create();
+    $this->assertTrue(Models\Parcours::all()->count() == 1);
+
+    Models\Savoirfaire::factory()->create();
+    $this->assertTrue(Models\Savoirfaire::all()->count() == 1);
+
 });

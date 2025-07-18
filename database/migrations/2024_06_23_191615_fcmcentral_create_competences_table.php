@@ -30,7 +30,6 @@ return new class extends Migration
             $table->string('libelle_long');
             $table->string('libelle_court');
             $table->string('url')->nullable();
-            $table->string('same')->nullable();
             $table->tinyInteger('ordre')->default(0);
             $table->timestamps();
         });
