@@ -1,21 +1,21 @@
 <?php
  
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
- 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
- 
-use Filament\Resources\Pages\ViewRecord;
- 
 
+use Illuminate\Support\Facades\Log;
+
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Placeholder;
+
 use Modules\FcmCommun\Http\Livewire\LivretFcm as LivretFcm;
 use Modules\FcmCommun\Http\Livewire\FilamentSpeedTest;
-use Modules\FcmCentral\Models\FcmMarin;
-use Illuminate\Support\Facades\Log;
+use Modules\FcmCentral\Models\cfv;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
  
 class LivretDeFcm extends ViewRecord
 {
@@ -50,6 +50,7 @@ class LivretDeFcm extends ViewRecord
                         "fcmMarinId" => $this->record->complements_fcm->id,
                         "tablePrefix" => 'fcmcentral_',
                         "parcoursMarin" => $this->getParcoursMarin($this->record->complements_fcm->id),
+                        "eventClass" => UserGeneratedEvent::class
                     ]),
                 ])
             ]);    
