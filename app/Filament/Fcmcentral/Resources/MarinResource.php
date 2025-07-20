@@ -293,7 +293,6 @@ class MarinResource extends Resource
                                     "parcours" =>  $data["parcours_id"],
                                 ]
                             );
-                            dump("ici");
                             event($event);
                         }
                     }),
