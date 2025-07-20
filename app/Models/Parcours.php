@@ -23,9 +23,6 @@ class Parcours extends Model
         'uuid',
         'libelle_long',
         'libelle_cours',
-        // 'version',
-        // 'parcours',
-        // 'date_debut',
     ];
 
     // protected $casts = [
@@ -52,6 +49,16 @@ class Parcours extends Model
 	{
 		return $this->hasMany(ParcoursSerialise::class, 'parcours_id', 'id');
 	}
+
+    public function getLatestSerializedVersion()
+    {
+        $last_version = $this->parcoursSerialise()->orderBy('version')->get()->last();
+        if ($last_version == null)
+        {
+            return 0;
+        }
+        return $last_version->version;
+    }
     
     
 }

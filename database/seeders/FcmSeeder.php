@@ -21,46 +21,46 @@ class FcmSeeder extends Seeder
     public function run()
     {
         // Creer 10 Activites (A))
-        $activites = Activite::factory()->count(10)->create();
+        $activites = Activite::factory()->count(2)->create();
 
         // Creer 10 Competences (C))
-        $competences = Competence::factory()->count(10)->create();
+        $competences = Competence::factory()->count(2)->create();
 
         // Creer 10 Fonctions (F)
-        $fonctions = Fonction::factory()->count(10)->create();
+        $fonctions = Fonction::factory()->count(2)->create();
 
         // Creer 10 Parcours (P)
-        $parcours = Parcours::factory()->count(10)->create();
+        $parcours = Parcours::factory()->count(2)->create();
 
         // Creer 10 Savoir Faire (SF)
-        $savoirfaires = Savoirfaire::factory()->count(10)->create();
+        $savoirfaires = Savoirfaire::factory()->count(2)->create();
 
 
         // Associer Many To Many F P
         $fonctions->each(function ($fonction) use ($parcours){
             $fonction->parcours()->attach(
-                $parcours->random(rand(2,5))->pluck('id')->toArray()
+                $parcours->random(rand(1,2))->pluck('id')->toArray()
             );
         });
 
         // Associer Many To Many C F
         $competences->each(function ($competence) use ($fonctions){
             $competence->fonctions()->attach(
-                $fonctions->random(rand(2,5))->pluck('id')->toArray()
+                $fonctions->random(rand(1,2))->pluck('id')->toArray()
             );
         });
 
         // Associer Many To Many SF C
         $savoirfaires->each(function ($savoirfaire) use ($competences){
             $savoirfaire->competences()->attach(
-                $competences->random(rand(2,5))->pluck('id')->toArray()
+                $competences->random(rand(1,2))->pluck('id')->toArray()
             );
         });
 
         // Associer Many To Many A SF
         $activites->each(function ($activite) use ($savoirfaires){
             $activite->savoirfaires()->attach(
-                $savoirfaires->random(rand(2,5))->pluck('id')->toArray(),
+                $savoirfaires->random(rand(1,2))->pluck('id')->toArray(),
                 [
                     'coeff' => rand(1,10),
                     'duree' => rand(10,120),

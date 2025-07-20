@@ -2,18 +2,22 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
+use Carbon\Carbon;
+
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 
 use Filament\Forms\Components\DatePicker;
-use Carbon\Carbon;
+use Filament\Forms\Components\TextInput;
 
-use Modules\FcmCommun\DataObjects\ParcoursDto;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Services\ParcoursService;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
+use Modules\FcmCentral\Models\ParcoursSerialise;
 
 class EditParcours extends EditRecord
 {
@@ -41,44 +45,32 @@ class EditParcours extends EditRecord
                 ->requiresConfirmation()
                 ->visible($this->authorizeUser())
                 ->form([
+                    TextInput::make('version')
+                        ->label('Version')
+                        ->numeric()
+                        ->required()
+                        ->disabled()
+                        ->dehydrated(),
                     DatePicker::make('date de debut')
-                    ->minDate(Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())))
+                        ->minDate(Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())))
                 ])
-                ->fillForm(function () use ($parcours_service){
+                ->fillForm(function ($record) use ($parcours_service){
                     return 
                     [
-                    'date de debut' => Carbon::now()->tomorrow()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())),
+                        'date de debut' => Carbon::now()->tomorrow()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())),
+                        'version' => $record->getLatestSerializedVersion() + 1,
                     ];
                 })
-                ->action(function (array $data) use ($parcours_service) {
-                    $parcours = $this->getRecord();
-                    $dto = ParcoursDto::from($parcours);
-                    $date_de_debut=new Carbon($data["date de debut"]);
-                    $newParcours = $parcours_service->serialize_parcours($dto, $date_de_debut);
-
-                    if ($newParcours == null)
-                    {
-                        Notification::make()
-                            ->title('Le figement du parcours a echoué.')
-                            ->warning()
-                            ->send();
-                        return;
-                    }
-                    Notification::make()
-                        ->title('Le figement du parcours a réussi.')
-                        ->success()
-                        ->body('Nouvelle version de ce parcours: ' . $newParcours->version)
-                        ->send();
+                ->action(function (array $data, $record) use ($parcours_service) {
 
                     $event = new UserGeneratedEvent(
-                        event_type: "parcours_fige",
-                        user_id: auth()->user()->uuid,
-                        object_class: "Parcours",
-                        object_uuid: $parcours->id,
-                        detail: [
-                            "version" => $newParcours->version,
-                            "date_debut" => $date_de_debut,
-                            "date_fin" => $newParcours->date_fin,
+                        UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+                        auth()->user()->uuid,
+                        ObjectClasses::PARCOURS,
+                        $record->uuid,
+                        [
+                            "date_de_debut" => $data["date de debut"], 
+                            "version"=> $data["version"], 
                         ]
                     );
 

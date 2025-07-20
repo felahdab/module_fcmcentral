@@ -2,40 +2,28 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers;
-use Modules\FcmCentral\Models\Parcours;
-use Filament\Forms;
+use Carbon\Carbon;
+
 use Filament\Forms\Form;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Textarea;
-use Illuminate\Validation\Rule;
-use Modules\FcmCentral\Events\SerializeParcoursEvent;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\FonctionsRelationManager;
-use Modules\FcmCentral\Models\ParcoursSerialise;
-
-use Modules\FcmCommun\Services\UserGeneratedEventService;
-use Modules\FcmCommun\Services\EventDataBuilderService;
-use Modules\FcmCommun\Services\EventTypeService;
-use Modules\FcmCentral\Traits\HasTablePrefix;
-use Modules\FcmCommun\Services\EventTriggerService;
-
 use Filament\Tables\Columns\TextColumn;
 
-
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Modules\FcmCentral\Services\ParcoursService;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\FonctionsRelationManager;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
+use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Models\Parcours;
 
 class ParcoursResource extends Resource
 {
-
-    use HasTablePrefix;
-
     protected static ?string $model = Parcours::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -59,6 +47,8 @@ class ParcoursResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $parcours_service = new ParcoursService();
+
         return $table
             ->columns([
                TextColumn::make('id')
@@ -85,70 +75,50 @@ class ParcoursResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
                 Action::make('serializeParcours')
-                ->label('Figer')
-                ->button()
-                ->color('success')
-                ->modalHeading('Figer le Parcours')
-                ->modalWidth('lg')
-                ->form([
-                    TextInput::make('version')
-                    ->label('Version')
-                    ->required()
-                    
-                    // va chercher dans ParcoursSerialize de FcmCentral , a etudier si FcmUnite
-                    ->default(function ($record){
-                        // Verification su un parcours existe
-                        if ($record){
-                            $maxVersion = ParcoursSerialise::where('parcours_id',$record->id)
-                                            ->max('version');
-                            // Incrementation
-                            return $maxVersion ? $maxVersion +1 : 1;
-                        }
-                        // Si aucun record
-                        return 1;
+                    ->label('Figer')
+                    ->button()
+                    ->color('success')
+                    ->modalHeading('Figer le Parcours')
+                    ->modalWidth('lg')
+                    ->form([
+                        TextInput::make('version')
+                            ->label('Version')
+                            ->numeric()
+                            ->required()
+                            ->disabled()
+                            ->dehydrated(),
+                        DatePicker::make('date de debut')
+                            ->label('Date')
+                            ->required()
+                            ->minDate(fn ($record) => Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($record))),
+                    ])
+                    ->fillForm(function ($record) use ($parcours_service){
+                        return 
+                        [
+                            'date de debut' => Carbon::now()->tomorrow()->max($parcours_service->firstPossibleNewVersionDate($record)),
+                            'version' => $record->getLatestSerializedVersion() + 1,
+                        ];
                     })
-                    ,
-                    DatePicker::make('date_debut')
-                    ->label('Date')
-                    ->required()
-                    ->default(today())
-                    //->minDate(today())
-                    ,
-                    TextInput::make('libelle_court')
-                    ->label('Libelle Court')
-                    ->default(function ($record){
-                        return $record->libelle_court;
+                    ->action(function ($record, $data){
+                        $event = new UserGeneratedEvent(
+                            UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+                            auth()->user()->uuid,
+                            ObjectClasses::PARCOURS,
+                            $record->uuid,
+                            [
+                                "date_de_debut" => $data["date de debut"], 
+                                "version"=> $data["version"], 
+                            ]
+                        );
+
+                        event($event);
                     })
-                    ->required(),
-                    Textarea::make('libelle_long')
-                    ->label('Libelle Long')
-                    ->rows(6)
-                    ->default(function ($record){
-                        return $record->libelle_long;
-                    })
-                    ,
                 ])
-
-                ->action(function ($record,$data){
-
-                   
-                   // event (new SerializeParcoursEvent($record,$data));
-
-                    //Data + Recuperer le prefix
-                    $data['marinUuid'] = null;
-                    //$prefix = (new static())->getTablePrefix();
-
-                  
-                    
-                    // Utiliser le service pour déclencher l'événement
-                    EventTriggerService::triggerEvent($data, $record);
-                })
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+                ->bulkActions([
+                    Tables\Actions\BulkActionGroup::make([
+                        Tables\Actions\DeleteBulkAction::make(),
+                    ]),
+                ]);
     }
 
     public static function getRelations(): array

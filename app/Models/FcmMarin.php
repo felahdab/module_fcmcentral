@@ -22,8 +22,8 @@ class FcmMarin extends Model
     public function parcoursSerialises(): BelongsToMany
     {
         return $this->belongsToMany(ParcoursSerialise::class, 'fcmcentral_marin_parcours', 'fcmmarin_id', 'parcoursserialise_id')
-        ->withPivot('id','taux_global', 'taux_stage', 'taux_activite','parcoursmarin')
-        ->withTimestamps();
+            ->withPivot('id','taux_global', 'taux_stage', 'taux_activite','parcoursmarin')
+            ->withTimestamps();
     }
    
     /**

@@ -2,7 +2,11 @@
 
 use function Pest\Livewire\livewire;
 
+use Carbon\Carbon;
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
+
 use function Pest\Laravel\{actingAs};
 use Livewire\Livewire;
 
@@ -16,6 +20,9 @@ use Modules\FcmCentral\Filament\Fcmcentral\Pages\Configuration;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Models;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 
 
 uses(RefreshDatabase::class);
@@ -97,4 +104,196 @@ it('has factories for all models', function(){
     Models\Savoirfaire::factory()->create();
     $this->assertTrue(Models\Savoirfaire::all()->count() == 1);
 
+});
+
+it('generated a UserGeneratedEvent when user wants to fige a parcours from the edit page', function(){
+    Event::fake();
+
+    $this->assertTrue(Models\Parcours::all()->count() == 0);
+    Models\Parcours::factory()->create();
+
+    $parcours = Models\Parcours::first();
+    $date_de_debut = Carbon::now()->tomorrow();
+
+    Livewire::actingAs($this->admin)
+        ->test(Resources\ParcoursResource\Pages\EditParcours::class, ["record" => $parcours->id])
+        ->mountAction('figer')
+        ->callAction('figer', data: [
+            'date de debut' => $date_de_debut,
+            'version' => 1,
+        ])
+        ->assertHasNoActionErrors();
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($parcours, $date_de_debut){
+        return $event->object_class == 'Parcours' && $event->object_uuid == $parcours->uuid;
+    });
+        
+});
+
+it('generated a UserGeneratedEvent when user wants to fige a parcours from the list page', function(){
+    Event::fake();
+
+    $this->assertTrue(Models\Parcours::all()->count() == 0);
+    Models\Parcours::factory()->create();
+
+    $parcours = Models\Parcours::first();
+    $date_de_debut = Carbon::now()->tomorrow();
+
+    Livewire::actingAs($this->admin)
+        ->test(Resources\ParcoursResource\Pages\ListParcours::class)
+        ->callTableAction('serializeParcours', $parcours, data: [
+            'date de debut' => $date_de_debut,
+            'version' => 1,
+        ])
+        ->assertHasNoActionErrors();
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($parcours, $date_de_debut){
+        return $event->object_class == 'Parcours' && $event->object_uuid == $parcours->uuid;
+    });
+        
+});
+
+it('generates a UserGeneratedEvent when user wants to suivre en FCM un marin', function(){
+    Event::fake();
+
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $this->assertTrue(Models\Marin::all()->count() == 1);
+
+    Livewire::actingAs($this->admin)
+        ->test(Resources\MarinResource\Pages\ListMarins::class)
+        ->assertCanNotSeeTableRecords([$marin])
+        ->removeTableFilter('en_fcm')
+        ->assertCanSeeTableRecords([$marin])
+        ->callTableAction('suivre_en_fcm', $marin)
+        ->assertHasNoActionErrors();
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
+        return $event->event_type == UserGeneratedEventTypes::MARIN_EN_FCM->value &&
+                $event->object_class == ObjectClasses::MARIN->value && 
+                $event->object_uuid == $marin->uuid;
+    });
+        
+});
+
+it('generates a UserGeneratedEvent when user wants to ne plus suivre en FCM un marin', function(){
+    Event::fake();
+
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
+
+    $marin->suivi_en_fcm = true;
+    $marin = Models\Marin::find($marin->id);
+    
+    Livewire::actingAs($this->admin)
+        ->test(Resources\MarinResource\Pages\ListMarins::class)
+        //->filterTable('en_fcm')
+        ->assertCountTableRecords(1)
+        ->assertCanSeeTableRecords([$marin])
+        ->callTableAction('ne_plus_suivre_en_fcm', $marin)
+        ->assertHasNoActionErrors();
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
+        return $event->event_type == UserGeneratedEventTypes::MARIN_PAS_FCM->value &&
+                $event->object_class == ObjectClasses::MARIN->value && 
+                $event->object_uuid == $marin->uuid;
+    });
+});
+
+it('generates a UserGeneratedEvent when user wants to assign cohorte', function(){
+    Event::fake();
+
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
+
+    $marin->suivi_en_fcm = true;
+
+    $cohorte = Models\Cohorte::factory()->create();
+    
+    Livewire::actingAs($this->admin)
+        ->test(Resources\MarinResource\Pages\ListMarins::class)
+        ->callTableAction('attribuer-cohorte-et-mentor', $marin, data: [
+            "cohorte_id" => $cohorte->uuid,
+            "mentor_id" => null,
+            "parcours_id" => null
+        ])
+        ->assertHasNoActionErrors();
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
+        return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN->value &&
+                $event->object_class == ObjectClasses::MARIN->value && 
+                $event->object_uuid == $marin->uuid;
+    });
+        
+});
+
+it('generates a UserGeneratedEvent when user wants to assign a mentor', function(){
+    Event::fake();
+
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
+    $marin->suivi_en_fcm = true;
+    $this->assertTrue(Models\Marin::all()->count() == 1);
+    $mentor = Models\Marin::factory()->create();
+    $this->assertTrue(Models\Marin::all()->count() == 2);
+        
+    Livewire::actingAs($this->admin)
+        ->test(Resources\MarinResource\Pages\ListMarins::class)
+        ->callTableAction('attribuer-cohorte-et-mentor', $marin, data: [
+            "cohorte_id" => null,
+            "mentor_id" => $mentor->uuid,
+            "parcours_id" => null
+        ])
+        ->assertHasNoActionErrors();
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
+        return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN->value &&
+                $event->object_class == ObjectClasses::MARIN->value && 
+                $event->object_uuid == $marin->uuid;
+    });
+        
+});
+
+it('generates a UserGeneratedEvent when user wants to assign a parcours', function(){
+    Event::fake();
+
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
+    $marin->suivi_en_fcm = true;
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
+    $parcours = Models\Parcours::factory()->create();
+    $serializedData = $parcours->toArray();
+    Models\ParcoursSerialise::create([
+        'parcours_id'   => $parcours->id,
+        'parcours'      => $serializedData,
+        'date_debut'    => Carbon::now(),
+        'libelle_court' => $parcours->libelle_court,
+        'libelle_long'  => $parcours->libelle_long,
+        'version'       => 1,
+    ]);
+        
+    Livewire::actingAs($this->admin)
+        ->test(Resources\MarinResource\Pages\ListMarins::class)
+        ->callTableAction('attribuer-cohorte-et-mentor', $marin, data: [
+            "cohorte_id" => null,
+            "mentor_id" => null,
+            "parcours_id" => $parcours->uuid
+        ])
+        ->assertHasNoActionErrors();
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
+        dump('ici');
+        dump($event);
+        return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN->value &&
+                $event->object_class == ObjectClasses::MARIN->value && 
+                $event->object_uuid == $marin->uuid;
+    });
+        
 });

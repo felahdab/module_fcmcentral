@@ -44,6 +44,7 @@ class ParcoursService extends BaseService
             "version" => $newversion, 
             "date_debut" => $date_de_debut, 
             "date_fin" => null,
+            "parcours_id" => $parcoursdto->id,
             "parcours" => $parcoursdto->toArray()
         ]);
 

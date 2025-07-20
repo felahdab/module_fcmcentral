@@ -2,8 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\Pages;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\RelationManagers;
 use Modules\FcmCentral\Models\Savoirfaire;
 use Filament\Forms;
 use Filament\Forms\Form;

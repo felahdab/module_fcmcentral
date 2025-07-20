@@ -2,34 +2,30 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Illuminate\Database\Eloquent\Builder;
+
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Filters\Filter;
 
 use Modules\FcmCommun\Models\Cohorte;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\RelationManagers;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Models\Parcours;
 //use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource;
-
 
 use Modules\FcmCommun\Services\EventTriggerService;
 
-
 class MarinResource extends Resource
 {
-
-    
-
     protected static ?string $model = Marin::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -164,12 +160,12 @@ class MarinResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['en_fcm'],
+                                array_key_exists('en_fcm', $data) && $data['en_fcm'],
                                 fn (Builder $query, $date): Builder => $query->enFcm(),
                             );
                     })
                     ->indicateUsing(function (array $data): ?string {
-                        if (!$data['en_fcm']) {
+                        if (! array_key_exists('en_fcm', $data) || ! $data['en_fcm']) {
                             return null;
                         }
 
@@ -186,14 +182,15 @@ class MarinResource extends Resource
                     })
                     ->action(function ($record) {
 
-                        //Data + Recuperer le prefix
-                        $data['marinUuid'] = $record->uuid;
-                        $data["fcm"] = ["en_fcm" => true];
-                    
-                       
-
-                        // Utiliser le service pour déclencher l'événement
-                        EventTriggerService::triggerEvent($data, $record);
+                        $event = new UserGeneratedEvent(
+                            UserGeneratedEventTypes::MARIN_EN_FCM,
+                            auth()->user()->uuid,
+                            ObjectClasses::MARIN,
+                            $record->uuid,
+                            []
+                        );
+                        event($event);
+                        
                     }),
 
                 Tables\Actions\Action::make('livret-de-fcm')
@@ -224,14 +221,14 @@ class MarinResource extends Resource
                         return $record->suiviEnFcm;
                     })
                     ->action(function ($record) {
-
-                        //Data + Recuperer le prefix
-                        $data['marinUuid'] = $record->uuid;
-                        $data["fcm"] = ["en_fcm" => false];
-                       
-
-                        // Utiliser le service pour déclencher l'événement
-                        EventTriggerService::triggerEvent($data, $record);
+                        $event = new UserGeneratedEvent(
+                            UserGeneratedEventTypes::MARIN_PAS_FCM,
+                            auth()->user()->uuid,
+                            ObjectClasses::MARIN,
+                            $record->uuid,
+                            []
+                        );
+                        event($event);
                     }),
 
                 Tables\Actions\Action::make('attribuer-cohorte-et-mentor')
@@ -242,54 +239,94 @@ class MarinResource extends Resource
                     ->form([
                         Forms\Components\Select::make('cohorte_id')
                             ->label("Cohorte de ce marin")
-                            ->options(Cohorte::all()->pluck('libelle_long', 'id')),
+                            ->options(Cohorte::all()->pluck('libelle_long', 'uuid')),
                         Forms\Components\Select::make('mentor_id')
                             ->label("Choisir un mentor")
-                            ->options(Marin::all()->pluck('fullNameAndGrade', 'id'))
+                            ->options(Marin::all()->pluck('fullNameAndGrade', 'uuid'))
                             ->searchable(),
-                        Forms\Components\Select::make('parcoursserialise_id')
+                        Forms\Components\Select::make('parcours_id')
                             ->label('Choisir un Parcours')
-                            ->options(ParcoursSerialise::pluck('libelle_court', 'id'))
+                            ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
                             ->searchable()
+                            ->visible(function ($record) {
+                                $visible = $record->suiviEnFcm && 
+                                    $record->complements_fcm && 
+                                    !$record->complements_fcm->parcoursSerialises()->exists();
+                                return $visible;
+                            })
                     ])
                     ->action(function ($record, $data) {
+                        
+                        if (array_key_exists("cohorte_id", $data) && $data["cohorte_id"] != null){
+                            $event = new UserGeneratedEvent(
+                                UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
+                                auth()->user()->uuid,
+                                ObjectClasses::MARIN,
+                                $record->uuid,
+                                [
+                                    "cohorte" => $data["cohorte_id"],
+                                ]
+                            );
+                            event($event);
+                        }
+                        
+                        if (array_key_exists("mentor_id", $data) && $data["mentor_id"] != null){
+                            $event = new UserGeneratedEvent(
+                                UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
+                                auth()->user()->uuid,
+                                ObjectClasses::MARIN,
+                                $record->uuid,
+                                [
+                                    "mentor" => $data["mentor_id"],
+                                ]
+                            );
+                            event($event);
+                        }
 
-                        //Data + Recuperer le prefix
-                        $data['marinUuid'] = $record->uuid;
-                       
-                        
-                        
-                        // Utiliser le service pour déclencher l'événement
-                        EventTriggerService::triggerEvent($data, $record);
+                        if (array_key_exists("parcours_id", $data) && $data["parcours_id"] != null){
+                            $event = new UserGeneratedEvent(
+                                UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+                                auth()->user()->uuid,
+                                ObjectClasses::MARIN,
+                                $record->uuid,
+                                [
+                                    "parcours" =>  $data["parcours_id"],
+                                ]
+                            );
+                            dump("ici");
+                            event($event);
+                        }
                     }),
                 Tables\Actions\Action::make('assignerParcours')
-                    ->label('Assigner Parcours')
+                    ->label('Changer le parcours de ce marin')
                     ->button()
                     ->color('success')
-                    ->modalHeading('Assigner un Parcours à un Marin')
+                    ->modalHeading('Changer le parcours de ce marin')
                     ->modalWidth('lg')
                     ->form([
-                        Forms\Components\Select::make('parcoursserialise_id')
+                        Forms\Components\Select::make('parcours_id')
                             ->label('Choisir un Parcours')
-                            ->options(ParcoursSerialise::pluck('libelle_court', 'id'))
+                            ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
                             ->searchable()
-                            ->required(),
                     ])
                     // Pour enlever le bouton si il exist dans MarinParcours
                     ->visible(function ($record) {
-                        
-                        return $record->suiviEnFcm && 
+                        $hidden = $record->suiviEnFcm && 
                                 $record->complements_fcm && 
                                 !$record->complements_fcm->parcoursSerialises()->exists();
+                        return ! $hidden;
                     })
                     ->action(function ($record, $data) {
-
-                         $eventdata  = [
-                            "parcoursserialise_id" =>$data["parcoursserialise_id"],
-                            "marinUuid" => $record->uuid
-                        ];
-                        // Utiliser le service pour déclencher l'événement
-                        EventTriggerService::triggerEvent($eventdata, $record);
+                        $event = new UserGeneratedEvent(
+                            UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+                            auth()->user()->uuid,
+                            ObjectClasses::MARIN,
+                            $record->uuid,
+                            [
+                                "parcours" =>  $data["parcours_id"],
+                            ]
+                        );
+                        event($event);
                     }),
 
             ])

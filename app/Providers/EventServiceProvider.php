@@ -21,8 +21,13 @@ use Modules\FcmCentral\Listeners\StoreUserGeneratedEventListener;
 use Modules\FcmCentral\Listeners\SaveUserGeneratedEventListener;
 use Modules\FcmCentral\Listeners\TransmitUserGeneratedEventListener;
 
+use Modules\FcmCentral\Listeners\Save\FcmMarinListener;
+use Modules\FcmCentral\Listeners\Save\CohorteMarinListener;
+use Modules\FcmCentral\Listeners\Save\MentorMarinListener;
+use Modules\FcmCentral\Listeners\Save\CreationParcoursSerialiseListener;
+use Modules\FcmCentral\Listeners\Save\ParcoursSerialiseMarinListener;
 
-use Modules\FcmCommun\Listeners\Save\SaveFcmMarinListener;
+use Modules\FcmCentral\Listeners\Save\SaveFcmMarinListener;
 use Modules\FcmCommun\Listeners\Save\SaveSuivreMarinFcmListener;
 use Modules\FcmCommun\Listeners\Save\SaveAssignerMarinParcoursListener;
 use Modules\FcmCommun\Listeners\Save\SaveSerializeParcoursListener;
@@ -32,8 +37,12 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         UserGeneratedEvent::class => [
             StoreUserGeneratedEventListener::class,
-            SaveUserGeneratedEventListener::class,
-            TransmitUserGeneratedEventListener::class,
+            FcmMarinListener::class,
+            CohorteMarinListener::class,
+            MentorMarinListener::class,
+            CreationParcoursSerialiseListener::class,
+            ParcoursSerialiseMarinListener::class,
+            //TransmitUserGeneratedEventListener::class,
         ],
 
         // // Methode dans FcmCommun pour attribuer une cohorte, un mentor dans les tables FCM et sauvegarder aussi le status en FCM dans RH
