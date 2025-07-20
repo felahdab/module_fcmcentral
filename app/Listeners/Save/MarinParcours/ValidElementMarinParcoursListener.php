@@ -4,6 +4,8 @@ namespace Modules\FcmCentral\Listeners\Save\MarinParcours;
 
 use Filament\Notifications\Notification;
 
+use App\Models\User;
+
 use Modules\FcmCommun\Enums\Constants;
 use Modules\FcmCommun\Services\CalculTauxParcoursService;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
@@ -34,36 +36,35 @@ class ValidElementMarinParcoursListener
 
         $data = $event->detail;
         $this->comment = $data['commentaire'];
-        $valideur = Marin::where('uuid', $data["validateur"]);
+        $valideur = User::where('uuid', $event->user_uuid)->first();
         $type_element = $data['type_element'];
         $uuid_element = $data['uuid_element'];
         $date = $data['date'];
 
-        $this->selectedItems = $event->data['selectedItems'];
+        $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours;
+        //ddd($donnees_du_parcours);
+        $parcoursMarin = $donnees_du_parcours->parcoursmarin;
+        
+        //ddd($parcoursMarin);
+        // Mise a jour en fonction de selectedItems
+        
+        $this->updateParcoursMarinItems($parcoursMarin, $type_element,  $uuid_element, $valideur->displayName ?? $valideur->nom . ' ' . $valideur->prenom);
+        ddd($parcoursMarin);
 
+        // Recalcul des taux
+        $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
+        $donnees_du_parcours->refresh();
+        ddd($donnees_du_parcours);
+        $donnees_du_parcours->taux_global= $parcoursMarin['taux_global'];
+        $donnees_du_parcours->pivot->taux_stage= $parcoursMarin['taux_stage'];
+        $donnees_du_parcours->pivot->taux_activite= $parcoursMarin['taux_activite'];
+        
 
-        foreach ($record->parcoursSerialises as $parcours) {
-            // Décoder le JSON du champ parcoursmarin
-            $parcoursMarin = json_decode($parcours->pivot->parcoursmarin, true);
+        // Sauvegarder les données d'origine avec les modifications dans selectedItems
+        $donnees_du_parcours->parcoursmarin = $parcoursMarin;
+        $parcours->pivot->save();
 
-
-            // Mise a jour en fonction de selectedItems
-            foreach ($this->selectedItems['sauve'] as $type => $items) {
-                $this->updateParcoursMarinItems($parcoursMarin, $type, $items, $record->marin->displayName ?? $record->marin->nom . ' ' . $record->marin->prenom . ' ' . $record->marin->grade);
-            }
-
-            // Recalcul des taux
-            $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
-            $parcours->pivot->taux_global= $parcoursMarin['taux_global'];
-            $parcours->pivot->taux_stage= $parcoursMarin['taux_stage'];
-            $parcours->pivot->taux_activite= $parcoursMarin['taux_activite'];
-            
-
-            // Sauvegarder les données d'origine avec les modifications dans selectedItems
-            $parcours->pivot->parcoursmarin = json_encode($parcoursMarin);
-            $parcours->pivot->save();
-
-        }
+        
 
         // Notification de succès
         // Notification::make()
@@ -71,7 +72,7 @@ class ValidElementMarinParcoursListener
         // ->success()
         // ->send();
 
-        $notification = Constants::getMess(Constants::VALID_ELMT_MARIN_PARCOURS, $record->marin->nom);
+        $notification = Constants::getMess(Constants::VALID_ELMT_MARIN_PARCOURS, $marin->nom);
 
         // Notification Filament
         Notification::make()
@@ -84,12 +85,12 @@ class ValidElementMarinParcoursListener
     /**
      * Mettre à jour les éléments imbriqués dans la structure.
      */
-    protected function updateParcoursMarinItems(&$parcoursMarin, $type, $items, $displayName)
+    protected function updateParcoursMarinItems(&$parcoursMarin, $type, $item, $displayName)
     {
         foreach ($parcoursMarin['fonctions'] as &$fonction) {
             // --- TRAITEMENT DIRECT DES FONCTIONS ---
-            if ($type === 'fonctions' && isset($items[$fonction['id']])) {
-                $fonction['etat_valid'] = $items[$fonction['id']];
+            if ($type === 'fonctions' && $fonction['uuid'] == $item) {
+                $fonction['etat_valid'] = true;
                 $fonction['commentaire'] = $this->comment;
                 $fonction['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
                 $fonction['valideur'] = $displayName;
@@ -110,8 +111,8 @@ class ValidElementMarinParcoursListener
             // --- SOUS-NIVEAUX ---
             if (isset($fonction['competences'])) {
                 foreach ($fonction['competences'] as &$competence) {
-                    if ($type === 'competences' && isset($items[$competence['id']])) {
-                        $competence['etat_valid'] = $items[$competence['id']];
+                    if ($type === 'competences' && $competence['uuid'] == $item) {
+                        $competence['etat_valid'] = true;
                         $competence['commentaire'] = $this->comment;
                         $competence['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
                         $competence['valideur'] = $displayName;
@@ -128,8 +129,8 @@ class ValidElementMarinParcoursListener
                     }
                     if (isset($competence['savoirfaires'])) {
                         foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                            if ($type === 'savoirfaires' && isset($items[$savoirFaire['id']])) {
-                                $savoirFaire['etat_valid'] = $items[$savoirFaire['id']];
+                            if ($type === 'savoirfaires' && $savoirFaire['uuid'] == $item) {
+                                $savoirFaire['etat_valid'] = true;
                                 $savoirFaire['commentaire'] = $this->comment;
                                 $savoirFaire['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
                                 $savoirFaire['valideur'] = $displayName;
