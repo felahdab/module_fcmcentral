@@ -57,10 +57,10 @@ class ParcoursSerialiseMarinListener
         // * Grace à la définition de cet attribut, le developpeur peut utiliser les méthodes suivantes:
         // * $marin->complements_fcm->cohorte
         // * $marin->complements_fcm->mentor
-        // * $marin->complements_fcm->donnes_du_parcours->taux_global
-        // * $marin->complements_fcm->donnes_du_parcours->taux_stage
-        // * $marin->complements_fcm->donnes_du_parcours->taux_activite
-        // * $marin->complements_fcm->donnes_du_parcours->parcours_serialise
+        // * $marin->complements_fcm->donnees_du_parcours->taux_global
+        // * $marin->complements_fcm->donnees_du_parcours->taux_stage
+        // * $marin->complements_fcm->donnees_du_parcours->taux_activite
+        // * $marin->complements_fcm->donnees_du_parcours->parcours_serialise
         // Si le record provient de Rh_Marins
         
         $fcmMarin = $marin->complements_fcm;

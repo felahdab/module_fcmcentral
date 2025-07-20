@@ -78,7 +78,7 @@ class FcmMarin extends Model
      * Grace à la définition de cet attribut, le developpeur peut utiliser les méthodes suivantes:
      * $marin->complements_fcm->cohorte
      * $marin->complements_fcm->mentor
-     * $marin->complements_fcm->donnes_du_parcours
+     * $marin->complements_fcm->donnees_du_parcours
      */
     public function getDonneesDuParcoursAttribute()
     {
