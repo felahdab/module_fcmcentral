@@ -34,6 +34,19 @@ class ValidElementMarinParcoursListener
         // Récupérer le marin et les données
         $marin = Marin::where('uuid', $event->object_uuid)->first();
 
+        // Extrait du modèle FcmCentral\Models\Marin:
+        // * Grace à la définition de cet attribut, le developpeur peut utiliser les méthodes suivantes:
+        // * $marin->complements_fcm->cohorte
+        // * $marin->complements_fcm->mentor
+        // * $marin->complements_fcm->donnees_du_parcours->taux_global
+        // * $marin->complements_fcm->donnees_du_parcours->taux_stage
+        // * $marin->complements_fcm->donnees_du_parcours->taux_activite
+        // * $marin->complements_fcm->donnees_du_parcours->parcoursmarin: le parcours du marin, dans sa forme sérialisée 
+        //            (mais castée array) et mise à jour par les évènements successifs.
+        // * $marin->complements_fcm->donnees_du_parcours->parcours_serialise: lien vers l'objet de la classe ParcoursSerialise
+        //              ayant servi de référence lors de l'attribution du parcours à ce marin.
+        // Attention à ne pas confondre ces 2 objets et à bien travailler sur parcoursmarin pour les mises à jours
+
         $data = $event->detail;
         $this->comment = $data['commentaire'];
         $valideur = User::where('uuid', $event->user_uuid)->first();

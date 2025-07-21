@@ -60,8 +60,12 @@ class ParcoursSerialiseMarinListener
         // * $marin->complements_fcm->donnees_du_parcours->taux_global
         // * $marin->complements_fcm->donnees_du_parcours->taux_stage
         // * $marin->complements_fcm->donnees_du_parcours->taux_activite
-        // * $marin->complements_fcm->donnees_du_parcours->parcours_serialise
-        // Si le record provient de Rh_Marins
+        // * $marin->complements_fcm->donnees_du_parcours->parcoursmarin: le parcours du marin, dans sa forme sérialisée 
+        //            (mais castée array) et mise à jour par les évènements successifs.
+        // * $marin->complements_fcm->donnees_du_parcours->parcours_serialise: lien vers l'objet de la classe ParcoursSerialise
+        //              ayant servi de référence lors de l'attribution du parcours à ce marin.
+        // Attention à ne pas confondre ces 2 objets et à bien travailler sur parcoursmarin pour les mises à jours
+
         
         $fcmMarin = $marin->complements_fcm;
 
