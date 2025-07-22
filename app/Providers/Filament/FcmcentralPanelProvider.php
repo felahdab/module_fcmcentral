@@ -26,6 +26,8 @@ use App\Http\Middleware\InitializeTenancyByPath;
 use App\Http\Middleware\SetTenantCookieMiddleware;
 use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 
+use App\Filament\Pages\UserPreferences;
+
 use Filament\Support\Assets\Theme;
 
 use  Modules\FcmCommun\Helpers\NavigationFilamentHelper;
@@ -44,6 +46,7 @@ class FcmcentralPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Teal,
             ])
+            ->profile(UserPreferences::class)
             ->font('Inter', provider: SpatieGoogleFontProvider::class)
             ->defaultAvatarProvider(AnnudefAvatarProvider::class)
             ->discoverResources(in: module_path($this->module, 'app/Filament/Fcmcentral/Resources'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Resources")
