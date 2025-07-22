@@ -289,8 +289,6 @@ it('generates a UserGeneratedEvent when user wants to assign a parcours', functi
         ->assertHasNoActionErrors();
 
     Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
-        dump('ici');
-        dump($event);
         return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN->value &&
                 $event->object_class == ObjectClasses::MARIN->value && 
                 $event->object_uuid == $marin->uuid;
