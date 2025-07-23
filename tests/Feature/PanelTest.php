@@ -268,16 +268,25 @@ it('generates a UserGeneratedEvent when user wants to assign a parcours', functi
     $marin->suivi_en_fcm = true;
     Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
     $this->assertTrue(Models\Marin::all()->count() == 1);
+    
     $parcours = Models\Parcours::factory()->create();
-    $serializedData = $parcours->toArray();
-    Models\ParcoursSerialise::create([
-        'parcours_id'   => $parcours->id,
-        'parcours'      => $serializedData,
-        'date_debut'    => Carbon::now(),
-        'libelle_court' => $parcours->libelle_court,
-        'libelle_long'  => $parcours->libelle_long,
-        'version'       => 1,
-    ]);
+    $fonction = Models\Fonction::factory()->create();
+    $parcours->fonctions()->attach($fonction);
+
+    $competence = Models\Competence::factory()->create();
+    $fonction->competences()->attach($competence);
+
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::PARCOURS,
+        object_uuid : $parcours->uuid,
+        detail: [
+            "version" => 1,
+            "date_de_debut"=> Carbon::tomorrow(),
+        ]
+        );
+    event($event);
         
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
@@ -293,5 +302,50 @@ it('generates a UserGeneratedEvent when user wants to assign a parcours', functi
                 $event->object_class == ObjectClasses::MARIN->value && 
                 $event->object_uuid == $marin->uuid;
     });
+        
+});
+
+it('displays the livret FCM ', function(){
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
+    $marin->suivi_en_fcm = true;
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
+    
+    $parcours = Models\Parcours::factory()->create();
+    $fonction = Models\Fonction::factory()->create();
+    $parcours->fonctions()->attach($fonction);
+
+    $competence = Models\Competence::factory()->create();
+    $fonction->competences()->attach($competence);
+
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::PARCOURS,
+        object_uuid : $parcours->uuid,
+        detail: [
+            "version" => 1,
+            "date_de_debut"=> Carbon::tomorrow(),
+        ]
+        );
+    event($event);
+    
+    Livewire::actingAs($this->admin)
+        ->test(Resources\MarinResource\Pages\ListMarins::class)
+        ->callTableAction('attribuer-cohorte-et-mentor', $marin, data: [
+            "cohorte_id" => null,
+            "mentor_id" => null,
+            "parcours_id" => $parcours->uuid
+        ])
+        ->assertHasNoActionErrors();
+
+        
+    Livewire::actingAs($this->admin)
+            ->test(Resources\MarinResource\Pages\LivretDeFcm::class, ["record" => $marin->id])
+            ->assertSee("Livret de FCM");
+
+    
         
 });

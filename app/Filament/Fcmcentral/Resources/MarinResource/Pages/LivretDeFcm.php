@@ -13,9 +13,10 @@ use Filament\Forms\Components\Placeholder;
 
 use Modules\FcmCommun\Http\Livewire\LivretFcm as LivretFcm;
 use Modules\FcmCommun\Http\Livewire\FilamentSpeedTest;
-use Modules\FcmCentral\Models\cfv;
+use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
+
  
 class LivretDeFcm extends ViewRecord
 {
