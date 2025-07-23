@@ -315,7 +315,7 @@ class MarinResource extends Resource
                         // ->disabled(),
                         Forms\Components\Select::make('cohorte_id')
                             ->label("Choisir la cohorte")
-                            ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'id')),
+                            ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
                             // ->options(Cohorte::all()->pluck('libelle_long', 'id')),
                         Forms\Components\Select::make('mentor_id')
                             ->label("Choisir le mentor")
@@ -324,7 +324,7 @@ class MarinResource extends Resource
                                     ->where('data->fcm->en_fcm', false)
                                     ->orderBy('nom')
                                     ->get()
-                                    ->pluck('fullNameAndGrade', 'id')
+                                    ->pluck('fullNameAndGrade', 'uuid')
                                 )                              
                             // ->options(Marin::all()->pluck('fullNameAndGrade', 'id'))
                             ->searchable(),

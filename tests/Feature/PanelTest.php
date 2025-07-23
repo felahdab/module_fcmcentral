@@ -216,7 +216,7 @@ it('generates a UserGeneratedEvent when user wants to assign cohorte', function(
     
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('attribuer-cohorte-et-mentor', $marin, data: [
+        ->callTableAction('attributs-fcm', $marin, data: [
             "cohorte_id" => $cohorte->uuid,
             "mentor_id" => null,
             "parcours_id" => null
@@ -244,7 +244,7 @@ it('generates a UserGeneratedEvent when user wants to assign a mentor', function
         
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('attribuer-cohorte-et-mentor', $marin, data: [
+        ->callTableAction('attributs-fcm', $marin, data: [
             "cohorte_id" => null,
             "mentor_id" => $mentor->uuid,
             "parcours_id" => null
@@ -290,7 +290,7 @@ it('generates a UserGeneratedEvent when user wants to assign a parcours', functi
         
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('attribuer-cohorte-et-mentor', $marin, data: [
+        ->callTableAction('attributs-fcm', $marin, data: [
             "cohorte_id" => null,
             "mentor_id" => null,
             "parcours_id" => $parcours->uuid
@@ -334,7 +334,7 @@ it('displays the livret FCM ', function(){
     
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('attribuer-cohorte-et-mentor', $marin, data: [
+        ->callTableAction('attributs-fcm', $marin, data: [
             "cohorte_id" => null,
             "mentor_id" => null,
             "parcours_id" => $parcours->uuid
