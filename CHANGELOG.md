@@ -1,3 +1,40 @@
+## 0.0.7 (July 23, 2025)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.6 –> 0.0.7
+- La version modal pour la création ou l'édition d'un marin semble plus ergonomique.
+- Corrections busgs résiduels après merge
+- squash commit for sza modifications
+- amélioration page activités du parcours
+- Merge branch 'fldb-debut-documentation' into fldb-simplification-events
+- Merge commit '98acb7bb6b6f42d7c98948213024d409939d5e24' into fldb-simplification-events
+- Ajustement de listener pour mettre à jour le parcours du marin.
+- Rajoute import manquant et retrait import en double.
+- Commit  LivretFCM MAJ + Validation
+- Retrait NavigationHelper du panneau FCM Central
+- Hotfix: correction typo dans le livret de FCM.
+- Correction type dans le livret de FCM. Création d'un test d'affichage du Livret pour assurer la non régression.
+- Intégration des liens pointant vers la documentation et la documentation des api dans le menu utilisateur du panneau de FCM central.
+- Débute l'implémentation de la documentation du module.
+- Rajout de la déclaration de quelques pages préférées du module FcmCentral
+- Retrait dump oubliés dans les tests.
+- Complément de commentaires dans les listeners ayant à faire appels aux données de FCM du Marin pour faciliter le travail du développeur.
+- Début de modification du listener ValidElementMarinParcoursListener pour le faire travailler sur les évènements conformes au dictionnaire des évènements v2. Travail à finaliser pour ce listener, et à réaliser pour les autres Listeners du livret de FCM.
+- Rajout du listener ValidElementMarinParcoursListener aux listeners des UserGeneratedEvent
+- Modification du Livret pour spécifier la classe d'évènements à utiliser.
+- Correction de typo
+- Retrait d'un dump oublié
+- Début de simplification des évènements FCM. Reste notamment à traiter le cas du livret de transformation.
+- Réintégration des migrations de moficiation du schéma de bdd dans les migrations initiales. Mise à jour des factory. Mise à jour des seeders du parcours DEASM. Intégration de tests unitaires pour vérifier la compatibilité entre les factory et le schéma de base.
+- Implements art #480061 : Amelioration Test Unitaire pour EventTrigger
+- Implements art #480061 : Modification Activites Savoirfaire pour le bug data en array
+- Implements art #480061 : Modification Parcours
+- Implements art #480061 : Optimisation Livret FCM
+- Implements art #480061 : Livret FCM Refonte et verification Ensemble Parcours Ajout et modification des Pivots pour les liaisons (cote frontend) Creation Seeder Parcours Deasm
+- Implements art #480061 : Livret FCM  Proposition Restore Reboot
+- Implements art  #480061 : Livret FCM v3 (proposition)
+- implements art #480061  : Livret FCM v2 (Validation, Annulation)
+- Implements art #480061 : Mise a jour Livret FCM Gestion du parcours + sauvegarde event Difficulte sur les many to many avec ascendants et descendants mais c'est ok Toute la logique est mis dans le Livewire pour eviter d'inserer du jquery Soucis sur FcmCentral_stored car il cherche le uuid du Marin_Parcours Rafraichissement ne fonctionne pas apres mise a jour doit faire Annulation cas unique et Proposition && Annul_Proposition (juste event a construire) etude a venir sur la presentation du parcours Rajout champ supplementaire sur le Parcours Serialise
+- Il faut préciser le panneau à utiliser pour les liens d'accès direct.
+
 ## 0.0.6 (May 14, 2025)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.5 –> 0.0.6
 - Rajout d'un élément d'accès direct pour illustrer la possibilité.
