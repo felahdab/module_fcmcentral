@@ -10,6 +10,9 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
+use Filament\Navigation\MenuItem;
+use Filament\Facades\Filament;
+
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -29,8 +32,6 @@ use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 use App\Filament\Pages\UserPreferences;
 
 use Filament\Support\Assets\Theme;
-
-use  Modules\FcmCommun\Helpers\NavigationFilamentHelper;
 
 class FcmcentralPanelProvider extends PanelProvider
 {
@@ -78,12 +79,17 @@ class FcmcentralPanelProvider extends PanelProvider
             ])
             // Menu Side Bar Haut
             ->topNavigation()
-            // Appel du Helper pour le Menu Modules
-            ->navigationItems([   
-                // Decompacte le tableau
-                ...NavigationFilamentHelper::registerNavigationsItems()
-            ])
-            ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')));
+            ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')))
+            ->userMenuItems([
+                'help' => MenuItem::make()
+                    ->label('Aide')
+                    ->icon('heroicon-m-question-mark-circle')
+                    ->url(fn () => url(config('skeletor.prefixe_instance') . '/docs/' . Filament::getCurrentPanel()->getId()) . '/', shouldOpenInNewTab:true),
+                'apidoc' => MenuItem::make()
+                    ->label('API')
+                    ->icon('heroicon-m-cloud')
+                    ->url(fn () => url(route('l5-swagger.default.api')), shouldOpenInNewTab:true),
+            ]);
         return $panel;
     }
 
