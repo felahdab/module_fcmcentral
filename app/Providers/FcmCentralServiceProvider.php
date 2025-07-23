@@ -16,11 +16,15 @@ use Modules\FcmCentral\Console\SeedTestData;
 use Modules\FcmCentral\Console\TestAttributionParcoursAUser;
 
 use App\Filament\PanelRegistry\DirectMenuItem;
+use App\Filament\PanelRegistry\PreferedPageItem;
 use App\Filament\PanelRegistry\ModuleDefinedMenusRegistry;
+use App\Filament\PanelRegistry\ModuleDefinedPreferedPagesRegistry;
 
 use Modules\FcmCentral\Models;
 use Modules\FcmCentral\Policies;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours;
+use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
 
 
 class FcmCentralServiceProvider extends ServiceProvider
@@ -69,6 +73,7 @@ class FcmCentralServiceProvider extends ServiceProvider
         });
 
         $this->registerDirectMenuItems();
+        $this->registerPreferedPagesItems();
     }
 
     public function registerDirectMenuItems()
@@ -82,6 +87,23 @@ class FcmCentralServiceProvider extends ServiceProvider
                     ->url(fn() => ListMarins::getUrl(panel: 'FCM Central'))
                 ])
         ]);
+    }
+
+    public function registerPreferedPagesItems()
+    {
+        app(ModuleDefinedPreferedPagesRegistry::class)->registerPreferedPagesItems(
+            [
+            PreferedPageItem::make()
+                ->name('FCM central: liste des marins')
+                ->routeName(fn() => ListMarins::getRouteName(panel: 'FCM Central')),
+            PreferedPageItem::make()
+                ->name('FCM central: liste des parcours')
+                ->routeName(fn() => ListParcours::getRouteName(panel: 'FCM Central')),
+            PreferedPageItem::make()
+                ->name('FCM central: recherche dans l\' annuaire')
+                ->routeName(fn() => RechercheAnnuairePage::getRouteName(panel: 'FCM Central'))
+            ]
+        );
     }
 
     /**
