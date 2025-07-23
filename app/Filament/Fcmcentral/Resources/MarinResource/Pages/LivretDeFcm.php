@@ -16,7 +16,6 @@ use Modules\FcmCommun\Http\Livewire\FilamentSpeedTest;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCentral\Models\FcmMarin;
  
 class LivretDeFcm extends ViewRecord
 {
