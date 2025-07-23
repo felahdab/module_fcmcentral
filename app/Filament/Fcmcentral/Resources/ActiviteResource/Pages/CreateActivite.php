@@ -9,4 +9,5 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateActivite extends CreateRecord
 {
     protected static string $resource = ActiviteResource::class;
+    protected static ?string $title = 'Créer stage ou tâche';
 }

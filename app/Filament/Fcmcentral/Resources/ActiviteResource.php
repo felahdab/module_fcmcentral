@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 
 class ActiviteResource extends Resource
 {
@@ -22,6 +24,7 @@ class ActiviteResource extends Resource
     protected static ?int $navigationSort = 15;
 
     protected static ?string $navigationGroup = 'Parcours';
+    protected static ?string $navigationLabel = "Stages et tâches";
 
     public static function form(Form $form): Form
     {
@@ -29,25 +32,31 @@ class ActiviteResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('libelle_long')
                     ->required()
-                    ->maxLength(255),
+                    ->label('Libellé long')
+                    ->maxLength(1500),
                 Forms\Components\TextInput::make('libelle_court')
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('url')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('duree_validite')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('prerequis')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Select::make('type')
-                ->options([
-                    'STAGE' => 'Stage',
-                   // 'TACHE' => 'Tache',
-                ])
+                    ->label('Libellé court (50)')
+                    ->maxLength(50),
+                Forms\Components\Select::make('type_activite')
+                    ->options([
+                        'STAGE' => 'Stage',
+                        'TACHE' => 'Tâche',
+                        ])
+                    ->label('Type')
                     ->required(),
+                Forms\Components\TextInput::make('url')
+                    // ->required()
+                    ->label('URL')
+                    ->maxLength(1000),
+                Forms\Components\TextInput::make('duree_validite')
+                    // ->required()
+                    ->label('Durée de validité (jours)')
+                    ->maxLength(10),
+                Forms\Components\TextInput::make('prerequis')
+                    // ->required()
+                    ->label('Prérequis')
+                    ->maxLength(500),
             ]);
     }
 
@@ -59,18 +68,28 @@ class ActiviteResource extends Resource
                     ->label('ID')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
+                Tables\Columns\TextColumn::make('type_activite')
+                    ->label('Type'),
                 Tables\Columns\TextColumn::make('libelle_court')
-                    ->searchable(),
+                    ->searchable()
+                    ->label('Libellé court'),
                 Tables\Columns\TextColumn::make('libelle_long')
                     ->searchable()
+                    ->label('Libellé long')
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('url')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(function ($state) {
+                        return strlen($state) > 20 ? substr($state, 0, 20) . '...' : $state;
+                    })
+                    ->tooltip(fn ($state) => $state)                
+                    ->label('URL'),
                 Tables\Columns\TextColumn::make('duree_validite')
-                    ->searchable(),
+                    ->searchable()
+                    ->label('Durée de validité (jours)'),
                 Tables\Columns\TextColumn::make('prerequis')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('type'),
+                    ->searchable()
+                    ->label('Prérequis'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -82,9 +101,30 @@ class ActiviteResource extends Resource
             ])
             ->filters([
                 //
+                SelectFilter::make('type_activite')
+                ->label('Type')
+                ->options([
+                    'STAGE' => 'Stage',
+                    'TACHE' => 'Tâche',
+                ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                ->iconButton()
+                ->icon('heroicon-m-eye')
+                ->modalHeading('Détail')
+                ->extraAttributes([
+                    'title' => 'Consulter',
+                    'class' => 'btn-consult',
+                    ]),
+                Tables\Actions\EditAction::make()
+                ->iconButton()
+                ->icon('heroicon-m-pencil-square')
+                ->extraAttributes([
+                    'title' => 'Modifier',
+                    'class' => 'btn-modif',
+                    ]),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

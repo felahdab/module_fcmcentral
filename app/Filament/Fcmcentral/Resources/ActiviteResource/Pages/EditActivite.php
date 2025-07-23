@@ -9,6 +9,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditActivite extends EditRecord
 {
     protected static string $resource = ActiviteResource::class;
+    protected static ?string $title = 'Modifier stage ou tâche';
 
     protected function getHeaderActions(): array
     {

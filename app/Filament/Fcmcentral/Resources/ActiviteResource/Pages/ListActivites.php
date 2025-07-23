@@ -9,6 +9,7 @@ use Filament\Resources\Pages\ListRecords;
 class ListActivites extends ListRecords
 {
     protected static string $resource = ActiviteResource::class;
+    protected static ?string $title = 'Stages et tâches';
 
     protected function getHeaderActions(): array
     {
