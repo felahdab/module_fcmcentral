@@ -57,6 +57,7 @@ class FcmCentralServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
+        $this->registerDocumentation();
         $this->registerFilamentAssets();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
     }
@@ -166,6 +167,14 @@ class FcmCentralServiceProvider extends ServiceProvider
         }
     }
 
+    protected function registerDocumentation()
+    {
+        $this->publishes([
+            module_path($this->moduleName, 'resources/docs') => resource_path('docs/FCM Central')
+        ], $this->moduleNameLower.'-module-documentation'
+        );
+    }
+    
     /**
      * Register config.
      */
