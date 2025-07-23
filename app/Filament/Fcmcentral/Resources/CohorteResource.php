@@ -19,7 +19,7 @@ class CohorteResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'Liste Cohortes';
+    protected static ?string $navigationLabel = 'Gestion Cohortes';
     
     public static function getNavigationBadge(): ?string
     {
@@ -30,13 +30,19 @@ class CohorteResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('libelle_long')
-                    ->maxLength(255)
-                    ->default(null),
                 TextInput::make('libelle_court')
                     ->maxLength(255)
-                    ->default(null),
-                DatePicker::make('date_sortie_cours'),    
+                    ->default(null)
+                    ->label('Libellé court')
+                    ->required(),
+                TextInput::make('libelle_long')
+                    ->maxLength(255)
+                    ->default(null)
+                    ->label('Libellé long')
+                    ->required(),
+                DatePicker::make('date_sortie_cours')
+                    ->label('Date fin')
+                    ->required(),    
             ]);
     }
 
@@ -44,28 +50,36 @@ class CohorteResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('libelle_long')
-                    ->searchable(),
                 TextColumn::make('libelle_court')
-                    ->searchable(),
+                    ->searchable()
+                    ->label('Libellé court'),
+                TextColumn::make('libelle_long')
+                    ->searchable()
+                    ->label('Libellé long')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cohorte_count')
-                ->label('Nb Marins')
-                //->counts('fcmCentralMarins')
-                ->getStateUsing(function (Cohorte $record){
-                    return $record->fcmCentralMarins()->count();
-                } )
-                ->sortable()
-                ->badge(),
+                    ->label('Nb Marins')
+                    ->getStateUsing(function (Cohorte $record){
+                        return $record->fcmCentralMarins()->count();
+                    })
+                    ->sortable()
+                    ->badge(),
                 TextColumn::make('date_sortie_cours')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->date()
+                    ->date('d/m/Y')
                     ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->icon('heroicon-m-pencil-square')
+                    ->extraAttributes([
+                        'title' => 'Modifier',
+                        'class' => 'btn-modif',
+                    ]), 
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

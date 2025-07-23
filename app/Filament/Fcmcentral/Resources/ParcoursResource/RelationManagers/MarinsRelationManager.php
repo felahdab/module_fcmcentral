@@ -22,33 +22,33 @@ class MarinsRelationManager extends RelationManager
 {
     protected static string $relationship = 'fcmMarins';
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Select::make('recordId')
-                    ->label('Marin')
-                    ->options(FcmMarin::all()->pluck('marin.nom', 'id'))
-                    ->searchable()
-                    ->required()
-                    ->disabled(fn ($context): bool => $context === 'edit'),
+    // public function form(Form $form): Form
+    // {
+    //     return $form
+    //         ->schema([
+    //             Select::make('recordId')
+    //                 ->label('Marin')
+    //                 ->options(FcmMarin::all()->pluck('marin.nom', 'id'))
+    //                 ->searchable()
+    //                 ->required()
+    //                 ->disabled(fn ($context): bool => $context === 'edit'),
 
-                TextInput::make('taux_global')
-                    ->label('Taux Global (Lecture Seule)')
-                    ->numeric()
-                    ->readOnly(),
+    //             TextInput::make('taux_global')
+    //                 ->label('Taux Global (Lecture Seule)')
+    //                 ->numeric()
+    //                 ->readOnly(),
 
-                TextInput::make('taux_stage')
-                    ->label('Taux Stage (Lecture Seule)')
-                    ->numeric()
-                    ->readOnly(),
+    //             TextInput::make('taux_stage')
+    //                 ->label('Taux Stage (Lecture Seule)')
+    //                 ->numeric()
+    //                 ->readOnly(),
 
-                TextInput::make('taux_activite')
-                    ->label('Taux Activite (Lecture Seule)')
-                    ->numeric()
-                    ->readOnly(),
-            ]);
-    }
+    //             TextInput::make('taux_activite')
+    //                 ->label('Taux Activite (Lecture Seule)')
+    //                 ->numeric()
+    //                 ->readOnly(),
+    //         ]);
+    // }
 
     public function table(Table $table): Table
     {
@@ -82,7 +82,11 @@ class MarinsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\AttachAction::make()
                     ->form(fn (Tables\Actions\AttachAction $action): array => [
-                        $action->getRecordSelect(),
+                        $action->getRecordSelect()
+                        // ->options(FcmMarin::join('rh_marins', 'rh_marins.id', '=', 'rh_marin_id')
+                        // ->where("rh_marins.data->fcm->en_fcm", true)
+                        // ->pluck('rh_marins.display_name', 'fcmcentral_fcm_marins.id'))
+                        ,
 
                         TextInput::make('taux_global')
                             ->label('Taux Global (Lecture Seule)')

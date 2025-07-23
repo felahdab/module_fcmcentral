@@ -1,91 +1,94 @@
 <x-filament::page>
     <div class="space-y-4">
-
-   
-    
-      <a href="#" onclick="Livewire.emit('openModal', 'fcmcentral::manage-entity-full-parcours-modal')">test</a>
+        {{-- <a href="#" onclick="Livewire.emit('openModal', 'fcmcentral::manage-entity-full-parcours-modal')">test</a> --}}
 
         <div class="tree-view">
-          @if ($parcours)
-              
-                      <div class="flex items-center justify-between">
-                        <h1 class="text-2xl font-bold yellow mt1 mb1">Parcours : {{ $parcours->libelle_long }}</h1>
-                         
-                      </div>
-                      <ul>
+        @if ($parcours)              
+            <div class="flex items-center justify-between text-2xl font-bold mt1 mb1">
+                    {{-- Parcours :  --}}
+                    {{ $parcours->libelle_long }}
+            </div>
+            <ul>
+                <li>
+                    @if ($parcours->fonctions->isNotEmpty())
+                    <ul >
+                        @foreach ($parcours->fonctions as $fonction)
                         <li>
-                      @if ($parcours->fonctions->isNotEmpty())
-                          <ul >
-                              @foreach ($parcours->fonctions as $fonction)
-                                  <li>
-                                      <div class="flex items-center justify-between  mt1 mb1">
-                                          <strong class="greenyellow">Fonction : {{ $fonction->libelle_long }}</strong>
-                                         <div class="flex items-center space-x-2">
-                                            {{($this->editAction)(['recordId'=>$fonction->id,'type'=>'fonction'])}}
-                                          
-                                          <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
-                                        
-                                         </div>
-                                      </div>
-                                      @if ($fonction->competences->isNotEmpty())
-                                          <ul class="collapsible">
-                                              @foreach ($fonction->competences as $competence)
-                                                  <li>
-                                                      <div class="flex items-center justify-between  mt1 mb1">
-                                                          <strong class="aquamarine">Compétence : {{ $competence->libelle_long }}</strong>
-                                                          <div class="flex items-center space-x-2">
-                                                            {{($this->editAction)(['recordId'=>$competence->id,'type'=>'competence'])}}
-                                                            {{($this->attachAction)(['parentId'=>$fonction->id,'parentType'=>'fonction','recordId'=>$competence->id,'type'=>'competence'])}}
-                                                          <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+                            <div class="flex items-center mt1 mb1">
+                                <div class="flex items-center ">
+                                    <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+                                </div>
+                                <strong class="vert">&nbsp;&nbsp;
+                                    {{-- Fonction :  --}}
+                                    {{ $fonction->libelle_long }}
+                                </strong>
+                                {{-- {{($this->editAction)(['recordId'=>$fonction->id,'type'=>'fonction'])}} --}}
+                            </div>
+                            @if ($fonction->competences->isNotEmpty())
+                                <ul class="collapsible">
+                                    @foreach ($fonction->competences as $competence)
+                                    <li>
+                                        <div class="flex items-center mt1 mb1">
+                                            <div class="flex items-center space-x-2">
+                                                <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+                                            </div>
+                                            <strong class="bleu">&nbsp;&nbsp;
+                                                {{-- Compétence :  --}}
+                                                {{ $competence->libelle_long }}
+                                            </strong>
+                                            {{-- {{($this->editAction)(['recordId'=>$competence->id,'type'=>'competence'])}}
+                                            {{($this->attachAction)(['parentId'=>$fonction->id,'parentType'=>'fonction','recordId'=>$competence->id,'type'=>'competence'])}} --}}
+                                        </div>
+                                        @if ($competence->savoirFaires->isNotEmpty())
+                                            <ul class="collapsible">
+                                                @foreach ($competence->savoirFaires as $savoirFaire)
+                                                <li>
+                                                    <div class="flex items-center mt1 mb1">
+                                                        <div class="flex items-center space-x-2">
+                                                            <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
                                                         </div>
-                                                      </div>
-                                                      @if ($competence->savoirFaires->isNotEmpty())
-                                                          <ul class="collapsible">
-                                                              @foreach ($competence->savoirFaires as $savoirFaire)
-                                                                  <li>
-                                                                    <div class="flex items-center justify-between  mt1 mb1">
-                                                                      <strong class="blue">Savoir-faire : {{ $savoirFaire->libelle_long }}</strong>
-                                                                      <div class="flex items-center space-x-2">
-                                                                        {{($this->editAction)(['recordId'=>$savoirFaire->id,'type'=>'savoirFaire'])}}
-                                                                    <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+                                                        <strong class="orange">&nbsp;&nbsp;
+                                                            {{-- Savoir-faire :  --}}
+                                                            {{ $savoirFaire->libelle_long }}
+                                                        </strong>
+                                                        {{-- {{($this->editAction)(['recordId'=>$savoirFaire->id,'type'=>'savoirFaire'])}} --}}
+                                                    </div>
+                                                    @if ($savoirFaire->activites->isNotEmpty())
+                                                        <ul class="collapsible">
+                                                            @foreach ($savoirFaire->activites as $activite)
+                                                            <li>
+                                                                <div class="flex items-center mt1 mb1">
+                                                                            {{-- Activite :  --}}
+                                                                            {{ $activite->libelle_long }}
+                                                                        {{-- <div class="flex items-center space-x-2">
+                                                                            {{($this->editAction)(['recordId'=>$activite->id,'type'=>'activite'])}}
+                                                                        </div> --}}
                                                                 </div>
-                                                                  </div>
-                                                                    @if ($savoirFaire->activites->isNotEmpty())
-                                                                    <ul class="collapsible">
-                                                                        @foreach ($savoirFaire->activites as $activite)
-                                                                            <li>
-                                                                                <div class="flex items-center justify-between  mt1 mb1">
-                                                                                Activite : {{ $activite->libelle_long }}
-                                                                            <div class="flex items-center space-x-2">
-                                                                                {{($this->editAction)(['recordId'=>$activite->id,'type'=>'activite'])}}
-                                                                            </div>
-                                                                        </div>
-                                                                        </li>
-                                                                        @endforeach
-                                                                        <li>{{($this->createAction)(['parentId'=>$savoirFaire->id,'parentType'=>'Savoirfaire','type'=>'activite'])}}</li>
-                                                                    </ul>
-                                                                @endif
-                                                                  
-                                                                  </li>
-                                                              @endforeach
-                                                              <li> {{($this->createAction)(['parentId'=>$competence->id,'parentType'=>'competence','type'=>'savoirFaire'])}}</li>
-                                                          </ul>
-                                                      @endif
-                                                  </li>
-                                              @endforeach
-                                              <li>{{($this->createAction)(['parentId'=>$fonction->id,'parentType'=>'fonction','type'=>'competence'])}}</li>
-                                          </ul>
-                                      @endif
-                                  </li>
-                              @endforeach
-                              <li>{{($this->createAction)(['parentId'=>$parcours->id,'parentType'=>'parcours','type'=>'fonction'])}}</li>
-                          </ul>
-                      @endif
-                  </li>
-              </ul>
-          @else
-              <p>Aucun parcours trouvé.</p>
-          @endif
+                                                            </li>
+                                                            @endforeach
+                                                            {{-- <li>{{($this->createAction)(['parentId'=>$savoirFaire->id,'parentType'=>'Savoirfaire','type'=>'activite'])}}</li> --}}
+                                                        </ul>
+                                                    @endif
+                                                </li>
+                                                @endforeach
+                                                {{-- <li> {{($this->createAction)(['parentId'=>$competence->id,'parentType'=>'competence','type'=>'savoirFaire'])}}</li> --}}
+                                            </ul>
+                                        @endif
+                                    </li>
+                                    @endforeach
+                                    {{-- <li>{{($this->createAction)(['parentId'=>$fonction->id,'parentType'=>'fonction','type'=>'competence'])}}</li> --}}
+                                </ul>
+                            @endif
+                        </li>
+                        @endforeach
+                        {{-- <li>{{($this->createAction)(['parentId'=>$parcours->id,'parentType'=>'parcours','type'=>'fonction'])}}</li> --}}
+                    </ul>
+                    @endif
+                </li>
+            </ul>
+        @else
+            <p>Aucun parcours trouvé.</p>
+        @endif
       </div>
       
       <style>
@@ -109,22 +112,16 @@
              /* color:darkgrey; */
           }
 
-          .yellow{
-            color:yellow;
+          .bleu{
+            color:#6AADE8;
           }
-
-          .greenyellow{
-            color:greenyellow
+          .vert{
+            color:#389D60;
           }
-
-          .aquamarine {
-            color:aquamarine;
+          .orange{
+            color:#e67b47;
           }
-
-          .blue {
-            color:#007bff;
-          }
-      
+                
           .tree-view .collapsible {
               display: none; /* Par défaut, les sous-éléments sont cachés */
           }
@@ -132,7 +129,7 @@
           .tree-view .toggle-btn {
               background: none;
               border: none;
-              color: #007bff;
+              color: #D81B60;
               cursor: pointer;
               font-size: 14px;
           }

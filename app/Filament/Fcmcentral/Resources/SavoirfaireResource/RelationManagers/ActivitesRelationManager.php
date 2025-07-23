@@ -23,31 +23,31 @@ class ActivitesRelationManager extends RelationManager
     protected static string $relationship = 'activites';
     protected static ?string $title = 'Stage(s) ou tâche(s) attachés';
 
-    protected function processPivotData(array $data): array
-{
-    // Traitement de la colonne data JSON
-    if (isset($data['data'])) {
-        if (is_array($data['data'])) {
-            // Nettoyer les valeurs vides
-            $cleanData = array_filter($data['data'], function($value, $key) {
-                return $value !== null && $value !== '' && trim($key) !== '';
-            }, ARRAY_FILTER_USE_BOTH);
+//     protected function processPivotData(array $data): array
+// {
+//     // Traitement de la colonne data JSON
+//     if (isset($data['data'])) {
+//         if (is_array($data['data'])) {
+//             // Nettoyer les valeurs vides
+//             $cleanData = array_filter($data['data'], function($value, $key) {
+//                 return $value !== null && $value !== '' && trim($key) !== '';
+//             }, ARRAY_FILTER_USE_BOTH);
             
-            $data['data'] = !empty($cleanData) ? json_encode($cleanData) : null;
-        } elseif (is_string($data['data']) && trim($data['data']) === '') {
-            $data['data'] = null;
-        }
-    } else {
-        $data['data'] = null;
-    }
+//             $data['data'] = !empty($cleanData) ? json_encode($cleanData) : null;
+//         } elseif (is_string($data['data']) && trim($data['data']) === '') {
+//             $data['data'] = null;
+//         }
+//     } else {
+//         $data['data'] = null;
+//     }
  
-    // Assurer les bons types
-    $data['coeff'] = (float) ($data['coeff'] ?? 1.0);
-    $data['duree'] = (string) ($data['duree'] ?? '1');
-    $data['ordre'] = (int) ($data['ordre'] ?? 1);
+//     // Assurer les bons types
+//     $data['coeff'] = (float) ($data['coeff'] ?? 1.0);
+//     $data['duree'] = (string) ($data['duree'] ?? '1');
+//     $data['ordre'] = (int) ($data['ordre'] ?? 1);
  
-    return $data;
-}
+//     return $data;
+// }
 
 
     public function form(Form $form): Form
@@ -55,11 +55,11 @@ class ActivitesRelationManager extends RelationManager
         return $form
             ->schema([
                 Select ::make('recordId')
-                ->label('Tâche ou stage')
-                ->options(Activite::all()->pluck('libelle_court','id'))
-                ->searchable()
-                ->required()
-                ->disabled(fn ($context): bool => $context === 'edit'),
+                    ->label('Tâche ou stage')
+                    ->options(Activite::all()->pluck('libelle_court','id'))
+                    ->searchable()
+                    ->required()
+                    ->disabled(fn ($context): bool => $context === 'edit'),
 
                TextInput::make('coeff')
                     ->label('Coefficient')
@@ -98,8 +98,11 @@ class ActivitesRelationManager extends RelationManager
             ->recordTitleAttribute('libelle_court')
             ->columns([
                 TextColumn::make('libelle_court')
-                ->label('Tâche ou stage')
+                ->label('Libellé court')
                 ->sortable(),
+                
+                TextColumn::make('type_activite')
+                ->label('Type'),
 
                 TextColumn::make('pivot.coeff')
                 ->label('Coefficient'),
@@ -191,7 +194,7 @@ class ActivitesRelationManager extends RelationManager
                     'title' => 'Détacher',
                     ]),
             ])
-            ->bulkActions([
+            ->bulkActions([                                                                                                                                                                                                                                                                                                                                                                                                           
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DetachBulkAction::make(),
                 ]),

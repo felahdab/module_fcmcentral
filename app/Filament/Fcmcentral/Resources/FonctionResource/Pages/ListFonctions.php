@@ -9,6 +9,7 @@ use Filament\Resources\Pages\ListRecords;
 class ListFonctions extends ListRecords
 {
     protected static string $resource = FonctionResource::class;
+    protected static ?string $title = 'Fonctions'; 
 
     protected function getHeaderActions(): array
     {

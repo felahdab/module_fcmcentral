@@ -9,4 +9,5 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateSavoirfaire extends CreateRecord
 {
     protected static string $resource = SavoirfaireResource::class;
+    protected static ?string $title = 'Créer savoir-faire';
 }

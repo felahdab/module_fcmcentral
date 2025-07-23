@@ -9,6 +9,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditSavoirfaire extends EditRecord
 {
     protected static string $resource = SavoirfaireResource::class;
+    protected static ?string $title = 'Modifier savoir-faire';
 
     protected function getHeaderActions(): array
     {

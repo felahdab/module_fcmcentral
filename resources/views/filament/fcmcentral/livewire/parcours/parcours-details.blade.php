@@ -1,85 +1,79 @@
 
 
 <div class="space-y-4">
-
-   
-    
-   
-      <div class="tree-view">
+    <div class="tree-view">
         @if ($parcours)
-            
-                    <div class="flex items-center justify-between">
-                      <h1 class="text-2xl font-bold yellow mt1 mb1">Parcours : {{ $parcours['libelle_long'] }}</h1>
-                       
-                    </div>
-                    <ul>
-                      <li>
-                    @if ($parcours['fonctions'] )
-                        <ul >
-                            @foreach ($parcours['fonctions']  as $fonction)
-                                <li>
-                                    <div class="flex items-center justify-between  mt1 mb1">
-                                        <strong class="greenyellow">Fonction : {{ $fonction['libelle_long'] }}</strong>
-                                       <div class="flex items-center space-x-2">
-                                      
-                                        
-                                        <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
-                                      
-                                       </div>
-                                    </div>
-                                    @if ($fonction['competences'])
-                                        <ul class="collapsible">
-                                            @foreach ($fonction['competences'] as $competence)
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold yellow mt1 mb1">
+                    {{-- Parcours :  --}}
+                    {{ $parcours['libelle_long'] }}
+                </h1>
+            </div>
+            <ul>
+                <li>
+                @if ($parcours['fonctions'] )
+                    <ul >
+                    @foreach ($parcours['fonctions']  as $fonction)
+                        <li>
+                            <div class="flex items-center mt1 mb1">
+                                <div class="flex items-center space-x-2">
+                                    <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+                                </div>        
+                                <strong class="vert">&nbsp;&nbsp;
+                                    {{-- Fonction :  --}}
+                                    {{ $fonction['libelle_long']}}
+                                </strong>                               
+                            </div>
+                            @if ($fonction['competences'])
+                                <ul class="collapsible">
+                                @foreach ($fonction['competences'] as $competence)
+                                    <li>
+                                        <div class="flex items-center mt1 mb1">
+                                            <div class="flex items-center space-x-2">
+                                                <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+                                            </div>
+                                            <strong class="bleu">
+                                                {{-- Compétence :  --}}
+                                                {{ $competence['libelle_long'] }}
+                                            </strong>
+                                        </div>
+                                        @if ($competence['savoirfaires'])
+                                            <ul class="collapsible">
+                                            @foreach ($competence['savoirfaires'] as $savoirFaire)
                                                 <li>
-                                                    <div class="flex items-center justify-between  mt1 mb1">
-                                                        <strong class="aquamarine">Compétence : {{ $competence['libelle_long'] }}</strong>
+                                                    <div class="flex items-center mt1 mb1">
                                                         <div class="flex items-center space-x-2">
-                                                        
-                                                        <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
-                                                      </div>
+                                                            <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+                                                        </div>            
+                                                        <strong class="orange">
+                                                            {{-- Savoir-faire :  --}}
+                                                            {{ $savoirFaire['libelle_long'] }}
+                                                        </strong>
                                                     </div>
-                                                    @if ($competence['savoirfaires'])
+                                                    @if ($savoirFaire['activites'])
                                                         <ul class="collapsible">
-                                                            @foreach ($competence['savoirfaires'] as $savoirFaire)
-                                                                <li>
-                                                                  <div class="flex items-center justify-between  mt1 mb1">
-                                                                    <strong class="blue">Savoir-faire : {{ $savoirFaire['libelle_long'] }}</strong>
-                                                                    <div class="flex items-center space-x-2">
-                                                                     
-                                                                  <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
-                                                              </div>
+                                                        @foreach ($savoirFaire['activites'] as $activite)
+                                                            <li>
+                                                                <div class="flex items-center mt1 mb1">
+                                                                    {{-- Activite :  --}}
+                                                                    {{ $activite['libelle_long'] }}
                                                                 </div>
-                                                                  @if ($savoirFaire['activites'])
-                                                                  <ul class="collapsible">
-                                                                      @foreach ($savoirFaire['activites'] as $activite)
-                                                                          <li>
-                                                                              <div class="flex items-center justify-between  mt1 mb1">
-                                                                              Activite : {{ $activite['libelle_long'] }}
-                                                                          <div class="flex items-center space-x-2">
-                                                                            
-                                                                          </div>
-                                                                      </div>
-                                                                      </li>
-                                                                      @endforeach
-                                                                     
-                                                                  </ul>
-                                                              @endif
-                                                                
-                                                                </li>
-                                                            @endforeach
-                                                           
+                                                            </li>
+                                                        @endforeach
                                                         </ul>
                                                     @endif
                                                 </li>
                                             @endforeach
-                                            
-                                        </ul>
-                                    @endif
-                                </li>
-                            @endforeach
-                            
-                        </ul>
-                    @endif
+                                            </ul>
+                                        @endif
+                                    </li>
+                                @endforeach
+                                </ul>
+                            @endif
+                        </li>
+                    @endforeach
+                    </ul>
+                @endif
                 </li>
             </ul>
         @else
@@ -108,22 +102,15 @@
            /* color:darkgrey; */
         }
 
-        .yellow{
-          color:yellow;
+        .bleu{
+            color:#6AADE8;
         }
-
-        .greenyellow{
-          color:greenyellow
+        .vert{
+            color:#389D60;
         }
-
-        .aquamarine {
-          color:aquamarine;
-        }
-
-        .blue {
-          color:#007bff;
-        }
-    
+        .orange{
+            color:#e67b47;
+        }    
         .tree-view .collapsible {
             display: none; /* Par défaut, les sous-éléments sont cachés */
         }
@@ -131,7 +118,7 @@
         .tree-view .toggle-btn {
             background: none;
             border: none;
-            color: #007bff;
+            color: #D81B60;
             cursor: pointer;
             font-size: 14px;
         }
@@ -162,7 +149,4 @@
             }
         }
     </script>
-    
-    
-
-  </div>
+</div>

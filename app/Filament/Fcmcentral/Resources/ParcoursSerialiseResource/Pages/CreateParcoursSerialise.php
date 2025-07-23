@@ -9,4 +9,5 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateParcoursSerialise extends CreateRecord
 {
     protected static string $resource = ParcoursSerialiseResource::class;
+    protected static ?string $title = 'Figer parcours';
 }

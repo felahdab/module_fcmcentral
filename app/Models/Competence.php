@@ -38,12 +38,14 @@ class Competence extends Model
     public function fonctions(): BelongsToMany
     {
         return $this->belongsToMany(Fonction::class, 'fcmcentral_competence_fonction', 'competence_id', 'fonction_id')
+            ->withPivot('ordre', 'same')
             ->withTimestamps();
     }
 
     public function savoirfaires(): BelongsToMany
     {
         return $this->belongsToMany(Savoirfaire::class, 'fcmcentral_competence_savoirfaire', 'competence_id', 'savoirfaire_id')
+            ->withPivot('coeff', 'duree', 'ordre', 'an_acquis', 'mod_acquis')
             ->withTimestamps();
     }
 }

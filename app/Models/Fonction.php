@@ -36,12 +36,14 @@ class Fonction extends Model
     public function parcours(): BelongsToMany
     {
         return $this->belongsToMany(Parcours::class, 'fcmcentral_fonction_parcours', 'fonction_id', 'parcours_id')
+        ->withPivot('ordre')
         ->withTimestamps();
     }
 
     public function competences(): BelongsToMany
     {
         return $this->belongsToMany(Competence::class, 'fcmcentral_competence_fonction', 'fonction_id', 'competence_id')
+        ->withPivot('ordre', 'same')
         ->withTimestamps();
     }
 

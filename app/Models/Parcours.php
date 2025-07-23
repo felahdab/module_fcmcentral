@@ -42,7 +42,8 @@ class Parcours extends Model
     public function fonctions(): BelongsToMany
     {
         return $this->belongsToMany(Fonction::class, 'fcmcentral_fonction_parcours', 'parcours_id', 'fonction_id')
-                ->withTimestamps();
+            ->withPivot('ordre')
+            ->withTimestamps();
     }
 
     public function parcoursSerialise()

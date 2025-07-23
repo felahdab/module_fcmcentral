@@ -16,6 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Modules\FcmCentral\Models\Domaine;
+use Filament\Tables\Filters\SelectFilter;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\ActivitesRelationManager;
 
@@ -29,73 +30,91 @@ class SavoirfaireResource extends Resource
     protected static ?int $navigationSort = 14;
 
     protected static ?string $navigationGroup = 'Parcours';
+    protected static ?string $navigationLabel = 'Savoir-faire';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('libelle_long')
-                    ->required()
-                    ->maxLength(255),
                 TextInput::make('libelle_court')
                     ->required()
-                    ->maxLength(255),
-                TextInput::make('url')
-                    ->label('Lien Url')
-                    ->maxLength(255), 
-                TextInput::make('code_sicomp')
-                    ->label('Code Sicomp')
-                    ->maxLength(255),  
-                    Select::make('domaine')
+                    ->label('Libellé court')
+                    ->maxLength(150),
+                TextInput::make('libelle_long')
+                    ->required()
+                    ->label('Libellé long')
+                    ->maxLength(1500),
+                Select::make('domaine_id')
                     ->label('Domaine')
+                    ->required()
+                    ->searchable()
                     ->options(Domaine::all()->pluck('libelle_court','id')),                    
-                TextInput::make('coeff')
-                    ->label('Coefficient')
-                    ->maxLength(255), 
-                TextInput::make('duree')
-                    ->label('Durée')
-                    ->maxLength(255),    
-                TextInput::make('an_acquis')
-                    ->label('Durée')
-                    ->maxLength(255), 
-                    TextInput::make('ordre')
-                    ->label('Ordre')
-                    ->maxLength(255),        
-                   Select::make('mod_acquis')
-                    ->label('Mod Acquis')
-                    ->options([
-                        'OUI' => 'Oui',
-                        'NON' => 'Non',
-                    ]),                         
+                TextInput::make('url')
+                    ->label('URL')
+                    ->maxLength(1000), 
+                TextInput::make('code_sicomp')
+                    ->label('Code OCTAVE')
+                    ->maxLength(255),  
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('libelle_court','asc')
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-               TextColumn::make('libelle_long')
-                    ->searchable(),
+                TextColumn::make('domaine.libelle_court')
+                    ->label('Domaine'),
                 TextColumn::make('libelle_court')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->label('Libellé court'),
+                TextColumn::make('libelle_long')
+                    ->searchable()
+                    ->label('Libellé long')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-               TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('url')
+                    ->formatStateUsing(function ($state) {
+                        return strlen($state) > 20 ? substr($state, 0, 20) . '...' : $state;
+                    })
+                    ->tooltip(fn ($state) => $state)                
+                    ->label('URL'),
+
             ])
             ->filters([
                 //
+                SelectFilter::make('domaine_id')
+                    ->label('Domaine')
+                    ->options(Domaine::query()->pluck('libelle_court','id')->toArray()),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                ->iconButton()
+                ->icon('heroicon-m-eye')
+                ->modalHeading('Détail')
+                ->extraAttributes([
+                    'title' => 'Consulter',
+                    'class' => 'btn-consult',
+                    ]),
+                Tables\Actions\EditAction::make()
+                ->iconButton()
+                ->icon('heroicon-m-pencil-square')
+                ->extraAttributes([
+                    'title' => 'Modifier',
+                    'class' => 'btn-modif',
+                    ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

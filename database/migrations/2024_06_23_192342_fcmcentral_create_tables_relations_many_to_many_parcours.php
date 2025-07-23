@@ -37,7 +37,7 @@ return new class extends Migration
             $table->foreignId('savoirfaire_id')->constrained('fcmcentral_savoirfaires');
             $table->integer('ordre')->default(0);
 
-            $table->decimal('coeff', 5, 2)->default(0);
+            $table->decimal('coeff', 5, 2)->nullable();
             $table->string('duree')->nullable();
             $table->string('an_acquis')->nullable();
             $table->string('mod_acquis')->nullable();

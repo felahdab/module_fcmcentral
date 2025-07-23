@@ -9,11 +9,10 @@ use Filament\Resources\Pages\EditRecord;
 class EditParcoursSerialise extends EditRecord
 {
     protected static string $resource = ParcoursSerialiseResource::class;
+    protected static ?string $title = 'Consulter PPA';
 
-    protected function getHeaderActions(): array
+    protected function getFormActions(): array
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
+        return [];
     }
 }

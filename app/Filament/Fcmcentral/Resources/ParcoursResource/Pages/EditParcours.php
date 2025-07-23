@@ -8,9 +8,9 @@ use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\TextInput;
 
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
 
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
@@ -22,11 +22,12 @@ use Modules\FcmCentral\Models\ParcoursSerialise;
 class EditParcours extends EditRecord
 {
     protected static string $resource = ParcoursResource::class;
+    protected static ?string $title = 'Modifier parcours';
 
     protected function getHeaderWidgets(): array
     {
         return [
-            ParcoursResource\Widgets\NbVersionsParcoursWidget::class,
+            // ParcoursResource\Widgets\NbVersionsParcoursWidget::class,
         ];
     }
 
@@ -44,6 +45,8 @@ class EditParcours extends EditRecord
             Action::make('figer')
                 ->requiresConfirmation()
                 ->visible($this->authorizeUser())
+                ->modalHeading(fn($record) => 'Figer le Parcours : '.$record->libelle_court)
+                ->modalDescription('En figeant le parcours, à compter de la date saisie, tous les parcours individualisés des marins suivant ce PPA seront mis à jour. Cette action est irreversible.')
                 ->form([
                     TextInput::make('version')
                         ->label('Version')

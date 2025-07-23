@@ -35,6 +35,7 @@ use Modules\FcmCommun\Services\EventTriggerService;
 class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
 {
     protected static ?string $navigationGroup = 'Marins';
+    protected static ?string $navigationLabel = 'Recherche Annudef';
 
     public function getRowActions()
     {
@@ -43,8 +44,12 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
             ->visible(function(){
                 return auth()->check();
             })
+            ->iconButton()
             ->icon('heroicon-m-user-plus')
-            ->label("Créé une fiche Marin et/ou un utilisateur local")
+            ->extraAttributes([
+                'title' => 'Créer une fiche Marin et/ou un utilisateur local',
+                'class' => 'btn-consult',
+                ])
             ->requiresConfirmation()
             ->modalSubmitAction(false)
             ->modalWidth(Enums\MaxWidth::SevenExtraLarge)
@@ -169,7 +174,7 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                 ->visible(function(){
                     return auth()->check() && auth()->user()->can('users.store');
                 })
-                ->icon('heroicon-o-plus')
+                ->icon('heroicon-m-user-plus')
                 ->label("Créé l'utilisateur local")
                 ->requiresConfirmation()
                 ->form([

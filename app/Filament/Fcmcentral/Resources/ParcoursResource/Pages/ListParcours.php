@@ -9,6 +9,7 @@ use Filament\Resources\Pages\ListRecords;
 class ListParcours extends ListRecords
 {
     protected static string $resource = ParcoursResource::class;
+    protected static ?string $title = 'Parcours';
 
     protected function getHeaderActions(): array
     {

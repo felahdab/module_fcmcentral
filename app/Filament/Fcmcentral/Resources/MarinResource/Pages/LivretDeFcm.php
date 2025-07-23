@@ -20,30 +20,22 @@ use Modules\FcmCentral\Events\UserGeneratedEvent;
  
 class LivretDeFcm extends ViewRecord
 {
+    
     protected static string $resource = MarinResource::class;
+    protected static ?string $title = 'Livret du marin';
   
     public function getRelationManagers(): array
     {
         return [];
     }
+
+  
     
     public function form(Form $form): Form
     {
         return $form
         ->schema([
-            Section::make('Informations sur le marin ')
-                ->schema([
-                    Grid::make(2)
-                    ->schema([
-                        Placeholder::make('nom')
-                            ->label('Nom Prénom')
-                            ->content(fn ($record)=> $record->nom.' '. $record->prenom),
-                        
-                    ]),
-                ]),
- 
-                
-            Section::make('Livret de FCM')
+            Section::make(fn() => 'Livret de ' . ($this->record->nom.' '. $this->record->prenom) )
                 ->schema([    
                    // Livewire::make(FilamentSpeedTest::class),
                     // DONNÉES PRÉ-CHARGÉES OBLIGATOIRES
@@ -70,6 +62,7 @@ class LivretDeFcm extends ViewRecord
     {
         $startTime = microtime(true);
         
+        
         //  REQUÊTE OPTIMISÉE - TOUS LES CHAMPS NÉCESSAIRES EN UNE FOIS
         $fcmMarin = FcmMarin::select([
             'id',
@@ -81,6 +74,7 @@ class LivretDeFcm extends ViewRecord
             'marin:id,uuid,nom,prenom'
         ])
         ->find($fcmMarinId);
+        
  
         $loadTime = round((microtime(true) - $startTime) * 1000, 2);
         Log::info("Données parcours chargées en: {$loadTime}ms pour marin: {$fcmMarinId}");

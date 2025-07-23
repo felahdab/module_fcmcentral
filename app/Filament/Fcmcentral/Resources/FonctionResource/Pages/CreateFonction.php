@@ -9,4 +9,5 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateFonction extends CreateRecord
 {
     protected static string $resource = FonctionResource::class;
+    protected static ?string $title = 'Créer fonction';
 }

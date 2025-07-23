@@ -25,7 +25,7 @@ class FonctionsRelationManager extends RelationManager
             ->schema([
                 Select ::make('recordId')
                 ->label('Fonction')
-                ->otpions(Fonction::all()->pluck('libelle_long','id'))
+                ->otpions(Fonction::all()->pluck('libelle_court','id'))
                 ->searchable()
                 ->required()
                 ->disabled(fn ($context): bool => $context === 'edit'),
@@ -35,31 +35,54 @@ class FonctionsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('libelle_long')
+            ->recordTitleAttribute('libelle_court')
             ->columns([
+                TextColumn::make('libelle_court')
+                ->label('Libellé court'),
                 TextColumn::make('libelle_long')
-                ->label('Fonction Court'),
-                TextColumn::make('libelle_long')
-                ->label('Fonction'),
-               
-
+                ->label('Libellé long'),
+                TextColumn::make('pivot.ordre')
+                ->label('Ordre')
+                ->numeric(),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                //Tables\Actions\CreateAction::make(),
-                Tables\Actions\AttachAction::make(),
+                Tables\Actions\AttachAction::make()
+                ->color('primary')
+                ->form(fn (Tables\Actions\AttachAction $action): array => [
+                    $action->getRecordSelect(),
+                    Forms\Components\TextInput::make('ordre')
+                        ->label('Ordre')
+                        ->required()
+                        ->numeric(),     
+                ])
             ])
             ->actions([
-                //Tables\Actions\EditAction::make(),
-                Tables\Actions\DetachAction::make(),
-                //Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->icon('heroicon-m-pencil-square')
+                    ->extraAttributes([
+                        'title' => 'Modifier',
+                        'class' => 'btn-modif',
+                        ])
+                    ->form([
+                        Forms\Components\TextInput::make('ordre')
+                        ->label('Ordre')
+                        ->required()
+                        ->numeric(),
+                    ]),
+                Tables\Actions\DetachAction::make()
+                    ->iconButton()
+                    ->icon('heroicon-m-arrow-top-right-on-square')
+                    ->extraAttributes([
+                        'title' => 'Détacher',
+                    ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DetachBulkAction::make(),
-                    //Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

@@ -9,11 +9,12 @@ use Filament\Resources\Pages\ListRecords;
 class ListParcoursSerialises extends ListRecords
 {
     protected static string $resource = ParcoursSerialiseResource::class;
+    protected static ?string $title = 'Parcours figés';
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            //Actions\CreateAction::make(),
-        ];
-    }
+    // protected function getHeaderActions(): array
+    // {
+    //     return [
+    //         Actions\CreateAction::make(),
+    //     ];
+    // }
 }

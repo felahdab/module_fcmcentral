@@ -9,6 +9,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditFonction extends EditRecord
 {
     protected static string $resource = FonctionResource::class;
+    protected static ?string $title = 'Modifier fonction';    
 
     protected function getHeaderActions(): array
     {

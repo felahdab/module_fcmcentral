@@ -24,6 +24,7 @@ class ViewParcours extends ViewRecord
 
     public $parcours;
 
+
     public function mount($record): void
     {
          parent::mount($record);
@@ -39,13 +40,11 @@ class ViewParcours extends ViewRecord
       */
      public function getFullParcours(int $id): ?Parcours
      {
-         $parcours = Parcours::with([
-             'fonctions.competences.savoirFaires.activites',
-         ])->find($id);
-
-         
-    
-    return $parcours;
+        $parcours = Parcours::with([
+            'fonctions.competences.savoirFaires.activites',
+        ])->find($id);
+        
+        return $parcours;
      }
 
      /**
@@ -180,10 +179,10 @@ class ViewParcours extends ViewRecord
                 ->label('Libellé Long de la Fonction')
                 ->live()
                 ->required(),
-                TextInput::make('libelle_court')
+            TextInput::make('libelle_court')
                 ->label('Libellé Court de la Fonction')
                 ->required(),
-                TextInput::make('lien_url')
+            TextInput::make('lien_url')
                 ->label('Lien de la Fonction')
                 
         ],
@@ -191,7 +190,7 @@ class ViewParcours extends ViewRecord
             TextInput::make('libelle_long')
                 ->label('Libellé de la Compétence')
                 ->required(),
-                TextInput::make('libelle_court')
+            TextInput::make('libelle_court')
                 ->label('Libellé Court Competence')
                 ->required(),
         ],
@@ -199,7 +198,7 @@ class ViewParcours extends ViewRecord
             TextInput::make('libelle_long')
                 ->label('Libellé du Savoir-Faire')
                 ->required(),
-                TextInput::make('libelle_court')
+            TextInput::make('libelle_court')
                 ->label('Libellé Court Savoir Faire')
                 ->required(),
         ],
@@ -207,7 +206,7 @@ class ViewParcours extends ViewRecord
             TextInput::make('libelle_long')
                 ->label('Libellé de l\'Activité')
                 ->required(),
-                TextInput::make('libelle_court')
+            TextInput::make('libelle_court')
                 ->label('Libellé Court Activite')
                 ->required(),
         ],

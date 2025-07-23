@@ -31,17 +31,20 @@ class ParcoursResource extends Resource
     protected static ?int $navigationSort = 11;
 
     protected static ?string $navigationGroup = 'Parcours';
+    protected static ?string $navigationLabel = 'Parcours';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('libelle_long')
-                    ->required()
-                    ->maxLength(255),
                 TextInput::make('libelle_court')
                     ->required()
-                    ->maxLength(255),
+                    ->label('Libellé court')
+                    ->maxLength(150),
+                TextInput::make('libelle_long')
+                    ->required()
+                    ->label('Libellé long')
+                    ->maxLength(1500),
             ]);
     }
 
@@ -50,30 +53,47 @@ class ParcoursResource extends Resource
         $parcours_service = new ParcoursService();
 
         return $table
+            ->defaultSort('libelle_court','asc')
             ->columns([
                TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('libelle_long')
-                    ->searchable(),
                 TextColumn::make('libelle_court')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable()
+                    ->label('Libellé court'),
+                TextColumn::make('libelle_long')
+                    ->searchable()
+                    ->label('Libellé long')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
-                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->recordUrl(fn ($record) => static::getUrl('edit',['record'=>$record]))
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->icon('heroicon-m-pencil-square')
+                    ->extraAttributes([
+                        'title' => 'Modifier',
+                        'class' => 'btn-modif',
+                        ]), 
+                Tables\Actions\ViewAction::make()
+                    ->iconButton()
+                    ->icon('heroicon-m-queue-list')
+                    ->extraAttributes([
+                        'title' => 'Parcours détaillé',
+                        'class' => 'btn-livret',
+                        ]),                    
                 Action::make('serializeParcours')
                     ->label('Figer')
                     ->button()
@@ -133,8 +153,9 @@ class ParcoursResource extends Resource
         return [
             'index' => Pages\ListParcours::route('/'),
             'create' => Pages\CreateParcours::route('/create'),
-            'edit' => Pages\EditParcours::route('/{record}/edit'),
             'view' => Pages\ViewParcours::route('/{record}/view'),
+            'edit' => Pages\EditParcours::route('/{record}/edit'),
+            
         ];
     }
 }

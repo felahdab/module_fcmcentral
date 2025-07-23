@@ -9,6 +9,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditMarin extends EditRecord
 {
     protected static string $resource = MarinResource::class;
+    protected static ?string $title = 'Modifier marin';
 
     protected function getHeaderActions(): array
     {

@@ -9,6 +9,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditCompetence extends EditRecord
 {
     protected static string $resource = CompetenceResource::class;
+    protected static ?string $title = 'Modifier compétence';
 
     protected function getHeaderActions(): array
     {

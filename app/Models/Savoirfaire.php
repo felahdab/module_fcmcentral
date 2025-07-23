@@ -48,7 +48,8 @@ class Savoirfaire extends Model
     public function competences(): BelongsToMany
     {
         return $this->belongsToMany(Competence::class, 'fcmcentral_competence_savoirfaire', 'savoirfaire_id', 'competence_id')
-                ->withTimestamps();
+            ->withPivot('coeff', 'duree', 'ordre', 'an_acquis', 'mod_acquis')
+            ->withTimestamps();
     }
 
     public function activites(): BelongsToMany
@@ -59,4 +60,8 @@ class Savoirfaire extends Model
                 ->using(ActiviteSavoirfairePivot::class);
     }
 
+    public function domaine()
+    {
+        return $this->belongsTo(Domaine::class, "domaine_id", "id");
+    }
 }

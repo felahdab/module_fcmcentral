@@ -9,4 +9,5 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateCompetence extends CreateRecord
 {
     protected static string $resource = CompetenceResource::class;
+    protected static ?string $title = 'Créer compétence';
 }

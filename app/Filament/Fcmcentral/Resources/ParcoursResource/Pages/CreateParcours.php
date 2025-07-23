@@ -9,4 +9,5 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateParcours extends CreateRecord
 {
     protected static string $resource = ParcoursResource::class;
+    protected static ?string $title = 'Créer parcours';
 }

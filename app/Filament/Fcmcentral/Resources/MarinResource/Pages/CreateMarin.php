@@ -9,4 +9,5 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateMarin extends CreateRecord
 {
     protected static string $resource = MarinResource::class;
+    protected static ?string $title = 'Créer marin';
 }

@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\Filter;
 
 use Modules\FcmCentral\Http\Livewire\ParcoursDetails;
 use Filament\Forms\Components\Placeholder;
@@ -28,45 +29,52 @@ class ParcoursSerialiseResource extends Resource
     protected static ?int $navigationSort = 10;
 
     protected static ?string $navigationGroup = 'Parcours';
+    protected static ?string $navigationLabel = 'Parcours figés';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 
-                            Forms\Components\TextInput::make('libelle_long')
-                                ->required()
-                                ->maxLength(255),
-                            Forms\Components\TextInput::make('libelle_court')
-                                ->required()
-                                ->maxLength(255),
-                            Forms\Components\TextInput::make('version')
-                                ->required()
-                                ->maxLength(255)
-                                ->default(1),
-                            Forms\Components\DatePicker::make('date_debut'),
-                            Forms\Components\DatePicker::make('date_fin'),
-                        // Forms\Components\Textarea::make('parcours')
-                        // ->formatStateUsing(function ($record){
-                        //     return json_encode($record->parcours, JSON_PRETTY_PRINT);
-                        // })
-                        //     ->columnSpanFull()
-                        //     ->rows(20)
-                        //     ->disabled(),
-                   
-                    
-                    // Section "Parcours Serialisés"
-                    Section::make('Parcours Serialisés')
-                    ->schema([
-     
+                Forms\Components\TextInput::make('libelle_court')
+                    ->required()
+                    ->label('Libellé court')
+                    ->maxLength(150)
+                    ->disabled(),
+                Forms\Components\TextInput::make('libelle_long')
+                    ->required()
+                    ->label('Libellé long')
+                    ->maxLength(1500)
+                    ->disabled(),
+                Forms\Components\TextInput::make('version')
+                    ->required()
+                    ->label('Version')
+                    ->maxLength(5)
+                    ->default(1)
+                    ->disabled(),
+                Forms\Components\DatePicker::make('date_debut')
+                    ->label('Date début')
+                    ->required()
+                    ->disabled(),
+                Forms\Components\DatePicker::make('date_fin')
+                    ->label('Date fin')
+                    ->disabled(),
+                // Section "Parcours Serialisés"
+                Section::make('Composition du PPA')
+                    ->schema([    
                         Placeholder::make('')
                         ->content(fn ($record) => view('fcmcentral::filament.fcmcentral.livewire.parcours.parcours-details',[
                             //'parcours' =>json_decode($record?->parcours ?? '{}', true),
                             'parcours' =>$record->parcours ,
                         ])),
-                  
                     ]),
-                    
+                // Forms\Components\Textarea::make('parcours')
+                // ->formatStateUsing(function ($record){
+                //     return json_encode($record->parcours, JSON_PRETTY_PRINT);
+                // })
+                //     ->columnSpanFull()
+                //     ->rows(20)
+                //     ->disabled(),
             ]);
     }
 
@@ -81,15 +89,19 @@ class ParcoursSerialiseResource extends Resource
                 Tables\Columns\TextColumn::make('version')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('libelle_court')
-                    ->searchable(),
+                    ->searchable()
+                    ->label('Libellé court'),
                 Tables\Columns\TextColumn::make('libelle_long')
                     ->searchable()
+                    ->label('Libellé long')
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('date_debut')
                     ->date()
+                    ->label('Date début')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date_fin')
                     ->date()
+                    ->label('Date fin')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -102,15 +114,36 @@ class ParcoursSerialiseResource extends Resource
             ])
             ->filters([
                 //
+                Filter::make('date_fin')
+                ->query(fn (Builder $query): Builder => $query->whereNull('date_fin'))
+                ->label('PPA en cours')
+                ->default(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\ViewAction::make()
+                // ->iconButton()
+                // ->icon('heroicon-m-eye')
+                // ->modalHeading('Détail')
+                // ->extraAttributes([
+                //     'title' => 'Consulter',
+                //     'class' => 'btn-consult',
+                //     ]),
+
+                Tables\Actions\EditAction::make()
+                ->iconButton()
+                ->icon('heroicon-m-eye')
+                ->modalHeading('Détail')
+                ->extraAttributes([
+                    'title' => 'Consulter',
+                    'class' => 'btn-consult',
+                    ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkActionGroup::make([
+            //         Tables\Actions\DeleteBulkAction::make(),
+            //     ]),
+            // ])
+            ;
     }
 
     public static function getRelations(): array
@@ -124,7 +157,8 @@ class ParcoursSerialiseResource extends Resource
     {
         return [
             'index' => Pages\ListParcoursSerialises::route('/'),
-            'create' => Pages\CreateParcoursSerialise::route('/create'),
+            // 'view' => Pages\ViewParcoursSerialise::route('/{record}/view'),
+            // 'create' => Pages\CreateParcoursSerialise::route('/create'),
             'edit' => Pages\EditParcoursSerialise::route('/{record}/edit'),
         ];
     }

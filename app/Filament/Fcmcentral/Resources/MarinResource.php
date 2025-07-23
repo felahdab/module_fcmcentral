@@ -11,7 +11,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Filters\Filter;
-
+use Filament\Tables\Filters\SelectFilter;
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
@@ -23,6 +23,8 @@ use Modules\FcmCentral\Models\Parcours;
 //use Modules\FcmCentral\Filament\Fcmcentral\Resources\FcmMarinResource;
 
 use Modules\FcmCommun\Services\EventTriggerService;
+use Modules\RH\Models\Specialite;
+use Modules\RH\Models\Unite;
 
 class MarinResource extends Resource
 {
@@ -31,8 +33,7 @@ class MarinResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationGroup = 'Marins';
-
-    protected static ?string $navigationLabel = "Liste des marins";
+    protected static ?string $navigationLabel = "Marins";
 
     public static function getNavigationBadge(): ?string
     {
@@ -46,40 +47,50 @@ class MarinResource extends Resource
                 Forms\Components\TextInput::make('nom')
                     ->required()
                     ->autofocus()
-                    ->maxLength(255),
+                    ->maxLength(1500)
+                    ->label('Nom'),
+                Forms\Components\Select::make('grade_id')
+                    ->relationship(name: 'grade', titleAttribute: 'libelle_long')
+                    ->label('Grade'),
                 Forms\Components\TextInput::make('prenom')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(1000)
+                    ->label('Prénom'),
+                Forms\Components\Select::make('specialite_id')
+                    ->relationship(name: 'specialite', titleAttribute: 'libelle_court')
+                    ->label('Spécialité'),
                 Forms\Components\TextInput::make('email')
                     ->unique(
                         table: 'rh_marins',
                         column: 'email',
                         ignoreRecord: true
                     )
-                    ->required(),
+                    ->required()
+                    ->label('Email'),
+                Forms\Components\Select::make('brevet_id')
+                    ->relationship(name: 'brevet', titleAttribute: 'libelle_long')
+                    ->label('Brevet'),
                 Forms\Components\TextInput::make('nid')
                     ->maxLength(15)
                     ->required()
-                    ->default(''),
+                    ->default('')
+                    ->label('NID'),
+                Forms\Components\Select::make('unite_id')
+                    ->relationship(name: 'unite', titleAttribute: 'libelle_long')
+                    ->label('Unité'),
                 Forms\Components\TextInput::make('matricule')
                     ->maxLength(20)
-                    ->default(''),
-                Forms\Components\DatePicker::make('date_embarq'),
-                Forms\Components\DatePicker::make('date_debarq'),
-                Forms\Components\Select::make('grade_id')
-                    ->relationship(name: 'grade', titleAttribute: 'libelle_long'),
-                Forms\Components\Select::make('specialite_id')
-                    ->relationship(name: 'specialite', titleAttribute: 'libelle_court'),
-                Forms\Components\Select::make('brevet_id')
-                    ->relationship(name: 'brevet', titleAttribute: 'libelle_long'),
-                Forms\Components\Select::make('unite_id')
-                    ->relationship(name: 'unite', titleAttribute: 'libelle_long'),
+                    ->default('')
+                    ->label('Matricule'),
+                // Forms\Components\DatePicker::make('date_embarq'),
+                // Forms\Components\DatePicker::make('date_debarq'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('nom', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('uuid')
                     ->label('UUID')
@@ -89,38 +100,44 @@ class MarinResource extends Resource
                     ->searchable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('nom')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('prenom')
-                    ->searchable(),
+                    ->searchable()
+                    ->label('Prénom'),
                 Tables\Columns\IconColumn::make('suiviEnFcm')
                     ->boolean()
-                    ->searchable(),
+                    ->label('Suivi FCM'),
                 Tables\Columns\TextColumn::make('complements_fcm.cohorte.libelle_court')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('complements_fcm.mentor.nom')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.parcours_serialise.libelle_court')
                     ->label("Parcours attribué")
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
                     ->label("Taux global")
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('matricule')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('nid')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('date_embarq')
-                    ->label('Date d\'embarquement')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('date_debarq')
-                    ->label('Date de débarquement')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->date()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('date_embarq')
+                //     ->label('Date d\'embarquement')
+                //     ->toggleable(isToggledHiddenByDefault: true)
+                //     ->date()
+                //     ->sortable(),
+                // Tables\Columns\TextColumn::make('date_debarq')
+                //     ->label('Date de débarquement')
+                //     ->toggleable(isToggledHiddenByDefault: true)
+                //     ->date()
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('specialite.libelle_court')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -132,6 +149,12 @@ class MarinResource extends Resource
                 Tables\Columns\TextColumn::make('unite.libelle_court')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('email')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
+                // Tables\Columns\TextColumn::make('code_sirh_user')
+                //     ->toggleable(isToggledHiddenByDefault: true)
+                //     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -144,12 +167,6 @@ class MarinResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('email')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('code_sirh_user')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->searchable(),
             ])
             ->filters([
                 Filter::make('en_fcm')
@@ -168,15 +185,61 @@ class MarinResource extends Resource
                         if (! array_key_exists('en_fcm', $data) || ! $data['en_fcm']) {
                             return null;
                         }
-
                         return 'Marins en FCM seulement';
-                    })
+                    }),
+                SelectFilter::make('specialite_id')
+                    ->label('Spécialité')
+                    ->options(Specialite::query()->orderBy('libelle_court')->pluck('libelle_court', 'id')),
+                SelectFilter::make('unite_id')
+                    ->label('Unité')
+                    ->options(Unite::query()->orderBy('libelle_court')->pluck('libelle_court', 'id')),
+               
+            //////////////////////////////////////////
+            /////////// Ces filtres sont à activer mais ne marchent pas en l'état car les données sont dans fcmmarin et pas marin
+            //////////////////////////////////////////
+                // SelectFilter::make('cohorte_id')
+                //     ->label('Cohorte')
+                //     ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'id')),
+                // SelectFilter::make('mentor_id')
+                //     ->label("Mentor")
+                //     ->options(
+                //         Marin::query()
+                //             ->where('data->fcm->en_fcm', false)
+                //             ->orderBy('nom')
+                //             ->get()
+                //             ->pluck('fullNameAndGrade', 'id')
+                //     )
+                //     ->query(function ($query, $value) {
+                //         return $query->whereHas('fcmcentral_fcm_marin', function ($q) use ($value) {
+                //             $q->where('mentor_id', $value);
+                //         });
+                //     }),
+                // SelectFilter::make('parcoursserialise_id')
+                //     ->label('Parcours')
+                //     ->options(
+                //         ParcoursSerialise::query()
+                //             ->whereNull('date_fin')
+                //             ->orderBy('libelle_court')
+                //             ->get()
+                //             ->pluck('libelle_court', 'id')
+                //         ),
 
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->icon('heroicon-m-pencil-square')
+                    ->extraAttributes([
+                        'title' => 'Modifier',
+                        'class' => 'btn-modif',
+                    ]),
                 Tables\Actions\Action::make("suivre_en_fcm")
-                    ->label("Suivre en FCM")
+                    ->iconButton()
+                    ->icon('heroicon-m-folder-plus')
+                    ->extraAttributes([
+                    'title' => 'Suivre en FCM',
+                    'class' => 'btn-suivifcm',
+                    ])
                     ->hidden(function ($record) {
                         return $record->suiviEnFcm;
                     })
@@ -192,30 +255,34 @@ class MarinResource extends Resource
                         event($event);
                         
                     }),
-
                 Tables\Actions\Action::make('livret-de-fcm')
-                    ->label("Livret de FCM")
-                    ->button()
-                    ->color('warning')
+                    ->iconButton()
+                    ->icon('heroicon-m-book-open')
+                    ->extraAttributes([
+                        'title' => 'Livret FCM',
+                        'class' => 'btn-livret',
+                    ])
                     ->visible(function ($record) {
-                        
                         return $record->suiviEnFcm && 
                                 $record->complements_fcm && 
                                 $record->complements_fcm->parcoursSerialises()->exists();
                     })
                     //->url(fn ($record): string => MarinResource::getUrl('livret-de-fcm', ['record' => $record->id])),
                     ->action(function ($record){
-                        // Recupere le premier parcours Sérialisés
-                        $fcmMarinId = $record->complements_fcm->id;
-                        
-                        $url = static::getUrl('livret-de-fcm',['record' => $fcmMarinId]);
+                        // $fcmMarinId = $record->complements_fcm->id;
+                        // dd($record->complements_fcm);
+                        // $url = static::getUrl('livret-de-fcm',['record' => $fcmMarinId]);
+                        $url = static::getUrl('livret-de-fcm',['record' => $record->id]);
                         return redirect($url);
                        
                     }),
-
                 Tables\Actions\Action::make("ne_plus_suivre_en_fcm")
-                    ->label("Ne plus suivre en FCM")
-                    ->button()
+                    ->iconButton()
+                    ->icon('heroicon-m-folder-minus')
+                    ->extraAttributes([
+                    'title' => 'Ne plus suivre en FCM',
+                    'class' => 'btn-suivifcm',
+                    ])
                     ->color('danger')
                     ->visible(function ($record) {
                         return $record->suiviEnFcm;
@@ -231,18 +298,35 @@ class MarinResource extends Resource
                         event($event);
                     }),
 
-                Tables\Actions\Action::make('attribuer-cohorte-et-mentor')
-                    ->label("Attribuer cohorte et mentor")
-                    ->button()
+                Tables\Actions\Action::make('attributs-fcm')
+                    ->iconButton()
+                    ->icon('heroicon-m-swatch')
+                    ->modalHeading('Attributs FCM')
+                    ->modalDescription('Selectionnez la cohorte, le mentor et le parcours à attribuer au marin.')
+                    ->extraAttributes([
+                        'title' => 'Attribuer cohorte - mentor - parcours',
+                        'class' => 'btn-suivifcm',
+                        ])
                     ->visible(fn ($record) => $record->suiviEnFcm)
                     ->requiresConfirmation()
                     ->form([
+                        // MarkdownEditor::make('info')
+                        // ->default('Sélectionnez la cohorte, le mentor et le parcours à attribuer au marin.')
+                        // ->disabled(),
                         Forms\Components\Select::make('cohorte_id')
-                            ->label("Cohorte de ce marin")
-                            ->options(Cohorte::all()->pluck('libelle_long', 'uuid')),
+                            ->label("Choisir la cohorte")
+                            ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'id')),
+                            // ->options(Cohorte::all()->pluck('libelle_long', 'id')),
                         Forms\Components\Select::make('mentor_id')
-                            ->label("Choisir un mentor")
-                            ->options(Marin::all()->pluck('fullNameAndGrade', 'uuid'))
+                            ->label("Choisir le mentor")
+                            ->options(
+                                Marin::query()
+                                    ->where('data->fcm->en_fcm', false)
+                                    ->orderBy('nom')
+                                    ->get()
+                                    ->pluck('fullNameAndGrade', 'id')
+                                )                              
+                            // ->options(Marin::all()->pluck('fullNameAndGrade', 'id'))
                             ->searchable(),
                         Forms\Components\Select::make('parcours_id')
                             ->label('Choisir un Parcours')
@@ -296,38 +380,35 @@ class MarinResource extends Resource
                             event($event);
                         }
                     }),
-                Tables\Actions\Action::make('assignerParcours')
-                    ->label('Changer le parcours de ce marin')
-                    ->button()
-                    ->color('success')
-                    ->modalHeading('Changer le parcours de ce marin')
-                    ->modalWidth('lg')
-                    ->form([
-                        Forms\Components\Select::make('parcours_id')
-                            ->label('Choisir un Parcours')
-                            ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
-                            ->searchable()
-                    ])
-                    // Pour enlever le bouton si il exist dans MarinParcours
-                    ->visible(function ($record) {
-                        $hidden = $record->suiviEnFcm && 
-                                $record->complements_fcm && 
-                                !$record->complements_fcm->parcoursSerialises()->exists();
-                        return ! $hidden;
-                    })
-                    ->action(function ($record, $data) {
-                        $event = new UserGeneratedEvent(
-                            UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
-                            auth()->user()->uuid,
-                            ObjectClasses::MARIN,
-                            $record->uuid,
-                            [
-                                "parcours" =>  $data["parcours_id"],
-                            ]
-                        );
-                        event($event);
-                    }),
+                // Tables\Actions\Action::make('assignerParcours')
+                //     ->label('Assigner Parcours')
+                //     ->button()
+                //     ->color('success')
+                //     ->modalHeading('Assigner un Parcours à un Marin')
+                //     ->modalWidth('lg')
+                //     ->form([
+                //         Forms\Components\Select::make('parcoursserialise_id')
+                //             ->label('Choisir un Parcours')
+                //             ->options(ParcoursSerialise::pluck('libelle_court', 'id'))
+                //             ->searchable()
+                //             ->required(),
+                //     ])
+                //     // Pour enlever le bouton si il exist dans MarinParcours
+                //     ->visible(function ($record) {
+                        
+                //         return $record->suiviEnFcm && 
+                //                 $record->complements_fcm && 
+                //                 !$record->complements_fcm->parcoursSerialises()->exists();
+                //     })
+                //     ->action(function ($record, $data) {
 
+                //          $eventdata  = [
+                //             "parcoursserialise_id" =>$data["parcoursserialise_id"],
+                //             "marinUuid" => $record->uuid
+                //         ];
+                //         // Utiliser le service pour déclencher l'événement
+                //         EventTriggerService::triggerEvent($eventdata, $record);
+                //     }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -348,8 +429,8 @@ class MarinResource extends Resource
         return [
             'index' => Pages\ListMarins::route('/'),
             'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),
-            //'create' => Pages\CreateMarin::route('/create'),
-            //'edit' => Pages\EditMarin::route('/{record}/edit'),
+            'create' => Pages\CreateMarin::route('/create'),
+            'edit' => Pages\EditMarin::route('/{record}/edit'),
         ];
     }
 }

@@ -30,14 +30,14 @@ class ActiviteResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('libelle_court')
+                    ->required()
+                    ->label('Libellé court')
+                    ->maxLength(150),
                 Forms\Components\TextInput::make('libelle_long')
                     ->required()
                     ->label('Libellé long')
                     ->maxLength(1500),
-                Forms\Components\TextInput::make('libelle_court')
-                    ->required()
-                    ->label('Libellé court (50)')
-                    ->maxLength(50),
                 Forms\Components\Select::make('type_activite')
                     ->options([
                         'STAGE' => 'Stage',
@@ -51,7 +51,7 @@ class ActiviteResource extends Resource
                     ->maxLength(1000),
                 Forms\Components\TextInput::make('duree_validite')
                     // ->required()
-                    ->label('Durée de validité (jours)')
+                    ->label('Durée de validité (j)')
                     ->maxLength(10),
                 Forms\Components\TextInput::make('prerequis')
                     // ->required()
@@ -63,6 +63,7 @@ class ActiviteResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('libelle_court','asc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -72,6 +73,7 @@ class ActiviteResource extends Resource
                     ->label('Type'),
                 Tables\Columns\TextColumn::make('libelle_court')
                     ->searchable()
+                    ->sortable()
                     ->label('Libellé court'),
                 Tables\Columns\TextColumn::make('libelle_long')
                     ->searchable()
@@ -86,9 +88,13 @@ class ActiviteResource extends Resource
                     ->label('URL'),
                 Tables\Columns\TextColumn::make('duree_validite')
                     ->searchable()
-                    ->label('Durée de validité (jours)'),
+                    ->label('Durée de validité (j)'),
                 Tables\Columns\TextColumn::make('prerequis')
                     ->searchable()
+                    ->formatStateUsing(function ($state) {
+                        return strlen($state) > 20 ? substr($state, 0, 20) . '...' : $state;
+                    })
+                    ->tooltip(fn ($state) => $state)
                     ->label('Prérequis'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

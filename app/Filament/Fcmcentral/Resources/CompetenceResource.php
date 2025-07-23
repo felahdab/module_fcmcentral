@@ -28,38 +28,51 @@ class CompetenceResource extends Resource
     protected static ?int $navigationSort = 13;
 
     protected static ?string $navigationGroup = 'Parcours';
+    protected static ?string $navigationLabel = 'Compétences';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('libelle_long')
-                    ->required()
-                    ->maxLength(255),
                 TextInput::make('libelle_court')
                     ->required()
-                    ->maxLength(255),
+                    ->label('Libellé court')
+                    ->maxLength(150),
+                TextInput::make('libelle_long')
+                    ->required()
+                    ->label('Libellé long')
+                    ->maxLength(1500),
                 TextInput::make('url')
-                    ->label('Lien Url')
-                    ->maxLength(255), 
-               TextInput::make('same')
-                    ->label('Same')
-                    ->maxLength(255),    
+                    ->label('URL')
+                    ->maxLength(1000), 
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('libelle_court','asc')    
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('libelle_long')
-                    ->searchable(),
                 TextColumn::make('libelle_court')
+                    ->label('Libellé court')
+                    ->sortable()
                     ->searchable(),   
+                TextColumn::make('libelle_long')
+                    ->label('Libellé long') 
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('url')
+                    ->searchable()
+                    ->formatStateUsing(function ($state) {
+                        return strlen($state) > 20 ? substr($state, 0, 20) . '...' : $state;
+                    })
+                    ->tooltip(fn ($state) => $state)                
+                    ->label('URL'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -73,7 +86,22 @@ class CompetenceResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                ->iconButton()
+                ->icon('heroicon-m-eye')
+                ->modalHeading('Détail')
+                ->extraAttributes([
+                    'title' => 'Consulter',
+                    'class' => 'btn-consult',
+                    ]),
+                Tables\Actions\EditAction::make()
+                ->iconButton()
+                ->icon('heroicon-m-pencil-square')
+                ->extraAttributes([
+                    'title' => 'Modifier',
+                    'class' => 'btn-modif',
+                    ]),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
