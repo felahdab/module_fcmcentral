@@ -1,23 +1,23 @@
 <?php
-
+ 
 namespace Modules\FcmCentral\Listeners\Save\MarinParcours;
-
+ 
 use Filament\Notifications\Notification;
-
 use App\Models\User;
-
 use Modules\FcmCommun\Enums\Constants;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\Services\CalculTauxParcoursService;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
-
+use Illuminate\Support\Facades\Log;
+ 
 class ValidElementMarinParcoursListener
 {
     public $comment;
     public $selectedItems;
-
+ 
     /**
      * Gère l'événement.
      *
@@ -30,131 +30,146 @@ class ValidElementMarinParcoursListener
         if (!$event->isOfType(UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS)) {
             return;
         }
-
+ 
         // Récupérer le marin et les données
         $marin = Marin::where('uuid', $event->object_uuid)->first();
-
-        // Extrait du modèle FcmCentral\Models\Marin:
-        // * Grace à la définition de cet attribut, le developpeur peut utiliser les méthodes suivantes:
-        // * $marin->complements_fcm->cohorte
-        // * $marin->complements_fcm->mentor
-        // * $marin->complements_fcm->donnees_du_parcours->taux_global
-        // * $marin->complements_fcm->donnees_du_parcours->taux_stage
-        // * $marin->complements_fcm->donnees_du_parcours->taux_activite
-        // * $marin->complements_fcm->donnees_du_parcours->parcoursmarin: le parcours du marin, dans sa forme sérialisée 
-        //            (mais castée array) et mise à jour par les évènements successifs.
-        // * $marin->complements_fcm->donnees_du_parcours->parcours_serialise: lien vers l'objet de la classe ParcoursSerialise
-        //              ayant servi de référence lors de l'attribution du parcours à ce marin.
-        // Attention à ne pas confondre ces 2 objets et à bien travailler sur parcoursmarin pour les mises à jours
-
+        
+        if (!$marin) {
+            Log::error('Marin non trouvé avec UUID: ' . $event->object_uuid);
+            return;
+        }
+ 
         $data = $event->detail;
-        $this->comment = $data['commentaire'];
+        //dd( $data);
+        //  RÉCUPÉRER TOUS LES ÉLÉMENTS DEPUIS selectedItems_full
+        $this->selectedItems = $data['sauve'] ?? [];
+        $this->comment = $this->sanitizeComment($data['commentaire'] ?? '');
+        
         $valideur = User::where('uuid', $event->user_uuid)->first();
-        $type_element = $data['type_element'];
-        $uuid_element = $data['uuid_element'];
-        $date = $data['date'];
-
+        $valideurName = $valideur ? 
+            ($valideur->display_name ?? $valideur->nom . ' ' . $valideur->prenom) : 
+            'VALIDEUR INCONNU';
+ 
+        //  DÉTERMINER LA CLÉ D'ACTION (sauve, annul, propos, etc.)
+        $actionType = $data['action_type'] ?? 'valid';
+        //$key = $this->getKeyFromActionType($actionType);
+ 
         $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours;
-        //ddd($donnees_du_parcours);
+        
+        if (!$donnees_du_parcours) {
+            Log::error('Données du parcours non trouvées pour le marin: ' . $marin->uuid);
+            return;
+        }
+ 
         $parcoursMarin = $donnees_du_parcours->parcoursmarin;
         
-        //ddd($parcoursMarin);
-        // Mise a jour en fonction de selectedItems
+        if (!$parcoursMarin) {
+            Log::error('Parcours marin non trouvé ou vide pour le marin: ' . $marin->uuid);
+            return;
+        }
+ 
+        //  TRAITER TOUS LES ÉLÉMENTS SELON LA CLÉ D'ACTION
+        $itemsToUpdate = $this->selectedItems ?? [];
         
-        $this->updateParcoursMarinItems($parcoursMarin, $type_element,  $uuid_element, $valideur->displayName ?? $valideur->nom . ' ' . $valideur->prenom);
-        ddd($parcoursMarin);
-
+        
+ 
+        //  METTRE À JOUR TOUS LES TYPES D'ÉLÉMENTS
+        foreach (['fonctions', 'competences', 'savoirfaires', 'activites'] as $elementType) {
+            if (isset($itemsToUpdate[$elementType])) {
+                $this->updateParcoursMarinItems(
+                    $parcoursMarin, 
+                    $elementType, 
+                    $itemsToUpdate[$elementType], 
+                    $valideurName
+                );
+            }
+        }
+ 
         // Recalcul des taux
         $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
-        $donnees_du_parcours->refresh();
-        ddd($donnees_du_parcours);
-        $donnees_du_parcours->taux_global= $parcoursMarin['taux_global'];
-        $donnees_du_parcours->pivot->taux_stage= $parcoursMarin['taux_stage'];
-        $donnees_du_parcours->pivot->taux_activite= $parcoursMarin['taux_activite'];
-        
-
-        // Sauvegarder les données d'origine avec les modifications dans selectedItems
+        $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
+        $donnees_du_parcours->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
+        $donnees_du_parcours->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
+ 
+        // Sauvegarder les données
         $donnees_du_parcours->parcoursmarin = $parcoursMarin;
-        $parcours->pivot->save();
-
-        
-
+        $donnees_du_parcours->save();
+ 
         // Notification de succès
-        // Notification::make()
-        // ->title('Données sauvegardées avec succès')
-        // ->success()
-        // ->send();
-
-        $notification = Constants::getMess(Constants::VALID_ELMT_MARIN_PARCOURS, $marin->nom);
-
-        // Notification Filament
+        $notification = UserGeneratedEventNotifications::getMess(
+            UserGeneratedEventNotifications::VALID_ELMT_MARIN_PARCOURS,
+            $marin->nom
+        );
+ 
         Notification::make()
             ->title($notification['title'])
             ->success()
             ->body($notification['message'])
             ->send();
     }
-
+ 
+    
+ 
     /**
-     * Mettre à jour les éléments imbriqués dans la structure.
+     * MÉTHODE POUR NETTOYER LES COMMENTAIRES
      */
-    protected function updateParcoursMarinItems(&$parcoursMarin, $type, $item, $displayName)
+    protected function sanitizeComment(string $comment): string
     {
+        if (empty($comment)) {
+            return '';
+        }
+        
+        $comment = strip_tags($comment);
+        $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
+        $comment = preg_replace('/\s+/', ' ', $comment);
+        $comment = addslashes(trim($comment));
+ 
+        return $comment;
+    }
+ 
+    /**
+     *  METTRE À JOUR LES ÉLÉMENTS 
+     */
+    protected function updateParcoursMarinItems(&$parcoursMarin, $type, $items, $displayName)
+    {
+        if (empty($items) || !is_array($items)) {
+            return;
+        }
+ 
+        Log::info("Mise à jour des {$type}", [
+            'count' => count($items),
+            'items' => array_keys($items)
+        ]);
+ 
         foreach ($parcoursMarin['fonctions'] as &$fonction) {
             // --- TRAITEMENT DIRECT DES FONCTIONS ---
-            if ($type === 'fonctions' && $fonction['uuid'] == $item) {
-                $fonction['etat_valid'] = true;
-                $fonction['commentaire'] = $this->comment;
-                $fonction['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
-                $fonction['valideur'] = $displayName;
+            if ($type === 'fonctions' && isset($items[$fonction['uuid']])) {
+                $this->updateElement($fonction, $displayName);
+                Log::info("Fonction mise à jour: {$fonction['uuid']}");
             }
-
-            // --- TRAITEMENT DES AUTRES TYPES ---
-            if (isset($fonction[$type])) {
-                foreach ($fonction[$type] as &$element) {
-                    if (isset($items[$element['id']])) {
-                        $element['etat_valid'] = $items[$element['id']];
-                        $element['commentaire'] = $this->comment;
-                        $element['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
-                        $element['valideur'] = $displayName;
-                    }
-                }
-            }
-
-            // --- SOUS-NIVEAUX ---
+ 
+            // --- TRAITEMENT DES COMPÉTENCES ---
             if (isset($fonction['competences'])) {
                 foreach ($fonction['competences'] as &$competence) {
-                    if ($type === 'competences' && $competence['uuid'] == $item) {
-                        $competence['etat_valid'] = true;
-                        $competence['commentaire'] = $this->comment;
-                        $competence['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
-                        $competence['valideur'] = $displayName;
+                    if ($type === 'competences' && isset($items[$competence['uuid']])) {
+                        $this->updateElement($competence, $displayName);
+                        Log::info("Compétence mise à jour: {$competence['uuid']}");
                     }
-                    if (isset($competence[$type])) {
-                        foreach ($competence[$type] as &$element) {
-                            if (isset($items[$element['id']])) {
-                                $element['etat_valid'] = $items[$element['id']];
-                                $element['commentaire'] = $this->comment;
-                                $element['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
-                                $element['valideur'] = $displayName;
-                            }
-                        }
-                    }
+ 
+                    // --- TRAITEMENT DES SAVOIR-FAIRES ---
                     if (isset($competence['savoirfaires'])) {
                         foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                            if ($type === 'savoirfaires' && $savoirFaire['uuid'] == $item) {
-                                $savoirFaire['etat_valid'] = true;
-                                $savoirFaire['commentaire'] = $this->comment;
-                                $savoirFaire['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
-                                $savoirFaire['valideur'] = $displayName;
+                            if ($type === 'savoirfaires' && isset($items[$savoirFaire['uuid']])) {
+                                $this->updateElement($savoirFaire, $displayName);
+                                Log::info("Savoir-faire mis à jour: {$savoirFaire['uuid']}");
                             }
-                            if (isset($savoirFaire[$type])) {
-                                foreach ($savoirFaire[$type] as &$element) {
-                                    if (isset($items[$element['id']])) {
-                                        $element['etat_valid'] = $items[$element['id']];
-                                        $element['commentaire'] = $this->comment;
-                                        $element['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
-                                        $element['valideur'] = $displayName;
+ 
+                            // --- TRAITEMENT DES ACTIVITÉS ---
+                            if (isset($savoirFaire['activites'])) {
+                                foreach ($savoirFaire['activites'] as &$activite) {
+                                    if ($type === 'activites' && isset($items[$activite['uuid']])) {
+                                        $this->updateElement($activite, $displayName);
+                                        Log::info("Activité mise à jour: {$activite['uuid']}");
                                     }
                                 }
                             }
@@ -163,5 +178,16 @@ class ValidElementMarinParcoursListener
                 }
             }
         }
+    }
+ 
+    /**
+     *  MÉTHODE HELPER POUR METTRE À JOUR UN ÉLÉMENT
+     */
+    protected function updateElement(&$element, $displayName)
+    {
+        $element['etat_valid'] = true;
+        $element['commentaire'] = $this->comment;
+        $element['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
+        $element['valideur'] = $displayName;
     }
 }
