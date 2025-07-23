@@ -429,8 +429,8 @@ class MarinResource extends Resource
         return [
             'index' => Pages\ListMarins::route('/'),
             'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),
-            'create' => Pages\CreateMarin::route('/create'),
-            'edit' => Pages\EditMarin::route('/{record}/edit'),
+            //'create' => Pages\CreateMarin::route('/create'),
+            //'edit' => Pages\EditMarin::route('/{record}/edit'),
         ];
     }
 }
