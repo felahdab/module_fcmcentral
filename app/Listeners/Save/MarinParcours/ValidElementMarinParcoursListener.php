@@ -40,20 +40,22 @@ class ValidElementMarinParcoursListener
         }
  
         $data = $event->detail;
+
+        // array:4 [▼ // vendor/spatie/laravel-ignition/src/helpers.php:14
+        // "type_element" => "activite"
+        // "uuid_element" => "eb48b9df-c466-37a5-a6b4-3251761f371f"
+        // "date" => Carbon\Carbon @1753288270 {#2989 ▶}
+        // "commentaire" => "dfg"
+        // ]
         //dd( $data);
         //  RÉCUPÉRER TOUS LES ÉLÉMENTS DEPUIS selectedItems_full
-        $this->selectedItems = $data['sauve'] ?? [];
         $this->comment = $this->sanitizeComment($data['commentaire'] ?? '');
         
         $valideur = User::where('uuid', $event->user_uuid)->first();
         $valideurName = $valideur ? 
             ($valideur->display_name ?? $valideur->nom . ' ' . $valideur->prenom) : 
             'VALIDEUR INCONNU';
- 
-        //  DÉTERMINER LA CLÉ D'ACTION (sauve, annul, propos, etc.)
-        $actionType = $data['action_type'] ?? 'valid';
-        //$key = $this->getKeyFromActionType($actionType);
- 
+
         $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours;
         
         if (!$donnees_du_parcours) {
@@ -67,23 +69,13 @@ class ValidElementMarinParcoursListener
             Log::error('Parcours marin non trouvé ou vide pour le marin: ' . $marin->uuid);
             return;
         }
- 
-        //  TRAITER TOUS LES ÉLÉMENTS SELON LA CLÉ D'ACTION
-        $itemsToUpdate = $this->selectedItems ?? [];
-        
-        
- 
-        //  METTRE À JOUR TOUS LES TYPES D'ÉLÉMENTS
-        foreach (['fonctions', 'competences', 'savoirfaires', 'activites'] as $elementType) {
-            if (isset($itemsToUpdate[$elementType])) {
-                $this->updateParcoursMarinItems(
-                    $parcoursMarin, 
-                    $elementType, 
-                    $itemsToUpdate[$elementType], 
-                    $valideurName
-                );
-            }
-        }
+
+        $this->updateParcoursMarinItems(
+            $parcoursMarin, 
+            $data['type_element'], 
+            $data['uuid_element'],
+            $valideurName
+        );
  
         // Recalcul des taux
         $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
@@ -130,20 +122,13 @@ class ValidElementMarinParcoursListener
     /**
      *  METTRE À JOUR LES ÉLÉMENTS 
      */
-    protected function updateParcoursMarinItems(&$parcoursMarin, $type, $items, $displayName)
-    {
-        if (empty($items) || !is_array($items)) {
-            return;
-        }
- 
-        Log::info("Mise à jour des {$type}", [
-            'count' => count($items),
-            'items' => array_keys($items)
-        ]);
- 
+    protected function updateParcoursMarinItems(&$parcoursMarin, $type_element, $uuid_element, $displayName)
+    { 
+        logger()->info("On doit valider  : {$type_element} / {$uuid_element}");
         foreach ($parcoursMarin['fonctions'] as &$fonction) {
+            logger()->info("Mise a jour de fontion: {$fonction["uuid"]}");
             // --- TRAITEMENT DIRECT DES FONCTIONS ---
-            if ($type === 'fonctions' && isset($items[$fonction['uuid']])) {
+            if ($type_element === 'fonction' && $fonction['uuid'] == $uuid_element) {
                 $this->updateElement($fonction, $displayName);
                 Log::info("Fonction mise à jour: {$fonction['uuid']}");
             }
@@ -151,7 +136,8 @@ class ValidElementMarinParcoursListener
             // --- TRAITEMENT DES COMPÉTENCES ---
             if (isset($fonction['competences'])) {
                 foreach ($fonction['competences'] as &$competence) {
-                    if ($type === 'competences' && isset($items[$competence['uuid']])) {
+                    logger()->info("Mise a jour de competence: {$competence["uuid"]}");
+                    if ($type_element === 'competence' && $competence['uuid'] == $uuid_element) {
                         $this->updateElement($competence, $displayName);
                         Log::info("Compétence mise à jour: {$competence['uuid']}");
                     }
@@ -159,7 +145,8 @@ class ValidElementMarinParcoursListener
                     // --- TRAITEMENT DES SAVOIR-FAIRES ---
                     if (isset($competence['savoirfaires'])) {
                         foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                            if ($type === 'savoirfaires' && isset($items[$savoirFaire['uuid']])) {
+                            logger()->info("Mise a jour de savoir-faire: {$savoirFaire["uuid"]}");
+                            if ($type_element === 'savoirfaire' && $savoirFaire['uuid'] == $uuid_element) {
                                 $this->updateElement($savoirFaire, $displayName);
                                 Log::info("Savoir-faire mis à jour: {$savoirFaire['uuid']}");
                             }
@@ -167,7 +154,8 @@ class ValidElementMarinParcoursListener
                             // --- TRAITEMENT DES ACTIVITÉS ---
                             if (isset($savoirFaire['activites'])) {
                                 foreach ($savoirFaire['activites'] as &$activite) {
-                                    if ($type === 'activites' && isset($items[$activite['uuid']])) {
+                                    logger()->info("Mise a jour de activite: {$activite["uuid"]}");
+                                    if ($type_element === 'activite' && $activite['uuid'] == $uuid_element) {
                                         $this->updateElement($activite, $displayName);
                                         Log::info("Activité mise à jour: {$activite['uuid']}");
                                     }
