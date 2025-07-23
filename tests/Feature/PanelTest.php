@@ -344,7 +344,7 @@ it('displays the livret FCM ', function(){
         
     Livewire::actingAs($this->admin)
             ->test(Resources\MarinResource\Pages\LivretDeFcm::class, ["record" => $marin->id])
-            ->assertSee("Livret de FCM");
+            ->assertSee("Livret du marin");
 
     
         
