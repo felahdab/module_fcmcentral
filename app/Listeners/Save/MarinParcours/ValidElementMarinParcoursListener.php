@@ -76,6 +76,10 @@ class ValidElementMarinParcoursListener
             $data['uuid_element'],
             $valideurName
         );
+        // JULIEN:
+        // Insérer ici un recalcul de l'état du parcours en fonction de l'état de validation des activités
+        // Je pense que tu dois avoir le code quelque part
+        // Une fois ce listener modifié, le test "recalcule l'état du parcours apres l'exécution d'une modification" doit passer correctement.
  
         // Recalcul des taux
         $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
