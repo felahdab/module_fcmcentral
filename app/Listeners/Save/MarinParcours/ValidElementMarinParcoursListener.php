@@ -7,6 +7,7 @@ use App\Models\User;
 use Modules\FcmCommun\Enums\Constants;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\Services\CalculTauxParcoursService;
+use Modules\FcmCommun\Services\ReCalculEtatParcoursService; 
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
@@ -76,7 +77,16 @@ class ValidElementMarinParcoursListener
             $data['uuid_element'],
             $valideurName
         );
+        // JULIEN:
+        // Insérer ici un recalcul de l'état du parcours en fonction de l'état de validation des activités
+        // Je pense que tu dois avoir le code quelque part
+        // Une fois ce listener modifié, le test "recalcule l'état du parcours apres l'exécution d'une modification" doit passer correctement.
  
+        //  RECALCULER LES ÉTATS DE VALIDATION HIÉRARCHIQUES
+    
+        ReCalculEtatParcoursService::recalculerEtats($parcoursMarin);
+
+
         // Recalcul des taux
         $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
         $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;

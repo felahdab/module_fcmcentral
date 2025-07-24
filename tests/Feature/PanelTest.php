@@ -6,6 +6,7 @@ use Carbon\Carbon;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Artisan;
 
 use function Pest\Laravel\{actingAs};
 use Livewire\Livewire;
@@ -23,6 +24,8 @@ use Modules\FcmCentral\Models;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+
+use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
 
 
 uses(RefreshDatabase::class);
@@ -349,3 +352,87 @@ it('displays the livret FCM ', function(){
     
         
 });
+
+it('recalcule l état du parcours apres l exécution d une modification', function(){
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
+    $marin->suivi_en_fcm = true;
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
+    
+    $this->seed(DeasmMasterSeeder::class);
+    $this->assertTrue(Models\Parcours::count() == 1);
+    $parcours = Models\Parcours::first();
+
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::PARCOURS,
+        object_uuid : $parcours->uuid,
+        detail: [
+            "version" => 1,
+            "date_de_debut"=> Carbon::tomorrow(),
+        ]
+        );
+    event($event);
+
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid : $marin->uuid,
+        detail: [
+            "parcours" => $parcours->uuid,
+        ]
+        );
+    event($event);
+
+    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d'; //C1-SF5 - Rechercher et exploiter le retex technique et tactique disponible
+
+    $activites = [
+        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  //Niveau 2 - GENOPS- Activité BOPS/CMI1
+        '97750a5e-abd4-4c16-89a6-65a2695ab692',  //Niveau 2 - GENOPS- Activité BOPS/CMI2
+        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  //Niveau 2 - GENOPS- Activité BOPS/MSGOPS
+        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'   //Niveau 2 - GENOPS- Activité BOPS/SIOC
+    ];
+
+    foreach($activites as $activite)
+    {
+        $event = new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
+            user_uuid : $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid : $marin->uuid,
+            detail: [
+                "type_element" => "activite",
+                "uuid_element" => $activite,
+                "date" => Carbon::now(),
+                "commentaire"=> "commentaire"
+            ]
+            );
+        event($event);
+    }
+    
+    $marin->refresh();
+
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction)
+    {
+        //dump($fonction);
+        foreach($fonction["competences"] as $competence)
+        {
+            foreach($competence["savoirfaires"] as $savoirfaire)
+            {
+                if ($savoirfaire["uuid"] == $savoirfaire_uuid)
+                {
+                    //dump($savoirfaire);
+                    foreach($savoirfaire["activites"] as $activite)
+                    {
+                        $this->assertTrue($activite["etat_valid"] == true);
+                    }
+                    $this->assertTrue($savoirfaire["etat_valid"] == true);
+                }
+            }
+        }
+    }
+})->only();
