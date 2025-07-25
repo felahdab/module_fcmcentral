@@ -528,13 +528,13 @@ it('devalide les bons elements du parcours lors de l emission du UserGeneratedEv
                     foreach($savoirfaire["activites"] as $activite)
                     {
                         if ($activite['uuid'] == $activites[0]){
-                            $this->assertTrue($activite["etat_valid"] == false);
+                            $this->assertFalse($activite["etat_valid"]);
                         }
                         else{
                             $this->assertTrue($activite["etat_valid"] == true);
                         }
                     }
-                    $this->assertTrue($savoirfaire["etat_valid"] == false);
+                    $this->assertFalse($savoirfaire["etat_valid"]);
                 }
             }
         }
