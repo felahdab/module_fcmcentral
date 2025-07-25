@@ -43,19 +43,19 @@ beforeEach(function () {
     $this->admin->save();
 });
 
-it('displays the FCM Central panel', function() {
+it('affiche le panneau principal FCM Central', function() {
     Livewire::actingAs($this->admin)
         ->test(Dashboard::class)
         ->assertSee('Tableau de bord');
 });
 
-it('displays the configuration page', function() {
+it('affiche la page de configuration', function() {
     Livewire::actingAs($this->admin)
         ->test(Configuration::class)
         ->assertSee('Configuration du module FCM Central');
 });
 
-it('saves configuration settings to fcmcentral settings', function() {
+it('enregistre la configuration du module FcmCentral en base de données', function() {
     Livewire::actingAs($this->admin)
         ->test(Configuration::class)
         ->fillForm([
@@ -70,7 +70,7 @@ it('saves configuration settings to fcmcentral settings', function() {
 
 });
 
-it('saves configuration settings to fcmcommun settings', function() {
+it('enregistre la configuration du module FcmCommun en base de données', function() {
     Livewire::actingAs($this->admin)
         ->test(Configuration::class)
         ->fillForm([
@@ -85,13 +85,13 @@ it('saves configuration settings to fcmcommun settings', function() {
 
 });
 
-it('shows cohorte list', function() {
+it('affiche la liste des cohortes', function() {
     Livewire::actingAs($this->admin)
         ->test(Resources\CohorteResource\Pages\ListCohortes::class)
         ->assertSee('Cohortes');
 });
 
-it('has factories for all models', function(){
+it('a des factories pour tous les modeles', function(){
     Models\Activite::factory()->create();
     $this->assertTrue(Models\Activite::all()->count() == 1);
 
@@ -109,7 +109,7 @@ it('has factories for all models', function(){
 
 });
 
-it('generated a UserGeneratedEvent when user wants to fige a parcours from the edit page', function(){
+it('genere un  UserGeneratedEvent quand on demande à figer un parcours depuis la page d edition d un parcours', function(){
     Event::fake();
 
     $this->assertTrue(Models\Parcours::all()->count() == 0);
@@ -133,7 +133,7 @@ it('generated a UserGeneratedEvent when user wants to fige a parcours from the e
         
 });
 
-it('generated a UserGeneratedEvent when user wants to fige a parcours from the list page', function(){
+it('genere un  UserGeneratedEvent quand on demande à figer un parcours depuis la liste des parcours', function(){
     Event::fake();
 
     $this->assertTrue(Models\Parcours::all()->count() == 0);
@@ -156,7 +156,7 @@ it('generated a UserGeneratedEvent when user wants to fige a parcours from the l
         
 });
 
-it('generates a UserGeneratedEvent when user wants to suivre en FCM un marin', function(){
+it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', function(){
     Event::fake();
 
     $this->assertTrue(Models\Marin::all()->count() == 0);
@@ -179,7 +179,7 @@ it('generates a UserGeneratedEvent when user wants to suivre en FCM un marin', f
         
 });
 
-it('generates a UserGeneratedEvent when user wants to ne plus suivre en FCM un marin', function(){
+it('genere un  UserGeneratedEvent quand on demande a ne plus suivre un marin en FCM', function(){
     Event::fake();
 
     $this->assertTrue(Models\Marin::all()->count() == 0);
@@ -205,7 +205,7 @@ it('generates a UserGeneratedEvent when user wants to ne plus suivre en FCM un m
     });
 });
 
-it('generates a UserGeneratedEvent when user wants to assign cohorte', function(){
+it('genere un  UserGeneratedEvent quand on assigne une cohorte a un marin suivi en fcm', function(){
     Event::fake();
 
     $this->assertTrue(Models\Marin::all()->count() == 0);
@@ -234,7 +234,7 @@ it('generates a UserGeneratedEvent when user wants to assign cohorte', function(
         
 });
 
-it('generates a UserGeneratedEvent when user wants to assign a mentor', function(){
+it('genere un  UserGeneratedEvent quand on assigne un mentor a un marin suivi en fcm', function(){
     Event::fake();
 
     $this->assertTrue(Models\Marin::all()->count() == 0);
@@ -262,7 +262,7 @@ it('generates a UserGeneratedEvent when user wants to assign a mentor', function
         
 });
 
-it('generates a UserGeneratedEvent when user wants to assign a parcours', function(){
+it('genere un  UserGeneratedEvent quand on assigne un parcours a un marin suivi en fcm', function(){
     Event::fake();
 
     $this->assertTrue(Models\Marin::all()->count() == 0);
@@ -308,7 +308,7 @@ it('generates a UserGeneratedEvent when user wants to assign a parcours', functi
         
 });
 
-it('displays the livret FCM ', function(){
+it('affiche le livret FCM ', function(){
     $this->assertTrue(Models\Marin::all()->count() == 0);
     $marin = Models\Marin::factory()->create();
     $marin = Models\Marin::find($marin->id);
@@ -343,17 +343,14 @@ it('displays the livret FCM ', function(){
             "parcours_id" => $parcours->uuid
         ])
         ->assertHasNoActionErrors();
-
-        
+ 
     Livewire::actingAs($this->admin)
             ->test(Resources\MarinResource\Pages\LivretDeFcm::class, ["record" => $marin->id])
             ->assertSee("Livret du marin");
 
-    
-        
 });
 
-it('recalcule l état du parcours apres l exécution d une modification', function(){
+it('met a jour le parcours en cas de validation', function(){
     $this->assertTrue(Models\Marin::all()->count() == 0);
     $marin = Models\Marin::factory()->create();
     $marin = Models\Marin::find($marin->id);
@@ -437,7 +434,7 @@ it('recalcule l état du parcours apres l exécution d une modification', functi
     }
 });
 
-it('devalide les bons elements du parcours lors de l emission du UserGeneratedEvent', function(){
+it('met a jour le parcours en cas d annulation', function(){
     $this->assertTrue(Models\Marin::all()->count() == 0);
     $marin = Models\Marin::factory()->create();
     $marin = Models\Marin::find($marin->id);
@@ -625,4 +622,202 @@ it('met a jour le parcours en cas de proposition', function(){
             }
         }
     }
-})->only();
+});
+
+it('met a jour le parcours en cas de validation d une proposition', function(){
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
+    $marin->suivi_en_fcm = true;
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
+    
+    $this->seed(DeasmMasterSeeder::class);
+    $this->assertTrue(Models\Parcours::count() == 1);
+    $parcours = Models\Parcours::first();
+
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::PARCOURS,
+        object_uuid : $parcours->uuid,
+        detail: [
+            "version" => 1,
+            "date_de_debut"=> Carbon::tomorrow(),
+        ]
+        );
+    event($event);
+
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid : $marin->uuid,
+        detail: [
+            "parcours" => $parcours->uuid,
+        ]
+        );
+    event($event);
+
+    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d'; //C1-SF5 - Rechercher et exploiter le retex technique et tactique disponible
+
+    $activites = [
+        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  //Niveau 2 - GENOPS- Activité BOPS/CMI1
+        '97750a5e-abd4-4c16-89a6-65a2695ab692',  //Niveau 2 - GENOPS- Activité BOPS/CMI2
+        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  //Niveau 2 - GENOPS- Activité BOPS/MSGOPS
+        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'   //Niveau 2 - GENOPS- Activité BOPS/SIOC
+    ];
+
+    // On propose la premiere activité
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::PROPOS_ELMT_MARIN_PARCOURS,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid : $marin->uuid,
+        detail: [
+            "type_element" => "activite",
+            "uuid_element" => $activites[0],
+            "date" => Carbon::now(),
+            "commentaire"=> "commentaire"
+        ]
+        );
+    event($event);
+
+    // On valide la premiere activité
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid : $marin->uuid,
+        detail: [
+            "type_element" => "activite",
+            "uuid_element" => $activites[0],
+            "date" => Carbon::now(),
+            "commentaire"=> "commentaire"
+        ]
+        );
+    event($event);
+    
+    $marin->refresh();
+
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction)
+    {
+        //dump($fonction);
+        foreach($fonction["competences"] as $competence)
+        {
+            foreach($competence["savoirfaires"] as $savoirfaire)
+            {
+                if ($savoirfaire["uuid"] == $savoirfaire_uuid)
+                {
+                    //dump($savoirfaire);
+                    foreach($savoirfaire["activites"] as $activite)
+                    {
+                        if ($activite['uuid'] == $activites[0]){
+                            $this->assertTrue($activite["date_proposition"] == null);
+                            $this->assertTrue($activite["etat_valid"] == true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+});
+
+it('met a jour le parcours en cas de refus d une proposition', function(){
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
+    $marin->suivi_en_fcm = true;
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
+    
+    $this->seed(DeasmMasterSeeder::class);
+    $this->assertTrue(Models\Parcours::count() == 1);
+    $parcours = Models\Parcours::first();
+
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::PARCOURS,
+        object_uuid : $parcours->uuid,
+        detail: [
+            "version" => 1,
+            "date_de_debut"=> Carbon::tomorrow(),
+        ]
+        );
+    event($event);
+
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid : $marin->uuid,
+        detail: [
+            "parcours" => $parcours->uuid,
+        ]
+        );
+    event($event);
+
+    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d'; //C1-SF5 - Rechercher et exploiter le retex technique et tactique disponible
+
+    $activites = [
+        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  //Niveau 2 - GENOPS- Activité BOPS/CMI1
+        '97750a5e-abd4-4c16-89a6-65a2695ab692',  //Niveau 2 - GENOPS- Activité BOPS/CMI2
+        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  //Niveau 2 - GENOPS- Activité BOPS/MSGOPS
+        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'   //Niveau 2 - GENOPS- Activité BOPS/SIOC
+    ];
+
+    // On propose la premiere activité
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::PROPOS_ELMT_MARIN_PARCOURS,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid : $marin->uuid,
+        detail: [
+            "type_element" => "activite",
+            "uuid_element" => $activites[0],
+            "date" => Carbon::now(),
+            "commentaire"=> "commentaire"
+        ]
+        );
+    event($event);
+
+    // On valide la premiere activité
+    $event = new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::ANNUL_PROPOS_ELMT_MARIN_PARCOURS,
+        user_uuid : $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid : $marin->uuid,
+        detail: [
+            "type_element" => "activite",
+            "uuid_element" => $activites[0],
+            "date" => Carbon::now(),
+            "commentaire"=> "commentaire"
+        ]
+        );
+    event($event);
+    
+    $marin->refresh();
+
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction)
+    {
+        //dump($fonction);
+        foreach($fonction["competences"] as $competence)
+        {
+            foreach($competence["savoirfaires"] as $savoirfaire)
+            {
+                if ($savoirfaire["uuid"] == $savoirfaire_uuid)
+                {
+                    //dump($savoirfaire);
+                    foreach($savoirfaire["activites"] as $activite)
+                    {
+                        if ($activite['uuid'] == $activites[0]){
+                            $this->assertTrue($activite["date_proposition"] == null);
+                            $this->assertTrue($activite["etat_valid"] == false);
+                        }
+                    }
+                }
+            }
+        }
+    }
+});

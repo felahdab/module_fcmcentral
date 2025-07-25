@@ -1,21 +1,24 @@
 <?php
-
+ 
 namespace Modules\FcmCentral\Listeners\Save\MarinParcours;
-
-use Illuminate\Support\Facades\Log;
+ 
 use Filament\Notifications\Notification;
-use Modules\FcmCommun\DataObjects\UserGeneratedEvent;
-use Modules\FcmCommun\Services\EventTypeManager;
-use Modules\FcmCommun\Traits\LoadsModelsDynamically;
+use App\Models\User;
 use Modules\FcmCommun\Enums\Constants;
-
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
+use Modules\FcmCommun\Services\CalculTauxParcoursService;
+use Modules\FcmCommun\Services\ReCalculEtatParcoursService; 
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Modules\FcmCentral\Models\Marin;
+use Illuminate\Support\Facades\Log;
+ 
 class AnnulProposElementMarinParcoursListener
 {
-    use LoadsModelsDynamically;
-
     public $comment;
     public $selectedItems;
-
+ 
     /**
      * Gère l'événement.
      *
@@ -25,109 +28,140 @@ class AnnulProposElementMarinParcoursListener
     public function handle(UserGeneratedEvent $event): void
     {
         // Vérifier si l'événement est du bon type
-        if (!$event->isOfType(EventTypeManager::ANNUL_PROPOS_ELMT_MARIN_PARCOURS)) {
+        if (!$event->isOfType(UserGeneratedEventTypes::ANNUL_PROPOS_ELMT_MARIN_PARCOURS)) {
+            return;
+        }
+ 
+        // Récupérer le marin et les données
+        $marin = Marin::where('uuid', $event->object_uuid)->first();
+        
+        if (!$marin) {
+            Log::error('Marin non trouvé avec UUID: ' . $event->object_uuid);
+            return;
+        }
+ 
+        $data = $event->detail;
+
+        // array:4 [▼ // vendor/spatie/laravel-ignition/src/helpers.php:14
+        // "type_element" => "activite"
+        // "uuid_element" => "eb48b9df-c466-37a5-a6b4-3251761f371f"
+        // "date" => Carbon\Carbon @1753288270 {#2989 ▶}
+        // "commentaire" => "dfg"
+        // ]
+        //dd( $data);
+        //  RÉCUPÉRER TOUS LES ÉLÉMENTS DEPUIS selectedItems_full
+        $this->comment = $this->sanitizeComment($data['commentaire'] ?? '');
+        
+        $valideur = User::where('uuid', $event->user_uuid)->first();
+        $valideurName = $valideur ? 
+            ($valideur->display_name ?? $valideur->nom . ' ' . $valideur->prenom) : 
+            'VALIDEUR INCONNU';
+
+        $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours;
+        
+        if (!$donnees_du_parcours) {
+            Log::error('Données du parcours non trouvées pour le marin: ' . $marin->uuid);
+            return;
+        }
+ 
+        $parcoursMarin = $donnees_du_parcours->parcoursmarin;
+        
+        if (!$parcoursMarin) {
+            Log::error('Parcours marin non trouvé ou vide pour le marin: ' . $marin->uuid);
             return;
         }
 
-        // Récupérer le marin et les données
-        $record = $event->record; // //$record: FcmCentral\Models\Marin
-        $data = $event->data;
-        $this->comment = $event->data['commentaire'];
-        $this->selectedItems = $event->data['selectedItems'];
+        $this->updateParcoursMarinItems(
+            $parcoursMarin, 
+            $data['type_element'], 
+            $data['uuid_element'],
+            $valideurName
+        );
 
+        ReCalculEtatParcoursService::recalculerEtats($parcoursMarin);
 
-        foreach ($record->parcoursSerialises as $parcours) {
-            // Décoder le JSON du champ parcoursmarin
-            $parcoursMarin = json_decode($parcours->pivot->parcoursmarin, true);
-
-
-            // Mise a jour en fonction de selectedItems
-            foreach ($this->selectedItems['aValiderPropos'] as $type => $items) {
-                $this->annulPropositions($parcoursMarin, $type, $items, $record->marin->displayName ?? $record->marin->nom . ' ' . $record->marin->prenom . ' ' . $record->marin->grade);
-            }
-
-
-            // Sauvegarder les données d'origine avec les modifications dans selectedItems
-            $parcours->pivot->parcoursmarin = json_encode($parcoursMarin);
-            $parcours->pivot->save();
-        }
-
+        // Recalcul des taux
+        $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
+        $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
+        $donnees_du_parcours->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
+        $donnees_du_parcours->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
+ 
+        // Sauvegarder les données
+        $donnees_du_parcours->parcoursmarin = $parcoursMarin;
+        $donnees_du_parcours->save();
+ 
         // Notification de succès
-        // Notification::make()
-        // ->title('Données sauvegardées avec succès')
-        // ->success()
-        // ->send();
-
-        $notification = Constants::getMess(Constants::ANNUL_PROPOS_ELMT_MARIN_PARCOURS, $record->marin->nom);
-
-        // Notification Filament
+        $notification = UserGeneratedEventNotifications::getMess(
+            UserGeneratedEventNotifications::VALID_ELMT_MARIN_PARCOURS,
+            $marin->nom
+        );
+ 
         Notification::make()
             ->title($notification['title'])
             ->success()
             ->body($notification['message'])
             ->send();
     }
-
-
-
-
-
-
+ 
+    
+ 
     /**
-     * Mettre à jour les éléments imbriqués dans la structure.
+     * MÉTHODE POUR NETTOYER LES COMMENTAIRES
      */
-    protected function annulPropositions(&$parcoursMarin, $type, $items)
-{
-    foreach ($parcoursMarin['fonctions'] as &$fonction) {
-        // --- TRAITEMENT DIRECT DES FONCTIONS ---
-        if ($type === 'fonctions' && isset($items[$fonction['id']])) {
-            $fonction['commentaire_proposition'] = null;
-            $fonction['date_proposition'] = null;
-            $fonction['etat_propos'] = null;
+    protected function sanitizeComment(string $comment): string
+    {
+        if (empty($comment)) {
+            return '';
         }
-
-        // --- TRAITEMENT DES AUTRES TYPES ---
-        if (isset($fonction[$type])) {
-            foreach ($fonction[$type] as &$element) {
-                // Ici, on vérifie directement si l'ID existe comme clé dans $items
-                if (array_key_exists($element['id'], $items)) {
-                    $element['commentaire_proposition'] = null;
-                    $element['date_proposition'] = null;
-                    $element['etat_propos'] = null;
-                }
+        
+        $comment = strip_tags($comment);
+        $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
+        $comment = preg_replace('/\s+/', ' ', $comment);
+        $comment = addslashes(trim($comment));
+ 
+        return $comment;
+    }
+ 
+    /**
+     *  METTRE À JOUR LES ÉLÉMENTS 
+     */
+    protected function updateParcoursMarinItems(&$parcoursMarin, $type_element, $uuid_element, $displayName)
+    { 
+        logger()->info("On doit valider  : {$type_element} / {$uuid_element}");
+        foreach ($parcoursMarin['fonctions'] as &$fonction) {
+            logger()->info("Mise a jour de fontion: {$fonction["uuid"]}");
+            // --- TRAITEMENT DIRECT DES FONCTIONS ---
+            if ($type_element === 'fonction' && $fonction['uuid'] == $uuid_element) {
+                $this->updateElement($fonction, $displayName);
+                Log::info("Fonction mise à jour: {$fonction['uuid']}");
             }
-        }
-
-        // --- SOUS-NIVEAUX ---
-        if (isset($fonction['competences'])) {
-            foreach ($fonction['competences'] as &$competence) {
-                if ($type === 'competences' && array_key_exists($competence['id'], $items)) {
-                    $competence['commentaire_proposition'] = null;
-                    $competence['date_proposition'] = null;
-                    $competence['etat_propos'] = null;
-                }
-                if (isset($competence[$type])) {
-                    foreach ($competence[$type] as &$element) {
-                        if (array_key_exists($element['id'], $items)) {
-                            $element['commentaire_proposition'] = null;
-                            $element['date_proposition'] = null;
-                            $element['etat_propos'] = null;
-                        }
+ 
+            // --- TRAITEMENT DES COMPÉTENCES ---
+            if (isset($fonction['competences'])) {
+                foreach ($fonction['competences'] as &$competence) {
+                    logger()->info("Mise a jour de competence: {$competence["uuid"]}");
+                    if ($type_element === 'competence' && $competence['uuid'] == $uuid_element) {
+                        $this->updateElement($competence, $displayName);
+                        Log::info("Compétence mise à jour: {$competence['uuid']}");
                     }
-                }
-                if (isset($competence['savoirfaires'])) {
-                    foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                        if ($type === 'savoirfaires' && array_key_exists($savoirFaire['id'], $items)) {
-                            $savoirFaire['commentaire_proposition'] = null;
-                            $savoirFaire['date_proposition'] = null;
-                            $savoirFaire['etat_propos'] = null;
-                        }
-                        if (isset($savoirFaire[$type])) {
-                            foreach ($savoirFaire[$type] as &$element) {
-                                if (array_key_exists($element['id'], $items)) {
-                                    $element['commentaire_proposition'] = null;
-                                    $element['date_proposition'] = null;
-                                    $element['etat_propos'] = null;
+ 
+                    // --- TRAITEMENT DES SAVOIR-FAIRES ---
+                    if (isset($competence['savoirfaires'])) {
+                        foreach ($competence['savoirfaires'] as &$savoirFaire) {
+                            logger()->info("Mise a jour de savoir-faire: {$savoirFaire["uuid"]}");
+                            if ($type_element === 'savoirfaire' && $savoirFaire['uuid'] == $uuid_element) {
+                                $this->updateElement($savoirFaire, $displayName);
+                                Log::info("Savoir-faire mis à jour: {$savoirFaire['uuid']}");
+                            }
+ 
+                            // --- TRAITEMENT DES ACTIVITÉS ---
+                            if (isset($savoirFaire['activites'])) {
+                                foreach ($savoirFaire['activites'] as &$activite) {
+                                    logger()->info("Mise a jour de activite: {$activite["uuid"]}");
+                                    if ($type_element === 'activite' && $activite['uuid'] == $uuid_element) {
+                                        $this->updateElement($activite, $displayName);
+                                        Log::info("Activité mise à jour: {$activite['uuid']}");
+                                    }
                                 }
                             }
                         }
@@ -136,7 +170,15 @@ class AnnulProposElementMarinParcoursListener
             }
         }
     }
-}
-
-
+ 
+    /**
+     *  MÉTHODE HELPER POUR METTRE À JOUR UN ÉLÉMENT
+     */
+    protected function updateElement(&$element, $displayName)
+    {
+        $element['etat_valid'] = false;
+        $element['commentaire'] = "";
+        $element['date_proposition'] = null;
+        //$element['valideur'] = $displayName;
+    }
 }

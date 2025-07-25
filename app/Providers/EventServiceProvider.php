@@ -29,7 +29,7 @@ use Modules\FcmCentral\Listeners\Save\ParcoursSerialiseMarinListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\ValidElementMarinParcoursListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\AnnulElementMarinParcoursListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\ProposElementMarinParcoursListener;
-
+use Modules\FcmCentral\Listeners\Save\MarinParcours\AnnulProposElementMarinParcoursListener;
 
 use Modules\FcmCentral\Listeners\Save\SaveFcmMarinListener;
 use Modules\FcmCommun\Listeners\Save\SaveSuivreMarinFcmListener;
@@ -49,6 +49,7 @@ class EventServiceProvider extends ServiceProvider
             ValidElementMarinParcoursListener::class,
             AnnulElementMarinParcoursListener::class,
             ProposElementMarinParcoursListener::class,
+            AnnulProposElementMarinParcoursListener::class,
             //TransmitUserGeneratedEventListener::class,
         ],
 

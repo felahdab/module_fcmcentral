@@ -187,5 +187,7 @@ class ValidElementMarinParcoursListener
         $element['commentaire'] = $this->comment;
         $element['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
         $element['valideur'] = $displayName;
+
+        $element["date_proposition"] = null; // On retire la mention d'une éventuelle proposition antérieure.
     }
 }
