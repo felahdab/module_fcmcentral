@@ -1,3 +1,8 @@
+## 0.0.9 (July 25, 2025)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.8 –> 0.0.9
+- Ajustement pour la prise en compte des propositions, annulation de propositions. Ajout des tests unitaires correspondant.
+- Ajustement du listener de proposition de validation d'element du parcours
+
 ## 0.0.8 (July 25, 2025)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.7 –> 0.0.8
 - Merge remote-tracking branch 'origin/julien-adaptation-annulation-element-parcours'
