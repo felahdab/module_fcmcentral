@@ -10,7 +10,6 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
-
 use Filament\Support\Enums;
 
 use App\Events\UnUtilisateurLocalDoitEtreCreeEvent;
@@ -19,18 +18,16 @@ use App\Models\Role;
 use App\Models\User;
 
 use Modules\RH\Events\UnMarinDoitEtreCreeEvent;
-use Modules\FcmCommun\Models\Marin;
-use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\RH\Filament\RH\Pages\RechercheAnnuaireForms\RechercheAnnuaireCreateUserOrMarinForm;
 
-use Modules\FcmCentral\Events\SaveFcmMarinEvent;
-use Modules\FcmCentral\Events\AssignerMarinParcoursEvent;
+use Modules\FcmCommun\Models\Marin;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+
+use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuaireForms\RechercheAnnuaireForm;
 
-use Modules\FcmCommun\Services\UserGeneratedEventService;
-use Modules\FcmCommun\Services\EventDataBuilderService;
-use Modules\FcmCommun\Services\EventTypeService;
-use Modules\FcmCommun\Services\EventTriggerService;
 
 class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
 {
@@ -100,8 +97,6 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                         }
                         UnMarinDoitEtreCreeEvent::dispatch($creation_data);
                     }
-
-
                 }
 
                 /**
@@ -124,43 +119,53 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
 
                 if (Arr::get($data, 'suivre_en_fcm'))
                 {
-                    // $marin->suivi_en_fcm = true;
-                    $eventdata = [
-                        "fcm" => ["en_fcm" => true],
-                        "marinUuid" => $marin->uuid
-                    ];
-
-                    // Utiliser le service pour déclencher l'événement
-                    EventTriggerService::triggerEvent($eventdata, $marin);
+                    $event = new UserGeneratedEvent(
+                        UserGeneratedEventTypes::MARIN_EN_FCM,
+                        auth()->user()->uuid,
+                        ObjectClasses::MARIN,
+                        $marin->uuid,
+                        []
+                    );
+                    event($event);
                 }
                 if (Arr::get($data, 'cohorte_id'))
                 {
-                    $eventdata = [
-                        "cohorte_id" => $data["cohorte_id"],
-                        "marinUuid" => $marin->uuid
-                    ];
-                    EventTriggerService::triggerEvent($eventdata, $marin);
-                    // $event = ["cohorte_id" =>Arr::get($data, 'cohorte') ];
-                    // event(new SaveFcmMarinEvent($marin, $event));
+                    $event = new UserGeneratedEvent(
+                        UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
+                        auth()->user()->uuid,
+                        ObjectClasses::MARIN,
+                        $marin->uuid,
+                        [
+                            "cohorte" => $data["cohorte_id"],
+                        ]
+                    );
+                    event($event);
                 }
                 if (Arr::get($data, 'mentor_id'))
                 {
-                    $eventdata = [
-                        "mentor_id" => $data["mentor_id"],
-                        "marinUuid" => $marin->uuid
-                    ];
-                    EventTriggerService::triggerEvent($eventdata, $marin);
-                    // $event = ["mentor_id" =>Arr::get($data, 'mentor_id') ];
-                    // event(new SaveFcmMarinEvent($marin, $event));
+                    $event = new UserGeneratedEvent(
+                        UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
+                        auth()->user()->uuid,
+                        ObjectClasses::MARIN,
+                        $marin->uuid,
+                        [
+                            "mentor" => $data["mentor_id"],
+                        ]
+                    );
+                    event($event);
                 }
-                if (Arr::get($data, 'parcoursserialise_id'))
+                if (Arr::get($data, 'parcours_id'))
                 {
-                    $eventdata = [
-                        "parcoursserialise_id" => $data["parcoursserialise_id"],
-                        "marinUuid" => $marin->uuid,
-                    ];
-
-                    EventTriggerService::triggerEvent($eventdata, $marin);
+                    $event = new UserGeneratedEvent(
+                        UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+                        auth()->user()->uuid,
+                        ObjectClasses::MARIN,
+                        $marin->uuid,
+                        [
+                            "parcours" =>  $data["parcours_id"],
+                        ]
+                    );
+                    event($event);
                 }
 
             })
