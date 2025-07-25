@@ -1,3 +1,15 @@
+## 0.0.8 (July 25, 2025)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.7 –> 0.0.8
+- Merge remote-tracking branch 'origin/julien-adaptation-annulation-element-parcours'
+- Implementation de l'annulation d'un element du parcours
+- Rajoute du listener d'annulation à la liste des listeners des UserGeneratedEvent
+- Commit NOT WORK
+- Création du test pour la dévalidation d'un élément du parcours
+- Réactivation de tous les tests
+- Merge branch 'julien-recalcul-etat-parcours-apres-evenement-metier'
+- Commit : Verification Etats Parents si Enfants tous cochés
+- Préparation du travail de recalcul de parcours à chaque évènement
+
 ## 0.0.7 (July 23, 2025)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.6 –> 0.0.7
 - La version modal pour la création ou l'édition d'un marin semble plus ergonomique.
