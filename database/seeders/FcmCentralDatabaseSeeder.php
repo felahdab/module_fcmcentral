@@ -16,6 +16,7 @@ class FcmCentralDatabaseSeeder extends Seeder
             SettingSeeder::class,
             FcmSeeder::class,
             DeasmMasterSeeder::class,
+            PermissionsSeeder::class
             
         ]);
     }
