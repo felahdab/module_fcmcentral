@@ -71,12 +71,23 @@ class ValidElementMarinParcoursListener
             return;
         }
 
-        $this->updateParcoursMarinItems(
-            $parcoursMarin, 
-            $data['type_element'], 
-            $data['uuid_element'],
-            $valideurName
-        );
+         //  GESTION SPÉCIALE POUR LES SAVOIR-FAIRES AVEC AUTO-VALIDATION
+         if ($data['type_element'] === 'savoirfaire' ) {
+            $this->updateSavoirfaireParcoursMarinItems(
+                $parcoursMarin, 
+                $data['uuid_element'],
+                $valideurName
+            );
+        } else {
+            //  GESTION CLASSIQUE POUR LES AUTRES ÉLÉMENTS
+            $this->updateParcoursMarinItems(
+                $parcoursMarin, 
+                $data['type_element'], 
+                $data['uuid_element'],
+                $valideurName
+            );
+        }
+
         // JULIEN:
         // Insérer ici un recalcul de l'état du parcours en fonction de l'état de validation des activités
         // Je pense que tu dois avoir le code quelque part
@@ -128,15 +139,57 @@ class ValidElementMarinParcoursListener
  
         return $comment;
     }
- 
+    
+
+
+    /**
+     *  METHODE POUR VALIDERS SAVOIRS FAIRES ET SES ACTIVITES  
+     */
+    protected function updateSavoirfaireParcoursMarinItems(&$parcoursMarin, $savoirfaire_uuid, $displayName)
+        {
+            $activites_validees = 0;
+            
+            foreach ($parcoursMarin['fonctions'] as &$fonction) {
+                if (!isset($fonction['competences'])) continue;
+                
+                foreach ($fonction['competences'] as &$competence) {
+                    if (!isset($competence['savoirfaires'])) continue;
+                    
+                    foreach ($competence['savoirfaires'] as &$savoirFaire) {
+                        if ($savoirFaire['uuid'] === $savoirfaire_uuid) {
+                            //  VALIDER LE SAVOIR-FAIRE
+                            $this->updateElement($savoirFaire, $displayName);
+                            Log::info("Savoir-faire validé: {$savoirFaire['uuid']}");
+                            
+                            //  VALIDER TOUTES SES ACTIVITÉS NON VALIDÉES
+                            if (isset($savoirFaire['activites'])) {
+                                foreach ($savoirFaire['activites'] as &$activite) {
+                                    // Seulement si pas déjà validée
+                                    if (!isset($activite['etat_valid']) || !$activite['etat_valid']) {
+                                        $this->updateElement($activite, $displayName);
+                                        $activites_validees++;
+                                        Log::info("Activité auto-validée: {$activite['uuid']}");
+                                    }
+                                }
+                            }
+                            
+                            Log::info("Savoir-faire {$savoirfaire_uuid} validé avec {$activites_validees} activités");
+                            return; // Sortir une fois trouvé
+                        }
+                    }
+                }
+            }
+        }
+    
+
     /**
      *  METTRE À JOUR LES ÉLÉMENTS 
      */
     protected function updateParcoursMarinItems(&$parcoursMarin, $type_element, $uuid_element, $displayName)
     { 
-        logger()->info("On doit valider  : {$type_element} / {$uuid_element}");
+        Log::info("On doit valider  : {$type_element} / {$uuid_element}");
         foreach ($parcoursMarin['fonctions'] as &$fonction) {
-            logger()->info("Mise a jour de fontion: {$fonction["uuid"]}");
+            Log::info("Mise a jour de fontion: {$fonction["uuid"]}");
             // --- TRAITEMENT DIRECT DES FONCTIONS ---
             if ($type_element === 'fonction' && $fonction['uuid'] == $uuid_element) {
                 $this->updateElement($fonction, $displayName);
@@ -146,7 +199,7 @@ class ValidElementMarinParcoursListener
             // --- TRAITEMENT DES COMPÉTENCES ---
             if (isset($fonction['competences'])) {
                 foreach ($fonction['competences'] as &$competence) {
-                    logger()->info("Mise a jour de competence: {$competence["uuid"]}");
+                    Log::info("Mise a jour de competence: {$competence["uuid"]}");
                     if ($type_element === 'competence' && $competence['uuid'] == $uuid_element) {
                         $this->updateElement($competence, $displayName);
                         Log::info("Compétence mise à jour: {$competence['uuid']}");
@@ -155,7 +208,7 @@ class ValidElementMarinParcoursListener
                     // --- TRAITEMENT DES SAVOIR-FAIRES ---
                     if (isset($competence['savoirfaires'])) {
                         foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                            logger()->info("Mise a jour de savoir-faire: {$savoirFaire["uuid"]}");
+                            Log::info("Mise a jour de savoir-faire: {$savoirFaire["uuid"]}");
                             if ($type_element === 'savoirfaire' && $savoirFaire['uuid'] == $uuid_element) {
                                 $this->updateElement($savoirFaire, $displayName);
                                 Log::info("Savoir-faire mis à jour: {$savoirFaire['uuid']}");
@@ -164,7 +217,7 @@ class ValidElementMarinParcoursListener
                             // --- TRAITEMENT DES ACTIVITÉS ---
                             if (isset($savoirFaire['activites'])) {
                                 foreach ($savoirFaire['activites'] as &$activite) {
-                                    logger()->info("Mise a jour de activite: {$activite["uuid"]}");
+                                    Log::info("Mise a jour de activite: {$activite["uuid"]}");
                                     if ($type_element === 'activite' && $activite['uuid'] == $uuid_element) {
                                         $this->updateElement($activite, $displayName);
                                         Log::info("Activité mise à jour: {$activite['uuid']}");

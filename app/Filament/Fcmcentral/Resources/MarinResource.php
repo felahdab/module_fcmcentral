@@ -276,6 +276,28 @@ class MarinResource extends Resource
                         return redirect($url);
                        
                     }),
+                 //  BOUTON PDF
+                    Tables\Actions\Action::make('livret-pdf')
+                    ->iconButton()
+                    ->icon('heroicon-m-document-text')
+                    ->extraAttributes([
+                        'title' => 'Télécharger PDF du Livret FCM',
+                        'class' => 'btn-pdf',
+                    ])
+                    ->visible(function ($record) {
+                        return $record->suiviEnFcm && 
+                                $record->complements_fcm && 
+                                $record->complements_fcm->parcoursSerialises()->exists();
+                    })
+                    ->action(function ($record) {
+                        // Générer et télécharger le PDF
+                        return response()->streamDownload(function () use ($record) {
+                            echo app(\Modules\FcmCommun\Services\LivretPdfService::class)->generatePdf($record);
+                        }, "livret-fcm-{$record->nom}-{$record->prenom}.pdf", [
+                            'Content-Type' => 'application/pdf',
+                        ]);
+                    }),
+
                 Tables\Actions\Action::make("ne_plus_suivre_en_fcm")
                     ->iconButton()
                     ->icon('heroicon-m-folder-minus')
@@ -428,7 +450,7 @@ class MarinResource extends Resource
     {
         return [
             'index' => Pages\ListMarins::route('/'),
-            'livret-de-fcm' => Pages\LivretDeFcm::route('/{record}/livret-de-fcm'),
+            'livret-de-fcm' => Pages\LivretDeFcmLight::route('/{record}/livret-de-fcm-light'),
             //'create' => Pages\CreateMarin::route('/create'),
             //'edit' => Pages\EditMarin::route('/{record}/edit'),
         ];

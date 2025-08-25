@@ -12,7 +12,6 @@ use Modules\FcmCommun\Models\Marin as BaseMarin;
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCentral\Models\FcmMarin;
 
-
 class Marin extends BaseMarin
 {
     /**
