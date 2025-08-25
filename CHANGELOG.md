@@ -1,3 +1,12 @@
+## 0.0.10 (August 25, 2025)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.9 –> 0.0.10
+- Merge branch 'fldb-nouveau-livret'
+- Adaptation du livret de FCM
+- Création de quelques permissions utiles pour la gestion de la FCM
+- Livret FCM : Event SavoirFaire
+- PDF Livret v1
+- Ajustement de la page de recherche dans l'annuaire pour utiliser les events.
+
 ## 0.0.9 (July 25, 2025)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.8 –> 0.0.9
 - Ajustement pour la prise en compte des propositions, annulation de propositions. Ajout des tests unitaires correspondant.
