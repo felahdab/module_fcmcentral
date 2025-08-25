@@ -77,20 +77,14 @@ class ProposElementMarinParcoursListener
             $data['uuid_element'],
             $valideurName
         );
-        // JULIEN:
-        // Insérer ici un recalcul de l'état du parcours en fonction de l'état de validation des activités
-        // Je pense que tu dois avoir le code quelque part
-        // Une fois ce listener modifié, le test "recalcule l'état du parcours apres l'exécution d'une modification" doit passer correctement.
- 
-        //  RECALCULER LES ÉTATS DE VALIDATION HIÉRARCHIQUES
-    
-        ReCalculEtatParcoursService::recalculerEtats($parcoursMarin);
 
+        //  RECALCULER LES ÉTATS DE VALIDATION HIÉRARCHIQUES
+        ReCalculEtatParcoursService::recalculerEtats($parcoursMarin);
 
         // Recalcul des taux
         $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
-        $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
-        $donnees_du_parcours->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
+        $donnees_du_parcours->taux_global   = $parcoursMarin['taux_global']   ?? 0;
+        $donnees_du_parcours->taux_stage    = $parcoursMarin['taux_stage']    ?? 0;
         $donnees_du_parcours->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
  
         // Sauvegarder les données
@@ -183,9 +177,7 @@ class ProposElementMarinParcoursListener
      */
     protected function updateElement(&$element, $displayName)
     {
-        //$element['etat_valid'] = true;
         $element['commentaire'] = $this->comment;
         $element['date_proposition'] = \Carbon\Carbon::now()->toDateTimeString();
-        //$element['valideur'] = $displayName;
     }
 }

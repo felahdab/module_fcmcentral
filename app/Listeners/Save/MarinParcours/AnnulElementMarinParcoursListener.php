@@ -49,8 +49,7 @@ class AnnulElementMarinParcoursListener
         // "commentaire" => "dfg"
         // ]
         
-        // RÉCUPÉRER TOUS LES ÉLÉMENTS DEPUIS selectedItems_full
-        $this->comment = $this->sanitizeComment($data['commentaire'] ?? '');
+        $this->comment = ''; // Pour une dévalidation d'élément, on remet simplement le commentaire de l'élément à vide.
         
         $valideur = User::where('uuid', $event->user_uuid)->first();
         $valideurName = $valideur ? 
@@ -161,6 +160,12 @@ class AnnulElementMarinParcoursListener
                                         $this->annulElement($activite, $displayName);
                                         Log::info("Activité annulée: {$activite['uuid']}");
                                     }
+
+                                    if ($type_element === 'savoirfaire' && $savoirFaire['uuid'] == $uuid_element) {
+                                        // On désactive toutes les activités du savoir faire
+                                        $this->annulElement($activite, $displayName);
+                                        Log::info("Activité annulée car faisant partie du savoir-faire désactivé: {$activite['uuid']}");
+                                    }
                                 }
                             }
                         }
@@ -176,6 +181,7 @@ class AnnulElementMarinParcoursListener
     protected function annulElement(&$element, $displayName)
     {
         $element['etat_valid'] = false; // ✅ DIFFÉRENCE PRINCIPALE : false au lieu de true
+        $element['date_proposition'] = null;
         $element['commentaire'] = $this->comment;
         $element['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
         $element['valideur'] = $displayName;
