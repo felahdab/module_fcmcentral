@@ -22,7 +22,13 @@ class MonLivretDeFcm extends Page
     public static function canAccess(array $parameters = []): bool
     {
         $marin =  Marin::fromCurrentUser();
-        return $marin != null && $marin?->suivi_en_fcm;
+        // Verification que le marin exsite ET qu'il est suivi en FCM ET qu'ila un parcours
+        return  $marin != null && 
+                $marin->suivi_en_fcm &&
+                $marin->complements_fcm !== null &&
+                $marin->complements_fcm->donnees_du_parcours !== null &&
+                $marin->complements_fcm->donnees_du_parcours->parcoursmarin !==null
+                ;
     }
 
     public function mount()
