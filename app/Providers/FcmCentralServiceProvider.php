@@ -83,13 +83,72 @@ class FcmCentralServiceProvider extends ServiceProvider
         app(ModuleDefinedMenusRegistry::class)->registerDirectMenuItems([
             DirectMenuItem::make()
                 ->name('FCM central')
-                ->children([
-                    DirectMenuItem::make()
-                    ->name('Liste des marins')
-                    ->url(fn() => ListMarins::getUrl(panel: 'FCM Central'))
-                ])
+                ->children($this->getConditionalMenuItems())
         ]);
     }
+
+    private function getConditionalMenuItems(): array
+    {
+        $menuItems = [];
+        
+        // Menu pour tous les marins FCM (leur livret personnel)
+        $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+        if ($marin && $marin->suivi_en_fcm && $this->marinHasParcours($marin)) {
+            $menuItems[] = DirectMenuItem::make()
+                ->name('Mon livret FCM')
+                ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(panel: 'FCM Central'))
+                ->icon('heroicon-o-document-text');
+        }
+        
+        // Menus administratifs (seulement pour super admin ou rôles spécifiques)
+        if ($this->userCanAccessAdminMenus()) {
+            $menuItems[] = DirectMenuItem::make()
+                ->name('Liste des marins')
+                ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins::getUrl(panel: 'FCM Central'))
+                ->icon('heroicon-o-users');
+                
+            $menuItems[] = DirectMenuItem::make()
+                ->name('Gestion des parcours')
+                ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours::getUrl(panel: 'FCM Central'))
+                ->icon('heroicon-o-academic-cap');
+        }
+        
+        return $menuItems;
+    }
+
+    private function marinHasParcours($marin): bool
+    {
+        return $marin->complements_fcm !== null &&
+            $marin->complements_fcm->donnees_du_parcours !== null &&
+            $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null;
+    }
+
+    private function userCanAccessAdminMenus(): bool
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        // Vérifier si c'est un super admin
+        if (method_exists($user, 'IsSuperAdmin') && $user->IsSuperAdmin()) {
+            return true;
+        }
+        
+        // Ou vérifier les rôles/permissions spécifiques
+         if (method_exists($user, 'hasRole')) {
+             return $user->hasRole(['fcmcentral::superviseur']); // ,'fcmcentral::admin'
+         }
+        
+        // Ou vérifier les permissions
+        // if (method_exists($user, 'can')) {
+        //     return $user->can('fcmcentral::admin.access');
+        // }
+        
+        return false;
+    }
+
 
     public function registerPreferedPagesItems()
     {
