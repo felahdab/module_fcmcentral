@@ -41,5 +41,10 @@ class PermissionsSeeder extends Seeder
             "guard_name" => "web"
         ]);
 
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::recherche_annuaire",
+            "guard_name" => "web"
+        ]);
+
     }
 }

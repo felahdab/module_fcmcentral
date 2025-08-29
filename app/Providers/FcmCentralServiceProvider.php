@@ -43,9 +43,10 @@ class FcmCentralServiceProvider extends ServiceProvider
         Models\ParcoursSerialise::class => Policies\ParcoursSerialisePolicy::class,
         Models\Fonction::class => Policies\FonctionPolicy::class,
         Models\Competence::class => Policies\CompetencePolicy::class,
-        Models\SavoirFaire::class => Policies\SavoirFairePolicy::class,
+        Models\Savoirfaire::class => Policies\SavoirfairePolicy::class,
         Models\Activite::class => Policies\ActivitePolicy::class,
-        Models\Marin::class => Policies\MarinPolicy::class
+        Models\Marin::class => Policies\MarinPolicy::class,
+        Models\Cohorte::class => Policies\CohortePolicy::class
     ];
 
     /**

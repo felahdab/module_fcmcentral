@@ -11,7 +11,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages;
-use Modules\FcmCommun\Models\Cohorte;
+use Modules\FcmCentral\Models\Cohorte;
 
 class CohorteResource extends Resource
 {

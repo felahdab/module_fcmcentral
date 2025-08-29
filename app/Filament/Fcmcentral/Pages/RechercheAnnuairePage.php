@@ -34,6 +34,15 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
     protected static ?string $navigationGroup = 'Marins';
     protected static ?string $navigationLabel = 'Recherche Annudef';
 
+    public static function canAccess(): bool
+    {
+        if (! auth()->check())
+            return false;
+        
+        $user = auth()->user();
+        return $user->can('fcmcentral::recherche_annuaire');
+    }
+
     public function getRowActions()
     {
         return [
