@@ -89,4 +89,9 @@ class Marin extends BaseMarin
     //    });
     }
 
+    public function hasLivret()
+    {
+        return $this->complements_fcm?->donnees_du_parcours?->parcoursmarin !== null;
+    }
+
 }

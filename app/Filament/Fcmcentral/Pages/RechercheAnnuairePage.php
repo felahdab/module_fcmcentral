@@ -12,6 +12,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Filament\Support\Enums;
 
+use Filament\Notifications\Notification;
+
 use App\Events\UnUtilisateurLocalDoitEtreCreeEvent;
 use App\Filament\PageTemplates\RechercheAnnuairePageTemplate;
 use App\Models\Role;
@@ -101,6 +103,10 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                         $creation_data = array_merge($record->toArray(), $data);
                         if (Arr::get($data, 'user'))
                         {
+                            /**
+                             * Si dans la partie précédente on a demandé à créer un utilisateur, on en récupère les informations
+                             * et on réalise l'association entre le Marin et l'utilisateur.
+                             */
                             $newUser= User::where('email', $record->email)->first();
                             $creation_data['user_id'] = $newUser->id;
                         }
@@ -113,12 +119,18 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                  * Sinon, on interrompt l'action.
                  */
                 $marin = Marin::where("email", $record->email)->first();
-                if ($marin == null)
+                if (Arr::get($data, 'suivre_en_fcm') && $marin == null)
                 {
                     /**
                      * TODO: prévoir une notification pour prévenir l'utilisateur que la partie FCM de sa demande n'a pas pu être traitée
                      * et qu'il doit retourner dans la liste des Marin pour indiquer la cohorte, le mentor et le parcours.
                      */
+
+                     Notification::make()
+                        ->title('Il n\'y a pas de fiche de marin correspondant à ce résultat de recherche.')
+                        ->body('Vous devez d\'abord créer la fiche de cette personne pour pouvoir ensuite la suivre en FCM.')
+                        ->warning()
+                        ->send();
                     return;
                 }
 
@@ -202,6 +214,11 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                     foreach($records as $record){
                         UnUtilisateurLocalDoitEtreCreeEvent::dispatch($record->toArray(), $data['roles']);
                     }
+
+                    Notification::make()
+                        ->title('Utilisateurs créés')
+                        ->success()
+                        ->send();
                 }),
         ];
     }

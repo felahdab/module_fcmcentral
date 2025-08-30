@@ -241,7 +241,8 @@ class MarinResource extends Resource
                     'class' => 'btn-suivifcm',
                     ])
                     ->hidden(function ($record) {
-                        return $record->suiviEnFcm;
+                        return $record->suiviEnFcm &&
+                            auth()->user()?->can('fcmcentral::suivre_en_fcm');
                     })
                     ->action(function ($record) {
 
@@ -265,7 +266,8 @@ class MarinResource extends Resource
                     ->visible(function ($record) {
                         return $record->suiviEnFcm && 
                                 $record->complements_fcm && 
-                                $record->complements_fcm->parcoursSerialises()->exists();
+                                $record->complements_fcm->parcoursSerialises()->exists() &&
+                                auth()->user()?->can('fcmcentral::voir_les_livrets');
                     })
                     //->url(fn ($record): string => MarinResource::getUrl('livret-de-fcm', ['record' => $record->id])),
                     ->action(function ($record){
@@ -287,7 +289,8 @@ class MarinResource extends Resource
                     ->visible(function ($record) {
                         return $record->suiviEnFcm && 
                                 $record->complements_fcm && 
-                                $record->complements_fcm->parcoursSerialises()->exists();
+                                $record->complements_fcm->parcoursSerialises()->exists() &&
+                                auth()->user()?->can('fcmcentral::telecharger_les_livrets');
                     })
                     ->action(function ($record) {
                         // Générer et télécharger le PDF
@@ -307,7 +310,8 @@ class MarinResource extends Resource
                     ])
                     ->color('danger')
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm;
+                        return $record->suiviEnFcm &&
+                            auth()->user()?->can('fcmcentral::suivre_en_fcm');
                     })
                     ->action(function ($record) {
                         $event = new UserGeneratedEvent(
@@ -329,7 +333,13 @@ class MarinResource extends Resource
                         'title' => 'Attribuer cohorte - mentor - parcours',
                         'class' => 'btn-suivifcm',
                         ])
-                    ->visible(fn ($record) => $record->suiviEnFcm)
+                    ->visible(function ($record) {
+                        return $record->suiviEnFcm  && (
+                                auth()->user()?->can('fcmcentral::attribuer_cohorte') ||
+                                auth()->user()?->can('fcmcentral::attribuer_mentor') ||
+                                auth()->user()?->can('fcmcentral::attribuer_parcours')
+                        );
+                    }) 
                     ->requiresConfirmation()
                     ->form([
                         // MarkdownEditor::make('info')
@@ -337,6 +347,9 @@ class MarinResource extends Resource
                         // ->disabled(),
                         Forms\Components\Select::make('cohorte_id')
                             ->label("Choisir la cohorte")
+                            ->visible(function(){
+                                return auth()->user()?->can('fcmcentral::attribuer_cohorte');
+                            })
                             ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
                             // ->options(Cohorte::all()->pluck('libelle_long', 'id')),
                         Forms\Components\Select::make('mentor_id')
@@ -348,7 +361,9 @@ class MarinResource extends Resource
                                     ->get()
                                     ->pluck('fullNameAndGrade', 'uuid')
                                 )                              
-                            // ->options(Marin::all()->pluck('fullNameAndGrade', 'id'))
+                                ->visible(function(){
+                                    return auth()->user()?->can('fcmcentral::attribuer_mentor');
+                                })
                             ->searchable(),
                         Forms\Components\Select::make('parcours_id')
                             ->label('Choisir un Parcours')
@@ -357,7 +372,8 @@ class MarinResource extends Resource
                             ->visible(function ($record) {
                                 $visible = $record->suiviEnFcm && 
                                     $record->complements_fcm && 
-                                    !$record->complements_fcm->parcoursSerialises()->exists();
+                                    ! $record->complements_fcm->parcoursSerialises()->exists() &&
+                                    auth()->user()?->can('fcmcentral::attribuer_parcours');
                                 return $visible;
                             })
                     ])

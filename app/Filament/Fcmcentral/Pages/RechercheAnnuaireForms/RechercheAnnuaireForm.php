@@ -16,17 +16,19 @@ class RechercheAnnuaireForm
     {
     return [
         Forms\Components\Wizard\Step::make('FCM')
+                ->visible(fn() => auth()->user()?->can('fcmcentral::suivre_en_fcm'))
                 ->schema([
                     Forms\Components\Toggle::make('suivre_en_fcm')
+                        ->visible(fn() => auth()->user()?->can('fcmcentral::suivre_en_fcm'))
                         ->label("Suivre en FCM")
                         ->live(),
                     Forms\Components\Select::make('cohorte_id')
-                        ->visible(fn(Get $get) => $get('suivre_en_fcm'))
+                        ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer_cohorte'))
                         ->label("Cohorte de ce marin")
                         ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
                     Forms\Components\Select::make('mentor_id')
                             ->label("Choisir un mentor")
-                            ->visible(fn(Get $get) => $get('suivre_en_fcm'))
+                            ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer_mentor'))
                             ->options(
                                 Marin::query()
                                     ->where('data->fcm->en_fcm', false)
@@ -36,7 +38,7 @@ class RechercheAnnuaireForm
                                 )                              
                             ->searchable(),
                     Forms\Components\Select::make('parcours_id')
-                            ->visible(fn(Get $get) => $get('suivre_en_fcm'))
+                            ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::suivre_en_fcm'))
                             ->label('Choisir un Parcours')
                             ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
                             ->searchable()

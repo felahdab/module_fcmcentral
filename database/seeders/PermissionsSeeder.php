@@ -46,5 +46,20 @@ class PermissionsSeeder extends Seeder
             "guard_name" => "web"
         ]);
 
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::voir_les_livrets",
+            "guard_name" => "web"
+        ]);
+
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::telecharger_les_livrets",
+            "guard_name" => "web"
+        ]);
+
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::suivre_en_fcm",
+            "guard_name" => "web"
+        ]);
+
     }
 }
