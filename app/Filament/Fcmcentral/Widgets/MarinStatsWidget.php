@@ -8,6 +8,30 @@ use Modules\FcmCentral\Models\Marin;
 
 class MarinStatsWidget extends BaseWidget
 {
+    
+    protected static ?int $sort = 2;
+
+    public static function canView():bool
+    {
+        $user = auth()->user();
+
+          // Exclure les super_admin
+          if ($user->admin==1) {
+            return false;
+        }
+        
+        $marin = Marin::fromCurrentUser();
+        
+        // Accessible seulement aux marins FCM avec parcours
+        return $marin !== null && 
+               $marin->suivi_en_fcm &&
+               $marin->complements_fcm !== null &&
+               $marin->complements_fcm->donnees_du_parcours !== null &&
+               $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null &&
+               !$marin->isMentor();
+    }
+    
+    
     protected function getStats(): array
     {
         $marin = Marin::fromCurrentUser();
@@ -35,8 +59,13 @@ class MarinStatsWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-academic-cap')
                 ->color('warning'),
                 
+            Stat::make('Savoir-faires validés', $stats['savoirfaires_valides'] . '/' . $stats['total_savoirfaires'])
+                ->description('Savoir-faires validés')
+                ->descriptionIcon('heroicon-m-cog-6-tooth')
+                ->color('info'),
+                
             Stat::make('Activités validées', $stats['activites_validees'] . '/' . $stats['total_activites'])
-                ->description('Progression des activités')
+                ->description('Activités validées')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
         ];
@@ -46,6 +75,8 @@ class MarinStatsWidget extends BaseWidget
     {
         $fonctions = count($parcours['fonctions'] ?? []);
         $competences = 0;
+        $totalSavoirfaires = 0;
+        $savoirfairesValides = 0;
         $totalActivites = 0;
         $activitesValidees = 0;
 
@@ -54,9 +85,14 @@ class MarinStatsWidget extends BaseWidget
             
             foreach ($fonction['competences'] ?? [] as $competence) {
                 foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
+                    $totalSavoirfaires++;
+                    if (($savoirfaire['etat_valid'] ?? false) === true) {
+                        $savoirfairesValides++;
+                    }
+                    
                     foreach ($savoirfaire['activites'] ?? [] as $activite) {
                         $totalActivites++;
-                        if (($activite['etat_validation'] ?? '') === 'valide') {
+                        if (($activite['etat_valid'] ?? false) === true) {
                             $activitesValidees++;
                         }
                     }
@@ -67,8 +103,10 @@ class MarinStatsWidget extends BaseWidget
         return [
             'fonctions' => $fonctions,
             'competences' => $competences,
+            'total_savoirfaires' => $totalSavoirfaires,
+            'savoirfaires_valides' => $savoirfairesValides,
             'total_activites' => $totalActivites,
-            'activites_validees' => $activitesValidees
+            'activites_validees' => $activitesValidees,
         ];
     }
 }

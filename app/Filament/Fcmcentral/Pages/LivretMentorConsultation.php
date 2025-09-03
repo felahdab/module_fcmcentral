@@ -1,0 +1,73 @@
+<?php
+ 
+namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
+ 
+use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Models\FcmMarin;
+use Filament\Pages\Page;
+use Filament\Forms\Form;
+use Filament\Forms\Components\Livewire;
+use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
+ 
+class LivretMentorConsultation extends Page
+{
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
+    protected static bool $shouldRegisterNavigation = false; // Pas dans le menu
+    protected static string $routePath = '/livret-mentor-consultation/{marinId?}';
+ 
+    public Marin $marin;
+    public int $marinId;
+ 
+    public static function canAccess(array $parameters = []): bool
+    {
+        $user = auth()->user();
+        
+        if ($user && $user->admin == 1) {
+            return false;
+        }
+ 
+        $marin = Marin::fromCurrentUser();
+        return $marin !== null && Marin::estMentor($marin);
+    }
+ 
+    public function mount(?int $marinId = null)
+    {
+        $this->marinId = $marinId;
+        if (!$this->marinId){
+            abort(404, 'ID Marin manquant');
+        }
+        $marinCible = Marin::findOrFail($this->marinId);
+        $currentMarin = Marin::fromCurrentUser();
+        
+        if (!$currentMarin || !Marin::estMentor($currentMarin)) {
+            abort(403, 'Accès non autorisé');
+        }
+        
+        $estSupervise = FcmMarin::where('mentor_id', $currentMarin->id)
+            ->where('rh_marin_id', $this->marinId)
+            ->exists();
+            
+        if (!$estSupervise) {
+            abort(403, 'Vous n\'êtes pas le mentor de ce marin');
+        }
+        
+        $this->marin = $marinCible;
+        $this->form->fill();
+    }
+ 
+    public function form(Form $form): Form
+    {
+        return $form->schema([
+            Livewire::make(LivretFcm::class, [
+                "marin" => $this->marin,
+                //"readOnly" => true,
+            ]),
+        ]);
+    }
+ 
+    public function getTitle(): string
+    {
+        return "Livret FCM de {$this->marin->nom} {$this->marin->prenom}";
+    }
+}

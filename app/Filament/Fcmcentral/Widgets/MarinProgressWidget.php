@@ -11,9 +11,32 @@ class MarinProgressWidget extends Widget
     
     protected int | string | array $columnSpan = 'full';
 
+    protected static ?int $sort = 1;
+
     public function getMarin(): ?Marin
     {
         return Marin::fromCurrentUser();
+    }
+
+
+    public static function canView():bool
+    {
+        $user = auth()->user();
+
+          // Exclure les super_admin
+          if ($user->admin==1) {
+            return false;
+        }
+        
+        $marin = Marin::fromCurrentUser();
+        
+        // Accessible seulement aux marins FCM avec parcours
+        return $marin !== null && 
+               $marin->suivi_en_fcm &&
+               $marin->complements_fcm !== null &&
+               $marin->complements_fcm->donnees_du_parcours !== null &&
+               $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null &&
+               !$marin->isMentor();
     }
 
     public function getProgressData(): array
@@ -30,7 +53,6 @@ class MarinProgressWidget extends Widget
             return ['progress' => 0, 'completed' => 0, 'total' => 0];
         }
 
-        // Calculer le progrès basé sur les activités validées
         $totalActivites = 0;
         $activitesValidees = 0;
         
@@ -39,7 +61,7 @@ class MarinProgressWidget extends Widget
                 foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
                     foreach ($savoirfaire['activites'] ?? [] as $activite) {
                         $totalActivites++;
-                        if (($activite['etat_validation'] ?? '') === 'valide') {
+                        if (($activite['etat_valid'] ?? false) === true) {
                             $activitesValidees++;
                         }
                     }
@@ -56,4 +78,3 @@ class MarinProgressWidget extends Widget
         ];
     }
 }
-

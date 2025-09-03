@@ -40,6 +40,13 @@ class MarinResource extends Resource
         return Marin::enFcm()->count();
     }
 
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+
     public static function form(Form $form): Form
     {
         return $form
@@ -193,7 +200,7 @@ class MarinResource extends Resource
                 SelectFilter::make('unite_id')
                     ->label('Unité')
                     ->options(Unite::query()->orderBy('libelle_court')->pluck('libelle_court', 'id')),
-               
+
             //////////////////////////////////////////
             /////////// Ces filtres sont à activer mais ne marchent pas en l'état car les données sont dans fcmmarin et pas marin
             //////////////////////////////////////////
@@ -253,7 +260,7 @@ class MarinResource extends Resource
                             []
                         );
                         event($event);
-                        
+
                     }),
                 Tables\Actions\Action::make('livret-de-fcm')
                     ->iconButton()
@@ -263,8 +270,8 @@ class MarinResource extends Resource
                         'class' => 'btn-livret',
                     ])
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm && 
-                                $record->complements_fcm && 
+                        return $record->suiviEnFcm &&
+                                $record->complements_fcm &&
                                 $record->complements_fcm->parcoursSerialises()->exists();
                     })
                     //->url(fn ($record): string => MarinResource::getUrl('livret-de-fcm', ['record' => $record->id])),
@@ -274,7 +281,7 @@ class MarinResource extends Resource
                         // $url = static::getUrl('livret-de-fcm',['record' => $fcmMarinId]);
                         $url = static::getUrl('livret-de-fcm',['record' => $record->id]);
                         return redirect($url);
-                       
+
                     }),
                  //  BOUTON PDF
                     Tables\Actions\Action::make('livret-pdf')
@@ -285,8 +292,8 @@ class MarinResource extends Resource
                         'class' => 'btn-pdf',
                     ])
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm && 
-                                $record->complements_fcm && 
+                        return $record->suiviEnFcm &&
+                                $record->complements_fcm &&
                                 $record->complements_fcm->parcoursSerialises()->exists();
                     })
                     ->action(function ($record) {
@@ -339,30 +346,50 @@ class MarinResource extends Resource
                             ->label("Choisir la cohorte")
                             ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
                             // ->options(Cohorte::all()->pluck('libelle_long', 'id')),
+                        // Forms\Components\Select::make('mentor_id')
+                        //     ->label("Choisir le mentor")
+                        //     ->options(
+                        //         Marin::query()
+                        //             ->where('data->fcm->en_fcm', false)
+                        //             ->orderBy('nom')
+                        //             ->get()
+                        //             ->pluck('fullNameAndGrade', 'uuid')
+                        //         )
+                        //     // ->options(Marin::all()->pluck('fullNameAndGrade', 'id'))
+                        //     ->searchable(),
                         Forms\Components\Select::make('mentor_id')
-                            ->label("Choisir le mentor")
-                            ->options(
-                                Marin::query()
-                                    ->where('data->fcm->en_fcm', false)
-                                    ->orderBy('nom')
-                                    ->get()
-                                    ->pluck('fullNameAndGrade', 'uuid')
-                                )                              
-                            // ->options(Marin::all()->pluck('fullNameAndGrade', 'id'))
-                            ->searchable(),
+    ->label("Choisir le mentor")
+    ->options(function () {
+        // Option 1: Tous les marins actifs
+        return Marin::query()
+            ->whereNull('deleted_at') // Marins non supprimés
+            ->orderBy('nom')
+            ->orderBy('prenom')
+            ->get()
+            ->mapWithKeys(function ($marin) {
+                $fullName = trim($marin->prenom . ' ' . $marin->nom);
+                $grade = $marin->grade?->libelle_court ?? '';
+                $label = $grade ? $grade . ' ' . $fullName : $fullName;
+                return [$marin->uuid => $label];
+            });
+    })
+    ->searchable()
+    ->placeholder('Sélectionnez un mentor'),
+
+
                         Forms\Components\Select::make('parcours_id')
                             ->label('Choisir un Parcours')
                             ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
                             ->searchable()
                             ->visible(function ($record) {
-                                $visible = $record->suiviEnFcm && 
-                                    $record->complements_fcm && 
+                                $visible = $record->suiviEnFcm &&
+                                    $record->complements_fcm &&
                                     !$record->complements_fcm->parcoursSerialises()->exists();
                                 return $visible;
                             })
                     ])
                     ->action(function ($record, $data) {
-                        
+
                         if (array_key_exists("cohorte_id", $data) && $data["cohorte_id"] != null){
                             $event = new UserGeneratedEvent(
                                 UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
@@ -375,7 +402,7 @@ class MarinResource extends Resource
                             );
                             event($event);
                         }
-                        
+
                         if (array_key_exists("mentor_id", $data) && $data["mentor_id"] != null){
                             $event = new UserGeneratedEvent(
                                 UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
@@ -417,9 +444,9 @@ class MarinResource extends Resource
                 //     ])
                 //     // Pour enlever le bouton si il exist dans MarinParcours
                 //     ->visible(function ($record) {
-                        
-                //         return $record->suiviEnFcm && 
-                //                 $record->complements_fcm && 
+
+                //         return $record->suiviEnFcm &&
+                //                 $record->complements_fcm &&
                 //                 !$record->complements_fcm->parcoursSerialises()->exists();
                 //     })
                 //     ->action(function ($record, $data) {

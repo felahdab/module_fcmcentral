@@ -59,6 +59,14 @@ class Marin extends BaseMarin
      */
     public function scopeMentorePar(Builder $query, Model $marin)
     {
+        
+                // Gérer le cas où $marin est null
+                if (!$marin) {
+                    $query->whereRaw('1 = 0'); // Retourne une requête vide
+                    return;
+                }
+
+                
         /**
          * Pour faciliter la vie du développeur, on commence par caster le modele $marin vers la class
          * courante. 
@@ -80,13 +88,56 @@ class Marin extends BaseMarin
      */
     public function scopeMentor(Builder $query)
     {
-        $query->whereIn('id', FcmMarin::all()->pluck('mentor_id'));
-    //     $query->whereIn('id', function($subQuery) {
-    //         $subQuery->select('mentor_id')
-    //                     ->from('fcmcentral_fcm_marins')
-    //                     ->whereNotNull('mentor_id')
-    //                     ->distinct();
-    //    });
+        $query->whereIn('id', FcmMarin::whereNotNull('mentor_id')->pluck('mentor_id'));
     }
+
+    /**
+     * Vérifie si ce marin est un mentor (supervise d'autres marins)
+     */
+    public function isMentor(): bool
+    {
+        // Vérifier directement dans la table FcmMarin si ce marin est mentor
+        return FcmMarin::where('mentor_id', $this->id)->exists();
+    }
+
+    /**
+     * Récupère les marins supervisés par ce mentor
+     */
+    public function marinsSupervises()
+    {
+        return static::mentorePar($this);
+    }
+
+    /**
+     * Méthode statique pour vérifier si un marin est mentor
+     */
+    public static function estMentor(?Model $marin): bool
+    {
+        if (!$marin) {
+            return false;
+        }
+        
+        return FcmMarin::where('mentor_id', $marin->id)->exists();
+    }
+
+
+    /**
+     * Relation pour accéder aux compléments FCM (première ligne seulement)
+     */
+    public function complements_fcm_relation()
+    {
+        return $this->hasOne(FcmMarin::class, 'rh_marin_id', 'id');
+    }
+
+    /**
+     * Alias pour la relation avec le nom attendu
+     */
+    public function complementsFcm()
+    {
+        return $this->complements_fcm_relation();
+    }
+
+
+
 
 }

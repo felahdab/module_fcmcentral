@@ -59,6 +59,21 @@ class FcmcentralPanelProvider extends PanelProvider
             ->widgets([
                 //Widgets\AccountWidget::class,
                 //Widgets\FilamentInfoWidget::class,
+                // Mentor
+                // Stats générales du mentor
+            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorStatsWidget::class,
+            
+            // Liste des marins supervisés
+            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinsSupervisesWidget::class,
+            
+            // Graphiques d'analyse
+            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorProgressionWidget::class,
+
+            // Marins
+            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinProgressWidget::class,
+            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinStatsWidget::class,
+            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinEvolutionWidget::class,
+            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinRepartitionWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
