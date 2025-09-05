@@ -8,19 +8,26 @@ use Filament\Pages\Page;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Livewire;
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
+
+
  
 class LivretMentorConsultation extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
     protected static bool $shouldRegisterNavigation = false; // Pas dans le menu
-    protected static string $routePath = '/livret-mentor-consultation/{marinId?}';
+    
  
     public Marin $marin;
     public int $marinId;
+
+    
  
     public static function canAccess(array $parameters = []): bool
     {
+            
+       
+
         $user = auth()->user();
         
         if ($user && $user->admin == 1) {
@@ -31,9 +38,13 @@ class LivretMentorConsultation extends Page
         return $marin !== null && Marin::estMentor($marin);
     }
  
-    public function mount(?int $marinId = null)
+    public function mount()
     {
-        $this->marinId = $marinId;
+        
+        
+      
+        
+        $this->marinId = request()->get('marinId');
         if (!$this->marinId){
             abort(404, 'ID Marin manquant');
         }
@@ -70,4 +81,11 @@ class LivretMentorConsultation extends Page
     {
         return "Livret FCM de {$this->marin->nom} {$this->marin->prenom}";
     }
+
+ 
+
+
+
+
+
 }
