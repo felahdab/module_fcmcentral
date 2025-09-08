@@ -10,25 +10,20 @@ use Filament\Forms\Components\Livewire;
 
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight as LivretDeFcm;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 class MonLivretDeFcm extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    use FcmAccessControl;
 
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
 
     public Marin $marin;
 
     public static function canAccess(array $parameters = []): bool
     {
-        $marin =  Marin::fromCurrentUser();
-        // Verification que le marin exsite ET qu'il est suivi en FCM ET qu'ila un parcours
-        return  $marin != null && 
-                $marin->suivi_en_fcm &&
-                $marin->complements_fcm !== null &&
-                $marin->complements_fcm->donnees_du_parcours !== null &&
-                $marin->complements_fcm->donnees_du_parcours->parcoursmarin !==null
-                ;
+        return static::canAccessMarinLivret();
     }
 
     public function mount()

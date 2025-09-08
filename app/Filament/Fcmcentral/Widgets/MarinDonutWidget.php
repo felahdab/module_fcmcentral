@@ -4,9 +4,12 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets;
 
 use Filament\Widgets\ChartWidget;
 use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 class MarinRepartitionWidget extends ChartWidget
 {
+    use FcmAccessControl;
+    
     protected static ?string $heading = 'Répartition du parcours';
     
     protected int | string | array $columnSpan = [
@@ -21,22 +24,7 @@ class MarinRepartitionWidget extends ChartWidget
 
     public static function canView():bool
     {
-        $user = auth()->user();
-
-          // Exclure les super_admin
-          if ($user && $user->admin==1) {
-            return false;
-        }
-        
-        $marin = Marin::fromCurrentUser();
-        
-        // Accessible seulement aux marins FCM avec parcours
-        return $marin !== null && 
-               $marin->suivi_en_fcm &&
-               $marin->complements_fcm !== null &&
-               $marin->complements_fcm->donnees_du_parcours !== null &&
-               $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null &&
-               !$marin->isMentor();
+       return static::canAccessMarinLivret();
     }
 
     public function getMarin(): ?Marin

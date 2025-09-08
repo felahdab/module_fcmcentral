@@ -25,9 +25,13 @@ use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCommun\Services\EventTriggerService;
 use Modules\RH\Models\Specialite;
 use Modules\RH\Models\Unite;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 class MarinResource extends Resource
 {
+    
+    use FcmAccessControl;
+    
     protected static ?string $model = Marin::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -35,16 +39,46 @@ class MarinResource extends Resource
     protected static ?string $navigationGroup = 'Marins';
     protected static ?string $navigationLabel = "Marins";
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        // Seuls les admins peuvent accéder à cette resource
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canCreate(): bool
+    {
+       // return static::canAccessAdminMenus();
+       return false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canDelete($record): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+
     public static function getNavigationBadge(): ?string
     {
         return Marin::enFcm()->count();
     }
 
 
-    public static function canCreate(): bool
-    {
-        return false;
-    }
+    
 
 
     public static function form(Form $form): Form

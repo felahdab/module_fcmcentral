@@ -8,6 +8,7 @@ use Filament\Pages\Page;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Livewire;
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 
  
@@ -25,18 +26,9 @@ class LivretMentorConsultation extends Page
  
     public static function canAccess(array $parameters = []): bool
     {
-            
-       
-
-        $user = auth()->user();
-        
-        if ($user && $user->admin == 1) {
-            return false;
-        }
- 
-        $marin = Marin::fromCurrentUser();
-        return $marin !== null && Marin::estMentor($marin);
+        return static::canAccessMentorFeatures();
     }
+
  
     public function mount()
     {
@@ -51,9 +43,10 @@ class LivretMentorConsultation extends Page
         $marinCible = Marin::findOrFail($this->marinId);
         $currentMarin = Marin::fromCurrentUser();
         
-        if (!$currentMarin || !Marin::estMentor($currentMarin)) {
+        if (!static::canAccessMentorFeatures()) {
             abort(403, 'Accès non autorisé');
         }
+
         
         $estSupervise = FcmMarin::where('mentor_id', $currentMarin->id)
             ->where('rh_marin_id', $this->marinId)
@@ -72,7 +65,7 @@ class LivretMentorConsultation extends Page
         return $form->schema([
             Livewire::make(LivretFcm::class, [
                 "marin" => $this->marin,
-                //"readOnly" => true,
+                "canValidate" => static::canValidateElements(),
             ]),
         ]);
     }

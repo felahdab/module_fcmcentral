@@ -12,14 +12,50 @@ use Filament\Tables\Columns\TextColumn;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages;
 use Modules\FcmCommun\Models\Cohorte;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 class CohorteResource extends Resource
 {
+    
+    use FcmAccessControl;
+    
     protected static ?string $model = Cohorte::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationLabel = 'Gestion Cohortes';
+
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        // Seuls les admins peuvent accéder à cette resource
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canCreate(): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canEdit($record): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canDelete($record): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return static::canAccessAdminMenus();
+    }
     
     public static function getNavigationBadge(): ?string
     {

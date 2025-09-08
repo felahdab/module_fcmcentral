@@ -5,9 +5,13 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets;
 use Filament\Widgets\ChartWidget;
 use Modules\FcmCentral\Models\Marin;
 use Carbon\Carbon;
+use Modules\FcmCentral\Traits\FcmAccessControl;
+
 
 class MarinEvolutionWidget extends ChartWidget
 {
+    use FcmAccessControl;
+    
     protected static ?string $heading = 'Évolution détaillée du parcours';
     
     protected int | string | array $columnSpan = 'full';
@@ -23,24 +27,8 @@ class MarinEvolutionWidget extends ChartWidget
 
     public static function canView():bool
     {
-        $user = auth()->user();
-
-          // Exclure les super_admin
-          if ($user->admin==1) {
-            return false;
-        }
-        
-        $marin = Marin::fromCurrentUser();
-        
-        // Accessible seulement aux marins FCM avec parcours
-        return $marin !== null && 
-               $marin->suivi_en_fcm &&
-               $marin->complements_fcm !== null &&
-               $marin->complements_fcm->donnees_du_parcours !== null &&
-               $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null &&
-               !$marin->isMentor();
+       return static::canAccessMarinLivret();
     }
-
     protected function getData(): array
     {
         $marin = $this->getMarin();

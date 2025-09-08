@@ -7,25 +7,19 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 class MarinsSupervisesWidget extends BaseWidget
 {
+    
+    use FcmAccessControl;
     protected static ?string $heading = 'Marins supervisés';
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
 
     public static function canView(): bool
     {
-        $user = auth()->user();
-        
-        // Exclure les admin (user->admin == 1)
-        if ($user && $user->admin == 1) {
-            return false;
-        }
-        
-        $marin = Marin::fromCurrentUser();
-        
-        return Marin::estMentor($marin);
+        return static::canAccessMentorFeatures();
     }
 
     public function table(Table $table): Table

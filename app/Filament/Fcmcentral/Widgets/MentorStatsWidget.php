@@ -6,9 +6,12 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 class MentorStatsWidget extends BaseWidget
 {
+    
+    use FcmAccessControl;
     protected static ?int $sort = 1;
     protected int | string | array $columnSpan = 'full';
 
@@ -16,16 +19,7 @@ class MentorStatsWidget extends BaseWidget
 
     public static function canView(): bool
     {
-        $user = auth()->user();
-        
-        // Exclure les admin (user->admin == 1)
-        if ($user && $user->admin == 1) {
-            return false;
-        }
-        
-        $marin = Marin::fromCurrentUser();
-        
-        return Marin::estMentor($marin);
+        return static::canAccessMentorFeatures();
     }
 
     protected function getStats(): array

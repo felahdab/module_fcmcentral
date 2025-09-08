@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 
 
@@ -21,6 +22,8 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Relation
 
 class CompetenceResource extends Resource
 {
+    use FcmAccessControl;
+    
     protected static ?string $model = Competence::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -29,6 +32,38 @@ class CompetenceResource extends Resource
 
     protected static ?string $navigationGroup = 'Parcours';
     protected static ?string $navigationLabel = 'Compétences';
+
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        // Seuls les admins peuvent accéder à cette resource
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canCreate(): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canEdit($record): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canDelete($record): bool
+    {
+        return static::canAccessAdminMenus();
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return static::canAccessAdminMenus();
+    }
 
     public static function form(Form $form): Form
     {

@@ -5,9 +5,12 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets;
 use Filament\Widgets\ChartWidget;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 class MentorProgressionWidget extends ChartWidget
 {
+    
+    use FcmAccessControl;
     protected static ?string $heading = 'Progression comparative des marins';
     protected static ?int $sort = 3;
     protected int | string | array $columnSpan = 'full';
@@ -15,17 +18,9 @@ class MentorProgressionWidget extends ChartWidget
 
     public static function canView(): bool
     {
-        $user = auth()->user();
-        
-        // Exclure les admin (user->admin == 1)
-        if ($user && $user->admin == 1) {
-            return false;
-        }
-        
-        $marin = Marin::fromCurrentUser();
-        
-        return Marin::estMentor($marin);
+        return static::canAccessMentorFeatures();
     }
+
 
     protected function getData(): array
     {

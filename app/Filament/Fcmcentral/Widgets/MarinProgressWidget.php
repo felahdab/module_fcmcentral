@@ -4,14 +4,19 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets;
 
 use Filament\Widgets\Widget;
 use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Traits\FcmAccessControl;
 
 class MarinProgressWidget extends Widget
 {
+   
+    use FcmAccessControl;
+   
     protected static string $view = 'fcmcentral::filament.fcmcentral.widgets.marin-progress-widget';
     
     protected int | string | array $columnSpan = 'full';
 
     protected static ?int $sort = 1;
+    
 
     public function getMarin(): ?Marin
     {
@@ -21,22 +26,7 @@ class MarinProgressWidget extends Widget
 
     public static function canView():bool
     {
-        $user = auth()->user();
-
-          // Exclure les super_admin
-          if ($user->admin==1) {
-            return false;
-        }
-        
-        $marin = Marin::fromCurrentUser();
-        
-        // Accessible seulement aux marins FCM avec parcours
-        return $marin !== null && 
-               $marin->suivi_en_fcm &&
-               $marin->complements_fcm !== null &&
-               $marin->complements_fcm->donnees_du_parcours !== null &&
-               $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null &&
-               !$marin->isMentor();
+       return static::canAccessMarinLivret();
     }
 
     public function getProgressData(): array
