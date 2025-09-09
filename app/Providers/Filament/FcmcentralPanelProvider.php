@@ -1,4 +1,5 @@
 <?php
+// filepath: Modules/FcmCentral/app/Providers/Filament/FcmcentralPanelProvider.php
 
 namespace Modules\FcmCentral\Providers\Filament;
 
@@ -11,6 +12,9 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
 use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationItem;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationBuilder;
 use Filament\Facades\Filament;
 
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -30,17 +34,33 @@ use App\Http\Middleware\SetTenantCookieMiddleware;
 use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 
 use App\Filament\Pages\UserPreferences;
-
 use Filament\Support\Assets\Theme;
+use Modules\FcmCentral\Traits\FcmAccessControl;
+
+// Import des Resources
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\FonctionResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource;
+
+// Import des Pages
+use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
+use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
 
 class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
+    use FcmAccessControl;
 
     private string $module = "FcmCentral";
+
     public function panel(Panel $panel): Panel
     {
         $moduleNamespace = $this->getModuleNamespace();
+        
         $panel
             ->id('FCM Central')
             ->path($this->prefix . '/fcmcentral')
@@ -56,25 +76,10 @@ class FcmcentralPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: module_path($this->module, 'app/Filament/Fcmcentral/Widgets'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Widgets")
-            ->widgets([
-                //Widgets\AccountWidget::class,
-                //Widgets\FilamentInfoWidget::class,
-                // Mentor
-                // Stats générales du mentor
-            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorStatsWidget::class,
-            
-            // Liste des marins supervisés
-            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinsSupervisesWidget::class,
-            
-            // Graphiques d'analyse
-            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorProgressionWidget::class,
-
-            // Marins
-            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinProgressWidget::class,
-            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinStatsWidget::class,
-            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinEvolutionWidget::class,
-            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinRepartitionWidget::class,
-            ])
+            ->widgets($this->getConditionalWidgets())
+            ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
+                return $this->buildConditionalNavigation($builder);
+            })
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -92,20 +97,334 @@ class FcmcentralPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            // Menu Side Bar Haut
             ->topNavigation()
             ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')))
-            ->userMenuItems([
-                'help' => MenuItem::make()
-                    ->label('Aide')
-                    ->icon('heroicon-m-question-mark-circle')
-                    ->url(fn () => url(config('skeletor.prefixe_instance') . '/docs/' . Filament::getCurrentPanel()->getId()) . '/', shouldOpenInNewTab:true),
-                'apidoc' => MenuItem::make()
-                    ->label('API')
-                    ->icon('heroicon-m-cloud')
-                    ->url(fn () => url(route('l5-swagger.default.api')), shouldOpenInNewTab:true),
-            ]);
+            ->userMenuItems($this->getConditionalUserMenuItems());
+
         return $panel;
+    }
+
+    /**
+     * Construction de la navigation conditionnelle avec évaluation différée
+     */
+    private function buildConditionalNavigation(NavigationBuilder $builder): NavigationBuilder
+{
+    // Navigation avec groupes organisés
+    return $builder->groups([
+        // Groupe principal (sans nom)
+        NavigationGroup::make()
+            ->items([
+                // Dashboard - toujours visible
+                NavigationItem::make('Tableau de bord')
+                    ->icon('heroicon-o-home')
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.dashboard'))
+                    ->url(fn (): string => Pages\Dashboard::getUrl()),
+                
+                // Mon livret FCM - visible seulement pour les marins FCM
+                NavigationItem::make('Mon livret FCM')
+                    ->icon('heroicon-o-document-text')
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.mon-livret-de-fcm'))
+                    ->url(fn (): string => MonLivretDeFcm::getUrl())
+                    ->badge(fn () => $this->getMarinProgressBadge())
+                    ->visible(fn (): bool => $this->canAccessMarinLivret()),
+                
+                // Mes marins FCM - visible seulement pour les mentors
+                NavigationItem::make('Mes marins FCM')
+                    ->icon('heroicon-o-users')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'marin'))
+                    ->url(fn (): string => MarinResource::getUrl('index'))
+                    ->badge(fn () => $this->getMentorMarinsCount())
+                    ->visible(fn (): bool => $this->canAccessMentorFeatures()),
+            ]),
+
+        // Groupe Administration
+        NavigationGroup::make('Administration')
+            // ->icon('heroicon-o-cog-6-tooth')
+            // ->collapsible()
+            // ->collapsed()
+            ->items([
+                NavigationItem::make('Gestion des marins')
+                    ->icon('heroicon-o-users')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'marin'))
+                    ->url(fn (): string => MarinResource::getUrl('index'))
+                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                
+                NavigationItem::make('Gestion des cohortes')
+                    ->icon('heroicon-o-user-group')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'cohorte'))
+                    ->url(fn (): string => CohorteResource::getUrl('index'))
+                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+            ])
+            //->visible(fn (): bool => $this->canAccessAdminMenus())
+            ,
+
+        // Groupe Gestion des parcours
+        NavigationGroup::make('Gestion des parcours')
+            // ->icon('heroicon-o-academic-cap')
+            // ->collapsible()
+            // ->collapsed()
+            ->items([
+                NavigationItem::make('Parcours figés')
+                    ->icon('heroicon-o-lock-closed')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours-serialise'))
+                    ->url(fn (): string => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource::getUrl('index'))
+                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                
+                NavigationItem::make('Parcours')
+                    ->icon('heroicon-o-map')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours') && !str_contains(request()->route()?->getName() ?? '', 'serialise'))
+                    ->url(fn (): string => ParcoursResource::getUrl('index'))
+                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                
+                NavigationItem::make('Fonctions')
+                    ->icon('heroicon-o-briefcase')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'fonction'))
+                    ->url(fn (): string => FonctionResource::getUrl('index'))
+                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                
+                NavigationItem::make('Compétences')
+                    ->icon('heroicon-o-star')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence'))
+                    ->url(fn (): string => CompetenceResource::getUrl('index'))
+                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                
+                NavigationItem::make('Savoir-faire')
+                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'savoir-faire'))
+                    ->url(fn (): string => SavoirFaireResource::getUrl('index'))
+                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                
+                NavigationItem::make('Stages et tâches')
+                    ->icon('heroicon-o-rectangle-stack')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'activite'))
+                    ->url(fn (): string => ActiviteResource::getUrl('index'))
+                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+            ])
+            //->visible(fn (): bool => $this->canAccessAdminMenus())
+            ,
+
+        // Groupe Outils
+        NavigationGroup::make('Outils')
+            // ->icon('heroicon-o-wrench')
+            // ->collapsible()
+            // ->collapsed()
+            ->items([
+                NavigationItem::make('Recherche annuaire')
+                    ->icon('heroicon-o-magnifying-glass')
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.recherche-annuaire-page'))
+                    ->url(fn (): string => RechercheAnnuairePage::getUrl())
+                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+            ])
+            //->visible(fn (): bool => $this->canAccessAdminMenus())
+            ,
+    ]);
+}
+
+
+   
+
+    /**
+     * Widgets conditionnels selon les droits
+     */
+    private function getConditionalWidgets(): array
+    {
+        $widgets = [];
+
+        try {
+            // Widgets pour les mentors
+            if ($this->canAccessMentorFeatures()) {
+                $widgets = array_merge($widgets, [
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorStatsWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinsSupervisesWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorProgressionWidget::class,
+                ]);
+            }
+
+            // Widgets pour les marins FCM
+            if ($this->canAccessMarinLivret()) {
+                $widgets = array_merge($widgets, [
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinProgressWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinStatsWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinEvolutionWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinRepartitionWidget::class,
+                ]);
+            }
+        } catch (\Exception $e) {
+            // En cas d'erreur, pas de widgets
+        }
+
+        return $widgets;
+    }
+
+    /**
+     * Menu utilisateur conditionnel
+     */
+    private function getConditionalUserMenuItems(): array
+    {
+        $menuItems = [
+            'profile' => MenuItem::make()
+                ->label('Mon profil')
+                ->icon('heroicon-m-user-circle'),
+            
+            'help' => MenuItem::make()
+                ->label('Aide')
+                ->icon('heroicon-m-question-mark-circle')
+                ->url(fn () => url(config('skeletor.prefixe_instance') . '/docs/' . Filament::getCurrentPanel()->getId()) . '/', shouldOpenInNewTab: true),
+            
+            'apidoc' => MenuItem::make()
+                ->label('API')
+                ->icon('heroicon-m-cloud')
+                ->url(fn () => url(route('l5-swagger.default.api')), shouldOpenInNewTab: true)
+                ->visible(fn (): bool => $this->canAccessAdminMenus()),
+        ];
+
+        try {
+            // Menu rapide pour les marins FCM
+            $menuItems['mon-parcours'] = MenuItem::make()
+                ->label('Mon parcours FCM')
+                ->icon('heroicon-m-document-text')
+                ->url(fn() => MonLivretDeFcm::getUrl())
+                ->badge(fn() => $this->getMarinProgressBadge())
+                ->visible(fn (): bool => $this->canAccessMarinLivret());
+
+            // Menu rapide pour les mentors
+            $menuItems['mes-marins'] = MenuItem::make()
+                ->label('Mes marins supervisés')
+                ->icon('heroicon-m-users')
+                ->url(fn() => MarinResource::getUrl('index'))
+                ->badge(fn() => $this->getMentorMarinsCount())
+                //->badgeColor('success')
+                ->visible(fn (): bool => $this->canAccessMentorFeatures());
+                
+            $menuItems['validations-attente'] = MenuItem::make()
+                ->label('Validations en attente')
+                ->icon('heroicon-m-clock')
+                ->url(fn() => MarinResource::getUrl('index', ['tableFilters[en_attente][value]' => true]))
+                ->badge(fn() => $this->getMentorPendingValidationsCount())
+                //->badgeColor('warning')
+                ->visible(fn(): bool => $this->canAccessMentorFeatures() && $this->getMentorPendingValidationsCount() > 0);
+
+            // Menu spécifique aux admins
+            $menuItems['admin-stats'] = MenuItem::make()
+                ->label('Statistiques générales')
+                ->icon('heroicon-m-chart-bar')
+                ->url(fn() => Pages\Dashboard::getUrl())
+                ->visible(fn (): bool => $this->canAccessAdminMenus());
+            
+            $menuItems['logout'] = MenuItem::make()
+                ->label('Se déconnecter')
+                ->icon('heroicon-m-arrow-right-on-rectangle');
+                
+        } catch (\Exception $e) {
+            // En cas d'erreur, menu de base seulement
+        }
+
+        return $menuItems;
+    }
+
+    // ... reste des méthodes helper inchangées ...
+
+    private function getMarinProgressBadge(): ?string
+    {
+        try {
+            if (!$this->canAccessMarinLivret()) {
+                return null;
+            }
+
+            $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+            if (!$marin || !$marin->complements_fcm) {
+                return null;
+            }
+
+            $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
+            if (!$parcours) return null;
+
+            $totalActivites = 0;
+            $activitesValidees = 0;
+            
+            foreach ($parcours['fonctions'] ?? [] as $fonction) {
+                foreach ($fonction['competences'] ?? [] as $competence) {
+                    foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
+                        foreach ($savoirfaire['activites'] ?? [] as $activite) {
+                            $totalActivites++;
+                            if (($activite['etat_valid'] ?? false) === true) {
+                                $activitesValidees++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $progress = $totalActivites > 0 ? round(($activitesValidees / $totalActivites) * 100) : 0;
+            return $progress . '%';
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    private function getMentorMarinsCount(): ?string
+    {
+        try {
+            if (!$this->canAccessMentorFeatures()) {
+                return null;
+            }
+
+            $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+            if (!$currentMarin) {
+                return null;
+            }
+
+            $count = \Modules\FcmCentral\Models\FcmMarin::where('mentor_id', $currentMarin->id)->count();
+            return $count > 0 ? (string) $count : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    private function getMentorPendingValidationsCount(): int
+    {
+        try {
+            if (!$this->canAccessMentorFeatures()) {
+                return 0;
+            }
+
+            $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+            if (!$currentMarin) {
+                return 0;
+            }
+
+            $marinIds = \Modules\FcmCentral\Models\FcmMarin::where('mentor_id', $currentMarin->id)
+                ->pluck('rh_marin_id');
+
+            $pendingCount = 0;
+            foreach ($marinIds as $marinId) {
+                $marin = \Modules\FcmCentral\Models\Marin::find($marinId);
+                if ($marin && $marin->complements_fcm) {
+                    $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
+                    if ($parcours) {
+                        foreach ($parcours['fonctions'] ?? [] as $fonction) {
+                            foreach ($fonction['competences'] ?? [] as $competence) {
+                                foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
+                                    foreach ($savoirfaire['activites'] ?? [] as $activite) {
+                                        $estProposee = !empty($activite['date_proposition']);
+                                        $estValidee = ($activite['etat_valid'] ?? false) === true;
+                                        $aDateValidation = !empty($activite['date_validation']);
+                                        
+                                        if ($estProposee && !$estValidee && !$aDateValidation) {
+                                            $pendingCount++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return $pendingCount;
+        } catch (\Exception $e) {
+            return 0;
+        }
     }
 
     protected function getModuleNamespace(): string

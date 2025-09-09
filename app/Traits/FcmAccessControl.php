@@ -55,15 +55,26 @@ trait FcmAccessControl
         if (!$user) {
             return false;
         }
-        
-        // Vérifier si c'est un super admin
-        if (method_exists($user, 'IsSuperAdmin') && $user->IsSuperAdmin()) {
+
+        if ($user->admin == 1) {
             return true;
         }
+
+        
+        // Vérifier si c'est un super admin
+        // if (method_exists($user, 'IsSuperAdmin') && $user->IsSuperAdmin()) {
+        //     return true;
+        // }
+
+        // Vérifier si user->admin == 1
+        // if (property_exists($user, 'admin') && $user->admin == 1) {
+        //     return true;
+        // }
+
         
         // Ou vérifier les rôles/permissions spécifiques
         // if (method_exists($user, 'hasRole')) {
-        //     return $user->hasRole(['fcmcentral::superviseur']);
+        //     return $user->hasRole(['fcmcentral::superviseur','admin','super-admin']);
         // }
         
         return false;

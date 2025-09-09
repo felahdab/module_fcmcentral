@@ -83,6 +83,7 @@ class FcmCentralServiceProvider extends ServiceProvider
 
     public function registerDirectMenuItems()
     {
+        if (static::canAccessAdminMenus()) {
         app(ModuleDefinedMenusRegistry::class)->registerDirectMenuItems([
             DirectMenuItem::make()
                 ->name('FCM Central')
@@ -90,25 +91,27 @@ class FcmCentralServiceProvider extends ServiceProvider
                 ->children($this->getConditionalMenuItems())
         ]);
     }
+    }
 
     private function getConditionalMenuItems(): array
     {
         $menuItems = [];
+       
         
         // Menu pour les marins FCM non-mentors (leur livret personnel)
-        if (static::canAccessMarinLivret()) {
+        if ( $this->canAccessMarinLivret()) {
             $menuItems[] = DirectMenuItem::make()
                 ->name('Mon livret FCM')
                 ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(panel: 'FCM Central'))
-                ->icon('heroicon-o-document-text');
+               ;
         }
         
         // Menus pour les mentors
-        if (static::canAccessMentorFeatures()) {
+        if ( $this->canAccessMentorFeatures()) {
             $menuItems[] = DirectMenuItem::make()
                 ->name('Mes marins FCM')
                 ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins::getUrl(panel: 'FCM Central'))
-                ->icon('heroicon-o-users');
+               ;
         }
         
         // Menus administratifs (seulement pour superviseurs/admins)
@@ -116,59 +119,59 @@ class FcmCentralServiceProvider extends ServiceProvider
             // Groupe Administration
             $menuItems[] = DirectMenuItem::make()
                 ->name('Administration')
-                ->icon('heroicon-o-cog-6-tooth')
+                
                 ->children([
                     DirectMenuItem::make()
                         ->name('Gestion des marins')
                         ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins::getUrl(panel: 'FCM Central'))
-                        ->icon('heroicon-o-users'),
+                        ,
                     
                     DirectMenuItem::make()
                         ->name('Gestion des cohortes')
                         ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages\ListCohortes::getUrl(panel: 'FCM Central'))
-                        ->icon('heroicon-o-user-group'),
+                        ,
                 ]);
 
             // Groupe Parcours
             $menuItems[] = DirectMenuItem::make()
                 ->name('Gestion des parcours')
-                ->icon('heroicon-o-academic-cap')
+               
                 ->children([
                     DirectMenuItem::make()
                         ->name('Parcours')
                         ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours::getUrl(panel: 'FCM Central'))
-                        ->icon('heroicon-o-map'),
+                        ,
                     
                     DirectMenuItem::make()
                         ->name('Fonctions')
                         ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\FonctionResource\Pages\ListFonctions::getUrl(panel: 'FCM Central'))
-                        ->icon('heroicon-o-briefcase'),
+                        ,
                     
                     DirectMenuItem::make()
                         ->name('Compétences')
                         ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages\ListCompetences::getUrl(panel: 'FCM Central'))
-                        ->icon('heroicon-o-star'),
+                        ,
                     
                     DirectMenuItem::make()
                         ->name('Savoir-faire')
                         ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\Pages\ListSavoirFaires::getUrl(panel: 'FCM Central'))
-                        ->icon('heroicon-o-wrench-screwdriver'),
+                        ,
                     
                     DirectMenuItem::make()
                         ->name('Stages et tâches')
                         ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource\Pages\ListActivites::getUrl(panel: 'FCM Central'))
-                        ->icon('heroicon-o-rectangle-stack'),
+                       ,
                 ]);
 
             // Outils
             $menuItems[] = DirectMenuItem::make()
                 ->name('Outils')
-                ->icon('heroicon-o-wrench')
+                
                 ->children([
                     DirectMenuItem::make()
                         ->name('Recherche annuaire')
                         ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage::getUrl(panel: 'FCM Central'))
-                        ->icon('heroicon-o-magnifying-glass'),
+                       ,
                 ]);
         }
         
