@@ -14,6 +14,8 @@ use Modules\FcmCentral\Traits\FcmAccessControl;
  
 class LivretMentorConsultation extends Page
 {
+    use FcmAccessControl;
+    
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
     protected static bool $shouldRegisterNavigation = false; // Pas dans le menu
