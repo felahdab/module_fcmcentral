@@ -230,28 +230,20 @@ class FcmcentralPanelProvider extends PanelProvider
     {
         $widgets = [];
 
-        try {
-            // Widgets pour les mentors
-            if ($this->canAccessMentorFeatures()) {
+       
+           
                 $widgets = array_merge($widgets, [
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorStatsWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinsSupervisesWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorProgressionWidget::class,
-                ]);
-            }
-
-            // Widgets pour les marins FCM
-            if ($this->canAccessMarinLivret()) {
-                $widgets = array_merge($widgets, [
+                
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinProgressWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinStatsWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinEvolutionWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinRepartitionWidget::class,
                 ]);
-            }
-        } catch (\Exception $e) {
-            // En cas d'erreur, pas de widgets
-        }
+           
+       
 
         return $widgets;
     }
