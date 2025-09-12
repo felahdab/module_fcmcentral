@@ -16,63 +16,39 @@ class RechercheAnnuaireForm
 
     public static function getSchema()
     {
-        return [
-            Forms\Components\Wizard\Step::make('FCM')
+    return [
+        Forms\Components\Wizard\Step::make('FCM')
+                ->visible(fn() => auth()->user()?->can('fcmcentral::suivre_en_fcm'))
                 ->schema([
                     Forms\Components\Toggle::make('suivre_en_fcm')
+                        ->visible(fn() => auth()->user()?->can('fcmcentral::suivre_en_fcm'))
                         ->label("Suivre en FCM")
                         ->live(),
                     
                     Forms\Components\Select::make('cohorte_id')
-                        ->visible(fn(Get $get) => $get('suivre_en_fcm'))
+                        ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer_cohorte'))
                         ->label("Cohorte de ce marin")
                         ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
                     
                     // Champ mentor visible seulement pour les admins
                     Forms\Components\Select::make('mentor_id')
-                        ->label("Choisir un mentor")
-                        ->visible(function(Get $get) {
-                            return $get('suivre_en_fcm') && static::canAccessAdminMenus();
-                        })
-                        ->options(
-                            Marin::query()
-                                ->whereNull('deleted_at')
-                                ->orderBy('nom')
-                                ->orderBy('prenom')
-                                ->get()
-                                ->mapWithKeys(function ($marin) {
-                                    $fullName = trim($marin->prenom . ' ' . $marin->nom);
-                                    $grade = $marin->grade?->libelle_court ?? '';
-                                    $label = $grade ? $grade . ' ' . $fullName : $fullName;
-                                    return [$marin->uuid => $label];
-                                })
-                        )
-                        ->searchable(),
-                    
-                    // Message informatif pour les mentors
-                    Forms\Components\Placeholder::make('mentor_info')
-                        ->visible(function(Get $get) {
-                            return $get('suivre_en_fcm') && static::canAccessMentorFeatures() && !static::canAccessAdminMenus();
-                        })
-                        ->label('Mentor assigné')
-                        ->content(function() {
-                            $currentMarin = Marin::fromCurrentUser();
-                            if ($currentMarin) {
-                                $grade = $currentMarin->grade?->libelle_court ?? '';
-                                $fullName = trim($currentMarin->prenom . ' ' . $currentMarin->nom);
-                                return $grade ? $grade . ' ' . $fullName : $fullName;
-                            }
-                            return 'Vous serez automatiquement assigné comme mentor';
-                        })
-                        ->extraAttributes(['class' => 'text-success-600 font-medium']),
-                    
+                            ->label("Choisir un mentor")
+                            ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer_mentor'))
+                            ->options(
+                                Marin::query()
+                                    ->where('data->fcm->en_fcm', false)
+                                    ->orderBy('nom')
+                                    ->get()
+                                    ->pluck('fullNameAndGrade', 'uuid')
+                                )                              
+                            ->searchable(),
                     Forms\Components\Select::make('parcours_id')
-                        ->visible(fn(Get $get) => $get('suivre_en_fcm'))
-                        ->label('Choisir un Parcours')
-                        ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
-                        ->searchable()
-                ]
-            ),     
+                            ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::suivre_en_fcm'))
+                            ->label('Choisir un Parcours')
+                            ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
+                            ->searchable()
+                    ]
+                ),     
         ];
     }
 }

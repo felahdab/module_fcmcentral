@@ -22,7 +22,15 @@ class RolesSeeder extends Seeder
             "guard_name" => "web"
         ]);
 
+        $role->permissions()->detach();
+
         $permission = Permission::where("name", "fcmcentral::marin.index")->first();
+
+        $role->permissions()->attach([
+            $permission
+        ]);
+
+        $permission = Permission::where("name", "fcmcentral::recherche_annuaire")->first();
 
         $role->permissions()->attach([
             $permission

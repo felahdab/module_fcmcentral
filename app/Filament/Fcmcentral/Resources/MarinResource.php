@@ -367,7 +367,8 @@ class MarinResource extends Resource
                         'class' => 'btn-suivifcm',
                     ])
                     ->hidden(function ($record) {
-                        return $record->suiviEnFcm;
+                        return $record->suiviEnFcm &&
+                            auth()->user()?->can('fcmcentral::suivre_en_fcm');
                     })
                     ->visible(fn ($record) => static::canAccessAdminMenus()) // Seuls les admins
                     ->action(function ($record) {
@@ -389,10 +390,10 @@ class MarinResource extends Resource
                         'class' => 'btn-livret',
                     ])
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm &&
-                                $record->complements_fcm &&
+                        return $record->suiviEnFcm && 
+                                $record->complements_fcm && 
                                 $record->complements_fcm->parcoursSerialises()->exists() &&
-                                (static::canAccessAdminMenus() || static::isMentorOfMarin($record));
+                                auth()->user()?->can('fcmcentral::voir_les_livrets');
                     })
                     ->action(function ($record){
                         $url = static::getUrl('livret-de-fcm',['record' => $record->id]);
@@ -407,10 +408,10 @@ class MarinResource extends Resource
                         'class' => 'btn-pdf',
                     ])
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm &&
-                                $record->complements_fcm &&
+                        return $record->suiviEnFcm && 
+                                $record->complements_fcm && 
                                 $record->complements_fcm->parcoursSerialises()->exists() &&
-                                (static::canAccessAdminMenus() || static::isMentorOfMarin($record));
+                                auth()->user()?->can('fcmcentral::telecharger_les_livrets');
                     })
                     ->action(function ($record) {
                         return response()->streamDownload(function () use ($record) {
@@ -429,7 +430,8 @@ class MarinResource extends Resource
                     ])
                     ->color('danger')
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm && static::canAccessAdminMenus(); // Seuls les admins
+                        return $record->suiviEnFcm &&
+                            auth()->user()?->can('fcmcentral::suivre_en_fcm');
                     })
                     ->action(function ($record) {
                         $event = new UserGeneratedEvent(
@@ -450,12 +452,21 @@ class MarinResource extends Resource
                     ->extraAttributes([
                         'title' => 'Attribuer cohorte - mentor - parcours',
                         'class' => 'btn-suivifcm',
-                    ])
-                    ->visible(fn ($record) => $record->suiviEnFcm && static::canAccessAdminMenus()) // Seuls les admins
+                        ])
+                    ->visible(function ($record) {
+                        return $record->suiviEnFcm  && (
+                                auth()->user()?->can('fcmcentral::attribuer_cohorte') ||
+                                auth()->user()?->can('fcmcentral::attribuer_mentor') ||
+                                auth()->user()?->can('fcmcentral::attribuer_parcours')
+                        );
+                    }) 
                     ->requiresConfirmation()
                     ->form([
                         Forms\Components\Select::make('cohorte_id')
                             ->label("Choisir la cohorte")
+                            ->visible(function(){
+                                return auth()->user()?->can('fcmcentral::attribuer_cohorte');
+                            })
                             ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
 
                         Forms\Components\Select::make('mentor_id')
@@ -466,24 +477,31 @@ class MarinResource extends Resource
                                     ->orderBy('nom')
                                     ->orderBy('prenom')
                                     ->get()
-                                    ->mapWithKeys(function ($marin) {
-                                        $fullName = trim($marin->prenom . ' ' . $marin->nom);
-                                        $grade = $marin->grade?->libelle_court ?? '';
-                                        $label = $grade ? $grade . ' ' . $fullName : $fullName;
-                                        return [$marin->uuid => $label];
-                                    });
-                            })
-                            ->searchable()
-                            ->placeholder('Sélectionnez un mentor'),
+                                   // ->pluck('fullNameAndGrade', 'uuid')
+                                   ->mapWithKeys(function ($marin) {
+                                    $fullName = trim($marin->prenom . ' ' . $marin->nom);
+                                    $grade = $marin->grade?->libelle_court ?? '';
+                                    $label = $grade ? $grade . ' ' . $fullName : $fullName;
+                                    return [$marin->uuid => $label];
+                                });
+                        })
+                        ->searchable()
 
+                                )                              
+                                ->visible(function(){
+                                    return auth()->user()?->can('fcmcentral::attribuer_mentor');
+                                })
+                            ->searchable(),
                         Forms\Components\Select::make('parcours_id')
                             ->label('Choisir un Parcours')
                             ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
                             ->searchable()
                             ->visible(function ($record) {
-                                return $record->suiviEnFcm &&
-                                    $record->complements_fcm &&
-                                    !$record->complements_fcm->parcoursSerialises()->exists();
+                                $visible = $record->suiviEnFcm && 
+                                    $record->complements_fcm && 
+                                    ! $record->complements_fcm->parcoursSerialises()->exists() &&
+                                    auth()->user()?->can('fcmcentral::attribuer_parcours');
+                                return $visible;
                             })
                     ])
                     ->action(function ($record, $data) {
