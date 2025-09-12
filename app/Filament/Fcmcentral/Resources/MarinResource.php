@@ -494,8 +494,8 @@ class MarinResource extends Resource
                                 //                !$user?->can('fcmcentral::bcf');
                                 
                                 // return $user?->can('fcmcentral::attribuer_mentor') && !$isMentorOnly;
-
-                                return !$user?->can('fcmcentral::attribuer_mentor');
+                                $isMentorOnly = $user?->can('fcmcentral::droits_admin');
+                                return !$user?->can('fcmcentral::attribuer_mentor') || $isMentorOnly;
                             })
                             ->options(
                                 Marin::query()
