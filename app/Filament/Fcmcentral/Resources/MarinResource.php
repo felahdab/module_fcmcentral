@@ -265,6 +265,7 @@ class MarinResource extends Resource
                         return static::getActivitesEnAttenteCount($record);
                     })
                     ->badge()
+                    //->sortable()
                     ->color(fn (string $state): string => $state > 0 ? 'warning' : 'success')
                     ->icon(fn (string $state): string => $state > 0 ? 'heroicon-m-clock' : 'heroicon-m-check-circle'),
                 Tables\Columns\TextColumn::make('matricule')
@@ -317,30 +318,42 @@ class MarinResource extends Resource
                     }),
                 
                 // Filtre spécial pour les activités en attente
-                Filter::make('activites_en_attente')
-                    ->form([
-                        Toggle::make('has_pending')
-                            ->label('Avec activités en attente'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        if (!($data['has_pending'] ?? false)) {
-                            return $query;
-                        }
-                        
-                        return $query->whereHas('complements_fcm', function ($q) {
-                            $q->whereNotNull('donnees_du_parcours');
-                        })->get()->filter(function ($marin) {
-                            return static::getActivitesEnAttenteCount($marin) > 0;
-                        })->pluck('id')->pipe(function ($ids) use ($query) {
-                            return $query->whereIn('id', $ids);
-                        });
-                    })
-                    ->indicateUsing(function (array $data): ?string {
-                        if (!($data['has_pending'] ?? false)) {
-                            return null;
-                        }
-                        return 'Avec activités en attente';
-                    }),
+    //             Filter::make('activites_en_attente')
+    // ->form([
+    //     Toggle::make('has_pending')
+    //         ->label('Avec activités en attente'),
+    // ])
+    // ->query(function (Builder $query, array $data): Builder {
+    //     if (!($data['has_pending'] ?? false)) {
+    //         return $query;
+    //     }
+        
+    //     try {
+    //         // Récupérer tous les marins avec parcours
+    //         $marinIds = $query->clone()
+    //             ->whereHas('complements_fcm', function ($q) {
+    //                 $q->whereNotNull('donnees_du_parcours');
+    //             })
+    //             ->get()
+    //             ->filter(function ($marin) {
+    //                 return static::getActivitesEnAttenteCount($marin) > 0;
+    //             })
+    //             ->pluck('id')
+    //             ->toArray();
+            
+    //         return $query->whereIn('id', $marinIds);
+    //     } catch (\Exception $e) {
+    //         // En cas d'erreur, retourner query vide
+    //         return $query->whereRaw('1 = 0');
+    //     }
+    // })
+    // ->indicateUsing(function (array $data): ?string {
+    //     if (!($data['has_pending'] ?? false)) {
+    //         return null;
+    //     }
+    //     return 'Avec activités en attente';
+    // }),
+
 
                 SelectFilter::make('specialite_id')
                     ->label('Spécialité')
@@ -444,7 +457,7 @@ class MarinResource extends Resource
                         event($event);
                     }),
 
-                Tables\Actions\Action::make('attributs-fcm')
+                    Tables\Actions\Action::make('attributs-fcm')
                     ->iconButton()
                     ->icon('heroicon-m-swatch')
                     ->modalHeading('Attributs FCM')
@@ -452,12 +465,12 @@ class MarinResource extends Resource
                     ->extraAttributes([
                         'title' => 'Attribuer cohorte - mentor - parcours',
                         'class' => 'btn-suivifcm',
-                        ])
+                    ])
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm  && (
-                                auth()->user()?->can('fcmcentral::attribuer_cohorte') ||
-                                auth()->user()?->can('fcmcentral::attribuer_mentor') ||
-                                auth()->user()?->can('fcmcentral::attribuer_parcours')
+                        return $record->suiviEnFcm && (
+                            auth()->user()?->can('fcmcentral::attribuer_cohorte') ||
+                            auth()->user()?->can('fcmcentral::attribuer_mentor') ||
+                            auth()->user()?->can('fcmcentral::attribuer_parcours')
                         );
                     }) 
                     ->requiresConfirmation()
@@ -468,42 +481,88 @@ class MarinResource extends Resource
                                 return auth()->user()?->can('fcmcentral::attribuer_cohorte');
                             })
                             ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
-
+                
+                        // === MENTOR POUR LES ADMINS/BCF (avec sélection) ===
                         Forms\Components\Select::make('mentor_id')
-                            ->label("Choisir le mentor")
-                            ->options(function () {
-                                return Marin::query()
+                            ->label("Choisir un mentor")
+                            ->visible(function(){
+                                // Visible si peut attribuer mentor ET n'est pas juste mentor
+
+                                $user = auth()->user();
+                                // $isMentorOnly = $user?->can('fcmcentral::mentor') && 
+                                //                !$user?->can('fcmcentral::admin') && 
+                                //                !$user?->can('fcmcentral::bcf');
+                                
+                                // return $user?->can('fcmcentral::attribuer_mentor') && !$isMentorOnly;
+
+                                return !$user?->can('fcmcentral::attribuer_mentor');
+                            })
+                            ->options(
+                                Marin::query()
                                     ->whereNull('deleted_at')
                                     ->orderBy('nom')
                                     ->orderBy('prenom')
                                     ->get()
-                                   // ->pluck('fullNameAndGrade', 'uuid')
-                                   ->mapWithKeys(function ($marin) {
-                                    $fullName = trim($marin->prenom . ' ' . $marin->nom);
-                                    $grade = $marin->grade?->libelle_court ?? '';
-                                    $label = $grade ? $grade . ' ' . $fullName : $fullName;
-                                    return [$marin->uuid => $label];
-                                });
-                        })
-                        ->searchable()
-
-                                )                              
-                                ->visible(function(){
-                                    return auth()->user()?->can('fcmcentral::attribuer_mentor');
-                                })
+                                    ->mapWithKeys(function ($marin) {
+                                        $fullName = trim($marin->prenom . ' ' . $marin->nom);
+                                        $grade = $marin->grade?->libelle_court ?? '';
+                                        $label = $grade ? $grade . ' ' . $fullName : $fullName;
+                                        return [$marin->uuid => $label];
+                                    })
+                            )
                             ->searchable(),
+                
+                        // === MENTOR CACHÉ POUR LES MENTORS (assignation automatique) ===
+                        Forms\Components\Hidden::make('mentor_id')
+                            ->visible(function(){
+                                // Visible si peut attribuer mentor ET est seulement mentor
+                                 $user = auth()->user();
+                                // $isMentorOnly = $user?->can('fcmcentral::mentor') && 
+                                //                !$user?->can('fcmcentral::admin') && 
+                                //                !$user?->can('fcmcentral::bcf');
+                                
+                                // return $user?->can('fcmcentral::attribuer_mentor') && $isMentorOnly;
+                                return $user?->can('fcmcentral::attribuer_mentor');
+                            })
+                            ->default(function() {
+                                $currentMarin = Marin::fromCurrentUser();
+                                return $currentMarin ? $currentMarin->uuid : null;
+                            }),
+                        
+                        // === MESSAGE INFORMATIF POUR LES MENTORS ===
+                        Forms\Components\Placeholder::make('mentor_info')
+                            ->visible(function(){
+                                $user = auth()->user();
+                                // $isMentorOnly = $user?->can('fcmcentral::mentor') && 
+                                //                !$user?->can('fcmcentral::admin') && 
+                                //                !$user?->can('fcmcentral::bcf');
+                                
+                                // return $user?->can('fcmcentral::attribuer_mentor') && $isMentorOnly;
+                                return $user?->can('fcmcentral::attribuer_mentor');
+                            })
+                            ->label('Mentor assigné automatiquement')
+                            ->content(function() {
+                                $currentMarin = Marin::fromCurrentUser();
+                                if ($currentMarin) {
+                                    $grade = $currentMarin->grade?->libelle_court ?? '';
+                                    $fullName = trim($currentMarin->prenom . ' ' . $currentMarin->nom);
+                                    return $grade ? $grade . ' ' . $fullName : $fullName;
+                                }
+                                return 'Vous serez automatiquement assigné comme mentor';
+                            })
+                            ->extraAttributes(['class' => 'text-success-600 font-medium']),
+                
+                        // === PARCOURS (condition simplifiée) ===
                         Forms\Components\Select::make('parcours_id')
                             ->label('Choisir un Parcours')
                             ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
                             ->searchable()
-                            ->visible(function ($record) {
-                                $visible = $record->suiviEnFcm && 
-                                    $record->complements_fcm && 
-                                    ! $record->complements_fcm->parcoursSerialises()->exists() &&
-                                    auth()->user()?->can('fcmcentral::attribuer_parcours');
-                                return $visible;
-                            })
+                            ->visible(function () {
+                                // Simplifier : juste vérifier la permission
+                                return auth()->user()?->can('fcmcentral::attribuer_parcours');
+                            }),
                     ])
+                
                     ->action(function ($record, $data) {
                         if (array_key_exists("cohorte_id", $data) && $data["cohorte_id"] != null){
                             $event = new UserGeneratedEvent(

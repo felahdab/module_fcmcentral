@@ -66,5 +66,80 @@ class PermissionsSeeder extends Seeder
             "guard_name" => "web"
         ]);
 
+
+
+        //=== PERMISSIONS WIDGETS ===
+
+        // Dashboard User
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::widget_marin",
+            "guard_name" => "web"
+        ]);
+
+        // Dashboard Marin FCM
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::widget_marin_fcm",
+            "guard_name" => "web"
+        ]);
+
+        // Dashboard Mentor
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::widget_mentor",
+            "guard_name" => "web"
+        ]);
+
+         // Dashboard Gestion
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::widget_gestion",
+            "guard_name" => "web"
+        ]);
+
+         // Dashboard Admin
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::widget_admin",
+            "guard_name" => "web"
+        ]);
+
+         // Dashboard Supadmin
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::widget_supadmin",
+            "guard_name" => "web"
+        ]);
+
+
+
+
+        //=== PERMISSIONS DROITS ===
+
+        // Pour le suivi  (niveau 1)
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::droits_gestion",
+            "guard_name" => "web"
+        ]);
+
+        // Pour l'Administration (niveau 2)
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::droits_admin",
+            "guard_name" => "web"
+        ]);
+
+        // Tout voir dans FcmCentral  (niveau 1)
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::droits_supadmin",
+            "guard_name" => "web"
+        ]);
+
+
+
+        //=== PERMISSIONS SPECIFIQUES ===
+
+        // Gerer les cohortes
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::gerer_cohorte",
+            "guard_name" => "web"
+        ]);
+
+
+
     }
 }

@@ -43,7 +43,7 @@ class RechercheAnnuaireForm
                                 )                              
                             ->searchable(),
                     Forms\Components\Select::make('parcours_id')
-                            ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::suivre_en_fcm'))
+                            ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer_parcours'))
                             ->label('Choisir un Parcours')
                             ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
                             ->searchable()
