@@ -241,6 +241,7 @@ class FcmcentralPanelProvider extends PanelProvider
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinStatsWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinEvolutionWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinRepartitionWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\TestMarinRolesPermissionsWidget::class,
                 ]);
            
        
