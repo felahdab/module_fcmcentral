@@ -33,36 +33,42 @@ class FonctionResource extends Resource
     protected static ?string $navigationGroup = 'Parcours';
     protected static ?string $navigationLabel = 'Fonctions';
 
+
+     /// DROITS ACCES ///    
+
     public static function canAccess(array $parameters = []): bool
     {
         // Seuls les admins peuvent accéder à cette resource
-        return static::canAccessAdminMenus();
+        return static::canGestionParcours();
     }
 
     public static function canViewAny(): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionParcours();
     }
 
     public static function canCreate(): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionParcours();
     }
 
     public static function canEdit($record): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionParcours();
     }
 
     public static function canDelete($record): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionParcours();
     }
 
     public static function canDeleteAny(): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionParcours();
     }
+
+    ///////////////////
+
 
     public static function form(Form $form): Form
     {

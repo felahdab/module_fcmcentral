@@ -413,26 +413,173 @@ class MarinResource extends Resource
                         return redirect($url);
                     }),
 
-                Tables\Actions\Action::make('livret-pdf')
-                    ->iconButton()
-                    ->icon('heroicon-m-document-text')
-                    ->extraAttributes([
-                        'title' => 'Télécharger PDF du Livret FCM',
-                        'class' => 'btn-pdf',
-                    ])
-                    ->visible(function ($record) {
-                        return $record->suiviEnFcm && 
-                                $record->complements_fcm && 
-                                $record->complements_fcm->parcoursSerialises()->exists() &&
-                                auth()->user()?->can('fcmcentral::telecharger_les_livrets');
-                    })
-                    ->action(function ($record) {
-                        return response()->streamDownload(function () use ($record) {
-                            echo app(\Modules\FcmCommun\Services\LivretPdfService::class)->generatePdf($record);
-                        }, "livret-fcm-{$record->nom}-{$record->prenom}.pdf", [
-                            'Content-Type' => 'application/pdf',
-                        ]);
-                    }),
+                    // Ajouter  une Note
+
+                    Tables\Actions\Action::make('livret-pdf')
+    ->iconButton()
+    ->icon('heroicon-m-document-text')
+    ->extraAttributes([
+        'title' => 'Télécharger PDF du Livret FCM',
+        'class' => 'btn-pdf',
+    ])
+    ->visible(function ($record) {
+        return $record->suiviEnFcm &&
+                $record->complements_fcm &&
+                $record->complements_fcm->parcoursSerialises()->exists() &&
+                auth()->user()?->can('fcmcentral::telecharger_les_livrets');
+    })
+    ->action(function ($record) {
+        return response()->streamDownload(function () use ($record) {
+            echo app(\Modules\FcmCommun\Services\LivretPdfService::class)->generatePdf($record);
+        }, "livret-fcm-{$record->nom}-{$record->prenom}.pdf", [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }),
+
+// ✅ NOUVEAU BOUTON NOTE
+Tables\Actions\Action::make('create-note')
+    ->iconButton()
+    ->icon('heroicon-m-pencil-square')
+    ->extraAttributes([
+        'title' => 'Créer une note',
+        'class' => 'btn-note',
+    ])
+    ->visible(function ($record) {
+        // Visible si le marin est suivi en FCM et que l'utilisateur peut créer des notes
+        return $record->suiviEnFcm && 
+               (static::canAccessAdminMenus() || static::canAccessMentorFeatures());
+    })
+    ->modalHeading('Créer une note')
+    ->modalDescription(fn ($record) => "Créer une note pour {$record->prenom} {$record->nom}")
+    ->modalWidth('lg')
+    ->form([
+        Forms\Components\Textarea::make('libelle')
+            ->required()
+            ->label('Contenu de la note')
+            ->rows(4)
+            ->maxLength(1000)
+            ->placeholder('Saisissez le contenu de votre note...'),
+
+        // Marin pré-sélectionné (caché)
+        Forms\Components\Hidden::make('marin_id')
+            ->default(fn ($record) => $record->id),
+
+        // Affichage du marin sélectionné
+        Forms\Components\Placeholder::make('marin_selected')
+            ->label('Marin concerné')
+            ->content(fn ($record) => $record->grade?->libelle_court . ' ' . $record->prenom . ' ' . $record->nom),
+
+        Forms\Components\Select::make('type_note_id')
+            ->label('Type de note')
+            ->options(function() {
+                return \Modules\FcmCentral\Models\TypeNote::pluck('libelle_court', 'id');
+            })
+            ->searchable()
+            ->preload()
+            ->nullable()
+            ->createOptionForm([
+                Forms\Components\TextInput::make('libelle_court')
+                    ->required()
+                    ->label('Libellé court')
+                    ->maxLength(150),
+                Forms\Components\Textarea::make('libelle_long')
+                    ->required()
+                    ->label('Libellé long')
+                    ->rows(3)
+                    ->maxLength(1500),
+            ])
+            ->createOptionUsing(function (array $data) {
+                return \Modules\FcmCentral\Models\TypeNote::create($data)->id;
+            }),
+
+        Forms\Components\DatePicker::make('date')
+            ->label('Date')
+            ->default(now())
+            ->nullable(),
+
+        // Rédacteur automatique selon le rôle
+        Forms\Components\Hidden::make('redacteur_id')
+            ->default(function () {
+                if (static::canAccessMentorFeatures()) {
+                    // Si c'est un mentor, utiliser son ID marin
+                    $currentMarin = Marin::fromCurrentUser();
+                    return $currentMarin ? $currentMarin->id : auth()->user()->id;
+                }
+                // Sinon utiliser l'ID utilisateur
+                return auth()->user()->id;
+            }),
+
+        // Affichage du rédacteur
+        Forms\Components\Placeholder::make('redacteur_info')
+            ->label('Rédacteur')
+            ->content(function () {
+                if (static::canAccessMentorFeatures()) {
+                    $currentMarin = Marin::fromCurrentUser();
+                    if ($currentMarin) {
+                        return $currentMarin->grade?->libelle_court . ' ' . $currentMarin->prenom . ' ' . $currentMarin->nom;
+                    }
+                }
+                return auth()->user()->name ?? 'Utilisateur connecté';
+            }),
+
+        Forms\Components\Toggle::make('valide_bcf')
+            ->label('Validé BCF')
+            ->default(false)
+            ->visible(fn () => static::canAccessAdminMenus()), // Seuls les admins peuvent cocher
+
+        Forms\Components\TextInput::make('lien_url')
+            ->label('Lien URL (optionnel)')
+            ->url()
+            ->nullable()
+            ->placeholder('https://...'),
+
+        // Champs cachés pour objet_type et objet_id
+        Forms\Components\Hidden::make('objet_type')
+            ->default('marin'),
+        Forms\Components\Hidden::make('objet_id')
+            ->default(fn ($record) => $record->id),
+    ])
+    ->action(function ($record, array $data) {
+        try {
+            // Créer la note
+            $note = \Modules\FcmCentral\Models\Note::create([
+                'libelle' => $data['libelle'],
+                'marin_id' => $record->id,
+                'type_note_id' => $data['type_note_id'] ?? null,
+                'date' => $data['date'] ?? now(),
+                'redacteur_id' => $data['redacteur_id'],
+                'valide_bcf' => $data['valide_bcf'] ?? false,
+                'lien_url' => $data['lien_url'] ?? null,
+                'objet_type' => 'marin',
+                'objet_id' => $record->id,
+            ]);
+
+            // Notification de succès
+            \Filament\Notifications\Notification::make()
+                ->title('Note créée avec succès')
+                ->body("La note pour {$record->prenom} {$record->nom} a été créée.")
+                ->success()
+                ->send();
+
+        } catch (\Exception $e) {
+            // Notification d'erreur
+            \Filament\Notifications\Notification::make()
+                ->title('Erreur lors de la création')
+                ->body('Une erreur est survenue lors de la création de la note.')
+                ->danger()
+                ->send();
+        }
+    })
+    ->requiresConfirmation()
+    ->modalSubmitActionLabel('Créer la note')
+    ->modalCancelActionLabel('Annuler'),
+
+
+                    // Fin Note
+
+
+
+
 
                 Tables\Actions\Action::make("ne_plus_suivre_en_fcm")
                     ->iconButton()
@@ -456,6 +603,25 @@ class MarinResource extends Resource
                         );
                         event($event);
                     }),
+
+                    Tables\Actions\Action::make('fiche-bilan')
+    ->iconButton()
+    ->icon('heroicon-m-chart-bar-square')
+    ->extraAttributes([
+        'title' => 'Fiche Bilan FCM',
+        'class' => 'btn-bilan',
+    ])
+    ->visible(function ($record) {
+        return $record->suiviEnFcm &&
+                $record->complements_fcm &&
+                $record->complements_fcm->parcoursSerialises()->exists() &&
+                auth()->user()?->can('fcmcentral::voir_les_livrets');
+    })
+    ->action(function ($record){
+        $url = static::getUrl('fiche-bilan', ['record' => $record->id]);
+        return redirect($url);
+    }),
+
 
                     Tables\Actions\Action::make('attributs-fcm')
                     ->iconButton()
@@ -688,8 +854,10 @@ class MarinResource extends Resource
         return [
             'index' => Pages\ListMarins::route('/'),
             'livret-de-fcm' => Pages\LivretDeFcmLight::route('/{record}/livret-de-fcm-light'),
+            'fiche-bilan' => Pages\FicheBilan::route('/{record}/fiche-bilan'),
         ];
     }
+    
 
 
     

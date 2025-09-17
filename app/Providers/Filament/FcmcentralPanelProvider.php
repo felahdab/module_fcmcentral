@@ -45,6 +45,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\FonctionResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
 
 // Import des Pages
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
@@ -147,67 +148,115 @@ class FcmcentralPanelProvider extends PanelProvider
                     ->icon('heroicon-o-users')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'marin'))
                     ->url(fn (): string => MarinResource::getUrl('index'))
-                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                    ->visible(fn (): bool => 
+                    self::canAccess('gerer_marin') &&
+                    ( self::canAccess('droits_admin') 
+                    || self::canAccess('droits_gestion')
+                    )
+                ),
                 
                 NavigationItem::make('Gestion des cohortes')
                     ->icon('heroicon-o-user-group')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'cohorte'))
                     ->url(fn (): string => CohorteResource::getUrl('index'))
-                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                    //->visible(fn (): bool => $this->canAccessAdminMenus()),
+                    ->visible(fn (): bool => 
+                    self::canAccess('attribuer_cohorte') &&
+                    ( self::canAccess('droits_admin') 
+                    || self::canAccess('droits_gestion')
+                    )
+                ),
+
+                NavigationItem::make('Gestion des Notes')
+                ->icon('heroicon-o-user-group')
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'note'))
+                ->url(fn (): string => NoteResource::getUrl('index'))
+                //->visible(fn (): bool => $this->canAccessAdminMenus()),
+                ->visible(fn (): bool => 
+                self::canAccess('gerer_note') &&
+                ( self::canAccess('droits_admin') 
+                || self::canAccess('droits_gestion')
+                )
+            ),
             ])
             //->visible(fn (): bool => $this->canAccessAdminMenus())
             ,
 
         // Groupe Gestion des parcours
         NavigationGroup::make('Gestion des parcours')
-            // ->icon('heroicon-o-academic-cap')
-            // ->collapsible()
-            // ->collapsed()
+            
             ->items([
                 NavigationItem::make('Parcours figés')
                     ->icon('heroicon-o-lock-closed')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours-serialise'))
                     ->url(fn (): string => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource::getUrl('index'))
-                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                    ->visible(fn (): bool => 
+                    self::canAccess('attribuer_parcours') &&
+                    ( self::canAccess('droits_admin') 
+                     || self::canAccess('droits_gestion')
+                    )
+                ),
                 
                 NavigationItem::make('Parcours')
                     ->icon('heroicon-o-map')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours') && !str_contains(request()->route()?->getName() ?? '', 'serialise'))
                     ->url(fn (): string => ParcoursResource::getUrl('index'))
-                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                    ->visible(fn (): bool => 
+                    self::canAccess('gerer_parcours') &&
+                    ( self::canAccess('droits_admin') 
+                    // || self::canAccess('droits_gestion')
+                    )
+                ),   
                 
                 NavigationItem::make('Fonctions')
                     ->icon('heroicon-o-briefcase')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'fonction'))
                     ->url(fn (): string => FonctionResource::getUrl('index'))
-                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
-                
+                    ->visible(fn (): bool => 
+                    self::canAccess('attribuer_cohorte') &&
+                    ( self::canAccess('droits_admin') 
+                    // || self::canAccess('droits_gestion')
+                    )
+                ),   
                 NavigationItem::make('Compétences')
                     ->icon('heroicon-o-star')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence'))
                     ->url(fn (): string => CompetenceResource::getUrl('index'))
-                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                    ->visible(fn (): bool => 
+                    self::canAccess('gerer_parcours') &&
+                    ( self::canAccess('droits_admin') 
+                    // || self::canAccess('droits_gestion')
+                    )
+                ),   
                 
                 NavigationItem::make('Savoir-faire')
                     ->icon('heroicon-o-wrench-screwdriver')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'savoir-faire'))
                     ->url(fn (): string => SavoirFaireResource::getUrl('index'))
-                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                    ->visible(fn (): bool => 
+                    self::canAccess('gerer_parcours') &&
+                    ( self::canAccess('droits_admin') 
+                    // || self::canAccess('droits_gestion')
+                    )
+                ),   
                 
                 NavigationItem::make('Stages et tâches')
                     ->icon('heroicon-o-rectangle-stack')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'activite'))
                     ->url(fn (): string => ActiviteResource::getUrl('index'))
-                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                    ->visible(fn (): bool => 
+                    self::canAccess('gerer_parcours') &&
+                    ( self::canAccess('droits_admin') 
+                    // || self::canAccess('droits_gestion')
+                    )
+                ),   
             ])
-            //->visible(fn (): bool => $this->canAccessAdminMenus())
+           
             ,
 
         // Groupe Outils
         NavigationGroup::make('Outils')
-            // ->icon('heroicon-o-wrench')
-            // ->collapsible()
-            // ->collapsed()
+            
             ->items([
                 NavigationItem::make('Recherche annuaire')
                     ->icon('heroicon-o-magnifying-glass')
@@ -215,8 +264,37 @@ class FcmcentralPanelProvider extends PanelProvider
                     ->url(fn (): string => RechercheAnnuairePage::getUrl())
                     ->visible(fn (): bool => $this->canAccessAdminMenus()),
             ])
-            //->visible(fn (): bool => $this->canAccessAdminMenus())
+            
             ,
+
+            // Groupe Outils
+        NavigationGroup::make('Administration ')
+        
+        ->items([
+            NavigationItem::make('Configuration module')
+                ->icon('heroicon-o-cog-6-tooth')
+                ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.configuration'))
+                ->url(fn (): string => '#') // TODO: Remplacer par votre URL
+                ->visible(fn (): bool => self::canAccess('configuration_module')),
+            
+            NavigationItem::make('Gestion permissions')
+                ->icon('heroicon-o-shield-check')
+                ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.permissions'))
+                ->url(fn (): string => '#') // TODO: Remplacer par votre URL
+                ->visible(fn (): bool => self::canAccess('gerer_permissions')),
+            
+            NavigationItem::make('Logs système')
+                ->icon('heroicon-o-document-text')
+                ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.logs'))
+                ->url(fn (): string => '#') // TODO: Remplacer par votre URL
+                ->visible(fn (): bool => self::canAccess('voir_logs')),
+            
+            NavigationItem::make('Debug Permissions')
+                ->icon('heroicon-o-bug-ant')
+                ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.debug-permissions'))
+                ->url(fn (): string => '#') // TODO: Remplacer par votre URL de debug
+                ->visible(fn (): bool => self::canAccess('admin')),
+        ])
     ]);
 }
 
@@ -419,6 +497,30 @@ class FcmcentralPanelProvider extends PanelProvider
             return 0;
         }
     }
+
+     // ========================================
+        // MÉTHODES UTILITAIRES
+        // ========================================
+    
+        /**
+         * Vérification centralisée des permissions
+         */
+        public static function canAccess(string $permission): bool
+        {
+            $user = auth()->user();
+            
+            if (!$user) {
+                return false;
+            }
+    
+            // Ajouter le préfixe fcmcentral:: si nécessaire
+            if (!str_starts_with($permission, 'fcmcentral::')) {
+                $permission = 'fcmcentral::' . $permission;
+            }
+    
+            return $user->can($permission);
+        }
+
 
     protected function getModuleNamespace(): string
     {

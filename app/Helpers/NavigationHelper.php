@@ -53,16 +53,16 @@ namespace Modules\FcmCentral\Helpers;
                 ->icon('heroicon-o-document-text')
                 ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.mon-livret-de-fcm'))
                 ->url(fn (): string => MonLivretDeFcm::getUrl())
-                ->badge(fn () => $this->getMarinProgressBadge())
-                ->visible(fn (): bool => $this->canAccessMarinLivret()),
+                ->badge(fn () => self::getMarinProgressBadge())
+                ->visible(fn (): bool => self::canAccessMarinLivret()),
             
             // Mes marins FCM - visible seulement pour les mentors
             NavigationItem::make('Mes marins FCM')
                 ->icon('heroicon-o-users')
                 ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'marin'))
                 ->url(fn (): string => MarinResource::getUrl('index'))
-                ->badge(fn () => $this->getMentorMarinsCount())
-                ->visible(fn (): bool => $this->canAccessMentorFeatures()),
+                ->badge(fn () => self::getMentorMarinsCount())
+                ->visible(fn (): bool => self::canAccessMentorFeatures()),
                 ]);
         }
     
@@ -103,7 +103,8 @@ namespace Modules\FcmCentral\Helpers;
                         ->url(fn (): string => '#') // TODO: Remplacer par votre URL
                         ->visible(fn (): bool => self::canAccess('voir_statistiques')),
                 ])
-                ->visible(fn (): bool => self::canAccess('bcf'));
+                //->visible(fn (): bool => self::canAccess('bcf'))
+                ;
         }
     
         /**
@@ -155,7 +156,8 @@ namespace Modules\FcmCentral\Helpers;
                         ->url(fn (): string => '#') // TODO: Remplacer par votre URL
                         ->visible(fn (): bool => self::canAccess('valider_element_parcours')),
                 ])
-                ->visible(fn (): bool => self::canAccess('bcf'));
+                //->visible(fn (): bool => self::canAccess('bcf'))
+                ;
         }
     
         /**
@@ -189,12 +191,13 @@ namespace Modules\FcmCentral\Helpers;
                         ->url(fn (): string => '#') // TODO: Remplacer par votre URL
                         ->visible(fn (): bool => self::canAccess('voir_fiche_bilan')),
                 ])
-                ->visible(fn (): bool => 
-                    self::canAccess('recherche_annuaire') || 
-                    self::canAccess('voir_les_livrets') || 
-                    self::canAccess('telecharger_les_livrets') || 
-                    self::canAccess('voir_fiche_bilan')
-                );
+                // ->visible(fn (): bool => 
+                //     self::canAccess('recherche_annuaire') || 
+                //     self::canAccess('voir_les_livrets') || 
+                //     self::canAccess('telecharger_les_livrets') || 
+                //     self::canAccess('voir_fiche_bilan')
+                // )
+                ;
         }
     
         /**
@@ -228,7 +231,8 @@ namespace Modules\FcmCentral\Helpers;
                         ->url(fn (): string => '#') // TODO: Remplacer par votre URL de debug
                         ->visible(fn (): bool => self::canAccess('admin')),
                 ])
-                ->visible(fn (): bool => self::canAccess('admin'));
+                //->visible(fn (): bool => self::canAccess('admin'))
+                ;
         }
     
         // ========================================
@@ -253,6 +257,111 @@ namespace Modules\FcmCentral\Helpers;
     
             return $user->can($permission);
         }
+
+
+
+        public static function  getMarinProgressBadge(): ?string
+    {
+        try {
+            if (!self::canAccessMarinLivret()) {
+                return null;
+            }
+
+            $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+            if (!$marin || !$marin->complements_fcm) {
+                return null;
+            }
+
+            $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
+            if (!$parcours) return null;
+
+            $totalActivites = 0;
+            $activitesValidees = 0;
+            
+            foreach ($parcours['fonctions'] ?? [] as $fonction) {
+                foreach ($fonction['competences'] ?? [] as $competence) {
+                    foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
+                        foreach ($savoirfaire['activites'] ?? [] as $activite) {
+                            $totalActivites++;
+                            if (($activite['etat_valid'] ?? false) === true) {
+                                $activitesValidees++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $progress = $totalActivites > 0 ? round(($activitesValidees / $totalActivites) * 100) : 0;
+            return $progress . '%';
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public static function getMentorMarinsCount(): ?string
+    {
+        try {
+            if (!self::canAccessMentorFeatures()) {
+                return null;
+            }
+
+            $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+            if (!$currentMarin) {
+                return null;
+            }
+
+            $count = \Modules\FcmCentral\Models\FcmMarin::where('mentor_id', $currentMarin->id)->count();
+            return $count > 0 ? (string) $count : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public static function getMentorPendingValidationsCount(): int
+    {
+        try {
+            if (!self::canAccessMentorFeatures()) {
+                return 0;
+            }
+
+            $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+            if (!$currentMarin) {
+                return 0;
+            }
+
+            $marinIds = \Modules\FcmCentral\Models\FcmMarin::where('mentor_id', $currentMarin->id)
+                ->pluck('rh_marin_id');
+
+            $pendingCount = 0;
+            foreach ($marinIds as $marinId) {
+                $marin = \Modules\FcmCentral\Models\Marin::find($marinId);
+                if ($marin && $marin->complements_fcm) {
+                    $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
+                    if ($parcours) {
+                        foreach ($parcours['fonctions'] ?? [] as $fonction) {
+                            foreach ($fonction['competences'] ?? [] as $competence) {
+                                foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
+                                    foreach ($savoirfaire['activites'] ?? [] as $activite) {
+                                        $estProposee = !empty($activite['date_proposition']);
+                                        $estValidee = ($activite['etat_valid'] ?? false) === true;
+                                        $aDateValidation = !empty($activite['date_validation']);
+                                        
+                                        if ($estProposee && !$estValidee && !$aDateValidation) {
+                                            $pendingCount++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return $pendingCount;
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
     
       
     }

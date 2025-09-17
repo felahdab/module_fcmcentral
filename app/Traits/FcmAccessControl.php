@@ -3,6 +3,7 @@
 namespace Modules\FcmCentral\Traits;
 
 use Modules\FcmCentral\Models\Marin;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 trait FcmAccessControl
 {
@@ -13,20 +14,18 @@ trait FcmAccessControl
     {
         $user = auth()->user();
 
-        // Exclure les super_admin
-        if ($user && $user->admin == 1) {
+        if (self::isAdmin($user)) {
             return false;
         }
-        
+
         $marin = Marin::fromCurrentUser();
-        
-        // Accessible seulement aux marins FCM avec parcours (non mentors)
-        return $marin !== null && 
-               $marin->suivi_en_fcm &&
-               $marin->complements_fcm !== null &&
-               $marin->complements_fcm->donnees_du_parcours !== null &&
-               $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null &&
-               !Marin::estMentor($marin);
+
+        return $marin !== null
+            && $marin->suivi_en_fcm
+            && $marin->complements_fcm !== null
+            && $marin->complements_fcm->donnees_du_parcours !== null
+            && $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null
+            && !Marin::estMentor($marin);
     }
 
     /**
@@ -35,9 +34,8 @@ trait FcmAccessControl
     public static function canAccessMentorFeatures(): bool
     {
         $user = auth()->user();
-        
-        // Exclure les super_admin
-        if ($user && $user->admin == 1) {
+
+        if (self::isAdmin($user)) {
             return false;
         }
 
@@ -51,33 +49,8 @@ trait FcmAccessControl
     public static function canAccessAdminMenus(): bool
     {
         $user = auth()->user();
-        
-        if (!$user) {
-            return false;
-        }
 
-        if ($user->admin == 1) {
-            return true;
-        }
-
-        
-        // Vérifier si c'est un super admin
-        // if (method_exists($user, 'IsSuperAdmin') && $user->IsSuperAdmin()) {
-        //     return true;
-        // }
-
-        // Vérifier si user->admin == 1
-        // if (property_exists($user, 'admin') && $user->admin == 1) {
-        //     return true;
-        // }
-
-        
-        // Ou vérifier les rôles/permissions spécifiques
-        // if (method_exists($user, 'hasRole')) {
-        //     return $user->hasRole(['fcmcentral::superviseur','admin','super-admin']);
-        // }
-        
-        return false;
+        return $user && $user->can('fcmcentral::droits_admin');
     }
 
     /**
@@ -89,10 +62,10 @@ trait FcmAccessControl
             $marin = Marin::fromCurrentUser();
         }
 
-        return $marin && 
-               $marin->complements_fcm !== null &&
-               $marin->complements_fcm->donnees_du_parcours !== null &&
-               $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null;
+        return $marin
+            && $marin->complements_fcm !== null
+            && $marin->complements_fcm->donnees_du_parcours !== null
+            && $marin->complements_fcm->donnees_du_parcours->parcoursmarin !== null;
     }
 
     /**
@@ -100,7 +73,7 @@ trait FcmAccessControl
      */
     public static function canConsultOthersLivret(): bool
     {
-        return static::canAccessMentorFeatures() || static::canAccessAdminMenus();
+        return self::canAccessMentorFeatures() || self::canAccessAdminMenus();
     }
 
     /**
@@ -108,10 +81,78 @@ trait FcmAccessControl
      */
     public static function canValidateElements(): bool
     {
+        return self::hasPermissionAndAccess('fcmcentral::valider_element_parcours');
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut gérer le parcours
+     */
+    public static function canGestionParcours(): bool
+    {
+        return self::hasPermissionAndAdminAccess('fcmcentral::gerer_parcours');
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut gérer les cohortes
+     */
+    public static function canGestionCohorte(): bool
+    {
+        return self::hasPermissionAndAdminAccess('fcmcentral::gerer_cohorte');
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut gérer les marins
+     */
+    public static function canGestionMarin(): bool
+    {
+        return self::hasPermissionAndAdminAccess('fcmcentral::gerer_marin');
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut gérer les marins
+     */
+    public static function canAttribuerParcours(): bool
+    {
+        return self::hasPermissionAndAdminAccess('fcmcentral::attribuer_parcours');
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut gérer les marins
+     */
+    public static function canGestionNote(): bool
+    {
+        return self::hasPermissionAndAdminAccess('fcmcentral::gerer_note');
+    }
+
+    /**
+     * Vérifie si l'utilisateur est administrateur
+     */
+    private static function isAdmin(?Authenticatable $user): bool
+    {
+        return $user && $user->can('fcmcentral::droits_admin');
+    }
+
+    /**
+     * Vérifie si l'utilisateur a une permission et un accès mentor ou admin
+     */
+    private static function hasPermissionAndAccess(string $permission): bool
+    {
         $user = auth()->user();
-        
-        return $user && 
-               $user->can('fcmcentral::valider_element_parcours') &&
-               (static::canAccessMentorFeatures() || static::canAccessAdminMenus());
+
+        return $user
+            && $user->can($permission)
+            && (self::canAccessMentorFeatures() || self::canAccessAdminMenus());
+    }
+
+    /**
+     * Vérifie si l'utilisateur a une permission et un accès admin uniquement
+     */
+    private static function hasPermissionAndAdminAccess(string $permission): bool
+    {
+        $user = auth()->user();
+
+        return $user
+            && $user->can($permission)
+            && self::canAccessAdminMenus();
     }
 }

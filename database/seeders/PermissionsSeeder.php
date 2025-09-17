@@ -66,6 +66,11 @@ class PermissionsSeeder extends Seeder
             "guard_name" => "web"
         ]);
 
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::attribuer_note",
+            "guard_name" => "web"
+        ]);
+
 
 
         //=== PERMISSIONS WIDGETS ===
@@ -138,6 +143,27 @@ class PermissionsSeeder extends Seeder
             "name" => "fcmcentral::gerer_cohorte",
             "guard_name" => "web"
         ]);
+
+        // Gerer les marin
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::gerer_marin",
+            "guard_name" => "web"
+        ]);
+
+        // Gerer le parcours
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::gerer_parcours",
+            "guard_name" => "web"
+        ]);
+
+        // Gerer les notes
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::gerer_note",
+            "guard_name" => "web"
+        ]);
+
+
+       
 
 
 

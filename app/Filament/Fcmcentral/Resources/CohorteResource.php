@@ -26,6 +26,9 @@ class CohorteResource extends Resource
     protected static ?string $navigationLabel = 'Gestion Cohortes';
 
 
+
+     /// DROITS ACCES ///
+
     public static function canAccess(array $parameters = []): bool
     {
         // Seuls les admins peuvent accéder à cette resource
@@ -34,28 +37,31 @@ class CohorteResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionCohorte();
     }
 
     public static function canCreate(): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionCohorte();
     }
 
     public static function canEdit($record): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionCohorte();
     }
 
     public static function canDelete($record): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionCohorte();
     }
 
     public static function canDeleteAny(): bool
     {
-        return static::canAccessAdminMenus();
+        return static::canGestionCohorte();
     }
+
+    ////////////////
+
     
     public static function getNavigationBadge(): ?string
     {
