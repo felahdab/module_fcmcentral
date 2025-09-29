@@ -796,7 +796,8 @@ Tables\Actions\Action::make('create-note')
                             $estValidee = ($activite['etat_valid'] ?? false) === true;
                             $aDateValidation = !empty($activite['date_validation']);
                             
-                            if ($estProposee && !$estValidee && !$aDateValidation) {
+                            //if ($estProposee && !$estValidee && !$aDateValidation) {
+                            if ($estProposee && !$estValidee) {   
                                 $pendingCount++;
                             }
                         }

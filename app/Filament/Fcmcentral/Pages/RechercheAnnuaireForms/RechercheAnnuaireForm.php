@@ -39,7 +39,8 @@ class RechercheAnnuaireForm
                                     ->where('data->fcm->en_fcm', false)
                                     ->orderBy('nom')
                                     ->get()
-                                    ->pluck('fullNameAndGrade', 'uuid')
+                                    ->pluck('nom', 'uuid')
+                                    //->pluck('fullNameAndGrade', 'uuid')
                                 )                              
                             ->searchable(),
                     Forms\Components\Select::make('parcours_id')
