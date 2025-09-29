@@ -23,20 +23,17 @@ return new class extends Migration
             $default_value = DB::raw('(UUID())');
         }
 
-        Schema::create('fcmcentral_activites', function (Blueprint $table) use ($default_value) {
+        Schema::create('fcmcentral_annees', function (Blueprint $table) use ($default_value) {
             // $table->uuid('id')->primary();
             $table->id();
             $table->uuid('uuid')->default($default_value);
-            $table->string('libelle_long');
+            $table->string('code');
             $table->string('libelle_court');
+            $table->string('libelle_long');
             $table->string('url')->nullable();
-            $table->string('duree')->nullable();
-            $table->decimal('coeff',5,2)->nullable();
-            $table->string('prerequis')->nullable();
-            $table->string('duree_validite')->nullable();
-            //$table->enum('type_activite', ['STAGE', 'TACHE']);
-            $table->enum('type_activite', ['STAGE']);
             $table->tinyInteger('ordre')->default(0);
+            $table->unsignedByInteger('parcours_id')->nullable();
+            $table->foreign('parcours_id')->references('id')->on('fcmcentral_parcours')->onDelete('set null');
             $table->timestamps();
         });
     }
@@ -46,6 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fcmcentral_activites');
+        Schema::dropIfExists('fcmcentral_annees');
     }
 };

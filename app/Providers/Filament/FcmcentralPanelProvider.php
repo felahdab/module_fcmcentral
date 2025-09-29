@@ -46,6 +46,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource;
 
 // Import des Pages
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
@@ -229,7 +230,7 @@ class FcmcentralPanelProvider extends PanelProvider
                     )
                 ),   
                 
-                NavigationItem::make('Savoir-faire')
+                NavigationItem::make('Savoir Faire')
                     ->icon('heroicon-o-wrench-screwdriver')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'savoir-faire'))
                     ->url(fn (): string => SavoirFaireResource::getUrl('index'))
@@ -240,7 +241,7 @@ class FcmcentralPanelProvider extends PanelProvider
                     )
                 ),   
                 
-                NavigationItem::make('Stages et tâches')
+                NavigationItem::make('Objectifs, Stages et EAD')
                     ->icon('heroicon-o-rectangle-stack')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'activite'))
                     ->url(fn (): string => ActiviteResource::getUrl('index'))
@@ -249,7 +250,18 @@ class FcmcentralPanelProvider extends PanelProvider
                     ( self::canAccess('droits_admin') 
                     // || self::canAccess('droits_gestion')
                     )
-                ),   
+                ),  
+                
+                NavigationItem::make('Domaines')
+                    ->icon('heroicon-o-rectangle-stack')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'domaine'))
+                    ->url(fn (): string => DomaineResource::getUrl('index'))
+                    ->visible(fn (): bool => 
+                    self::canAccess('gerer_parcours') &&
+                    ( self::canAccess('droits_admin') 
+                    // || self::canAccess('droits_gestion')
+                    )
+                ),
             ])
            
             ,

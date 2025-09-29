@@ -64,4 +64,15 @@ class Savoirfaire extends Model
     {
         return $this->belongsTo(Domaine::class, "domaine_id", "id");
     }
+
+    public function competencePrincipale()
+    {
+    return $this->belongsTo(Competence::class, 'competence_id');
+    }
+
+    public function activitesPrincipaux()
+    {
+        return $this->hasMany(Activite::class, 'savoirfaire_id');
+    }
+
 }

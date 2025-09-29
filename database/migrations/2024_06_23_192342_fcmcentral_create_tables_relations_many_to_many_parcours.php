@@ -11,19 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fcmcentral_fonction_parcours', function (Blueprint $table) {
+        Schema::create('fcmcentral_annee_parcours', function (Blueprint $table) {
             $table->id();
             //$table->foreignUuid('parcours_id')->references('id')->on('fcmcentral_parcours');
 			//$table->foreignUuid('fonction_id')->references('id')->on('fcmcentral_fonctions');
             $table->foreignId('parcours_id')->constrained('fcmcentral_parcours');
-			$table->foreignId('fonction_id')->constrained('fcmcentral_fonctions');
+			$table->foreignId('annees_id')->constrained('fcmcentral_annees');
             $table->integer('ordre')->default(0);
             $table->timestamps();
         });
 
-        Schema::create('fcmcentral_competence_fonction', function (Blueprint $table) {
+        Schema::create('fcmcentral_competence_annee', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('fonction_id')->constrained('fcmcentral_fonctions');
+            $table->foreignId('annees_id')->constrained('fcmcentral_annees');
             $table->foreignId('competence_id')->constrained('fcmcentral_competences');
             $table->integer('ordre')->default(0);
             $table->string('same')->nullable();
@@ -31,6 +31,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        
         Schema::create('fcmcentral_competence_savoirfaire', function (Blueprint $table) {
             $table->id();
             $table->foreignId('competence_id')->constrained('fcmcentral_competences');
@@ -45,10 +46,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('fcmcentral_activite_savoirfaire', function (Blueprint $table) {
+        Schema::create('fcmcentral_objectif_savoirfaire', function (Blueprint $table) {
             $table->id();
             $table->foreignId('savoirfaire_id')->constrained('fcmcentral_savoirfaires');
-            $table->foreignId('activite_id')->constrained('fcmcentral_activites');
+            $table->foreignId('objectif_id')->constrained('fcmcentral_objectifs');
             $table->json('data')->nullable();
             $table->string('duree')->nullable();
             $table->decimal('coeff',5,2)->nullable();
@@ -76,10 +77,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fcmcentral_fonction_parcours');
-        Schema::dropIfExists('fcmcentral_competence_fonction');
+        Schema::dropIfExists('fcmcentral_annee_parcours');
+        Schema::dropIfExists('fcmcentral_competence_annee');
         Schema::dropIfExists('fcmcentral_competence_savoirfaire');
-        Schema::dropIfExists('fcmcentral_activite_savoirfaire');
+        Schema::dropIfExists('fcmcentral_objectif_savoirfaire');
 
          // Supp relation et champ 
         // Schema::table('fcmcentral_activites', function (Blueprint $table){

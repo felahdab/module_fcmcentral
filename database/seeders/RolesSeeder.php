@@ -16,25 +16,27 @@ class RolesSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
-        $role = Role::firstOrCreate([
-            "name" => "fcmcentral::superviseur",
-            "guard_name" => "web"
-        ]);
+{
+    $role = Role::firstOrCreate([
+        "name" => "fcmcentral::superviseur",
+        "guard_name" => "web"
+    ]);
 
-        $role->permissions()->detach();
+    $role->permissions()->detach();
 
-        $permission = Permission::where("name", "fcmcentral::marin.index")->first();
+    $permissions = [
+        "fcmcentral::marin.index",
+        "fcmcentral::recherche_annuaire",
+    ];
 
-        $role->permissions()->attach([
-            $permission
-        ]);
-
-        $permission = Permission::where("name", "fcmcentral::recherche_annuaire")->first();
-
-        $role->permissions()->attach([
-            $permission
-        ]);
-
+    foreach ($permissions as $permName) {
+        $permission = Permission::where("name", $permName)->first();
+        if ($permission) {
+            $role->permissions()->attach($permission->id);
+        } else {
+            // Optionnel : log ou throw pour savoir ce qui manque
+            \Log::warning("Permission manquante : $permName");
+        }
     }
+}
 }

@@ -28,12 +28,18 @@ return new class extends Migration
             // $table->uuid('id')->primary();
             $table->id();
             $table->uuid('uuid')->default($default_value);
+            $table->string('code');
             $table->string('libelle_long');
             $table->string('libelle_court');
             $table->string('url')->nullable();
+            $table->string('same')->nullable();
             $table->string('code_sicomp')->nullable();
             // $table->string('niveau');
             $table->integer('ordre')->default(0);
+            $table->unsignedByInteger('competence_id')->nullable();
+            $table->foreign('competence_id')->references('id')->on('fcmcentral_competences')->onDelete('set null');
+            $table->unsignedByInteger('parcours_id')->nullable();
+            $table->foreign('parcours_id')->references('id')->on('fcmcentral_parcours')->onDelete('set null');
             $table->timestamps();
         });
     }

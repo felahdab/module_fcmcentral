@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-use Modules\FcmCentral\Database\Factories\FonctionFactory;
+use Modules\FcmCentral\Database\Factories\AnneeFactory;
 
 use Modules\FcmCentral\Traits\HasTablePrefix;
 
 
-class Fonction extends Model
+class Annee extends Model
 {
     use HasFactory;
     use HasTablePrefix;
@@ -28,21 +28,21 @@ class Fonction extends Model
         "url",
     ];
     
-    protected static function newFactory(): FonctionFactory
+    protected static function newFactory(): AnneeFactory
     {
-        return FonctionFactory::new();
+        return AnneeFactory::new();
     }
 
     public function parcours(): BelongsToMany
     {
-        return $this->belongsToMany(Parcours::class, 'fcmcentral_fonction_parcours', 'fonction_id', 'parcours_id')
+        return $this->belongsToMany(Parcours::class, 'fcmcentral_annee_parcours', 'annee_id', 'parcours_id')
         ->withPivot('ordre')
         ->withTimestamps();
     }
 
     public function competences(): BelongsToMany
     {
-        return $this->belongsToMany(Competence::class, 'fcmcentral_competence_fonction', 'fonction_id', 'competence_id')
+        return $this->belongsToMany(Competence::class, 'fcmcentral_competence_annee', 'annee_id', 'competence_id')
         ->withPivot('ordre', 'same')
         ->withTimestamps();
     }

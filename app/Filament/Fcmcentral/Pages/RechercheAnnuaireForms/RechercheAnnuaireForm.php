@@ -32,17 +32,28 @@ class RechercheAnnuaireForm
                     
                     // Champ mentor visible seulement pour les admins
                     Forms\Components\Select::make('mentor_id')
-                            ->label("Choisir un mentor")
-                            ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer_mentor'))
-                            ->options(
-                                Marin::query()
-                                    ->where('data->fcm->en_fcm', false)
-                                    ->orderBy('nom')
-                                    ->get()
-                                    ->pluck('nom', 'uuid')
-                                    //->pluck('fullNameAndGrade', 'uuid')
-                                )                              
-                            ->searchable(),
+                    ->label("Choisir un mentor")
+                    ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer_mentor'))
+                    ->options(
+                        Marin::query()
+                            ->whereNull('deleted_at')
+                            ->orderBy('nom')
+                            ->orderBy('prenom')
+                            ->get()
+                            ->mapWithKeys(function ($marin) {
+                                $fullName = trim($marin->prenom . ' ' . $marin->nom);
+                                $grade = $marin->grade?->libelle_court ?? '';
+                                $label = $grade ? $grade . ' ' . $fullName : $fullName;
+                                return [$marin->uuid => $label];
+                            })
+                    )
+                    ->searchable()
+
+                    ->placeholder('Sélectionnez un mentor')
+                    ->helperText('Seuls les marins non en FCM peuvent être mentors')
+                    ->preload() // Charge les options au chargement de la page
+                    ->native(false), // Utilise le select stylé Filament
+                
                     Forms\Components\Select::make('parcours_id')
                             ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer_parcours'))
                             ->label('Choisir un Parcours')

@@ -4,7 +4,7 @@ namespace Modules\FcmCentral\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ActiviteSavoirfairePivot extends Pivot 
+class ObjectifSavoirfairePivot extends Pivot 
 {
   protected $fillable=[
     'activite_id',

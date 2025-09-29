@@ -27,8 +27,9 @@ return new class extends Migration
             //$table->uuid('id')->primary();
             $table->id();
             $table->uuid('uuid')->default($default_value);
-            $table->string('libelle_long');
+            $table->string('code');
             $table->string('libelle_court');
+            $table->string('libelle_long');
             $table->tinyInteger('ordre')->default(0);
             $table->timestamps();
         });

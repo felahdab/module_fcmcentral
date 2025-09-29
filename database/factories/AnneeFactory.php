@@ -5,14 +5,14 @@ namespace Modules\FcmCentral\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-use Modules\FcmCentral\Models\Fonction;
+use Modules\FcmCentral\Models\Annee;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TransformationHistory>
  */
-class FonctionFactory extends Factory
+class AnneeFactory extends Factory
 {
-    protected $model = Fonction::class;
+    protected $model = Annee::class;
 
     /**
      * Define the model's default state.
@@ -23,7 +23,7 @@ class FonctionFactory extends Factory
      // Compteur
      private static $counter = 1;
      // Libelle
-     private static $libelle = "Fonction";
+     private static $libelle = "Annee";
 
 
     public function definition()

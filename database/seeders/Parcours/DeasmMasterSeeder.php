@@ -27,8 +27,8 @@ class DeasmMasterSeeder extends Seeder
             DeasmCompetenceFonctionSeeder::class,
             DeasmSavoirfaireSeeder::class,
             DeasmCompetenceSavoirfaireSeeder::class,
-            DeasmActivitesSeeder::class,
-            DeasmActiviteSavoirfaireSeeder::class,
+           // DeasmActivitesSeeder::class,
+           // DeasmActiviteSavoirfaireSeeder::class,
         ]);
         
         $this->command->info('✅ Parcours Deasm importé avec succès !');

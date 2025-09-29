@@ -856,7 +856,7 @@ L’apprenant, dans son rôle de futur cadre central opérations, s’entretient
     'id' => 2674,
     'uuid' => '9cd62d27-467f-4f41-893e-1ca9f39ab1a6',
     'libelle_long' => 'Niveau 1 - LAN - Activité MENASURFBFG :
-Dans le cadre de la préparation du briefing opération et supervisée par un opérateur GE confirmé (ou BS OPS/GE), restitution par l’apprenant de l’étude d’une menace surface (frégate et FPB) sous forme d’une présentation formelle avec un support multimédia.',
+    Dans le cadre de la préparation du briefing opération et supervisée par un opérateur GE confirmé (ou BS OPS/GE), restitution par l’apprenant de l’étude d’une menace surface (frégate et FPB) sous forme d’une présentation formelle avec un support multimédia.',
     'libelle_court' => 'Niveau 1 - LAN - Activité MENASURFBFG',
     'url' => NULL,
     'duree' => NULL,

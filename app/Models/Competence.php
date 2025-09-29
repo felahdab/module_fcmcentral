@@ -48,4 +48,10 @@ class Competence extends Model
             ->withPivot('coeff', 'duree', 'ordre', 'an_acquis', 'mod_acquis')
             ->withTimestamps();
     }
+
+    public function savoirfairesPrincipaux()
+    {
+        return $this->hasMany(Savoirfaire::class, 'competence_id');
+    }
+
 }

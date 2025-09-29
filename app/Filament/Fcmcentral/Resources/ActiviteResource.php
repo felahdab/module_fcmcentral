@@ -67,38 +67,57 @@ class ActiviteResource extends Resource
 
 
     public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('libelle_court')
-                    ->required()
-                    ->label('Libellé court')
-                    ->maxLength(150),
-                Forms\Components\TextInput::make('libelle_long')
-                    ->required()
-                    ->label('Libellé long')
-                    ->maxLength(1500),
-                Forms\Components\Select::make('type_activite')
-                    ->options([
-                        'STAGE' => 'Stage',
-                        'TACHE' => 'Tâche',
-                        ])
-                    ->label('Type')
-                    ->required(),
-                Forms\Components\TextInput::make('url')
-                    // ->required()
-                    ->label('URL')
-                    ->maxLength(1000),
-                Forms\Components\TextInput::make('duree_validite')
-                    // ->required()
-                    ->label('Durée de validité (j)')
-                    ->maxLength(10),
-                Forms\Components\TextInput::make('prerequis')
-                    // ->required()
-                    ->label('Prérequis')
-                    ->maxLength(500),
-            ]);
-    }
+{
+    return $form
+        ->schema([
+            Forms\Components\TextInput::make('libelle_court')
+                ->required()
+                ->label('Libellé court')
+                ->maxLength(150),
+                
+            Forms\Components\TextInput::make('libelle_long')
+                ->required()
+                ->label('Libellé long')
+                ->maxLength(1500),
+                
+            //  Select avec validation stricte
+            Forms\Components\Select::make('type_activite')
+                ->options(Activite::getTypesActivite())
+                ->label('Type')
+                ->required()
+                ->in(Activite::getValidTypes()) // Validation stricte
+                ->default(Activite::TYPE_OBJECTIF),
+                
+            Forms\Components\TextInput::make('url')
+                ->label('URL')
+                ->url()
+                ->maxLength(1000),
+                
+            Forms\Components\TextInput::make('duree_validite')
+                ->label('Durée de validité (jours)')
+                ->numeric()
+                ->minValue(0)
+                ->suffix('jours'),
+                
+            Forms\Components\Textarea::make('prerequis')
+                ->label('Prérequis')
+                ->maxLength(500)
+                ->rows(3),
+
+            Forms\Components\TextInput::make('coeff')
+                ->label('Coefficient')
+                ->numeric()
+                ->step(0.1)
+                ->minValue(0)
+                ->default(1.0),
+                
+            Forms\Components\TextInput::make('duree')
+                ->label('Durée estimée')
+                ->helperText('Format libre (ex: 2h, 1 jour, 1 semaine)')
+                ->maxLength(50),
+        ]);
+}
+
 
     public static function table(Table $table): Table
     {
@@ -151,7 +170,8 @@ class ActiviteResource extends Resource
                 ->label('Type')
                 ->options([
                     'STAGE' => 'Stage',
-                    'TACHE' => 'Tâche',
+                    'OBJECTIF' => 'Objectif',
+                    'EAD' => 'Ead',
                 ]),
             ])
             ->actions([

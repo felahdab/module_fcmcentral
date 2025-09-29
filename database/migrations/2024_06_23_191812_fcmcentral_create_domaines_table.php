@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('fcmcentral_domaines', function (Blueprint $table) {
             $table->id();
+            $table->string('code');
             $table->string('libelle_long');
             $table->string('libelle_court');
             

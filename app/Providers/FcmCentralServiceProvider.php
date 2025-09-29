@@ -49,6 +49,7 @@ class FcmCentralServiceProvider extends ServiceProvider
         Models\Savoirfaire::class => Policies\SavoirfairePolicy::class,
         Models\Activite::class => Policies\ActivitePolicy::class,
         Models\Marin::class => Policies\MarinPolicy::class,
+        Models\Domaine::class => Policies\DomainePolicy::class,
         Models\Cohorte::class => Policies\CohortePolicy::class
     ];
 
@@ -168,9 +169,14 @@ class FcmCentralServiceProvider extends ServiceProvider
                         ,
                     
                     DirectMenuItem::make()
-                        ->name('Stages et tâches')
+                        ->name('Objectifs, Stages et EAD')
                         ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource\Pages\ListActivites::getUrl(panel: 'FCM Central'))
                        ,
+
+                    DirectMenuItem::make()
+                       ->name('Domaines')
+                       ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages\ListDomaines::getUrl(panel: 'FCM Central'))
+                      ,   
                 ]);
 
             // Outils

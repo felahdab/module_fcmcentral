@@ -20,6 +20,15 @@ class Domaine extends Model
 		'libelle_long', 
 	];
 	
+
+	    /**
+     * Relation avec les savoir-faire
+     */
+    public function savoirfaires()
+    {
+        return $this->hasMany(Savoirfaire::class);
+    }
+
 	
 
 }

@@ -22,7 +22,7 @@ class Parcours extends Model
     protected $fillable = [
         'uuid',
         'libelle_long',
-        'libelle_cours',
+        'libelle_court',
     ];
 
     // protected $casts = [
