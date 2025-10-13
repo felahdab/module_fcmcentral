@@ -1,61 +1,46 @@
 <?php
- 
+
 namespace Modules\FcmCentral\Listeners\Save\MarinParcours;
- 
+
 use Filament\Notifications\Notification;
 use App\Models\User;
 use Modules\FcmCommun\Enums\Constants;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\Services\CalculTauxParcoursService;
-use Modules\FcmCommun\Services\ReCalculEtatParcoursService; 
+use Modules\FcmCommun\Services\ReCalculEtatParcoursService;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
 use Illuminate\Support\Facades\Log;
- 
+
 class AnnulProposElementMarinParcoursListener
 {
     public $comment;
-    public $selectedItems;
- 
+
     /**
-     * Gère l'événement.
-     *
-     * @param UserGeneratedEvent $event
-     * @return void
+     * Gère l'événement d'annulation de proposition.
      */
     public function handle(UserGeneratedEvent $event): void
     {
-        // Vérifier si l'événement est du bon type
         if (!$event->isOfType(UserGeneratedEventTypes::ANNUL_PROPOS_ELMT_MARIN_PARCOURS)) {
             return;
         }
- 
-        // Récupérer le marin et les données
+
         $marin = Marin::where('uuid', $event->object_uuid)->first();
         
         if (!$marin) {
             Log::error('Marin non trouvé avec UUID: ' . $event->object_uuid);
             return;
         }
- 
-        $data = $event->detail;
 
-        // array:4 [▼ // vendor/spatie/laravel-ignition/src/helpers.php:14
-        // "type_element" => "activite"
-        // "uuid_element" => "eb48b9df-c466-37a5-a6b4-3251761f371f"
-        // "date" => Carbon\Carbon @1753288270 {#2989 ▶}
-        // "commentaire" => "dfg"
-        // ]
-        //dd( $data);
-        //  RÉCUPÉRER TOUS LES ÉLÉMENTS DEPUIS selectedItems_full
+        $data = $event->detail;
         $this->comment = $this->sanitizeComment($data['commentaire'] ?? '');
-        
+
         $valideur = User::where('uuid', $event->user_uuid)->first();
-        $valideurName = $valideur ? 
-            ($valideur->display_name ?? $valideur->nom . ' ' . $valideur->prenom) : 
-            'VALIDEUR INCONNU';
+        $valideurName = $valideur ?
+            ($valideur->display_name ?? $valideur->nom . ' ' . $valideur->prenom) :
+            'ANNULEUR INCONNU';
 
         $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours;
         
@@ -63,7 +48,7 @@ class AnnulProposElementMarinParcoursListener
             Log::error('Données du parcours non trouvées pour le marin: ' . $marin->uuid);
             return;
         }
- 
+
         $parcoursMarin = $donnees_du_parcours->parcoursmarin;
         
         if (!$parcoursMarin) {
@@ -72,8 +57,8 @@ class AnnulProposElementMarinParcoursListener
         }
 
         $this->updateParcoursMarinItems(
-            $parcoursMarin, 
-            $data['type_element'], 
+            $parcoursMarin,
+            $data['type_element'],
             $data['uuid_element'],
             $valideurName
         );
@@ -85,28 +70,26 @@ class AnnulProposElementMarinParcoursListener
         $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
         $donnees_du_parcours->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
         $donnees_du_parcours->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
- 
+
         // Sauvegarder les données
         $donnees_du_parcours->parcoursmarin = $parcoursMarin;
         $donnees_du_parcours->save();
- 
+
         // Notification de succès
         $notification = UserGeneratedEventNotifications::getMess(
-            UserGeneratedEventNotifications::VALID_ELMT_MARIN_PARCOURS,
+            UserGeneratedEventNotifications::ANNUL_PROPOS_ELMT_MARIN_PARCOURS,
             $marin->nom
         );
- 
+
         Notification::make()
             ->title($notification['title'])
-            ->success()
+            ->warning()
             ->body($notification['message'])
             ->send();
     }
- 
-    
- 
+
     /**
-     * MÉTHODE POUR NETTOYER LES COMMENTAIRES
+     * ✅ MÉTHODE POUR NETTOYER LES COMMENTAIRES
      */
     protected function sanitizeComment(string $comment): string
     {
@@ -118,50 +101,54 @@ class AnnulProposElementMarinParcoursListener
         $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
         $comment = preg_replace('/\s+/', ' ', $comment);
         $comment = addslashes(trim($comment));
- 
+
         return $comment;
     }
- 
+
     /**
-     *  METTRE À JOUR LES ÉLÉMENTS 
+     * ✅ METTRE À JOUR LES ÉLÉMENTS POUR ANNULATION DE PROPOSITION (nouvelle structure)
      */
     protected function updateParcoursMarinItems(&$parcoursMarin, $type_element, $uuid_element, $displayName)
-    { 
-        logger()->info("On doit valider  : {$type_element} / {$uuid_element}");
-        foreach ($parcoursMarin['fonctions'] as &$fonction) {
-            logger()->info("Mise a jour de fontion: {$fonction["uuid"]}");
-            // --- TRAITEMENT DIRECT DES FONCTIONS ---
-            if ($type_element === 'fonction' && $fonction['uuid'] == $uuid_element) {
-                $this->updateElement($fonction, $displayName);
-                Log::info("Fonction mise à jour: {$fonction['uuid']}");
+    {
+        Log::info("=== ANNULATION DE PROPOSITION ===");
+        Log::info("Type: {$type_element} / UUID: {$uuid_element}");
+        $found = false;
+
+        foreach ($parcoursMarin['annees'] as &$annee) {
+            // --- TRAITEMENT DIRECT DES ANNÉES ---
+            if ($type_element === 'annee' && $annee['uuid'] == $uuid_element) {
+                $this->updateElement($annee, $displayName);
+                Log::info("✅ Proposition d'année annulée: {$annee['uuid']}");
+                $found = true;
+                return;
             }
- 
-            // --- TRAITEMENT DES COMPÉTENCES ---
-            if (isset($fonction['competences'])) {
-                foreach ($fonction['competences'] as &$competence) {
-                    logger()->info("Mise a jour de competence: {$competence["uuid"]}");
-                    if ($type_element === 'competence' && $competence['uuid'] == $uuid_element) {
-                        $this->updateElement($competence, $displayName);
-                        Log::info("Compétence mise à jour: {$competence['uuid']}");
+
+            // --- TRAITEMENT DES SAVOIR-FAIRES ---
+            if (isset($annee['savoirfaires'])) {
+                foreach ($annee['savoirfaires'] as &$savoirFaire) {
+                    if ($type_element === 'savoirfaire') {
+                        $pivotUuid = $savoirFaire['uuid'] . '_' . ($savoirFaire['pivot']['uuid'] ?? $savoirFaire['pivot']['id'] ?? '');
+                        
+                        if ($savoirFaire['uuid'] == $uuid_element || $pivotUuid == $uuid_element) {
+                            $this->updateElement($savoirFaire, $displayName);
+                            Log::info("✅ Proposition de savoir-faire annulée: {$savoirFaire['uuid']}");
+                            $found = true;
+                            return;
+                        }
                     }
- 
-                    // --- TRAITEMENT DES SAVOIR-FAIRES ---
-                    if (isset($competence['savoirfaires'])) {
-                        foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                            logger()->info("Mise a jour de savoir-faire: {$savoirFaire["uuid"]}");
-                            if ($type_element === 'savoirfaire' && $savoirFaire['uuid'] == $uuid_element) {
-                                $this->updateElement($savoirFaire, $displayName);
-                                Log::info("Savoir-faire mis à jour: {$savoirFaire['uuid']}");
-                            }
- 
-                            // --- TRAITEMENT DES ACTIVITÉS ---
-                            if (isset($savoirFaire['activites'])) {
-                                foreach ($savoirFaire['activites'] as &$activite) {
-                                    logger()->info("Mise a jour de activite: {$activite["uuid"]}");
-                                    if ($type_element === 'activite' && $activite['uuid'] == $uuid_element) {
-                                        $this->updateElement($activite, $displayName);
-                                        Log::info("Activité mise à jour: {$activite['uuid']}");
-                                    }
+
+                    // --- TRAITEMENT DES OBJECTIFS ---
+                    if (isset($savoirFaire['objectifs']) && is_array($savoirFaire['objectifs'])) {
+                        foreach ($savoirFaire['objectifs'] as &$objectif) {
+                            if ($type_element === 'objectif') {
+                                $objUuidComposite = "obj_{$savoirFaire['pivot']['id']}_{$objectif['id']}";
+                                $objUuidSimple = $objectif['uuid'] ?? '';
+                                
+                                if ($objUuidSimple == $uuid_element || $objUuidComposite == $uuid_element) {
+                                    $this->updateElement($objectif, $displayName);
+                                    Log::info("✅ Proposition d'objectif annulée: {$objUuidSimple} / {$objUuidComposite}");
+                                    $found = true;
+                                    return;
                                 }
                             }
                         }
@@ -169,16 +156,21 @@ class AnnulProposElementMarinParcoursListener
                 }
             }
         }
+
+        if (!$found) {
+            Log::error("❌ ÉLÉMENT NON TROUVÉ POUR ANNULATION DE PROPOSITION: {$type_element} / {$uuid_element}");
+        }
     }
- 
+
     /**
-     *  MÉTHODE HELPER POUR METTRE À JOUR UN ÉLÉMENT
+     * ✅ MÉTHODE HELPER POUR ANNULER UNE PROPOSITION
      */
     protected function updateElement(&$element, $displayName)
     {
         $element['etat_valid'] = false;
         $element['commentaire'] = "";
         $element['date_proposition'] = null;
-        //$element['valideur'] = $displayName;
+        
+        Log::info("Proposition annulée avec succès");
     }
 }

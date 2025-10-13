@@ -24,55 +24,106 @@ class Savoirfaire extends Model
      */
     protected $fillable = [
         "uuid",
+        "code",
         "libelle_long",
         "libelle_court",
-        "url",
         "code_sicomp",
-        //"coeff",
-        //"duree",
-        //"an_acquie",
+        "same",
         "ordre",
-        //"mod_acquis",
+        "competence_id",
         "domaine_id",
+        "color",
     ];
     
-    protected $casts =[
-        'data' => 'array',
-    ];
+    
     
     protected static function newFactory(): SavoirfaireFactory
     {
         return Savoirfairefactory::new();
     }
 
-    public function competences(): BelongsToMany
+    public function competence()
     {
-        return $this->belongsToMany(Competence::class, 'fcmcentral_competence_savoirfaire', 'savoirfaire_id', 'competence_id')
-            ->withPivot('coeff', 'duree', 'ordre', 'an_acquis', 'mod_acquis')
-            ->withTimestamps();
-    }
-
-    public function activites(): BelongsToMany
-    {
-        return $this->belongsToMany(Activite::class, 'fcmcentral_activite_savoirfaire', 'savoirfaire_id',  'activite_id')
-                ->withPivot('coeff', 'duree', 'ordre','data')
-                ->withTimestamps()
-                ->using(ActiviteSavoirfairePivot::class);
+        return $this->belongsTo(Competence::class, 'competence_id');
     }
 
     public function domaine()
     {
-        return $this->belongsTo(Domaine::class, "domaine_id", "id");
+        return $this->belongsTo(Domaine::class, 'domaine_id');
     }
 
-    public function competencePrincipale()
+    // Relation many-to-many avec Annee via le pivot enrichi
+    public function annees()
     {
-    return $this->belongsTo(Competence::class, 'competence_id');
+        return $this->belongsToMany(
+            Annee::class,
+            'fcmcentral_annee_savoirfaires',
+            'savoirfaire_id',
+            'annee_id'
+        )
+        ->withPivot([
+            'id',
+            'uuid',
+            'ordre',
+            'heures',
+            'jours',
+            'libelle_court',
+            'savoirfaire_type_id'
+        ])
+        ->withTimestamps();
     }
 
-    public function activitesPrincipaux()
+
+
+    // Accès direct aux objets pivot
+    public function anneeSavoirfaires()
     {
-        return $this->hasMany(Activite::class, 'savoirfaire_id');
+        return $this->hasMany(AnneeSavoirfaire::class, 'savoirfaire_id');
     }
+
+    public function objectifs()
+{
+    return $this->hasManyThrough(
+        Objectif::class,
+        AnneeSavoirfaire::class,
+        'savoirfaire_id', // Clé étrangère dans annee_savoirfaires
+        'annee_savoirfaire_id', // Clé étrangère dans objectifs
+        'id', // Clé locale dans savoirfaires
+        'id' // Clé locale dans annee_savoirfaires
+    );
+}
+
+
+
+
+    // public function competences(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Competence::class, 'fcmcentral_competence_savoirfaire', 'savoirfaire_id', 'competence_id')
+    //         ->withPivot('coeff', 'duree', 'ordre', 'an_acquis', 'mod_acquis')
+    //         ->withTimestamps();
+    // }
+
+    // public function activites(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Activite::class, 'fcmcentral_activite_savoirfaire', 'savoirfaire_id',  'activite_id')
+    //             ->withPivot('coeff', 'duree', 'ordre','data')
+    //             ->withTimestamps()
+    //             ->using(ActiviteSavoirfairePivot::class);
+    // }
+
+    // public function domaine()
+    // {
+    //     return $this->belongsTo(Domaine::class, "domaine_id", "id");
+    // }
+
+    // public function competencePrincipale()
+    // {
+    // return $this->belongsTo(Competence::class, 'competence_id');
+    // }
+
+    // public function activitesPrincipaux()
+    // {
+    //     return $this->hasMany(Activite::class, 'savoirfaire_id');
+    // }
 
 }

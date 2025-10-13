@@ -7,17 +7,16 @@ use Modules\FcmCentral\Models\Marin;
 use Carbon\Carbon;
 use Modules\FcmCentral\Traits\FcmAccessControl;
 
-
 class MarinEvolutionWidget extends ChartWidget
 {
     use FcmAccessControl;
-    
+   
     protected static ?string $heading = 'Évolution détaillée du parcours';
-    
+   
     protected int | string | array $columnSpan = 'full';
-    
+   
     protected static ?string $maxHeight = '400px';
-    
+   
     protected static ?int $sort = 3;
 
     public function getMarin(): ?Marin
@@ -29,10 +28,11 @@ class MarinEvolutionWidget extends ChartWidget
     {
        return static::canAccessMarinLivret();
     }
+
     protected function getData(): array
     {
         $marin = $this->getMarin();
-        
+       
         if (!$marin || !$marin->complements_fcm) {
             return [
                 'datasets' => [],
@@ -45,16 +45,6 @@ class MarinEvolutionWidget extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Activités validées (cumul)',
-                    'data' => $evolutionData['activites_cumul'],
-                    'borderColor' => 'rgb(59, 130, 246)',
-                    'backgroundColor' => 'rgba(59, 130, 246, 0.1)',
-                    'fill' => false,
-                    'tension' => 0.4,
-                    'pointRadius' => 5,
-                    'pointHoverRadius' => 8,
-                ],
-                [
                     'label' => 'Savoir-faires validés (cumul)',
                     'data' => $evolutionData['savoirfaires_cumul'],
                     'borderColor' => 'rgb(16, 185, 129)',
@@ -65,8 +55,8 @@ class MarinEvolutionWidget extends ChartWidget
                     'pointHoverRadius' => 8,
                 ],
                 [
-                    'label' => 'Objectif activités',
-                    'data' => $evolutionData['objectif_activites'],
+                    'label' => 'Objectif savoir-faires',
+                    'data' => $evolutionData['objectif_savoirfaires'],
                     'borderColor' => 'rgb(239, 68, 68)',
                     'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
                     'borderDash' => [5, 5],
@@ -98,123 +88,97 @@ class MarinEvolutionWidget extends ChartWidget
     {
         $marin = $this->getMarin();
         $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
-        
+       
         if (!$parcours) {
             return [
-                'activites_cumul' => [], 
                 'savoirfaires_cumul' => [],
-                'objectif_activites' => [],
+                'objectif_savoirfaires' => [],
                 'moyenne_mobile' => [],
                 'labels' => []
             ];
         }
 
-        // Calculer le total d'activités et savoir-faires
-        $totalActivites = 0;
+        // ✅ Calculer le total de savoir-faires et récupérer les validations
         $totalSavoirfaires = 0;
         $validations = [];
-        
-        foreach ($parcours['fonctions'] ?? [] as $fonction) {
-            foreach ($fonction['competences'] ?? [] as $competence) {
-                foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
-                    $totalSavoirfaires++;
-                    
-                    // Savoir-faire validé
-                    if (($savoirfaire['etat_valid'] ?? false) === true && 
-                        !empty($savoirfaire['date_validation'])) {
-                        $validations[] = [
-                            'date' => Carbon::parse($savoirfaire['date_validation']),
-                            'type' => 'savoirfaire'
-                        ];
-                    }
-                    
-                    foreach ($savoirfaire['activites'] ?? [] as $activite) {
-                        $totalActivites++;
-                        
-                        // Activité validée
-                        if (($activite['etat_valid'] ?? false) === true && 
-                            !empty($activite['date_validation'])) {
-                            $validations[] = [
-                                'date' => Carbon::parse($activite['date_validation']),
-                                'type' => 'activite'
-                            ];
-                        }
-                    }
+       
+        foreach ($parcours['annees'] ?? [] as $annee) {
+            foreach ($annee['savoirfaires'] ?? [] as $savoirfaire) {
+                $totalSavoirfaires++;
+               
+                // ✅ Savoir-faire validé
+                if (($savoirfaire['etat_valid'] ?? false) === true &&
+                    !empty($savoirfaire['date_validation'])) {
+                    $validations[] = [
+                        'date' => Carbon::parse($savoirfaire['date_validation']),
+                        'type' => 'savoirfaire'
+                    ];
                 }
             }
         }
 
         if (empty($validations)) {
             return [
-                'activites_cumul' => [], 
                 'savoirfaires_cumul' => [],
-                'objectif_activites' => [],
+                'objectif_savoirfaires' => [],
                 'moyenne_mobile' => [],
                 'labels' => []
             ];
         }
 
-        // Trier par date
+        // ✅ Trier par date
         usort($validations, function($a, $b) {
             return $a['date']->timestamp - $b['date']->timestamp;
         });
 
-        // Générer les données mensuelles
+        // ✅ Générer les données mensuelles
         $startDate = $validations[0]['date']->copy()->startOfMonth();
-        $endDate = Carbon::now()->addMonths(3)->endOfMonth(); // Projeter 3 mois dans le futur
-        
+        $endDate = Carbon::now()->addMonths(3)->endOfMonth();
+       
         $labels = [];
-        $activitesCumul = [];
         $savoirfairesCumul = [];
-        $objectifActivites = [];
+        $objectifSavoirfaires = [];
         $moyenneMobile = [];
-        
+       
         $currentDate = $startDate->copy();
         $dureeEnMois = $startDate->diffInMonths($endDate);
-        
+       
         while ($currentDate <= $endDate) {
             $monthEnd = $currentDate->copy()->endOfMonth();
-            
-            // Calculer les cumuls
-            $activitesCumulees = 0;
+           
+            // ✅ Calculer les cumuls
             $savoirfairesCumules = 0;
-            
+           
             foreach ($validations as $validation) {
-                if ($validation['date'] <= $monthEnd) {
-                    if ($validation['type'] === 'activite') {
-                        $activitesCumulees++;
-                    } else {
-                        $savoirfairesCumules++;
-                    }
+                if ($validation['date'] <= $monthEnd && $validation['type'] === 'savoirfaire') {
+                    $savoirfairesCumules++;
                 }
             }
-            
-            // Objectif linéaire basé sur le total
+           
+            // ✅ Objectif linéaire basé sur le total
             $moisEcoules = $startDate->diffInMonths($currentDate) + 1;
-            $objectif = round(($totalActivites * $moisEcoules) / $dureeEnMois);
-            
+            $objectif = round(($totalSavoirfaires * $moisEcoules) / $dureeEnMois);
+           
             $labels[] = $currentDate->format('M Y');
-            $activitesCumul[] = $activitesCumulees;
             $savoirfairesCumul[] = $savoirfairesCumules;
-            $objectifActivites[] = min($objectif, $totalActivites);
-            
+            $objectifSavoirfaires[] = min($objectif, $totalSavoirfaires);
+           
             $currentDate->addMonth();
         }
-        
-        // Calculer la moyenne mobile sur 3 mois
-        for ($i = 0; $i < count($activitesCumul); $i++) {
+
+        // ✅ Calculer la moyenne mobile sur 3 mois
+        for ($i = 0; $i < count($savoirfairesCumul); $i++) {
             if ($i < 2) {
-                $moyenneMobile[] = $activitesCumul[$i];
+                $moyenneMobile[] = $savoirfairesCumul[$i];
             } else {
-                $moyenne = ($activitesCumul[$i-2] + $activitesCumul[$i-1] + $activitesCumul[$i]) / 3;
+                $moyenne = ($savoirfairesCumul[$i-2] + $savoirfairesCumul[$i-1] + $savoirfairesCumul[$i]) / 3;
                 $moyenneMobile[] = round($moyenne, 1);
             }
         }
 
         return [
-            'activites_cumul' => $activitesCumul,
             'savoirfaires_cumul' => $savoirfairesCumul,
-            'objectif_activites' => $objectifActivites,
+            'objectif_savoirfaires' => $objectifSavoirfaires,
             'moyenne_mobile' => $moyenneMobile,
             'labels' => $labels,
         ];
@@ -257,7 +221,7 @@ class MarinEvolutionWidget extends ChartWidget
                     'display' => true,
                     'title' => [
                         'display' => true,
-                        'text' => 'Nombre d\'éléments',
+                        'text' => 'Nombre de savoir-faires',
                         'font' => ['weight' => 'bold']
                     ],
                     'beginAtZero' => true,

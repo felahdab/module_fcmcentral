@@ -24,7 +24,6 @@ class ViewParcours extends ViewRecord
 
     public $parcours;
 
-
     public function mount($record): void
     {
          parent::mount($record);
@@ -40,12 +39,15 @@ class ViewParcours extends ViewRecord
       */
      public function getFullParcours(int $id): ?Parcours
      {
-        $parcours = Parcours::with([
-            'fonctions.competences.savoirFaires.activites',
-        ])->find($id);
-        
-        return $parcours;
+         $parcours = Parcours::with([
+             'annees.anneeSavoirfaires.objectifs',
+         ])->find($id);
+
+         
+    
+    return $parcours;
      }
+
 
      /**
       *  Function pour Modifier 

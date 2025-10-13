@@ -16,62 +16,31 @@ use Filament\Tables\Columns\TextColumn;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCentral\Services\ParcoursService;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\FonctionsRelationManager;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\AnneesRelationManager;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+use Modules\FcmCentral\Services\ParcoursService;
 
 class ParcoursResource extends Resource
 {
     use FcmAccessControl;
-    
+    use FilamentPermissionTrait;
+   
     protected static ?string $model = Parcours::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static ?int $navigationSort = 11;
-
     protected static ?string $navigationGroup = 'Parcours';
     protected static ?string $navigationLabel = 'Parcours';
 
-
-    /// DROITS ACCES ///
-    
-    public static function canAccess(array $parameters = []): bool
-    {
-        // Seuls les admins peuvent accéder à cette resource
-        return static::canGestionParcours();
-    }
-
-    public static function canViewAny(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canCreate(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    //////////////////// 
-
+    protected static array $permissions = [
+        'fcmcentral::gerer_parcours',
+        'fcmcentral::droits_admin',
+        'fcmcentral::droits_bcf',
+        'fcmcentral::droits_supadmin',
+    ];
 
     public static function form(Form $form): Form
     {
@@ -90,24 +59,33 @@ class ParcoursResource extends Resource
 
     public static function table(Table $table): Table
     {
+       
         $parcours_service = new ParcoursService();
 
         return $table
-            ->defaultSort('libelle_court','asc')
+            ->defaultSort('ordre','asc')
+            ->reorderable('ordre')
             ->columns([
                TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('libelle_court')
-                    ->searchable()
+                    ->label('Libellé')
+                    ->limit(50)
                     ->sortable()
-                    ->label('Libellé court'),
-                TextColumn::make('libelle_long')
                     ->searchable()
-                    ->label('Libellé long')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->description(fn ($record) => substr($record->libelle_long,0,40).'...'),
+                TextColumn::make('annees.libelle_court')
+                    ->label('Années')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->color(fn($state, $record) =>
+                        $record->annees->pluck('color')->map(fn($color) => $color ?? 'info')->first()
+                    ),    
+                TextColumn::make('annees.savoirfaires.code')
+                    ->label('Savoir Faires')
+                    ->badge(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -126,14 +104,14 @@ class ParcoursResource extends Resource
                     ->extraAttributes([
                         'title' => 'Modifier',
                         'class' => 'btn-modif',
-                        ]), 
+                    ]),
                 Tables\Actions\ViewAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-queue-list')
                     ->extraAttributes([
                         'title' => 'Parcours détaillé',
                         'class' => 'btn-livret',
-                        ]),                    
+                    ]),                    
                 Action::make('serializeParcours')
                     ->label('Figer')
                     ->button()
@@ -159,7 +137,7 @@ class ParcoursResource extends Resource
                             'version' => $record->getLatestSerializedVersion() + 1,
                         ];
                     })
-                    ->action(function ($record, $data){
+                    ->action(function ($record, $data) {
                         $event = new UserGeneratedEvent(
                             UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
                             auth()->user()->uuid,
@@ -173,18 +151,77 @@ class ParcoursResource extends Resource
 
                         event($event);
                     })
-                ])
-                ->bulkActions([
-                    Tables\Actions\BulkActionGroup::make([
-                        Tables\Actions\DeleteBulkAction::make(),
-                    ]),
-                ]);
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                   // Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    /**
+     * Créer un parcours sérialisé
+     */
+    protected static function createParcoursSerialise(Parcours $parcours, array $parcours_data, $date_de_debut, $version): ?ParcoursSerialise
+    {
+        // Vérifier la version précédente
+        $previous = ParcoursSerialise::where('uuid', $parcours->uuid)
+            ->orderBy('version')
+            ->get()
+            ->last();
+
+        if ($previous) {
+            if ((new Carbon($previous->date_debut))->isAfter((new Carbon($date_de_debut)))) {
+                return null;
+            }
+        } else {
+            if (Carbon::now()->isAfter((new Carbon($date_de_debut)))) {
+                return null;
+            }
+        }
+
+        // Créer le nouveau parcours sérialisé
+        $parcours_serialise = ParcoursSerialise::create([
+            "uuid" => $parcours->uuid,
+            "libelle_long" => $parcours->libelle_long,
+            "libelle_court" => $parcours->libelle_court,
+            "version" => $version,
+            "date_debut" => $date_de_debut,
+            "date_fin" => null,
+            "parcours_id" => $parcours->id,
+            "parcours" => $parcours_data // Structure complète avec années
+        ]);
+
+        // Mettre à jour les versions précédentes
+        ParcoursSerialise::where('uuid', $parcours->uuid)
+            ->where('version', '<', $version)
+            ->whereNull('date_fin')
+            ->update(['date_fin' => Carbon::parse($date_de_debut)->subDay()]);
+
+        return $parcours_serialise;
+    }
+
+    /**
+     * Obtenir la première date possible pour une nouvelle version
+     */
+    protected static function getFirstPossibleNewVersionDate(Parcours $parcours): Carbon
+    {
+        $previous = ParcoursSerialise::where('uuid', $parcours->uuid)
+            ->orderBy('version')
+            ->get()
+            ->last();
+
+        if ($previous) {
+            return (new Carbon($previous->date_debut))->addDay()->startOfDay();
+        } else {
+            return Carbon::now()->addDay()->startOfDay();
+        }
     }
 
     public static function getRelations(): array
     {
         return [
-            FonctionsRelationManager::class
+            AnneesRelationManager::class
         ];
     }
 
@@ -195,7 +232,6 @@ class ParcoursResource extends Resource
             'create' => Pages\CreateParcours::route('/create'),
             'view' => Pages\ViewParcours::route('/{record}/view'),
             'edit' => Pages\EditParcours::route('/{record}/edit'),
-            
         ];
     }
 }

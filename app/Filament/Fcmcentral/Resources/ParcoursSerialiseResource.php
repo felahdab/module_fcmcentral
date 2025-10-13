@@ -174,11 +174,11 @@ class ParcoursSerialiseResource extends Resource
                     'class' => 'btn-consult',
                     ]),
             ])
-            // ->bulkActions([
-            //     Tables\Actions\BulkActionGroup::make([
-            //         Tables\Actions\DeleteBulkAction::make(),
-            //     ]),
-            // ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
             ;
     }
 

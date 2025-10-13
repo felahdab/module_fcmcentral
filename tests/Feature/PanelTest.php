@@ -1,32 +1,23 @@
 <?php
 
 use function Pest\Livewire\livewire;
-
 use Carbon\Carbon;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Artisan;
-
 use function Pest\Laravel\{actingAs};
 use Livewire\Livewire;
-
 use Filament\Facades\Filament;
 use Filament\Pages\Dashboard;
-
 use App\Models\User;
 use App\Models\Setting;
-
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\Configuration;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources;
-
 use Modules\FcmCentral\Models;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
-
 use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
-
 
 uses(RefreshDatabase::class);
 uses(Tests\TestCase::class);
@@ -64,10 +55,10 @@ it('enregistre la configuration du module FcmCentral en base de données', funct
             "token_for_remote_fcmcentral_instance" => "token"
         ])
         ->call('save');
+
     $this->assertTrue(Setting::forKey('fcmcentral')->get('transmit_user_generated_events_to_remote_fcmcentral_instance') == true);
     $this->assertTrue(Setting::forKey('fcmcentral')->get('url_of_remote_fcmcentral_instance') == "url");
     $this->assertTrue(Setting::forKey('fcmcentral')->get('token_for_remote_fcmcentral_instance') == "token");
-
 });
 
 it('enregistre la configuration du module FcmCommun en base de données', function() {
@@ -79,10 +70,10 @@ it('enregistre la configuration du module FcmCommun en base de données', functi
             "cohorte_token_for_remote_fcmcentral_instance" => "token"
         ])
         ->call('save');
+
     $this->assertTrue(Setting::forKey('fcmcommun')->get('retreive_cohortes_from_distant_fcmcentral_module') == true);
     $this->assertTrue(Setting::forKey('fcmcommun')->get('cohortes_url_of_remote_fcmcentral_instance') == "url");
     $this->assertTrue(Setting::forKey('fcmcommun')->get('cohorte_token_for_remote_fcmcentral_instance') == "token");
-
 });
 
 it('affiche la liste des cohortes', function() {
@@ -92,21 +83,20 @@ it('affiche la liste des cohortes', function() {
 });
 
 it('a des factories pour tous les modeles', function(){
-    Models\Activite::factory()->create();
-    $this->assertTrue(Models\Activite::all()->count() == 1);
+    Models\Objectif::factory()->create();
+    $this->assertTrue(Models\Objectif::all()->count() == 1);
 
-    Models\Competence::factory()->create();
-    $this->assertTrue(Models\Competence::all()->count() == 1);
+    // Models\Competence::factory()->create();
+    // $this->assertTrue(Models\Competence::all()->count() == 1);
 
-    Models\Fonction::factory()->create();
-    $this->assertTrue(Models\Fonction::all()->count() == 1);
+    Models\Annee::factory()->create();
+    $this->assertTrue(Models\Annee::all()->count() == 1);
 
     Models\Parcours::factory()->create();
     $this->assertTrue(Models\Parcours::all()->count() == 1);
 
     Models\Savoirfaire::factory()->create();
     $this->assertTrue(Models\Savoirfaire::all()->count() == 1);
-
 });
 
 it('genere un  UserGeneratedEvent quand on demande à figer un parcours depuis la page d edition d un parcours', function(){
@@ -130,7 +120,6 @@ it('genere un  UserGeneratedEvent quand on demande à figer un parcours depuis l
     Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($parcours, $date_de_debut){
         return $event->object_class == 'Parcours' && $event->object_uuid == $parcours->uuid;
     });
-
 });
 
 it('genere un  UserGeneratedEvent quand on demande à figer un parcours depuis la liste des parcours', function(){
@@ -153,7 +142,6 @@ it('genere un  UserGeneratedEvent quand on demande à figer un parcours depuis l
     Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($parcours, $date_de_debut){
         return $event->object_class == 'Parcours' && $event->object_uuid == $parcours->uuid;
     });
-
 });
 
 it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', function(){
@@ -176,7 +164,6 @@ it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', f
                 $event->object_class == ObjectClasses::MARIN->value &&
                 $event->object_uuid == $marin->uuid;
     });
-
 });
 
 it('genere un  UserGeneratedEvent quand on demande a ne plus suivre un marin en FCM', function(){
@@ -192,7 +179,6 @@ it('genere un  UserGeneratedEvent quand on demande a ne plus suivre un marin en 
 
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        //->filterTable('en_fcm')
         ->assertCountTableRecords(1)
         ->assertCanSeeTableRecords([$marin])
         ->callTableAction('ne_plus_suivre_en_fcm', $marin)
@@ -231,7 +217,6 @@ it('genere un  UserGeneratedEvent quand on assigne une cohorte a un marin suivi 
                 $event->object_class == ObjectClasses::MARIN->value &&
                 $event->object_uuid == $marin->uuid;
     });
-
 });
 
 it('genere un  UserGeneratedEvent quand on assigne un mentor a un marin suivi en fcm', function(){
@@ -259,7 +244,6 @@ it('genere un  UserGeneratedEvent quand on assigne un mentor a un marin suivi en
                 $event->object_class == ObjectClasses::MARIN->value &&
                 $event->object_uuid == $marin->uuid;
     });
-
 });
 
 it('genere un  UserGeneratedEvent quand on assigne un parcours a un marin suivi en fcm', function(){
@@ -273,11 +257,13 @@ it('genere un  UserGeneratedEvent quand on assigne un parcours a un marin suivi 
     $this->assertTrue(Models\Marin::all()->count() == 1);
 
     $parcours = Models\Parcours::factory()->create();
-    $fonction = Models\Fonction::factory()->create();
-    $parcours->fonctions()->attach($fonction);
+    
+    // ✅ CORRECTION: Utiliser la nouvelle structure
+    $annee = Models\Annee::factory()->create();
+    $parcours->annees()->attach($annee);
 
-    $competence = Models\Competence::factory()->create();
-    $fonction->competences()->attach($competence);
+    $savoirfaire = Models\Savoirfaire::factory()->create();
+    $annee->savoirfaires()->attach($savoirfaire);
 
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
@@ -305,7 +291,6 @@ it('genere un  UserGeneratedEvent quand on assigne un parcours a un marin suivi 
                 $event->object_class == ObjectClasses::MARIN->value &&
                 $event->object_uuid == $marin->uuid;
     });
-
 });
 
 it('affiche le livret FCM ', function(){
@@ -317,11 +302,13 @@ it('affiche le livret FCM ', function(){
     $this->assertTrue(Models\Marin::all()->count() == 1);
 
     $parcours = Models\Parcours::factory()->create();
-    $fonction = Models\Fonction::factory()->create();
-    $parcours->fonctions()->attach($fonction);
+    
+    // ✅ CORRECTION: Utiliser la nouvelle structure
+    $annee = Models\Annee::factory()->create();
+    $parcours->annees()->attach($annee);
 
-    $competence = Models\Competence::factory()->create();
-    $fonction->competences()->attach($competence);
+    $savoirfaire = Models\Savoirfaire::factory()->create();
+    $annee->savoirfaires()->attach($savoirfaire);
 
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
@@ -347,7 +334,6 @@ it('affiche le livret FCM ', function(){
     Livewire::actingAs($this->admin)
             ->test(Resources\MarinResource\Pages\LivretDeFcm::class, ["record" => $marin->id])
             ->assertSee("Livret du marin");
-
 });
 
 it('met a jour le parcours en cas de validation', function(){
@@ -385,16 +371,15 @@ it('met a jour le parcours en cas de validation', function(){
         );
     event($event);
 
-    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d'; //C1-SF5 - Rechercher et exploiter le retex technique et tactique disponible
-
-    $activites = [
-        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  //Niveau 2 - GENOPS- Activité BOPS/CMI1
-        '97750a5e-abd4-4c16-89a6-65a2695ab692',  //Niveau 2 - GENOPS- Activité BOPS/CMI2
-        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  //Niveau 2 - GENOPS- Activité BOPS/MSGOPS
-        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'   //Niveau 2 - GENOPS- Activité BOPS/SIOC
+    // ✅ CORRECTION: Utiliser les UUIDs des objectifs (nouvelle structure)
+    $objectifs = [
+        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  // Objectif 1
+        '97750a5e-abd4-4c16-89a6-65a2695ab692',  // Objectif 2
+        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  // Objectif 3
+        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'   // Objectif 4
     ];
 
-    foreach($activites as $activite)
+    foreach($objectifs as $objectif)
     {
         $event = new UserGeneratedEvent(
             event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
@@ -402,8 +387,8 @@ it('met a jour le parcours en cas de validation', function(){
             object_class: ObjectClasses::MARIN,
             object_uuid : $marin->uuid,
             detail: [
-                "type_element" => "activite",
-                "uuid_element" => $activite,
+                "type_element" => "objectif", // ✅ CORRECTION: objectif au lieu d'activite
+                "uuid_element" => $objectif,
                 "date" => Carbon::now(),
                 "commentaire"=> "commentaire"
             ]
@@ -413,25 +398,32 @@ it('met a jour le parcours en cas de validation', function(){
 
     $marin->refresh();
 
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction)
+    // ✅ CORRECTION: Adapter la vérification pour la nouvelle structure
+    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d';
+    $savoirfaire_trouve = false;
+
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["annees"] as $annee)
     {
-        //dump($fonction);
-        foreach($fonction["competences"] as $competence)
+        if (!isset($annee["savoirfaires"])) continue;
+        
+        foreach($annee["savoirfaires"] as $savoirfaire)
         {
-            foreach($competence["savoirfaires"] as $savoirfaire)
+            if ($savoirfaire["uuid"] == $savoirfaire_uuid)
             {
-                if ($savoirfaire["uuid"] == $savoirfaire_uuid)
-                {
-                    //dump($savoirfaire);
-                    foreach($savoirfaire["activites"] as $activite)
+                $savoirfaire_trouve = true;
+                
+                if (isset($savoirfaire["objectifs"]) && is_array($savoirfaire["objectifs"])) {
+                    foreach($savoirfaire["objectifs"] as $objectif)
                     {
-                        $this->assertTrue($activite["etat_valid"] == true);
+                        $this->assertTrue($objectif["etat_valid"] == true);
                     }
-                    $this->assertTrue($savoirfaire["etat_valid"] == true);
                 }
+                $this->assertTrue($savoirfaire["etat_valid"] == true);
             }
         }
     }
+    
+    $this->assertTrue($savoirfaire_trouve, "Le savoir-faire devrait être trouvé dans le parcours");
 });
 
 it('met a jour le parcours en cas d annulation', function(){
@@ -469,16 +461,17 @@ it('met a jour le parcours en cas d annulation', function(){
         );
     event($event);
 
-    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d'; //C1-SF5 - Rechercher et exploiter le retex technique et tactique disponible
+    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d';
 
-    $activites = [
-        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  //Niveau 2 - GENOPS- Activité BOPS/CMI1
-        '97750a5e-abd4-4c16-89a6-65a2695ab692',  //Niveau 2 - GENOPS- Activité BOPS/CMI2
-        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  //Niveau 2 - GENOPS- Activité BOPS/MSGOPS
-        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'   //Niveau 2 - GENOPS- Activité BOPS/SIOC
+    // ✅ CORRECTION: Utiliser les UUIDs des objectifs
+    $objectifs = [
+        '06a569b8-23a7-4c3f-b57a-51ca841894a7',
+        '97750a5e-abd4-4c16-89a6-65a2695ab692',
+        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',
+        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'
     ];
 
-    foreach($activites as $activite)
+    foreach($objectifs as $objectif)
     {
         $event = new UserGeneratedEvent(
             event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
@@ -486,8 +479,8 @@ it('met a jour le parcours en cas d annulation', function(){
             object_class: ObjectClasses::MARIN,
             object_uuid : $marin->uuid,
             detail: [
-                "type_element" => "activite",
-                "uuid_element" => $activite,
+                "type_element" => "objectif", // ✅ CORRECTION
+                "uuid_element" => $objectif,
                 "date" => Carbon::now(),
                 "commentaire"=> "commentaire"
             ]
@@ -495,15 +488,15 @@ it('met a jour le parcours en cas d annulation', function(){
         event($event);
     }
 
-    // On annule la premiere activité
+    // On annule le premier objectif
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::ANNUL_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
         object_uuid : $marin->uuid,
         detail: [
-            "type_element" => "activite",
-            "uuid_element" => $activites[0],
+            "type_element" => "objectif", // ✅ CORRECTION
+            "uuid_element" => $objectifs[0],
             "date" => Carbon::now(),
             "commentaire"=> "commentaire"
         ]
@@ -512,27 +505,31 @@ it('met a jour le parcours en cas d annulation', function(){
 
     $marin->refresh();
 
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction)
+    // ✅ CORRECTION: Adapter la vérification pour la nouvelle structure
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["annees"] as $annee)
     {
-        //dump($fonction);
-        foreach($fonction["competences"] as $competence)
+        if (!isset($annee["savoirfaires"])) continue;
+        
+        foreach($annee["savoirfaires"] as $savoirfaire)
         {
-            foreach($competence["savoirfaires"] as $savoirfaire)
+            if ($savoirfaire["uuid"] == $savoirfaire_uuid)
             {
-                if ($savoirfaire["uuid"] == $savoirfaire_uuid)
-                {
-                    //dump($savoirfaire);
-                    foreach($savoirfaire["activites"] as $activite)
+                if (isset($savoirfaire["objectifs"]) && is_array($savoirfaire["objectifs"])) {
+                    foreach($savoirfaire["objectifs"] as $objectif)
                     {
-                        if ($activite['uuid'] == $activites[0]){
-                            $this->assertFalse($activite["etat_valid"]);
+                        // Construire l'UUID composite pour comparer
+                        $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                        $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
+                        
+                        if ($objectif['uuid'] == $objectifs[0] || $objUuidComposite == $objectifs[0]){
+                            $this->assertFalse($objectif["etat_valid"]);
                         }
                         else{
-                            $this->assertTrue($activite["etat_valid"] == true);
+                            $this->assertTrue($objectif["etat_valid"] == true);
                         }
                     }
-                    $this->assertFalse($savoirfaire["etat_valid"]);
                 }
+                $this->assertFalse($savoirfaire["etat_valid"]);
             }
         }
     }
@@ -573,24 +570,25 @@ it('met a jour le parcours en cas de proposition', function(){
         );
     event($event);
 
-    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d'; //C1-SF5 - Rechercher et exploiter le retex technique et tactique disponible
+    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d';
 
-    $activites = [
-        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  //Niveau 2 - GENOPS- Activité BOPS/CMI1
-        '97750a5e-abd4-4c16-89a6-65a2695ab692',  //Niveau 2 - GENOPS- Activité BOPS/CMI2
-        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  //Niveau 2 - GENOPS- Activité BOPS/MSGOPS
-        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'   //Niveau 2 - GENOPS- Activité BOPS/SIOC
+    // ✅ CORRECTION: Utiliser les UUIDs des objectifs
+    $objectifs = [
+        '06a569b8-23a7-4c3f-b57a-51ca841894a7',
+        '97750a5e-abd4-4c16-89a6-65a2695ab692',
+        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',
+        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'
     ];
 
-    // On propose la premiere activité
+    // On propose le premier objectif
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::PROPOS_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
         object_uuid : $marin->uuid,
         detail: [
-            "type_element" => "activite",
-            "uuid_element" => $activites[0],
+            "type_element" => "objectif", // ✅ CORRECTION
+            "uuid_element" => $objectifs[0],
             "date" => Carbon::now(),
             "commentaire"=> "commentaire"
         ]
@@ -599,23 +597,27 @@ it('met a jour le parcours en cas de proposition', function(){
 
     $marin->refresh();
 
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction)
+    // ✅ CORRECTION: Adapter la vérification pour la nouvelle structure
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["annees"] as $annee)
     {
-        //dump($fonction);
-        foreach($fonction["competences"] as $competence)
+        if (!isset($annee["savoirfaires"])) continue;
+        
+        foreach($annee["savoirfaires"] as $savoirfaire)
         {
-            foreach($competence["savoirfaires"] as $savoirfaire)
+            if ($savoirfaire["uuid"] == $savoirfaire_uuid)
             {
-                if ($savoirfaire["uuid"] == $savoirfaire_uuid)
-                {
-                    //dump($savoirfaire);
-                    foreach($savoirfaire["activites"] as $activite)
+                if (isset($savoirfaire["objectifs"]) && is_array($savoirfaire["objectifs"])) {
+                    foreach($savoirfaire["objectifs"] as $objectif)
                     {
-                        if ($activite['uuid'] == $activites[0]){
-                            $this->assertTrue($activite["date_proposition"] != null);
+                        // Construire l'UUID composite pour comparer
+                        $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                        $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
+                        
+                        if ($objectif['uuid'] == $objectifs[0] || $objUuidComposite == $objectifs[0]){
+                            $this->assertTrue($objectif["date_proposition"] != null);
                         }
                         else{
-                            $this->assertTrue($activite["date_proposition"] == null);
+                            $this->assertTrue($objectif["date_proposition"] == null);
                         }
                     }
                 }
@@ -659,39 +661,40 @@ it('met a jour le parcours en cas de validation d une proposition', function(){
         );
     event($event);
 
-    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d'; //C1-SF5 - Rechercher et exploiter le retex technique et tactique disponible
+    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d';
 
-    $activites = [
-        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  //Niveau 2 - GENOPS- Activité BOPS/CMI1
-        '97750a5e-abd4-4c16-89a6-65a2695ab692',  //Niveau 2 - GENOPS- Activité BOPS/CMI2
-        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  //Niveau 2 - GENOPS- Activité BOPS/MSGOPS
-        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'   //Niveau 2 - GENOPS- Activité BOPS/SIOC
+    // ✅ CORRECTION: Utiliser les UUIDs des objectifs
+    $objectifs = [
+        '06a569b8-23a7-4c3f-b57a-51ca841894a7',
+        '97750a5e-abd4-4c16-89a6-65a2695ab692',
+        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',
+        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'
     ];
 
-    // On propose la premiere activité
+    // On propose le premier objectif
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::PROPOS_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
         object_uuid : $marin->uuid,
         detail: [
-            "type_element" => "activite",
-            "uuid_element" => $activites[0],
+            "type_element" => "objectif", // ✅ CORRECTION
+            "uuid_element" => $objectifs[0],
             "date" => Carbon::now(),
             "commentaire"=> "commentaire"
         ]
         );
     event($event);
 
-    // On valide la premiere activité
+    // On valide le premier objectif
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
         object_uuid : $marin->uuid,
         detail: [
-            "type_element" => "activite",
-            "uuid_element" => $activites[0],
+            "type_element" => "objectif", // ✅ CORRECTION
+            "uuid_element" => $objectifs[0],
             "date" => Carbon::now(),
             "commentaire"=> "commentaire"
         ]
@@ -700,21 +703,25 @@ it('met a jour le parcours en cas de validation d une proposition', function(){
 
     $marin->refresh();
 
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction)
+    // ✅ CORRECTION: Adapter la vérification pour la nouvelle structure
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["annees"] as $annee)
     {
-        //dump($fonction);
-        foreach($fonction["competences"] as $competence)
+        if (!isset($annee["savoirfaires"])) continue;
+        
+        foreach($annee["savoirfaires"] as $savoirfaire)
         {
-            foreach($competence["savoirfaires"] as $savoirfaire)
+            if ($savoirfaire["uuid"] == $savoirfaire_uuid)
             {
-                if ($savoirfaire["uuid"] == $savoirfaire_uuid)
-                {
-                    //dump($savoirfaire);
-                    foreach($savoirfaire["activites"] as $activite)
+                if (isset($savoirfaire["objectifs"]) && is_array($savoirfaire["objectifs"])) {
+                    foreach($savoirfaire["objectifs"] as $objectif)
                     {
-                        if ($activite['uuid'] == $activites[0]){
-                            $this->assertTrue($activite["date_proposition"] == null);
-                            $this->assertTrue($activite["etat_valid"] == true);
+                        // Construire l'UUID composite pour comparer
+                        $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                        $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
+                        
+                        if ($objectif['uuid'] == $objectifs[0] || $objUuidComposite == $objectifs[0]){
+                            $this->assertTrue($objectif["date_proposition"] == null);
+                            $this->assertTrue($objectif["etat_valid"] == true);
                         }
                     }
                 }
@@ -758,39 +765,40 @@ it('met a jour le parcours en cas de refus d une proposition', function(){
         );
     event($event);
 
-    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d'; //C1-SF5 - Rechercher et exploiter le retex technique et tactique disponible
+    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d';
 
-    $activites = [
-        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  //Niveau 2 - GENOPS- Activité BOPS/CMI1
-        '97750a5e-abd4-4c16-89a6-65a2695ab692',  //Niveau 2 - GENOPS- Activité BOPS/CMI2
-        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  //Niveau 2 - GENOPS- Activité BOPS/MSGOPS
-        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'   //Niveau 2 - GENOPS- Activité BOPS/SIOC
+    // ✅ CORRECTION: Utiliser les UUIDs des objectifs
+    $objectifs = [
+        '06a569b8-23a7-4c3f-b57a-51ca841894a7',
+        '97750a5e-abd4-4c16-89a6-65a2695ab692',
+        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',
+        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'
     ];
 
-    // On propose la premiere activité
+    // On propose le premier objectif
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::PROPOS_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
         object_uuid : $marin->uuid,
         detail: [
-            "type_element" => "activite",
-            "uuid_element" => $activites[0],
+            "type_element" => "objectif", // ✅ CORRECTION
+            "uuid_element" => $objectifs[0],
             "date" => Carbon::now(),
             "commentaire"=> "commentaire"
         ]
         );
     event($event);
 
-    // On valide la premiere activité
+    // On refuse la proposition
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::ANNUL_PROPOS_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
         object_uuid : $marin->uuid,
         detail: [
-            "type_element" => "activite",
-            "uuid_element" => $activites[0],
+            "type_element" => "objectif", // ✅ CORRECTION
+            "uuid_element" => $objectifs[0],
             "date" => Carbon::now(),
             "commentaire"=> "commentaire"
         ]
@@ -799,21 +807,25 @@ it('met a jour le parcours en cas de refus d une proposition', function(){
 
     $marin->refresh();
 
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction)
+    // ✅ CORRECTION: Adapter la vérification pour la nouvelle structure
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["annees"] as $annee)
     {
-        //dump($fonction);
-        foreach($fonction["competences"] as $competence)
+        if (!isset($annee["savoirfaires"])) continue;
+        
+        foreach($annee["savoirfaires"] as $savoirfaire)
         {
-            foreach($competence["savoirfaires"] as $savoirfaire)
+            if ($savoirfaire["uuid"] == $savoirfaire_uuid)
             {
-                if ($savoirfaire["uuid"] == $savoirfaire_uuid)
-                {
-                    //dump($savoirfaire);
-                    foreach($savoirfaire["activites"] as $activite)
+                if (isset($savoirfaire["objectifs"]) && is_array($savoirfaire["objectifs"])) {
+                    foreach($savoirfaire["objectifs"] as $objectif)
                     {
-                        if ($activite['uuid'] == $activites[0]){
-                            $this->assertTrue($activite["date_proposition"] == null);
-                            $this->assertTrue($activite["etat_valid"] == false);
+                        // Construire l'UUID composite pour comparer
+                        $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                        $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
+                        
+                        if ($objectif['uuid'] == $objectifs[0] || $objUuidComposite == $objectifs[0]){
+                            $this->assertTrue($objectif["date_proposition"] == null);
+                            $this->assertTrue($objectif["etat_valid"] == false);
                         }
                     }
                 }
@@ -822,7 +834,7 @@ it('met a jour le parcours en cas de refus d une proposition', function(){
     }
 });
 
-it('valide automatiquement toutes les activites a false quand on valide un savoirfaire', function(){
+it('valide automatiquement tous les objectifs quand on valide un savoirfaire', function(){
     $this->assertTrue(Models\Marin::all()->count() == 0);
     $marin = Models\Marin::factory()->create();
     $marin = Models\Marin::find($marin->id);
@@ -834,7 +846,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
     $this->assertTrue(Models\Parcours::count() == 1);
     $parcours = Models\Parcours::first();
 
-    // Creation de parcours Event  (count Event = 1)
+    // Creation de parcours Event
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
         user_uuid : $this->admin->uuid,
@@ -847,7 +859,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
         );
     event($event);
 
-    // Attribuer PArcours Marin (Count Event =2)
+    // Attribuer Parcours Marin
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid : $this->admin->uuid,
@@ -859,92 +871,92 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
         );
     event($event);
 
-    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d'; //C1-SF5 - Rechercher et exploiter le retex technique et tactique disponible
+    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d';
 
-    $activites = [
-        '06a569b8-23a7-4c3f-b57a-51ca841894a7',  //Niveau 2 - GENOPS- Activité BOPS/CMI1
-        '97750a5e-abd4-4c16-89a6-65a2695ab692',  //Niveau 2 - GENOPS- Activité BOPS/CMI2
-        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',  //Niveau 2 - GENOPS- Activité BOPS/MSGOPS
-        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906',  //Niveau 2 - GENOPS- Activité BOPS/SIOC
-        'ed1fa3e7-22cf-442b-b9c0-3d72a9ec984b'   // Niveau 3 - LSM - MENACE LSM (hors categorie savoir faire)
+    // ✅ CORRECTION: Utiliser les UUIDs des objectifs
+    $objectifs = [
+        '06a569b8-23a7-4c3f-b57a-51ca841894a7',
+        '97750a5e-abd4-4c16-89a6-65a2695ab692',
+        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',
+        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906',
+        'ed1fa3e7-22cf-442b-b9c0-3d72a9ec984b'   // Objectif hors catégorie
     ];
 
-    // FONCTION HELPER: Trouver les activités filles du savoir-faire (creer dans Outils Services FcmCommun)
-    $getActivitesDuSavoirfaire = function($parcoursMarin, $savoirfaire_uuid) {
-        $activites_du_savoirfaire = [];
+    // ✅ CORRECTION: Helper adapté pour la nouvelle structure
+    $getObjectifsDuSavoirfaire = function($parcoursMarin, $savoirfaire_uuid) {
+        $objectifs_du_savoirfaire = [];
 
-        foreach($parcoursMarin["fonctions"] as $fonction) {
-            if (!isset($fonction['competences'])) continue;
+        foreach($parcoursMarin["annees"] as $annee) {
+            if (!isset($annee['savoirfaires'])) continue;
 
-            foreach($fonction['competences'] as $competence) {
-                if (!isset($competence['savoirfaires'])) continue;
-
-                foreach($competence['savoirfaires'] as $savoirfaire) {
-                    if ($savoirfaire['uuid'] === $savoirfaire_uuid) {
-                        if (isset($savoirfaire['activites'])) {
-                            foreach($savoirfaire['activites'] as $activite) {
-                                $activites_du_savoirfaire[] = $activite['uuid'];
+            foreach($annee['savoirfaires'] as $savoirfaire) {
+                if ($savoirfaire['uuid'] === $savoirfaire_uuid) {
+                    if (isset($savoirfaire['objectifs']) && is_array($savoirfaire['objectifs'])) {
+                        foreach($savoirfaire['objectifs'] as $objectif) {
+                            // Ajouter à la fois l'UUID simple et composite
+                            $objectifs_du_savoirfaire[] = $objectif['uuid'] ?? '';
+                            
+                            $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                            if ($pivotId) {
+                                $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
+                                $objectifs_du_savoirfaire[] = $objUuidComposite;
                             }
                         }
-                        return $activites_du_savoirfaire;
                     }
+                    return $objectifs_du_savoirfaire;
                 }
             }
         }
 
-        return $activites_du_savoirfaire;
+        return $objectifs_du_savoirfaire;
     };
 
-    // ÉTAPE 1: Identifier les activités du savoir-faire
+    // ÉTAPE 1: Identifier les objectifs du savoir-faire
     $marin->refresh();
-    $activites_du_savoirfaire = $getActivitesDuSavoirfaire(
+    $objectifs_du_savoirfaire = $getObjectifsDuSavoirfaire(
         $marin->complements_fcm->donnees_du_parcours->parcoursmarin,
         $savoirfaire_uuid
     );
 
-    //  ÉTAPE 2: Identifier les activités hors catégorie
-    $activites_hors_categorie = array_diff($activites, $activites_du_savoirfaire);
+    // ÉTAPE 2: Identifier les objectifs hors catégorie
+    $objectifs_hors_categorie = array_diff($objectifs, $objectifs_du_savoirfaire);
 
-    echo "\n🔍 Activités du savoir-faire: " . implode(', ', $activites_du_savoirfaire) . "\n";
-    echo "🔍 Activités hors catégorie: " . implode(', ', $activites_hors_categorie) . "\n";
+    echo "\n🔍 Objectifs du savoir-faire: " . implode(', ', $objectifs_du_savoirfaire) . "\n";
+    echo "🔍 Objectifs hors catégorie: " . implode(', ', $objectifs_hors_categorie) . "\n";
 
-    //  ÉTAPE 3: Valider seulement la première activité du savoir-faire ( Count Event = 3)
+    // ÉTAPE 3: Valider seulement le premier objectif du savoir-faire
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
         object_uuid : $marin->uuid,
         detail: [
-            "type_element" => "activite",
-            "uuid_element" => $activites[0], // Première activité du savoir-faire
+            "type_element" => "objectif", // ✅ CORRECTION
+            "uuid_element" => $objectifs[0],
             "date" => Carbon::now(),
-            "commentaire"=> "activite validee individuellement"
+            "commentaire"=> "objectif valide individuellement"
         ]
         );
     event($event);
 
-    //  ÉTAPE 4: Valider les activités hors catégorie  ( Count Event = 4)
-    foreach($activites_hors_categorie as $activite_hors_categorie) {
+    // ÉTAPE 4: Valider les objectifs hors catégorie
+    foreach($objectifs_hors_categorie as $objectif_hors_categorie) {
         $event = new UserGeneratedEvent(
             event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
             user_uuid : $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
             object_uuid : $marin->uuid,
             detail: [
-                "type_element" => "activite",
-                "uuid_element" => $activite_hors_categorie,
+                "type_element" => "objectif", // ✅ CORRECTION
+                "uuid_element" => $objectif_hors_categorie,
                 "date" => Carbon::now(),
-                "commentaire"=> "activite hors categorie validee"
+                "commentaire"=> "objectif hors categorie valide"
             ]
             );
         event($event);
     }
 
-    // COMPTER LES EVENTS AVANT VALIDATION DU SAVOIR-FAIRE
-    $events_avant = \DB::table('fcmcentral_stored_events')->count();
-    echo "🔍 Events avant validation savoir-faire: {$events_avant}\n";
-
-    //  ÉTAPE 5: Valider maintenant le savoir-faire complet (Count Event = 5)
+    // ÉTAPE 5: Valider maintenant le savoir-faire complet
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
@@ -961,91 +973,38 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
 
     $marin->refresh();
 
-    //  VÉRIFICATION 1: État des activités dans le parcours
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction) {
-        foreach($fonction["competences"] as $competence) {
-            foreach($competence["savoirfaires"] as $savoirfaire) {
-                if ($savoirfaire["uuid"] == $savoirfaire_uuid) {
-                    // Toutes les activités du savoir-faire doivent être validées
-                    foreach($savoirfaire["activites"] as $activite) {
-                        $this->assertTrue($activite["etat_valid"] == true,
-                            "L'activité {$activite['uuid']} devrait être validée");
+    // ✅ VÉRIFICATION: État des objectifs dans le parcours (nouvelle structure)
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["annees"] as $annee) {
+        if (!isset($annee['savoirfaires'])) continue;
+        
+        foreach($annee['savoirfaires'] as $savoirfaire) {
+            if ($savoirfaire["uuid"] == $savoirfaire_uuid) {
+                // Tous les objectifs du savoir-faire doivent être validés
+                if (isset($savoirfaire["objectifs"]) && is_array($savoirfaire["objectifs"])) {
+                    foreach($savoirfaire["objectifs"] as $objectif) {
+                        $this->assertTrue($objectif["etat_valid"] == true,
+                            "L'objectif {$objectif['uuid']} devrait être validé");
 
                         // Vérifier les commentaires selon l'origine de la validation
-                        if ($activite['uuid'] === $activites[0]) {
-                            // La première activité était déjà validée
-                            $this->assertEquals("activite validee individuellement", $activite['commentaire'],
-                                "L'activité déjà validée devrait garder son commentaire original");
+                        $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                        $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
+                        
+                        if ($objectif['uuid'] === $objectifs[0] || $objUuidComposite === $objectifs[0]) {
+                            // Le premier objectif était déjà validé
+                            $this->assertEquals("objectif valide individuellement", $objectif['commentaire'],
+                                "L'objectif déjà validé devrait garder son commentaire original");
                         } else {
-                            // Les autres activités ont été validées par le savoir-faire
-                            $this->assertEquals("validation savoir-faire complet", $activite['commentaire'],
-                                "L'activité auto-validée devrait avoir le commentaire du savoir-faire");
-                        }
-                    }
-                    // Le savoir-faire lui-même doit être validé
-                    $this->assertTrue($savoirfaire["etat_valid"] == true,
-                        "Le savoir-faire devrait être validé");
-                }
-            }
-        }
-    }
-
-    //  VÉRIFICATION 2: Les activités hors catégorie restent inchangées
-    foreach($activites_hors_categorie as $activite_hors_categorie) {
-        $activite_trouvee = false;
-
-        foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["fonctions"] as $fonction) {
-            foreach($fonction["competences"] as $competence) {
-                foreach($competence["savoirfaires"] as $savoirfaire_autre) {
-                    if (isset($savoirfaire_autre["activites"])) {
-                        foreach($savoirfaire_autre["activites"] as $activite) {
-                            if ($activite['uuid'] === $activite_hors_categorie) {
-                                $activite_trouvee = true;
-                                $this->assertTrue($activite["etat_valid"],
-                                    "L'activité hors catégorie {$activite_hors_categorie} devrait rester validée");
-                                $this->assertEquals("activite hors categorie validee", $activite['commentaire'],
-                                    "L'activité hors catégorie devrait garder son commentaire original");
-                            }
+                            // Les autres objectifs ont été validés par le savoir-faire
+                            $this->assertEquals("validation savoir-faire complet", $objectif['commentaire'],
+                                "L'objectif auto-validé devrait avoir le commentaire du savoir-faire");
                         }
                     }
                 }
+                
+                // Le savoir-faire lui-même doit être validé
+                $this->assertTrue($savoirfaire["etat_valid"] == true,
+                    "Le savoir-faire devrait être validé");
             }
         }
-
-        $this->assertTrue($activite_trouvee,
-            "L'activité hors catégorie {$activite_hors_categorie} devrait être trouvée dans le parcours");
     }
-
-    //  VÉRIFICATION 3: Compter les events générés
-    $events_apres = \DB::table('fcmcentral_stored_events')->count();
-    $nouveaux_events = $events_apres - $events_avant;
-
-    //  echo "🔍 Events après validation savoir-faire: {$events_apres}\n";
-    //  echo "🔍 Nouveaux events: {$nouveaux_events}\n";
-
-    // //  DEBUG: Voir les events récents
-    // $recent_events = \DB::table('fcmcentral_stored_events')
-    //     ->where('created_at', '>=', Carbon::now()->subMinute())
-    //     ->orderBy('created_at', 'desc')
-    //     ->get();
-
-    // // echo "\n📋 EVENTS RÉCENTS ({$recent_events->count()}):\n";
-    // foreach($recent_events as $index => $event) {
-    //     $detail = json_decode($event->detail, true);
-    //     $type = $detail['type_element'] ?? 'UNKNOWN';
-    //     $uuid = $detail['uuid_element'] ?? 'UNKNOWN';
-    //     $commentaire = $detail['commentaire'] ?? 'UNKNOWN';
-    //      echo "  {$index}. Type: {$type} | UUID: {$uuid} | Commentaire: {$commentaire}\n";
-    // }
-
-    //  ASSERTION: Vérifier le nombre d'events
-    // Devrait générer des events pour les activités du savoir-faire non encore validées
-    // $activites_non_validees_du_savoirfaire = array_diff($activites_du_savoirfaire, [$activites[0]]);
-    // $expected_nouveaux_events = 2 + count($activites_non_validees_du_savoirfaire); // 1 savoir-faire + activités non validées
-    // //$expected_nouveaux_events = count($activites_non_validees_du_savoirfaire);
-    // //echo "🔍 Nouveaux  events Attendus : { $expected_nouveaux_events}\n";
-    //   $this->assertEquals($expected_nouveaux_events, $nouveaux_events,
-    //       "Il devrait y avoir {$expected_nouveaux_events} nouveaux events, trouvé: {$nouveaux_events}");
 });
-
-

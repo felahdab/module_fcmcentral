@@ -13,54 +13,28 @@ use Filament\Tables\Columns\TextColumn;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages;
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 class CohorteResource extends Resource
 {
     
     use FcmAccessControl;
+    use FilamentPermissionTrait;
     
     protected static ?string $model = Cohorte::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'Gestion Cohortes';
+    
 
 
-
-     /// DROITS ACCES ///
-
-    public static function canAccess(array $parameters = []): bool
-    {
-        // Seuls les admins peuvent accéder à cette resource
-        return static::canAccessAdminMenus();
-    }
-
-    public static function canViewAny(): bool
-    {
-        return static::canGestionCohorte();
-    }
-
-    public static function canCreate(): bool
-    {
-        return static::canGestionCohorte();
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canGestionCohorte();
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canGestionCohorte();
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canGestionCohorte();
-    }
-
-    ////////////////
+     // Permissions marche avec le Trait
+    protected static array $permissions = [
+        'fcmcentral::gerer_cohorte',
+        'fcmcentral::droits_admin',
+        'fcmcentral::droits_bcf',
+        'fcmcentral::droits_supadmin',
+    ];
 
     
     public static function getNavigationBadge(): ?string

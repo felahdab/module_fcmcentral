@@ -10,6 +10,7 @@ use Modules\FcmCommun\Traits\LoadsModelsDynamically;
 use Modules\FcmCommun\Enums\Constants;
 use Modules\FcmCommun\Helpers\HierarchyParentsVerifierHelper;
 use Modules\FcmCommun\Services\CalculTauxParcoursService;
+use Modules\FcmCommun\Services\ReCalculEtatParcoursService;
 
 class ValidProposElementMarinParcoursListener
 {
@@ -20,15 +21,12 @@ class ValidProposElementMarinParcoursListener
     public $hierarchyMap;
 
     /**
-     * Gère l'événement.
-     *
-     * @param UserGeneratedEvent $event
-     * @return void
+     * Gère l'événement de validation de propositions.
      */
     public function handle(UserGeneratedEvent $event): void
     {
         // Vérifier si l'événement est du bon type
-        if (!$event->isOfType(EventTypeManager::VALID_PROPOS_ELMT_MARIN_PARCOURS)) {
+        if (!$event->isOfType(UserGeneratedEventTypes::VALID_PROPOS_ELMT_MARIN_PARCOURS)) {
             return;
         }
 
@@ -44,6 +42,10 @@ class ValidProposElementMarinParcoursListener
         foreach ($record->parcoursSerialises as $parcours) {
             // Décoder le JSON du champ parcoursmarin
             $parcoursMarin = json_decode($parcours->pivot->parcoursmarin, true);
+
+            Log::info("=== VALIDATION DE PROPOSITIONS ===");
+            Log::info("Marin: {$record->marin->nom}");
+            Log::info("Items à valider:", $this->selectedItems['aValiderPropos'] ?? []);
 
             // 1. Valider les propositions
             foreach ($this->selectedItems['aValiderPropos'] as $type => $items) {
@@ -62,15 +64,20 @@ class ValidProposElementMarinParcoursListener
                 $this->applyParentValidationToParcours($parcoursMarin, $updatedSelectedItems, $displayName);
             }
 
+            // ✅ RECALCULER LES ÉTATS DE VALIDATION HIÉRARCHIQUES
+            ReCalculEtatParcoursService::recalculerEtats($parcoursMarin);
+
             // Recalcul des taux
             $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
-            $parcours->pivot->taux_global= $parcoursMarin['taux_global'];
-            $parcours->pivot->taux_stage= $parcoursMarin['taux_stage'];
-            $parcours->pivot->taux_activite= $parcoursMarin['taux_activite'];
+            $parcours->pivot->taux_global = $parcoursMarin['taux_global'];
+            $parcours->pivot->taux_stage = $parcoursMarin['taux_stage'];
+            $parcours->pivot->taux_activite = $parcoursMarin['taux_activite'];
 
             // Sauvegarder les données
             $parcours->pivot->parcoursmarin = json_encode($parcoursMarin);
             $parcours->pivot->save();
+
+            Log::info("✅ Parcours sauvegardé avec succès");
         }
 
         $notification = Constants::getMess(Constants::VALID_PROPOS_ELMT_MARIN_PARCOURS, $record->marin->nom);
@@ -84,52 +91,38 @@ class ValidProposElementMarinParcoursListener
     }
 
     /**
-     * Valider les propositions dans le parcours
+     * ✅ VALIDER LES PROPOSITIONS DANS LE PARCOURS (nouvelle structure)
      */
     protected function validPropositions(&$parcoursMarin, $type, $items, $displayName)
     {
-        foreach ($parcoursMarin['fonctions'] as &$fonction) {
-            // --- TRAITEMENT DIRECT DES FONCTIONS ---
-            if ($type === 'fonctions' && array_key_exists($fonction['id'], $items)) {
-                $this->validateElement($fonction, $items[$fonction['id']], $displayName);
+        Log::info("Validation propositions type: {$type}");
+        
+        foreach ($parcoursMarin['annees'] as &$annee) {
+            // --- TRAITEMENT DIRECT DES ANNÉES ---
+            if ($type === 'annees' && array_key_exists($annee['id'], $items)) {
+                $this->validateElement($annee, $items[$annee['id']], $displayName);
+                Log::info("✅ Année validée: {$annee['uuid']}");
             }
 
-            // --- TRAITEMENT DES AUTRES TYPES ---
-            if (isset($fonction[$type])) {
-                foreach ($fonction[$type] as &$element) {
-                    if (array_key_exists($element['id'], $items)) {
-                        $this->validateElement($element, $items[$element['id']], $displayName);
+            // --- TRAITEMENT DES SAVOIR-FAIRES ---
+            if (isset($annee['savoirfaires'])) {
+                foreach ($annee['savoirfaires'] as &$savoirFaire) {
+                    // ✅ Utiliser l'ID du pivot pour identifier le savoir-faire
+                    $pivotId = $savoirFaire['pivot']['id'] ?? null;
+                    
+                    if ($type === 'savoirfaires' && $pivotId && array_key_exists($pivotId, $items)) {
+                        $this->validateElement($savoirFaire, $items[$pivotId], $displayName);
+                        Log::info("✅ Savoir-faire validé: {$savoirFaire['uuid']} (pivot: {$pivotId})");
                     }
-                }
-            }
 
-            // --- SOUS-NIVEAUX ---
-            if (isset($fonction['competences'])) {
-                foreach ($fonction['competences'] as &$competence) {
-                    if ($type === 'competences' && array_key_exists($competence['id'], $items)) {
-                        $this->validateElement($competence, $items[$competence['id']], $displayName);
-                    }
-                    
-                    if (isset($competence[$type])) {
-                        foreach ($competence[$type] as &$element) {
-                            if (array_key_exists($element['id'], $items)) {
-                                $this->validateElement($element, $items[$element['id']], $displayName);
-                            }
-                        }
-                    }
-                    
-                    if (isset($competence['savoirfaires'])) {
-                        foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                            if ($type === 'savoirfaires' && array_key_exists($savoirFaire['id'], $items)) {
-                                $this->validateElement($savoirFaire, $items[$savoirFaire['id']], $displayName);
-                            }
-                            
-                            if (isset($savoirFaire[$type])) {
-                                foreach ($savoirFaire[$type] as &$element) {
-                                    if (array_key_exists($element['id'], $items)) {
-                                        $this->validateElement($element, $items[$element['id']], $displayName);
-                                    }
-                                }
+                    // --- TRAITEMENT DES OBJECTIFS ---
+                    if (isset($savoirFaire['objectifs']) && is_array($savoirFaire['objectifs'])) {
+                        foreach ($savoirFaire['objectifs'] as &$objectif) {
+                            if ($type === 'objectifs' && array_key_exists($objectif['id'], $items)) {
+                                $this->validateElement($objectif, $items[$objectif['id']], $displayName);
+                                
+                                $objUuid = $objectif['uuid'] ?? "obj_{$pivotId}_{$objectif['id']}";
+                                Log::info("✅ Objectif validé: {$objUuid}");
                             }
                         }
                     }
@@ -139,7 +132,7 @@ class ValidProposElementMarinParcoursListener
     }
 
     /**
-     * Valider un élément (proposition acceptée)
+     * ✅ VALIDER UN ÉLÉMENT (proposition acceptée)
      */
     protected function validateElement(&$element, $itemData, $displayName)
     {
@@ -152,10 +145,12 @@ class ValidProposElementMarinParcoursListener
         $element['commentaire_proposition'] = null;
         $element['date_proposition'] = null;
         $element['etat_propos'] = null;
+        
+        Log::info("Élément validé avec succès");
     }
 
     /**
-     * Construire selectedItems à partir du parcours actuel
+     * ✅ CONSTRUIRE selectedItems À PARTIR DU PARCOURS ACTUEL (nouvelle structure)
      */
     protected function buildSelectedItemsFromParcours($parcoursMarin): array
     {
@@ -165,48 +160,40 @@ class ValidProposElementMarinParcoursListener
             'sauve' => []
         ];
         
-        foreach ($parcoursMarin['fonctions'] as $fonction) {
-            if ($fonction['etat_valid']) {
-                $selectedItems['gestion']['fonctions'][$fonction['id']] = true;
+        foreach ($parcoursMarin['annees'] as $annee) {
+            // ✅ TRAITEMENT DES ANNÉES
+            if ($annee['etat_valid']) {
+                $selectedItems['gestion']['annees'][$annee['id']] = true;
                 
                 // Ajouter dans sauve si pas dans init
-                if (!isset($selectedItems['init']['fonctions'][$fonction['id']])) {
-                    $selectedItems['sauve']['fonctions'][$fonction['id']] = true;
+                if (!isset($selectedItems['init']['annees'][$annee['id']])) {
+                    $selectedItems['sauve']['annees'][$annee['id']] = true;
                 }
             }
             
-            if (isset($fonction['competences'])) {
-                foreach ($fonction['competences'] as $competence) {
-                    if ($competence['etat_valid']) {
-                        $selectedItems['gestion']['competences'][$competence['id']] = true;
+            // ✅ TRAITEMENT DES SAVOIR-FAIRES
+            if (isset($annee['savoirfaires'])) {
+                foreach ($annee['savoirfaires'] as $savoirfaire) {
+                    $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                    
+                    if ($pivotId && $savoirfaire['etat_valid']) {
+                        $selectedItems['gestion']['savoirfaires'][$pivotId] = true;
                         
                         // Ajouter dans sauve si pas dans init
-                        if (!isset($selectedItems['init']['competences'][$competence['id']])) {
-                            $selectedItems['sauve']['competences'][$competence['id']] = true;
+                        if (!isset($selectedItems['init']['savoirfaires'][$pivotId])) {
+                            $selectedItems['sauve']['savoirfaires'][$pivotId] = true;
                         }
                     }
                     
-                    if (isset($competence['savoirfaires'])) {
-                        foreach ($competence['savoirfaires'] as $savoirfaire) {
-                            if ($savoirfaire['etat_valid']) {
-                                $selectedItems['gestion']['savoirfaires'][$savoirfaire['id']] = true;
+                    // ✅ TRAITEMENT DES OBJECTIFS
+                    if (isset($savoirfaire['objectifs']) && is_array($savoirfaire['objectifs'])) {
+                        foreach ($savoirfaire['objectifs'] as $objectif) {
+                            if ($objectif['etat_valid']) {
+                                $selectedItems['gestion']['objectifs'][$objectif['id']] = true;
                                 
                                 // Ajouter dans sauve si pas dans init
-                                if (!isset($selectedItems['init']['savoirfaires'][$savoirfaire['id']])) {
-                                    $selectedItems['sauve']['savoirfaires'][$savoirfaire['id']] = true;
-                                }
-                            }
-                            
-                            if (isset($savoirfaire['activites'])) {
-                                foreach ($savoirfaire['activites'] as $activite) {
-                                    if ($activite['etat_valid']) {
-                                        $selectedItems['gestion']['activites'][$activite['id']] = true;
-                                        
-                                        // Ajouter dans sauve si pas dans init
-                                        if (!isset($selectedItems['init']['activites'][$activite['id']])) {
-                                            $selectedItems['sauve']['activites'][$activite['id']] = true;
-                                        }
-                                    }
+                                if (!isset($selectedItems['init']['objectifs'][$objectif['id']])) {
+                                    $selectedItems['sauve']['objectifs'][$objectif['id']] = true;
                                 }
                             }
                         }
@@ -219,54 +206,44 @@ class ValidProposElementMarinParcoursListener
     }
 
     /**
-     * Appliquer la validation des parents dans le parcours
+     * ✅ APPLIQUER LA VALIDATION DES PARENTS DANS LE PARCOURS (nouvelle structure)
      */
     protected function applyParentValidationToParcours(&$parcoursMarin, $updatedSelectedItems, $displayName)
     {
-        foreach ($parcoursMarin['fonctions'] as &$fonction) {
-            // Vérifier si la fonction doit être validée
-            if (isset($updatedSelectedItems['gestion']['fonctions'][$fonction['id']]) && !$fonction['etat_valid']) {
-                $fonction['etat_valid'] = true;
-                $fonction['commentaire'] = $this->comment ?: 'Validation automatique suite à validation des enfants';
-                $fonction['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
-                $fonction['valideur'] = $displayName;
+        foreach ($parcoursMarin['annees'] as &$annee) {
+            // ✅ Vérifier si l'année doit être validée
+            if (isset($updatedSelectedItems['gestion']['annees'][$annee['id']]) && !$annee['etat_valid']) {
+                $annee['etat_valid'] = true;
+                $annee['commentaire'] = $this->comment ?: 'Validation automatique suite à validation des enfants';
+                $annee['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
+                $annee['valideur'] = $displayName;
                 
                 // Nettoyer les données de proposition si elles existent
-                $fonction['commentaire_proposition'] = null;
-                $fonction['date_proposition'] = null;
-                $fonction['etat_propos'] = null;
+                $annee['commentaire_proposition'] = null;
+                $annee['date_proposition'] = null;
+                $annee['etat_propos'] = null;
+                
+                Log::info("✅ Année auto-validée: {$annee['uuid']}");
             }
             
-            if (isset($fonction['competences'])) {
-                foreach ($fonction['competences'] as &$competence) {
-                    // Vérifier si la compétence doit être validée
-                    if (isset($updatedSelectedItems['gestion']['competences'][$competence['id']]) && !$competence['etat_valid']) {
-                        $competence['etat_valid'] = true;
-                        $competence['commentaire'] = $this->comment ?: 'Validation automatique suite à validation des enfants';
-                        $competence['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
-                        $competence['valideur'] = $displayName;
+            // ✅ TRAITEMENT DES SAVOIR-FAIRES
+            if (isset($annee['savoirfaires'])) {
+                foreach ($annee['savoirfaires'] as &$savoirfaire) {
+                    $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                    
+                    // Vérifier si le savoir-faire doit être validé
+                    if ($pivotId && isset($updatedSelectedItems['gestion']['savoirfaires'][$pivotId]) && !$savoirfaire['etat_valid']) {
+                        $savoirfaire['etat_valid'] = true;
+                        $savoirfaire['commentaire'] = $this->comment ?: 'Validation automatique suite à validation des enfants';
+                        $savoirfaire['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
+                        $savoirfaire['valideur'] = $displayName;
                         
                         // Nettoyer les données de proposition
-                        $competence['commentaire_proposition'] = null;
-                        $competence['date_proposition'] = null;
-                        $competence['etat_propos'] = null;
-                    }
-                    
-                    if (isset($competence['savoirfaires'])) {
-                        foreach ($competence['savoirfaires'] as &$savoirfaire) {
-                            // Vérifier si le savoir-faire doit être validé
-                            if (isset($updatedSelectedItems['gestion']['savoirfaires'][$savoirfaire['id']]) && !$savoirfaire['etat_valid']) {
-                                $savoirfaire['etat_valid'] = true;
-                                $savoirfaire['commentaire'] = $this->comment ?: 'Validation automatique suite à validation des enfants';
-                                $savoirfaire['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
-                                $savoirfaire['valideur'] = $displayName;
-                                
-                                // Nettoyer les données de proposition
-                                $savoirfaire['commentaire_proposition'] = null;
-                                $savoirfaire['date_proposition'] = null;
-                                $savoirfaire['etat_propos'] = null;
-                            }
-                        }
+                        $savoirfaire['commentaire_proposition'] = null;
+                        $savoirfaire['date_proposition'] = null;
+                        $savoirfaire['etat_propos'] = null;
+                        
+                        Log::info("✅ Savoir-faire auto-validé: {$savoirfaire['uuid']} (pivot: {$pivotId})");
                     }
                 }
             }

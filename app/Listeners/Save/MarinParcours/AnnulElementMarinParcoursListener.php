@@ -1,171 +1,206 @@
 <?php
- 
+
 namespace Modules\FcmCentral\Listeners\Save\MarinParcours;
- 
+
 use Filament\Notifications\Notification;
 use App\Models\User;
 use Modules\FcmCommun\Enums\Constants;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\Services\CalculTauxParcoursService;
-use Modules\FcmCommun\Services\ReCalculEtatParcoursService; 
+use Modules\FcmCommun\Services\ReCalculEtatParcoursService;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
 use Illuminate\Support\Facades\Log;
- 
+
 class AnnulElementMarinParcoursListener
 {
     public $comment;
-    public $selectedItems;
- 
+
     /**
      * Gère l'événement d'annulation.
-     *
-     * @param UserGeneratedEvent $event
-     * @return void
      */
     public function handle(UserGeneratedEvent $event): void
     {
-        // Vérifier si l'événement est du bon type
         if (!$event->isOfType(UserGeneratedEventTypes::ANNUL_ELMT_MARIN_PARCOURS)) {
             return;
         }
- 
-        // Récupérer le marin et les données
+
         $marin = Marin::where('uuid', $event->object_uuid)->first();
-        
+       
         if (!$marin) {
             Log::error('Marin non trouvé avec UUID: ' . $event->object_uuid);
             return;
         }
- 
+
         $data = $event->detail;
- 
-        // array:4 [▼ // vendor/spatie/laravel-ignition/src/helpers.php:14
-        // "type_element" => "activite"
-        // "uuid_element" => "eb48b9df-c466-37a5-a6b4-3251761f371f"
-        // "date" => Carbon\Carbon @1753288270 {#2989 ▶}
-        // "commentaire" => "dfg"
-        // ]
-        
-        $this->comment = ''; // Pour une dévalidation d'élément, on remet simplement le commentaire de l'élément à vide.
-        
+        $this->comment = ''; // Pour une dévalidation, on remet le commentaire à vide
+
         $valideur = User::where('uuid', $event->user_uuid)->first();
-        $valideurName = $valideur ? 
-            ($valideur->display_name ?? $valideur->nom . ' ' . $valideur->prenom) : 
+        $valideurName = $valideur ?
+            ($valideur->display_name ?? $valideur->nom . ' ' . $valideur->prenom) :
             'ANNULEUR INCONNU';
- 
+
         $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours;
-        
+       
         if (!$donnees_du_parcours) {
             Log::error('Données du parcours non trouvées pour le marin: ' . $marin->uuid);
             return;
         }
- 
+
         $parcoursMarin = $donnees_du_parcours->parcoursmarin;
-        
+       
         if (!$parcoursMarin) {
             Log::error('Parcours marin non trouvé ou vide pour le marin: ' . $marin->uuid);
             return;
         }
- 
-        $this->updateParcoursMarinItems(
-            $parcoursMarin, 
-            $data['type_element'], 
-            $data['uuid_element'],
-            $valideurName
-        );
- 
+
+        // ✅ GESTION SPÉCIALE POUR LES SAVOIR-FAIRES AVEC ANNULATION EN CASCADE
+        if ($data['type_element'] === 'savoirfaire') {
+            $this->annulSavoirfaireParcoursMarinItems(
+                $parcoursMarin,
+                $data['uuid_element'],
+                $valideurName
+            );
+        } else {
+            // ✅ GESTION CLASSIQUE POUR LES AUTRES ÉLÉMENTS
+            $this->updateParcoursMarinItems(
+                $parcoursMarin,
+                $data['type_element'],
+                $data['uuid_element'],
+                $valideurName
+            );
+        }
+
         // RECALCULER LES ÉTATS DE VALIDATION HIÉRARCHIQUES
         ReCalculEtatParcoursService::recalculerEtats($parcoursMarin);
- 
+
         // Recalcul des taux
         $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
         $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
         $donnees_du_parcours->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
         $donnees_du_parcours->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
- 
+
         // Sauvegarder les données
         $donnees_du_parcours->parcoursmarin = $parcoursMarin;
         $donnees_du_parcours->save();
- 
+
         // Notification de succès
         $notification = UserGeneratedEventNotifications::getMess(
             UserGeneratedEventNotifications::ANNUL_ELMT_MARIN_PARCOURS,
             $marin->nom
         );
- 
+
         Notification::make()
             ->title($notification['title'])
             ->warning() // ✅ WARNING au lieu de SUCCESS pour l'annulation
             ->body($notification['message'])
             ->send();
     }
- 
+
     /**
-     * MÉTHODE POUR NETTOYER LES COMMENTAIRES
+     * ✅ MÉTHODE POUR ANNULER SAVOIR-FAIRE ET SES OBJECTIFS EN CASCADE
      */
-    protected function sanitizeComment(string $comment): string
+    protected function annulSavoirfaireParcoursMarinItems(&$parcoursMarin, $savoirfaire_uuid, $displayName)
     {
-        if (empty($comment)) {
-            return '';
+        $objectifs_annules = 0;
+        $found = false;
+
+        Log::info("=== ANNULATION SAVOIR-FAIRE ===");
+        Log::info("Recherche du savoir-faire UUID: {$savoirfaire_uuid}");
+
+        foreach ($parcoursMarin['annees'] as &$annee) {
+            if (!isset($annee['savoirfaires'])) {
+                continue;
+            }
+
+            foreach ($annee['savoirfaires'] as &$savoirFaire) {
+                // ✅ CONSTRUIRE L'UUID COMPOSITE COMME DANS L'INTERFACE
+                $pivotUuid = $savoirFaire['uuid'] . '_' . ($savoirFaire['pivot']['uuid'] ?? $savoirFaire['pivot']['id'] ?? '');
+               
+                Log::info("Comparaison: interface='{$savoirfaire_uuid}' vs parcours='{$pivotUuid}'");
+               
+                if ($savoirFaire['uuid'] === $savoirfaire_uuid || $pivotUuid === $savoirfaire_uuid) {
+                    $found = true;
+                   
+                    Log::info("✅ SAVOIR-FAIRE TROUVÉ POUR ANNULATION!");
+
+                    // ✅ ANNULER LE SAVOIR-FAIRE
+                    $this->annulElement($savoirFaire, $displayName);
+                    Log::info("✅ Savoir-faire annulé: {$savoirFaire['uuid']}");
+
+                    // ✅ ANNULER TOUS SES OBJECTIFS VALIDÉS
+                    if (isset($savoirFaire['objectifs']) && is_array($savoirFaire['objectifs'])) {
+                        Log::info("Annulation automatique de " . count($savoirFaire['objectifs']) . " objectifs");
+                       
+                        foreach ($savoirFaire['objectifs'] as &$objectif) {
+                            // Seulement si validé
+                            if (isset($objectif['etat_valid']) && $objectif['etat_valid']) {
+                                $this->annulElement($objectif, $displayName);
+                                $objectifs_annules++;
+                               
+                                $objUuid = $objectif['uuid'] ?? "obj_{$savoirFaire['pivot']['id']}_{$objectif['id']}";
+                                Log::info("  ✅ Objectif auto-annulé: {$objUuid}");
+                            }
+                        }
+                    }
+
+                    Log::info("✅ RÉSULTAT: Savoir-faire {$savoirfaire_uuid} annulé avec {$objectifs_annules} objectifs auto-annulés");
+                    return;
+                }
+            }
         }
-        
-        $comment = strip_tags($comment);
-        $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
-        $comment = preg_replace('/\s+/', ' ', $comment);
-        $comment = addslashes(trim($comment));
- 
-        return $comment;
+
+        if (!$found) {
+            Log::error("❌ SAVOIR-FAIRE NON TROUVÉ POUR ANNULATION: {$savoirfaire_uuid}");
+        }
     }
- 
+
     /**
-     * METTRE À JOUR LES ÉLÉMENTS POUR ANNULATION
+     * ✅ METTRE À JOUR LES ÉLÉMENTS POUR ANNULATION (nouvelle structure)
      */
     protected function updateParcoursMarinItems(&$parcoursMarin, $type_element, $uuid_element, $displayName)
-    { 
-        logger()->info("On doit annuler : {$type_element} / {$uuid_element}");
-        foreach ($parcoursMarin['fonctions'] as &$fonction) {
-            logger()->info("Mise a jour de fonction: {$fonction["uuid"]}");
-            // --- TRAITEMENT DIRECT DES FONCTIONS ---
-            if ($type_element === 'fonction' && $fonction['uuid'] == $uuid_element) {
-                $this->annulElement($fonction, $displayName);
-                Log::info("Fonction annulée: {$fonction['uuid']}");
-            }
- 
-            // --- TRAITEMENT DES COMPÉTENCES ---
-            if (isset($fonction['competences'])) {
-                foreach ($fonction['competences'] as &$competence) {
-                    logger()->info("Mise a jour de competence: {$competence["uuid"]}");
-                    if ($type_element === 'competence' && $competence['uuid'] == $uuid_element) {
-                        $this->annulElement($competence, $displayName);
-                        Log::info("Compétence annulée: {$competence['uuid']}");
-                    }
- 
-                    // --- TRAITEMENT DES SAVOIR-FAIRES ---
-                    if (isset($competence['savoirfaires'])) {
-                        foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                            logger()->info("Mise a jour de savoir-faire: {$savoirFaire["uuid"]}");
-                            if ($type_element === 'savoirfaire' && $savoirFaire['uuid'] == $uuid_element) {
-                                $this->annulElement($savoirFaire, $displayName);
-                                Log::info("Savoir-faire annulé: {$savoirFaire['uuid']}");
-                            }
- 
-                            // --- TRAITEMENT DES ACTIVITÉS ---
-                            if (isset($savoirFaire['activites'])) {
-                                foreach ($savoirFaire['activites'] as &$activite) {
-                                    logger()->info("Mise a jour de activite: {$activite["uuid"]}");
-                                    if ($type_element === 'activite' && $activite['uuid'] == $uuid_element) {
-                                        $this->annulElement($activite, $displayName);
-                                        Log::info("Activité annulée: {$activite['uuid']}");
-                                    }
+    {
+        Log::info("=== ANNULATION INDIVIDUELLE ===");
+        Log::info("Type: {$type_element} / UUID: {$uuid_element}");
+        $found = false;
 
-                                    if ($type_element === 'savoirfaire' && $savoirFaire['uuid'] == $uuid_element) {
-                                        // On désactive toutes les activités du savoir faire
-                                        $this->annulElement($activite, $displayName);
-                                        Log::info("Activité annulée car faisant partie du savoir-faire désactivé: {$activite['uuid']}");
-                                    }
+        foreach ($parcoursMarin['annees'] as &$annee) {
+            // --- TRAITEMENT DIRECT DES ANNÉES ---
+            if ($type_element === 'annee' && $annee['uuid'] == $uuid_element) {
+                $this->annulElement($annee, $displayName);
+                Log::info("✅ Année annulée: {$annee['uuid']}");
+                $found = true;
+                return;
+            }
+
+            // --- TRAITEMENT DES SAVOIR-FAIRES ---
+            if (isset($annee['savoirfaires'])) {
+                foreach ($annee['savoirfaires'] as &$savoirFaire) {
+                    if ($type_element === 'savoirfaire') {
+                        $pivotUuid = $savoirFaire['uuid'] . '_' . ($savoirFaire['pivot']['uuid'] ?? $savoirFaire['pivot']['id'] ?? '');
+                       
+                        if ($savoirFaire['uuid'] == $uuid_element || $pivotUuid == $uuid_element) {
+                            $this->annulElement($savoirFaire, $displayName);
+                            Log::info("✅ Savoir-faire annulé: {$savoirFaire['uuid']}");
+                            $found = true;
+                            return;
+                        }
+                    }
+
+                    // --- TRAITEMENT DES OBJECTIFS ---
+                    if (isset($savoirFaire['objectifs']) && is_array($savoirFaire['objectifs'])) {
+                        foreach ($savoirFaire['objectifs'] as &$objectif) {
+                            if ($type_element === 'objectif') {
+                                $objUuidComposite = "obj_{$savoirFaire['pivot']['id']}_{$objectif['id']}";
+                                $objUuidSimple = $objectif['uuid'] ?? '';
+                               
+                                if ($objUuidSimple == $uuid_element || $objUuidComposite == $uuid_element) {
+                                    $this->annulElement($objectif, $displayName);
+                                    Log::info("✅ Objectif annulé: {$objUuidSimple} / {$objUuidComposite}");
+                                    $found = true;
+                                    return;
                                 }
                             }
                         }
@@ -173,10 +208,14 @@ class AnnulElementMarinParcoursListener
                 }
             }
         }
+
+        if (!$found) {
+            Log::error("❌ ÉLÉMENT NON TROUVÉ POUR ANNULATION: {$type_element} / {$uuid_element}");
+        }
     }
- 
+
     /**
-     * MÉTHODE HELPER POUR ANNULER UN ÉLÉMENT
+     * ✅ MÉTHODE HELPER POUR ANNULER UN ÉLÉMENT
      */
     protected function annulElement(&$element, $displayName)
     {
@@ -185,5 +224,7 @@ class AnnulElementMarinParcoursListener
         $element['commentaire'] = $this->comment;
         $element['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
         $element['valideur'] = $displayName;
+       
+        Log::info("Élément annulé avec succès");
     }
 }

@@ -11,64 +11,37 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\RelationManagers\SavoirfairesRelationManager;
+use Modules\FcmCentral\Helpers\OutilsHelper;
 
 class CompetenceResource extends Resource
 {
     use FcmAccessControl;
+    use FilamentPermissionTrait;
     
     protected static ?string $model = Competence::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 13;
-
-    protected static ?string $navigationGroup = 'Parcours';
-    protected static ?string $navigationLabel = 'Compétences';
 
 
 
-    /// DROITS ACCES ///
-
-    public static function canAccess(array $parameters = []): bool
-    {
-        // Seuls les admins peuvent accéder à cette resource
-        return static::canGestionParcours();
-    }
-
-    public static function canViewAny(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canCreate(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    ///////////////////
+    // Permissions marche avec le Trait
+    protected static array $permissions = [
+        'fcmcentral::gerer_parcours',
+        'fcmcentral::droits_admin',
+        'fcmcentral::droits_bcf',
+        'fcmcentral::droits_supadmin',
+    ];
 
 
 
@@ -84,45 +57,60 @@ class CompetenceResource extends Resource
                     ->required()
                     ->label('Libellé long')
                     ->maxLength(1500),
-                TextInput::make('url')
-                    ->label('URL')
-                    ->maxLength(1000), 
+                Select::make('parcours_type_id')
+                    ->relationship(name: 'parcoursType', titleAttribute: 'libelle_court')
+                    ->label('Type de Parcours'),    
+                Select::make('color')
+                    ->options(OutilsHelper::selectColors())
+                    ->label('Couleur du Badge'),        
+               
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('libelle_court','asc')    
+            ->defaultSort('ordre','asc')  
+            ->reorderable('ordre') 
+            ->defaultPaginationPageOption(25) 
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('code')
+                    ->label('Code')
+                    ->sortable()
+                    ->badge()
+                    ->color(fn($record)=>$record->color ?? 'info')
+                    ->searchable(),       
                 TextColumn::make('libelle_court')
                     ->label('Libellé court')
+                    ->limit(50)
                     ->sortable()
-                    ->searchable(),   
-                TextColumn::make('libelle_long')
-                    ->label('Libellé long') 
                     ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('url')
+                    ->description(fn ($record) => substr($record->libelle_long,0,40).'...')
+                    ,   
+               
+                    TextColumn::make('savoirfaires.code')
+                    ->label('Savoir Faire')
+                    ->badge()
+                    ->color(fn($record)=>$record->savoirfaires->first()->color ?? $record->color ?? 'info'),    
+                TextColumn::make('parcoursType.libelle_court')
+                    ->label('Type Parcours')
                     ->searchable()
-                    ->formatStateUsing(function ($state) {
-                        return strlen($state) > 20 ? substr($state, 0, 20) . '...' : $state;
-                    })
-                    ->tooltip(fn ($state) => $state)                
-                    ->label('URL'),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
+                TextColumn::make('ordre')
+                
+                   ,    
+                // TextColumn::make('created_at')
+                //     ->date()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('updated_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -146,16 +134,21 @@ class CompetenceResource extends Resource
 
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
+    }
+
+    public static function getEloquentQuery() : Builder
+    {
+        return parent::getEloquentQuery()->withCount('savoirfaires');
     }
 
     public static function getRelations(): array
     {
         return [
-            SavoirfairesRelationManager::class,
+            //SavoirfairesRelationManager::class,
         ];
     }
 

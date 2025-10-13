@@ -15,9 +15,11 @@ class Domaine extends Model
 	use HasTablePrefix;
 
 	protected $fillable = [
-		'id',
+		'code',
 		'libelle_court', 
 		'libelle_long', 
+		'ordre',
+		'color',
 	];
 	
 
@@ -26,7 +28,7 @@ class Domaine extends Model
      */
     public function savoirfaires()
     {
-        return $this->hasMany(Savoirfaire::class);
+        return $this->hasMany(Savoirfaire::class, 'domaine_id');
     }
 
 	

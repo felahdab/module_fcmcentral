@@ -17,18 +17,29 @@ class DeasmMasterSeeder extends Seeder
     public function run()
     {
         $this->command->info('🚀 Import du parcours Deasm...');
-        $this->command->info('📋 Parcours ID: 104');
+       
+
         
         $this->call([
-            DeasmParcoursSeeder::class,
-            DeasmFonctionsSeeder::class,
-            DeasmFonctionParcoursSeeder::class,
+
+            // Details
+            DeasmSavoirfaireTypesSeeder::class,
+            DeasmDomainesSeeder::class,
+            DeasmParcoursTypesSeeder::class,
+
+
+            // Catalogue
             DeasmCompetencesSeeder::class,
-            DeasmCompetenceFonctionSeeder::class,
-            DeasmSavoirfaireSeeder::class,
-            DeasmCompetenceSavoirfaireSeeder::class,
-           // DeasmActivitesSeeder::class,
-           // DeasmActiviteSavoirfaireSeeder::class,
+            DeasmSavoirfairesSeeder::class,
+            //DeasmCompetenceSavoirfaireSeeder::class,
+            
+            // Parcours
+            DeasmParcoursSeeder::class,
+            DeasmAnneesSeeder::class,
+            DeasmAnneeParcoursSeeder::class,
+            DeasmAnneeSavoirfairesSeeder::class,
+            DeasmObjectifsSeeder::class,
+           
         ]);
         
         $this->command->info('✅ Parcours Deasm importé avec succès !');

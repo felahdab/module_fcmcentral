@@ -37,14 +37,16 @@ use App\Filament\Pages\UserPreferences;
 use Filament\Support\Assets\Theme;
 use Modules\FcmCentral\Traits\FcmAccessControl;
 
+
+
 // Import des Resources
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\FonctionResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\AnneeResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource;
 
@@ -82,6 +84,9 @@ class FcmcentralPanelProvider extends PanelProvider
             ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
                 return $this->buildConditionalNavigation($builder);
             })
+
+           
+            
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -106,6 +111,8 @@ class FcmcentralPanelProvider extends PanelProvider
         return $panel;
     }
 
+
+    
     /**
      * Construction de la navigation conditionnelle avec évaluation différée
      */
@@ -184,7 +191,7 @@ class FcmcentralPanelProvider extends PanelProvider
             ,
 
         // Groupe Gestion des parcours
-        NavigationGroup::make('Gestion des parcours')
+        NavigationGroup::make('Parcours')
             
             ->items([
                 NavigationItem::make('Parcours figés')
@@ -209,16 +216,38 @@ class FcmcentralPanelProvider extends PanelProvider
                     )
                 ),   
                 
-                NavigationItem::make('Fonctions')
+                NavigationItem::make('Annees')
                     ->icon('heroicon-o-briefcase')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'fonction'))
-                    ->url(fn (): string => FonctionResource::getUrl('index'))
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'annee'))
+                    ->url(fn (): string => AnneeResource::getUrl('index'))
                     ->visible(fn (): bool => 
                     self::canAccess('attribuer_cohorte') &&
                     ( self::canAccess('droits_admin') 
                     // || self::canAccess('droits_gestion')
                     )
                 ),   
+                
+                
+                NavigationItem::make('Objectifs')
+                    ->icon('heroicon-o-rectangle-stack')
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'objectif'))
+                    ->url(fn (): string => ObjectifResource::getUrl('index'))
+                    ->visible(fn (): bool => 
+                    self::canAccess('gerer_parcours') &&
+                    ( self::canAccess('droits_admin') 
+                    // || self::canAccess('droits_gestion')
+                    )
+                ),  
+                
+                
+            ])
+           
+            ,
+
+            // Groupe Gestion des parcours
+            NavigationGroup::make('Catalogue')  
+            ->items([
+
                 NavigationItem::make('Compétences')
                     ->icon('heroicon-o-star')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence'))
@@ -240,19 +269,19 @@ class FcmcentralPanelProvider extends PanelProvider
                     // || self::canAccess('droits_gestion')
                     )
                 ),   
-                
-                NavigationItem::make('Objectifs, Stages et EAD')
+
+                NavigationItem::make('Domaines')
                     ->icon('heroicon-o-rectangle-stack')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'activite'))
-                    ->url(fn (): string => ActiviteResource::getUrl('index'))
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'domaine'))
+                    ->url(fn (): string => DomaineResource::getUrl('index'))
                     ->visible(fn (): bool => 
                     self::canAccess('gerer_parcours') &&
                     ( self::canAccess('droits_admin') 
                     // || self::canAccess('droits_gestion')
                     )
-                ),  
-                
-                NavigationItem::make('Domaines')
+                ),
+
+                NavigationItem::make('Type ')
                     ->icon('heroicon-o-rectangle-stack')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'domaine'))
                     ->url(fn (): string => DomaineResource::getUrl('index'))
@@ -266,21 +295,11 @@ class FcmcentralPanelProvider extends PanelProvider
            
             ,
 
-        // Groupe Outils
-        NavigationGroup::make('Outils')
-            
-            ->items([
-                NavigationItem::make('Recherche annuaire')
-                    ->icon('heroicon-o-magnifying-glass')
-                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.recherche-annuaire-page'))
-                    ->url(fn (): string => RechercheAnnuairePage::getUrl())
-                    ->visible(fn (): bool => $this->canAccessAdminMenus()),
-            ])
-            
-            ,
+
+        
 
             // Groupe Outils
-        NavigationGroup::make('Administration ')
+        NavigationGroup::make('Gestion')
         
         ->items([
             NavigationItem::make('Configuration module')

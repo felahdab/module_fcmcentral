@@ -99,46 +99,76 @@ class MentorStatsWidget extends BaseWidget
         ];
     }
 
-    private function calculateMarinStats($parcours): array
-    {
-        $totalActivites = 0;
-        $activitesValidees = 0;
-        $enAttente = 0;
-        $validationsSemaine = 0;
+    // ✅ NOUVELLE STRUCTURE POUR LES WIDGETS MENTOR
+private function calculateProgression(Marin $marin): array
+{
+    if (!$marin->complements_fcm) {
+        return ['progress' => 0, 'total' => 0, 'completed' => 0];
+    }
 
-        foreach ($parcours['fonctions'] ?? [] as $fonction) {
-            foreach ($fonction['competences'] ?? [] as $competence) {
-                foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
-                    foreach ($savoirfaire['activites'] ?? [] as $activite) {
-                        $totalActivites++;
-                        
-                        if (($activite['etat_valid'] ?? false) === true) {
-                            $activitesValidees++;
-                            
-                            // Compter les validations de cette semaine
-                            if (!empty($activite['date_validation'])) {
-                                $dateValidation = \Carbon\Carbon::parse($activite['date_validation']);
-                                if ($dateValidation->isCurrentWeek()) {
-                                    $validationsSemaine++;
-                                }
-                            }
-                        } else {
-                            // Logique pour détecter les activités en attente
-                            if (!empty($activite['date_proposition'])) {
-                                $enAttente++;
-                            }
-                        }
+    $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
+    if (!$parcours) {
+        return ['progress' => 0, 'total' => 0, 'completed' => 0];
+    }
+
+    $totalSavoirfaires = 0;
+    $savoirfairesValides = 0;
+   
+    foreach ($parcours['annees'] ?? [] as $annee) {
+        foreach ($annee['savoirfaires'] ?? [] as $savoirfaire) {
+            $totalSavoirfaires++;
+            if (($savoirfaire['etat_valid'] ?? false) === true) {
+                $savoirfairesValides++;
+            }
+        }
+    }
+
+    $progress = $totalSavoirfaires > 0 ? round(($savoirfairesValides / $totalSavoirfaires) * 100) : 0;
+
+    return [
+        'progress' => $progress,
+        'total' => $totalSavoirfaires,
+        'completed' => $savoirfairesValides
+    ];
+}
+
+private function calculateMarinStats($parcours): array
+{
+    $totalSavoirfaires = 0;
+    $savoirfairesValides = 0;
+    $enAttente = 0;
+    $validationsSemaine = 0;
+
+    foreach ($parcours['annees'] ?? [] as $annee) {
+        foreach ($annee['savoirfaires'] ?? [] as $savoirfaire) {
+            $totalSavoirfaires++;
+           
+            if (($savoirfaire['etat_valid'] ?? false) === true) {
+                $savoirfairesValides++;
+               
+                // ✅ Compter les validations de cette semaine
+                if (!empty($savoirfaire['date_validation'])) {
+                    $dateValidation = \Carbon\Carbon::parse($savoirfaire['date_validation']);
+                    if ($dateValidation->isCurrentWeek()) {
+                        $validationsSemaine++;
                     }
+                }
+            } else {
+                // ✅ Logique pour détecter les savoir-faires en attente
+                if (!empty($savoirfaire['date_proposition'])) {
+                    $enAttente++;
                 }
             }
         }
-
-        $progression = $totalActivites > 0 ? round(($activitesValidees / $totalActivites) * 100) : 0;
-
-        return [
-            'progression' => $progression,
-            'en_attente' => $enAttente,
-            'validations_semaine' => $validationsSemaine,
-        ];
     }
+
+    $progression = $totalSavoirfaires > 0 ? round(($savoirfairesValides / $totalSavoirfaires) * 100) : 0;
+
+    return [
+        'progression' => $progression,
+        'en_attente' => $enAttente,
+        'validations_semaine' => $validationsSemaine,
+    ];
+}
+
 }

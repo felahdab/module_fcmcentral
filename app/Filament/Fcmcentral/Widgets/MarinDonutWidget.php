@@ -9,18 +9,17 @@ use Modules\FcmCentral\Traits\FcmAccessControl;
 class MarinRepartitionWidget extends ChartWidget
 {
     use FcmAccessControl;
-    
+   
     protected static ?string $heading = 'Répartition du parcours';
-    
+   
     protected int | string | array $columnSpan = [
         'sm' => 2,
         'md' => 2,
         'lg' => 2,
         'xl' => 2,
     ];
-    
+   
     protected static ?int $sort = 4;
-
 
     public static function canView():bool
     {
@@ -35,7 +34,7 @@ class MarinRepartitionWidget extends ChartWidget
     protected function getData(): array
     {
         $marin = $this->getMarin();
-        
+       
         if (!$marin || !$marin->complements_fcm) {
             return [
                 'datasets' => [],
@@ -44,7 +43,7 @@ class MarinRepartitionWidget extends ChartWidget
         }
 
         $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
-        
+       
         if (!$parcours) {
             return [
                 'datasets' => [],
@@ -59,10 +58,8 @@ class MarinRepartitionWidget extends ChartWidget
                 [
                     'label' => 'Validés',
                     'data' => [
-                        $repartitionData['fonctions']['valides'],
-                        $repartitionData['competences']['valides'],
+                        $repartitionData['annees']['valides'],
                         $repartitionData['savoirfaires']['valides'],
-                        $repartitionData['activites']['valides'],
                     ],
                     'backgroundColor' => 'rgba(34, 197, 94, 0.8)',
                     'borderColor' => 'rgb(34, 197, 94)',
@@ -71,17 +68,15 @@ class MarinRepartitionWidget extends ChartWidget
                 [
                     'label' => 'Non validés',
                     'data' => [
-                        $repartitionData['fonctions']['non_valides'],
-                        $repartitionData['competences']['non_valides'],
+                        $repartitionData['annees']['non_valides'],
                         $repartitionData['savoirfaires']['non_valides'],
-                        $repartitionData['activites']['non_valides'],
                     ],
                     'backgroundColor' => 'rgba(239, 68, 68, 0.8)',
                     'borderColor' => 'rgb(239, 68, 68)',
                     'borderWidth' => 1,
                 ],
             ],
-            'labels' => ['Fonctions', 'Compétences', 'Savoir-faires', 'Activités'],
+            'labels' => ['Années', 'Savoir-faires'],
         ];
     }
 
@@ -93,49 +88,29 @@ class MarinRepartitionWidget extends ChartWidget
     private function calculateRepartition(array $parcours): array
     {
         $stats = [
-            'fonctions' => ['valides' => 0, 'non_valides' => 0],
-            'competences' => ['valides' => 0, 'non_valides' => 0],
+            'annees' => ['valides' => 0, 'non_valides' => 0],
             'savoirfaires' => ['valides' => 0, 'non_valides' => 0],
-            'activites' => ['valides' => 0, 'non_valides' => 0],
         ];
 
-        foreach ($parcours['fonctions'] ?? [] as $fonction) {
-            // Vérifier si la fonction a au moins une compétence validée
-            $fonctionACompetenceValidee = false;
-            
-            foreach ($fonction['competences'] ?? [] as $competence) {
-                // Compétences
-                if (($competence['etat_valid'] ?? false) === true) {
-                    $stats['competences']['valides']++;
-                    $fonctionACompetenceValidee = true;
+        foreach ($parcours['annees'] ?? [] as $annee) {
+            // ✅ Vérifier si l'année a au moins un savoir-faire validé
+            $anneeASavoirFaireValide = false;
+           
+            foreach ($annee['savoirfaires'] ?? [] as $savoirfaire) {
+                // ✅ Savoir-faires
+                if (($savoirfaire['etat_valid'] ?? false) === true) {
+                    $stats['savoirfaires']['valides']++;
+                    $anneeASavoirFaireValide = true;
                 } else {
-                    $stats['competences']['non_valides']++;
-                }
-                
-                foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
-                    // Savoir-faires
-                    if (($savoirfaire['etat_valid'] ?? false) === true) {
-                        $stats['savoirfaires']['valides']++;
-                    } else {
-                        $stats['savoirfaires']['non_valides']++;
-                    }
-                    
-                    foreach ($savoirfaire['activites'] ?? [] as $activite) {
-                        // Activités
-                        if (($activite['etat_valid'] ?? false) === true) {
-                            $stats['activites']['valides']++;
-                        } else {
-                            $stats['activites']['non_valides']++;
-                        }
-                    }
+                    $stats['savoirfaires']['non_valides']++;
                 }
             }
-            
-            // Fonctions
-            if ($fonctionACompetenceValidee) {
-                $stats['fonctions']['valides']++;
+           
+            // ✅ Années
+            if ($anneeASavoirFaireValide) {
+                $stats['annees']['valides']++;
             } else {
-                $stats['fonctions']['non_valides']++;
+                $stats['annees']['non_valides']++;
             }
         }
 
@@ -159,8 +134,8 @@ class MarinRepartitionWidget extends ChartWidget
                     'bodyColor' => 'white',
                     'callbacks' => [
                         'afterLabel' => 'function(context) {
-                            const total = context.dataset.data[context.dataIndex] + 
-                                         (context.dataIndex < 4 ? 
+                            const total = context.dataset.data[context.dataIndex] +
+                                         (context.dataIndex < 2 ?
                                           context.chart.data.datasets[context.datasetIndex === 0 ? 1 : 0].data[context.dataIndex] : 0);
                             const percentage = ((context.raw / total) * 100).toFixed(1);
                             return "(" + percentage + "%)";

@@ -20,7 +20,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Modules\FcmCentral\Traits\FcmAccessControl;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\ActivitesRelationManager;
-
+use Modules\FcmCentral\Helpers\OutilsHelper;
 
 class SavoirfaireResource extends Resource
 {
@@ -88,48 +88,67 @@ class SavoirfaireResource extends Resource
                     ->required()
                     ->searchable()
                     ->options(Domaine::all()->pluck('libelle_court','id')),                    
-                TextInput::make('url')
-                    ->label('URL')
-                    ->maxLength(1000), 
+                // TextInput::make('url')
+                //     ->label('URL')
+                //     ->maxLength(1000), 
+                TextInput::make('same')
+                    ->label('same')
+                    ->maxLength(255), 
                 TextInput::make('code_sicomp')
                     ->label('Code OCTAVE')
-                    ->maxLength(255),  
+                    ->maxLength(255), 
+                Select::make('color')
+                    ->options(OutilsHelper::selectColors())
+                    ->label('Couleur du Badge'),             
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('libelle_court','asc')
+            ->defaultSort('ordre','asc')
+            ->reorderable('ordre') 
+            ->defaultPaginationPageOption(25)
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('domaine.libelle_court')
-                    ->label('Domaine'),
+                
+                    TextColumn::make('code')
+                    ->label('Code')
+                    ->sortable()
+                    ->searchable()
+                    ->badge()
+                    ->color(fn($record)=>$record->color ??  $record->competence->color ?? 'info') 
+                    ,  
+                   
                 TextColumn::make('libelle_court')
+                    ->label('Libellé court')
+                    ->limit(50)
+                    ->sortable()
+                    ->searchable()
+                    ->description(fn ($record) => substr($record->libelle_long,0,40).'...')
+                    ,   
+                    TextColumn::make('domaine.libelle_court')
+                    ->label('Domaine')
+                    ->badge()
+                    //->color('danger') 
+                    ->color(fn($record)=>$record->domaine->color ?? 'info')
+                    ,     
+                    TextColumn::make('competence.code')
+                    ->label('Competence')
+                    ->badge()
+                    ->color(fn($record)=>$record->competence->color ?? 'info')
+                    ,
+                TextColumn::make('competence.parcoursType.libelle_court')
+                    ->label('Type Parcours')
                     ->searchable()
                     ->sortable()
-                    ->label('Libellé court'),
-                TextColumn::make('libelle_long')
-                    ->searchable()
-                    ->label('Libellé long')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('url')
-                    ->formatStateUsing(function ($state) {
-                        return strlen($state) > 20 ? substr($state, 0, 20) . '...' : $state;
-                    })
-                    ->tooltip(fn ($state) => $state)                
-                    ->label('URL'),
+                    ->badge()
+                    ->color(fn($record)=>$record->competence->parcoursType->color ?? 'info')
+                    ,
+                TextColumn::make('ordre')
 
             ])
             ->filters([
@@ -156,16 +175,16 @@ class SavoirfaireResource extends Resource
                     ]),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            ActivitesRelationManager::class
+            //ActivitesRelationManager::class
         ];
     }
 

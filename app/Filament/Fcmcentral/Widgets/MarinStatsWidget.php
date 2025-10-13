@@ -17,18 +17,17 @@ class MarinStatsWidget extends BaseWidget
     {
        return static::canAccessMarinLivret();
     }
-    
-    
+
     protected function getStats(): array
     {
         $marin = Marin::fromCurrentUser();
-        
+       
         if (!$marin || !$marin->complements_fcm) {
             return [];
         }
 
         $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
-        
+       
         if (!$parcours) {
             return [];
         }
@@ -36,64 +35,61 @@ class MarinStatsWidget extends BaseWidget
         $stats = $this->calculateStats($parcours);
 
         return [
-            Stat::make('Fonctions', $stats['fonctions'])
-                ->description('Fonctions dans votre parcours')
-                ->descriptionIcon('heroicon-m-briefcase')
+            Stat::make('Années', $stats['annees'])
+                ->description('Années dans votre parcours')
+                ->descriptionIcon('heroicon-m-calendar')
                 ->color('primary'),
-                
-            Stat::make('Compétences', $stats['competences'])
-                ->description('Compétences à acquérir')
-                ->descriptionIcon('heroicon-m-academic-cap')
-                ->color('warning'),
-                
+               
             Stat::make('Savoir-faires validés', $stats['savoirfaires_valides'] . '/' . $stats['total_savoirfaires'])
                 ->description('Savoir-faires validés')
                 ->descriptionIcon('heroicon-m-cog-6-tooth')
-                ->color('info'),
-                
-            Stat::make('Activités validées', $stats['activites_validees'] . '/' . $stats['total_activites'])
-                ->description('Activités validées')
-                ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
+               
+            Stat::make('Taux global', $stats['taux_global'] . '%')
+                ->description('Progression générale')
+                ->descriptionIcon('heroicon-m-chart-pie')
+                ->color('info'),
+               
+            Stat::make('Dernière validation', $stats['derniere_validation'])
+                ->description('Date de la dernière validation')
+                ->descriptionIcon('heroicon-m-check-circle')
+                ->color('warning'),
         ];
     }
 
     private function calculateStats($parcours): array
     {
-        $fonctions = count($parcours['fonctions'] ?? []);
-        $competences = 0;
+        $annees = count($parcours['annees'] ?? []);
         $totalSavoirfaires = 0;
         $savoirfairesValides = 0;
-        $totalActivites = 0;
-        $activitesValidees = 0;
-
-        foreach ($parcours['fonctions'] ?? [] as $fonction) {
-            $competences += count($fonction['competences'] ?? []);
-            
-            foreach ($fonction['competences'] ?? [] as $competence) {
-                foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
-                    $totalSavoirfaires++;
-                    if (($savoirfaire['etat_valid'] ?? false) === true) {
-                        $savoirfairesValides++;
-                    }
-                    
-                    foreach ($savoirfaire['activites'] ?? [] as $activite) {
-                        $totalActivites++;
-                        if (($activite['etat_valid'] ?? false) === true) {
-                            $activitesValidees++;
+        $derniereValidation = null;
+       
+        foreach ($parcours['annees'] ?? [] as $annee) {
+            foreach ($annee['savoirfaires'] ?? [] as $savoirfaire) {
+                $totalSavoirfaires++;
+                if (($savoirfaire['etat_valid'] ?? false) === true) {
+                    $savoirfairesValides++;
+                   
+                    // ✅ Suivre la dernière validation
+                    if (!empty($savoirfaire['date_validation'])) {
+                        $dateValidation = \Carbon\Carbon::parse($savoirfaire['date_validation']);
+                        if (!$derniereValidation || $dateValidation->gt($derniereValidation)) {
+                            $derniereValidation = $dateValidation;
                         }
                     }
                 }
             }
         }
 
+        // ✅ Calculer le taux global sur les savoir-faires
+        $tauxGlobal = $totalSavoirfaires > 0 ? round(($savoirfairesValides / $totalSavoirfaires) * 100) : 0;
+
         return [
-            'fonctions' => $fonctions,
-            'competences' => $competences,
+            'annees' => $annees,
             'total_savoirfaires' => $totalSavoirfaires,
             'savoirfaires_valides' => $savoirfairesValides,
-            'total_activites' => $totalActivites,
-            'activites_validees' => $activitesValidees,
+            'taux_global' => $tauxGlobal,
+            'derniere_validation' => $derniereValidation ? $derniereValidation->diffForHumans() : 'Aucune',
         ];
     }
 }

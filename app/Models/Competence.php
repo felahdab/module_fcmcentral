@@ -24,10 +24,12 @@ class Competence extends Model
      */
     protected $fillable = [
         "uuid",
+        "code",
         "libelle_long",
         "libelle_court",
-        "url",
-        //"same",
+        "parcours_type_id",
+        "ordre",
+        "color",
     ];
     
     protected static function newFactory(): CompetenceFactory
@@ -35,23 +37,36 @@ class Competence extends Model
         return CompetenceFactory::new();
     }
 
-    public function fonctions(): BelongsToMany
+    public function parcoursType()
     {
-        return $this->belongsToMany(Fonction::class, 'fcmcentral_competence_fonction', 'competence_id', 'fonction_id')
-            ->withPivot('ordre', 'same')
-            ->withTimestamps();
+        return $this->belongsTo(ParcoursType::class, 'parcours_type_id');
     }
 
-    public function savoirfaires(): BelongsToMany
-    {
-        return $this->belongsToMany(Savoirfaire::class, 'fcmcentral_competence_savoirfaire', 'competence_id', 'savoirfaire_id')
-            ->withPivot('coeff', 'duree', 'ordre', 'an_acquis', 'mod_acquis')
-            ->withTimestamps();
-    }
-
-    public function savoirfairesPrincipaux()
+    public function savoirfaires()
     {
         return $this->hasMany(Savoirfaire::class, 'competence_id');
     }
+
+
+
+
+    // public function fonctions(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Fonction::class, 'fcmcentral_competence_fonction', 'competence_id', 'fonction_id')
+    //         ->withPivot('ordre', 'same')
+    //         ->withTimestamps();
+    // }
+
+    // public function savoirfaires(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Savoirfaire::class, 'fcmcentral_competence_savoirfaire', 'competence_id', 'savoirfaire_id')
+    //         ->withPivot('coeff', 'duree', 'ordre', 'an_acquis', 'mod_acquis')
+    //         ->withTimestamps();
+    // }
+
+    // public function savoirfairesPrincipaux()
+    // {
+    //     return $this->hasMany(Savoirfaire::class, 'competence_id');
+    // }
 
 }

@@ -21,8 +21,12 @@ class Parcours extends Model
      */
     protected $fillable = [
         'uuid',
+        'code',
         'libelle_long',
         'libelle_court',
+        'parcours_type_id',
+        'ordre',
+        'color',
     ];
 
     // protected $casts = [
@@ -34,16 +38,27 @@ class Parcours extends Model
         return ParcoursFactory::new();
     }
 
-    protected $with = ['fonctions.competences.savoirfaires.activites'];
+   
+
+    public function parcoursType() {
+        return $this->belongsTo(ParcoursType::class,'parcours_type_id');
+    }
+
+
+    protected $with = [
+        'annees.savoirfaires.objectifs' 
+    ];
 
     /**
      * Les fonctions qui constituent un parcours
      */
-    public function fonctions(): BelongsToMany
+    public function annees(): BelongsToMany
     {
-        return $this->belongsToMany(Fonction::class, 'fcmcentral_fonction_parcours', 'parcours_id', 'fonction_id')
+        return $this->belongsToMany(Annee::class, 
+        'fcmcentral_annee_parcours', 'parcours_id', 'annee_id')
             ->withPivot('ordre')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->orderBy('fcmcentral_annee_parcours.ordre'); 
     }
 
     public function parcoursSerialise()

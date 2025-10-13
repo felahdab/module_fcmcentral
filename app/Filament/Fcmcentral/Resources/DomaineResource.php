@@ -12,60 +12,31 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\RelationManagers\SavoirfaireRelationManager;
 use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+use Modules\FcmCentral\Helpers\OutilsHelper;
 
 class DomaineResource extends Resource
 {
     use FcmAccessControl;
+    use FilamentPermissionTrait;
    
     protected static ?string $model = Domaine::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
-    protected static ?int $navigationSort = 11;
-
-    protected static ?string $navigationGroup = 'Parcours';
-    protected static ?string $navigationLabel = 'Domaines';
-
-    /// DROITS ACCES ///    
-
-    public static function canAccess(array $parameters = []): bool
-    {
-        // Seuls les admins peuvent accéder à cette resource
-        return static::canGestionParcours();
-    }
-
-    public static function canViewAny(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canCreate(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    ///////////////////
+      // Permissions marche avec le Trait
+      protected static array $permissions = [
+        'fcmcentral::gerer_parcours',
+        'fcmcentral::droits_admin',
+        'fcmcentral::droits_bcf',
+        'fcmcentral::droits_supadmin',
+    ];
 
     public static function form(Form $form): Form
     {
@@ -79,26 +50,36 @@ class DomaineResource extends Resource
                     ->required()
                     ->maxLength(1500)
                     ->label('Libellé long'),
+                Select::make('color')
+                    ->options(OutilsHelper::selectColors())
+                    ->label('Couleur du Badge'),         
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('libelle_court','asc')
+        ->defaultSort('ordre','asc')
+        ->reorderable('ordre') 
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('code')
+                    ->label('Code')
+                    ->sortable()
+                    ->searchable()
+                    ->badge()
+                    ->color(fn($record)=>$record->color ??  $record->competence->color ?? 'info') 
+                    ,  
+                   
                 TextColumn::make('libelle_court')
-                    ->searchable()
+                    ->label('Libellé court')
+                    ->limit(50)
                     ->sortable()
-                    ->label('Libellé court'),
-                TextColumn::make('libelle_long')
                     ->searchable()
-                    ->sortable()
-                    ->label('Libellé long')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->description(fn ($record) => substr($record->libelle_long,0,40).'...')
+                ,
                 TextColumn::make('savoirfaires_count')
                     ->counts('savoirfaires')
                     ->label('Nb Savoir-faire')
@@ -143,7 +124,7 @@ class DomaineResource extends Resource
     public static function getRelations(): array
     {
         return [
-            SavoirfaireRelationManager::class,
+          
         ];
     }
 
