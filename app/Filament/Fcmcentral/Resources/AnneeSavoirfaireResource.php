@@ -87,14 +87,16 @@ class AnneeSavoirfaireResource extends Resource
                 TextColumn::make('annee.libelle_court')
                     ->label('Année')
                     ->badge()
+                    ->sortable()
                     ->color(fn($record) => $record->annee->color ?? 'info'),
 
                 TextColumn::make('savoirfaire.code')
                     ->label('Code SF')
                     ->badge()
+                    ->sortable()
                     ->color(fn($record) => $record->savoirfaire->color ?? 'info'),
 
-               
+                
 
 
                 
@@ -104,7 +106,15 @@ class AnneeSavoirfaireResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->description(fn ($record) => substr($record->savoirfaire->libelle_long,0,40).'...')
-                    ,       
+                    , 
+                   
+                 TextColumn::make('savoirfaire.competence.parcoursType.code')
+                    ->label('Parcours')
+                    ->badge()
+                    ->sortable()
+                    ->searchable()
+                    ->color(fn($record) => $record->savoirfaire->competence->parcoursType->color ?? 'info'),
+                    
 
                 TextColumn::make('ordre')
                     ->label('Ordre')
