@@ -48,6 +48,10 @@ class ParcoursResource extends Resource
                     ->required()
                     ->label('Libellé court')
                     ->maxLength(150),
+                    TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),           
                 TextInput::make('libelle_long')
                     ->required()
                     ->label('Libellé long')

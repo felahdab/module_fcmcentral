@@ -53,6 +53,11 @@ class ObjectifResource extends Resource
                 ->required()
                 ->label('Libellé long')
                 ->maxLength(1500),
+            
+                TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),       
                 
             //  Select avec validation stricte
             Forms\Components\Select::make('type_activite')
@@ -61,6 +66,7 @@ class ObjectifResource extends Resource
                 ->required()
                 ->in(Objectif::getValidTypes()) // Validation stricte
                 ->default(Objectif::TYPE_OBJECTIF),
+
                 
             Forms\Components\TextInput::make('url')
                 ->label('URL')
