@@ -55,6 +55,10 @@ class SavoirfaireResource extends Resource
                     ->required()
                     ->label('Libellé long')
                     ->maxLength(1500),
+                TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),        
                 Select::make('domaine_id')
                     ->label('Domaine')
                     ->required()
