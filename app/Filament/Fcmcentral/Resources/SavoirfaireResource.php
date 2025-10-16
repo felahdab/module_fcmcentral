@@ -16,6 +16,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Modules\FcmCentral\Models\Domaine;
+use Modules\FcmCentral\Models\Competence;
 use Filament\Tables\Filters\SelectFilter;
 use Modules\FcmCentral\Traits\FcmAccessControl;
 
@@ -63,7 +64,12 @@ class SavoirfaireResource extends Resource
                     ->label('Domaine')
                     ->required()
                     ->searchable()
-                    ->options(Domaine::all()->pluck('libelle_court','id')),                    
+                    ->options(Domaine::all()->pluck('libelle_court','id')), 
+                Select::make('competence_id')
+                    ->label('Competence')
+                    ->required()
+                    ->searchable()
+                    ->options(Competence::all()->pluck('libelle_court','id')),                       
                 // TextInput::make('url')
                 //     ->label('URL')
                 //     ->maxLength(1000), 
