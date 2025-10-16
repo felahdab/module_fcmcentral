@@ -84,33 +84,36 @@ class SavoirfairesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                // Tables\Actions\AttachAction::make()
-                //     ->color('primary')
-                //     ->form(fn (Tables\Actions\AttachAction $action): array => [
-                //         $action->getRecordSelect(),
-                //         Forms\Components\TextInput::make('ordre')
-                //             ->label('Ordre')
-                //             ->required()
-                //             ->numeric()
-                //             ->default(1),
+                Tables\Actions\AttachAction::make()
+                    ->color('primary')
+                    ->label('Liaison entre Duree/Annee et les Savoirs-Faires')
+                    ->form(fn (Tables\Actions\AttachAction $action): array => [
+                        $action->getRecordSelect()
+                        ,
+                        
+                        Forms\Components\TextInput::make('ordre')
+                            ->label('Ordre')
+                            ->required()
+                            ->numeric()
+                            ->default(1),
                        
-                //         Forms\Components\TextInput::make('heures')
-                //             ->label('Heures')
-                //             ->numeric(),
+                        Forms\Components\TextInput::make('heures')
+                            ->label('Heures')
+                            ->numeric(),
                        
-                //         Forms\Components\TextInput::make('jours')
-                //             ->label('Jours')
-                //             ->numeric(),
+                        Forms\Components\TextInput::make('jours')
+                            ->label('Jours')
+                            ->numeric(),
                        
-                //         Forms\Components\TextInput::make('libelle_court')
-                //             ->label('Intitulé')
-                //             ->maxLength(255),
+                        Forms\Components\TextInput::make('libelle_court')
+                            ->label('Intitulé')
+                            ->maxLength(255),
                        
-                //         Select::make('savoirfaire_type_id')
-                //             ->label('Type de Savoir-faire')
-                //             ->options(SavoirfaireType::all()->pluck('libelle_court', 'id'))
-                //             ->searchable(),
-                //     ])
+                        Select::make('savoirfaire_type_id')
+                            ->label('Type de Savoir-faire')
+                            ->options(SavoirfaireType::all()->pluck('libelle_court', 'id'))
+                            ->searchable(),
+                    ])
             ])
             ->actions([
                 Tables\Actions\Action::make('manageDetails')
@@ -126,27 +129,28 @@ class SavoirfairesRelationManager extends RelationManager
                    
 
                 // Tables\Actions\DetachAction::make()
-                //     ->iconButton()
+                //     //->iconButton()
+                //     ->label('Détacher')
                 //     ->icon('heroicon-m-arrow-top-right-on-square')
                 //     ->extraAttributes([
                 //         'title' => 'Détacher',
                 //     ]),
 
                 
-        //         Tables\Actions\Action::make('detachPivot')
-        // ->label('Détacher')
-        // ->iconButton()
-        // ->icon('heroicon-m-arrow-top-right-on-square')
-        // ->extraAttributes([
-        //     'title' => 'Détacher',
-        // ])
-        // ->color('danger')
-        // ->requiresConfirmation()
-        // ->modalHeading(fn ($record) => 'Détacher ' . $record->code)
-        // ->modalDescription('Êtes-vous sûr de vouloir détacher ce savoir-faire de cette année ?')
-        // ->action(function ($record) {
-        //     \Modules\FcmCentral\Models\AnneeSavoirfaire::find($record->pivot->id)?->delete();
-        // }),
+                Tables\Actions\Action::make('detachPivot')
+        ->label('Détacher')
+        //->iconButton()
+        ->icon('heroicon-m-arrow-top-right-on-square')
+        ->extraAttributes([
+            'title' => 'Détacher',
+        ])
+        ->color('danger')
+        ->requiresConfirmation()
+        ->modalHeading(fn ($record) => 'Détacher ' . $record->code)
+        ->modalDescription('Êtes-vous sûr de vouloir détacher ce savoir-faire de cette année ?')
+        ->action(function ($record) {
+            \Modules\FcmCentral\Models\AnneeSavoirfaire::find($record->pivot->id)?->delete();
+        }),
 
             ])
             ->bulkActions([
