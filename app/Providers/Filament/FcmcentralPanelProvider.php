@@ -43,7 +43,8 @@ use Modules\FcmCentral\Traits\FcmAccessControl;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\AnneeResource;
+//use Modules\FcmCentral\Filament\Fcmcentral\Resources\AnneeResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\AnneeSavoirfaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
@@ -219,10 +220,10 @@ class FcmcentralPanelProvider extends PanelProvider
                     )
                 ),   
                 
-                NavigationItem::make('Annees')
+                NavigationItem::make('Annees Savoirfaire')
                     ->icon('heroicon-o-briefcase')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'annee'))
-                    ->url(fn (): string => AnneeResource::getUrl('index'))
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'annee-savoirfaire'))
+                    ->url(fn (): string => AnneeSavoirfaireResource::getUrl('index'))
                     ->visible(fn (): bool => 
                     self::canAccess('attribuer_cohorte') &&
                     ( self::canAccess('droits_admin') 

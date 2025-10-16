@@ -5,6 +5,7 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Models\AnneeSavoirfaire;
 use Modules\FcmCentral\Models\Annee;
+use Modules\FcmCentral\Models\ParcoursType;
 use Modules\FcmCentral\Models\Savoirfaire;
 use Modules\FcmCentral\Models\SavoirfaireType;
 use Filament\Forms;
@@ -126,6 +127,24 @@ class AnneeSavoirfaireResource extends Resource
                 Tables\Filters\SelectFilter::make('annee_id')
                     ->label('Année')
                     ->options(Annee::all()->pluck('libelle_court', 'id')),
+                    Tables\Filters\SelectFilter::make('parcours_type_id')
+                    ->label('Type de parcours')
+                    ->options(\Modules\FcmCentral\Models\ParcoursType::all()->pluck('libelle_court', 'id'))
+                    ->query(function ($query, $state) {
+                        if (!$state) {
+                            if (empty($state)){
+                                // Afichage quand aucun filtre selectionne
+                                    return $query;
+                            }
+                            $query->whereHas('savoirfaire.competence.parcoursType', function ($q) use ($state) {
+                                $q->where('id', $state);
+                            });
+                        }
+                    }),
+            
+            
+                
+
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
