@@ -7,6 +7,7 @@ use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -16,43 +17,19 @@ use Filament\Tables\Table;
 class NoteResource extends Resource
 {
     use FcmAccessControl;
+    use FilamentPermissionTrait;
 
     protected static ?string $model = Note::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationLabel = 'Notes';
-    protected static ?string $modelLabel = 'Note';
-    protected static ?string $pluralModelLabel = 'Notes';
 
-    /// DROITS ACCES ///
-    public static function canAccess(array $parameters = []): bool
-    {
-        return static::canGestionNote();
-    }
 
-    public static function canViewAny(): bool
-    {
-        return static::canGestionNote();
-    }
-
-    public static function canCreate(): bool
-    {
-        return static::canGestionNote();
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canGestionNote();
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canGestionNote();
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canGestionNote();
-    }
+    // Permissions marche avec le Trait
+    protected static array $permissions = [
+        'fcmcentral::gerer_parcours',
+        'fcmcentral::droits_admin',
+        'fcmcentral::droits_bcf',
+        'fcmcentral::droits_supadmin',
+    ];
 
     public static function form(Form $form): Form
     {

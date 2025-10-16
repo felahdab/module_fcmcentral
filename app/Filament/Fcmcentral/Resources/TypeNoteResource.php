@@ -13,52 +13,27 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 
 
 class TypeNoteResource extends Resource
 {
     use FcmAccessControl;
+    use FilamentPermissionTrait;
    
     protected static ?string $model = TypeNote::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
 
-    /// DROITS ACCES ///
-
-    public static function canAccess(array $parameters = []): bool
-    {
-        // Seuls les admins peuvent accéder à cette resource
-        return static::canGetionNote();
-    }
-
-    public static function canViewAny(): bool
-    {
-        return static::canGetionNote();
-    }
-
-    public static function canCreate(): bool
-    {
-        return static::canGetionNote();
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canGetionNote();
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canGetionNote();
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canGetionNote();
-    }
-
-    /////////////////
+   // Permissions marche avec le Trait
+   protected static array $permissions = [
+    'fcmcentral::gerer_parcours',
+    'fcmcentral::droits_admin',
+    'fcmcentral::droits_bcf',
+    'fcmcentral::droits_supadmin',
+];
     
 
     public static function form(Form $form): Form

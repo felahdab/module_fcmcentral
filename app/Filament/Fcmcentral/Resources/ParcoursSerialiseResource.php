@@ -18,6 +18,8 @@ use Filament\Tables\Filters\Filter;
 use Modules\FcmCentral\Http\Livewire\ParcoursDetails;
 use Filament\Forms\Components\Placeholder;
 use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\MarinsRelationManager;
 
@@ -25,48 +27,23 @@ class ParcoursSerialiseResource extends Resource
 {
     
     use FcmAccessControl;
+    use FilamentPermissionTrait;
     
     protected static ?string $model = ParcoursSerialise::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 10;
+    
 
-    protected static ?string $navigationGroup = 'Parcours';
-    protected static ?string $navigationLabel = 'Parcours figés';
+    // Permissions marche avec le Trait
+    protected static array $permissions = [
+        'fcmcentral::gerer_parcours',
+        'fcmcentral::droits_admin',
+        'fcmcentral::droits_bcf',
+        'fcmcentral::droits_supadmin',
+    ];
 
-
-    public static function canAccess(array $parameters = []): bool
-    {
-        // Seuls les admins peuvent accéder à cette resource
-        return static::canAttribuerParcours();
-    }
-
-    public static function canViewAny(): bool
-    {
-        return static::canAttribuerParcours();
-    }
-
-    public static function canCreate(): bool
-    {
-        return static::canAttribuerParcours();
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canAttribuerParcours();
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canAttribuerParcours();
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canAttribuerParcours();
-    }
-
+    
     public static function form(Form $form): Form
     {
         return $form

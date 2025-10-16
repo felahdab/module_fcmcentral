@@ -97,6 +97,9 @@ it('a des factories pour tous les modeles', function(){
 
     Models\Savoirfaire::factory()->create();
     $this->assertTrue(Models\Savoirfaire::all()->count() == 1);
+
+    Models\Objectif::factory()->create();
+    $this->assertTrue(Models\Objectif::all()->count() == 1);
 });
 
 it('genere un  UserGeneratedEvent quand on demande à figer un parcours depuis la page d edition d un parcours', function(){

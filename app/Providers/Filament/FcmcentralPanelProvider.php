@@ -49,10 +49,13 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource;
+
 
 // Import des Pages
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
+use Modules\FcmCentral\Models\ParcoursType;
 
 class FcmcentralPanelProvider extends PanelProvider
 {
@@ -283,8 +286,8 @@ class FcmcentralPanelProvider extends PanelProvider
 
                 NavigationItem::make('Type ')
                     ->icon('heroicon-o-rectangle-stack')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'domaine'))
-                    ->url(fn (): string => DomaineResource::getUrl('index'))
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours-types'))
+                    ->url(fn (): string => ParcoursTypeResource::getUrl('index'))
                     ->visible(fn (): bool => 
                     self::canAccess('gerer_parcours') &&
                     ( self::canAccess('droits_admin') 

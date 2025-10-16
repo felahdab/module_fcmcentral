@@ -31,9 +31,7 @@ class ParcoursResource extends Resource
    
     protected static ?string $model = Parcours::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?int $navigationSort = 11;
-    protected static ?string $navigationGroup = 'Parcours';
-    protected static ?string $navigationLabel = 'Parcours';
+
 
     protected static array $permissions = [
         'fcmcentral::gerer_parcours',

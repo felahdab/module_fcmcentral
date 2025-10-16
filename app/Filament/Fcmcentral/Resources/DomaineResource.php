@@ -50,6 +50,10 @@ class DomaineResource extends Resource
                     ->required()
                     ->maxLength(1500)
                     ->label('Libellé long'),
+                TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),    
                 Select::make('color')
                     ->options(OutilsHelper::selectColors())
                     ->label('Couleur du Badge'),         

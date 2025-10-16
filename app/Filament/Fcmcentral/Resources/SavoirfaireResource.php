@@ -21,55 +21,27 @@ use Modules\FcmCentral\Traits\FcmAccessControl;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\ActivitesRelationManager;
 use Modules\FcmCentral\Helpers\OutilsHelper;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 class SavoirfaireResource extends Resource
 {
     
     use FcmAccessControl;
+    use FilamentPermissionTrait;
     
     protected static ?string $model = Savoirfaire::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 14;
+   
 
-    protected static ?string $navigationGroup = 'Parcours';
-    protected static ?string $navigationLabel = 'Savoir-faire';
-
-    /// DROITS ACCES ///
-
-    public static function canAccess(array $parameters = []): bool
-    {
-        // Seuls les admins peuvent accéder à cette resource
-        return static::canGestionParcours();
-    }
-
-    public static function canViewAny(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canCreate(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canEdit($record): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canGestionParcours();
-    }
-
-    /////////////////
+    // Permissions marche avec le Trait
+    protected static array $permissions = [
+        'fcmcentral::gerer_parcours',
+        'fcmcentral::droits_admin',
+        'fcmcentral::droits_bcf',
+        'fcmcentral::droits_supadmin',
+    ];
 
     public static function form(Form $form): Form
     {

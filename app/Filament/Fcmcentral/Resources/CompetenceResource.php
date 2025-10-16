@@ -57,6 +57,10 @@ class CompetenceResource extends Resource
                     ->required()
                     ->label('Libellé long')
                     ->maxLength(1500),
+                TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),    
                 Select::make('parcours_type_id')
                     ->relationship(name: 'parcoursType', titleAttribute: 'libelle_court')
                     ->label('Type de Parcours'),    

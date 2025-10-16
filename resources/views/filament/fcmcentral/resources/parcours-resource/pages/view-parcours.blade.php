@@ -3,7 +3,7 @@
         <div class="tree-view">
             @if ($parcours)              
                 <div class="flex items-center justify-between text-2xl font-bold mt1 mb1">
-                    {{ $parcours->libelle_long }}
+                    {{ $parcours->libelle_long }} 
                 </div>
                 <ul>
                     <li>
@@ -16,7 +16,7 @@
                                                 <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
                                             </div>
                                             <strong class="vert" style="color: {{ $annee->color ?? '#389D60' }}">&nbsp;&nbsp;
-                                                {{ $annee->libelle_long }}
+                                                {{ $annee->libelle_long }}  
                                                 <span class="badge-count">({{ $annee->anneeSavoirfaires->count() }} SF)</span>
                                             </strong>
                                         </div>

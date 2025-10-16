@@ -65,7 +65,7 @@
                                                                 <li>
                                                                     <div class="flex items-center mt1 mb1">
                                                                         <strong class="orange">&nbsp;&nbsp;
-                                                                            📎 {{ $objectif['libelle_long'] }}
+                                                                            📎{{ $objectif['code'] }} -  {{ $objectif['libelle_court'] }}
                                                                         </strong>
                                                                         @if(!empty($objectif['description']))
                                                                             <div class="objectif-description">

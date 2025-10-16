@@ -56,10 +56,10 @@ class AnneeResource extends Resource
                     ->required()
                     ->maxLength(1500)
                     ->label('Libellé long'),
-                // TextInput::make('code')
-                //     ->label('code')  
-                //     ->required()                 
-                //     ->maxLength(1000),  
+                TextInput::make('code')
+                    ->label('code')  
+                    ->required()                 
+                    ->maxLength(1000),  
                 Select::make('color')
                     ->options(OutilsHelper::selectColors())
                     ->label('Couleur du Badge'),              

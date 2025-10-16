@@ -44,10 +44,10 @@ class FcmCentralServiceProvider extends ServiceProvider
     protected $policies = [
         Models\Parcours::class => Policies\ParcoursPolicy::class,
         Models\ParcoursSerialise::class => Policies\ParcoursSerialisePolicy::class,
-        Models\Fonction::class => Policies\FonctionPolicy::class,
+        Models\Annee::class => Policies\AnneePolicy::class,
         Models\Competence::class => Policies\CompetencePolicy::class,
         Models\Savoirfaire::class => Policies\SavoirfairePolicy::class,
-        Models\Activite::class => Policies\ActivitePolicy::class,
+        Models\Objectif::class => Policies\ObjectifPolicy::class,
         Models\Marin::class => Policies\MarinPolicy::class,
         Models\Domaine::class => Policies\DomainePolicy::class,
         Models\Cohorte::class => Policies\CohortePolicy::class

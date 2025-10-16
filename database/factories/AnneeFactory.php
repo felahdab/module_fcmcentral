@@ -37,7 +37,6 @@ class AnneeFactory extends Factory
             "libelle_court" => $libcourt,
             "libelle_long"  => $liblong,
             "uuid"          =>  $this->faker->uuid,
-            "url"           => fake()->url(),
             "ordre"         => self::$counter,
 
         ];
