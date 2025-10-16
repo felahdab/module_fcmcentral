@@ -23,7 +23,7 @@ class AnneeSavoirfaire extends Model
         'savoirfaire_type_id',
         'heures',
         'jours',
-        'intitule',
+        'libelle_court',
         'ordre',
     ];
 
