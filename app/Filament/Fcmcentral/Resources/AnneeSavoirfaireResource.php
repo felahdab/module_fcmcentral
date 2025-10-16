@@ -139,8 +139,8 @@ class AnneeSavoirfaireResource extends Resource
                            
                         }
 
-                        $query->whereHas('savoirfaire.competence', function ($q) use ($state) {
-                            $q->where('parcours_type_id', $state);
+                        $query->whereHas('savoirfaire.competence.parcoursType', function ($q) use ($state) {
+                            $q->where('id', $state['value']);
                         });
                           
                                
@@ -158,7 +158,7 @@ class AnneeSavoirfaireResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                   // Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
