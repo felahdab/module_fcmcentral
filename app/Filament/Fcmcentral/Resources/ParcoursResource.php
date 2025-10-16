@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Select;
 
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
@@ -20,6 +21,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationMa
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\Parcours;
+use Modules\FcmCentral\Models\ParcoursType;
 use Modules\FcmCentral\Traits\FcmAccessControl;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Modules\FcmCentral\Services\ParcoursService;
@@ -48,14 +50,21 @@ class ParcoursResource extends Resource
                     ->required()
                     ->label('Libellé court')
                     ->maxLength(150),
-                    TextInput::make('code')
-                    ->required()
-                    ->label('Code')
-                    ->maxLength(150),           
+                    
                 TextInput::make('libelle_long')
                     ->required()
                     ->label('Libellé long')
                     ->maxLength(1500),
+                    TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),    
+                    Select::make('parcours_type_id')
+                    ->label('Type de Parcours')
+                    ->required()
+                    ->searchable()
+                    ->options(ParcoursType::all()->pluck('libelle_court','id')),    
+
             ]);
     }
 
@@ -78,13 +87,22 @@ class ParcoursResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->description(fn ($record) => substr($record->libelle_long,0,40).'...'),
-                TextColumn::make('annees.libelle_court')
+                    TextColumn::make('code')
+                    ->label('Code')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('parcoursType.libelle_court')
+                    ->label('Parcours Type')
+                    ->badge()
+                    //->color('danger') 
+                    ->color(fn($record)=>$record->parcoursType->color ?? 'info')  ,  
+                    TextColumn::make('annees.libelle_court')
                     ->label('Années')
                     ->badge()
                     ->listWithLineBreaks()
                     ->color(fn($state, $record) =>
                         $record->annees->pluck('color')->map(fn($color) => $color ?? 'info')->first()
                     ),    
+                  
                 TextColumn::make('annees.savoirfaires.code')
                     ->label('Savoir Faires')
                     ->badge(),
