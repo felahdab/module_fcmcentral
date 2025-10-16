@@ -129,17 +129,23 @@ class AnneeSavoirfaireResource extends Resource
                     ->options(Annee::all()->pluck('libelle_court', 'id')),
                     Tables\Filters\SelectFilter::make('parcours_type_id')
                     ->label('Type de parcours')
-                    ->options(\Modules\FcmCentral\Models\ParcoursType::all()->pluck('libelle_court', 'id'))
+                    ->options( \Modules\FcmCentral\Models\ParcoursType::all()->pluck('libelle_court', 'id'))
                     ->query(function ($query, $state) {
-                        if (!$state) {
-                            if (empty($state)){
-                                // Afichage quand aucun filtre selectionne
-                                    return $query;
-                            }
-                            $query->whereHas('savoirfaire.competence.parcoursType', function ($q) use ($state) {
-                                $q->where('id', $state);
-                            });
+                      
+                        if ($state['value'] ===null) {
+                            //dd($state);
+                             // Afichage quand aucun filtre selectionne
+                             return $query;
+                           
                         }
+
+                        $query->whereHas('savoirfaire.competence', function ($q) use ($state) {
+                            $q->where('parcours_type_id', $state);
+                        });
+                          
+                               
+                        
+                        
                     }),
             
             
