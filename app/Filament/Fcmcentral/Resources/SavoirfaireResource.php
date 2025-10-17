@@ -138,6 +138,23 @@ class SavoirfaireResource extends Resource
                 SelectFilter::make('domaine_id')
                     ->label('Domaine')
                     ->options(Domaine::query()->pluck('libelle_court','id')->toArray()),
+
+                   SelectFilter::make('parcours_type_id')
+                    ->label('Type de parcours')
+                    ->options( \Modules\FcmCentral\Models\ParcoursType::all()->pluck('libelle_court', 'id'))
+                    ->query(function ($query, $state) {
+                      
+                        if ($state['value'] ===null) {
+                            //dd($state);
+                             // Afichage quand aucun filtre selectionne
+                             return $query;
+                           
+                        }
+
+                        $query->whereHas('competence.parcoursType', function ($q) use ($state) {
+                            $q->where('id', $state['value']);
+                        });
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()

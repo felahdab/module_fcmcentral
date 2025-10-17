@@ -2,245 +2,153 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
-use Filament\Actions;
-use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
 use Modules\FcmCentral\Models\Parcours;
-use Livewire\Component;
-
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
+use Modules\FcmCentral\Models\Annee;
+use Modules\FcmCentral\Models\AnneeSavoirfaire;
+use Modules\FcmCentral\Models\Objectif;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Str;
 
 class ViewParcours extends ViewRecord
 {
     protected static string $resource = ParcoursResource::class;
-    
-    // Vue personnalisée
-    protected static string  $view = 'fcmcentral::filament.fcmcentral.resources.parcours-resource.pages.view-parcours';
+    protected static string $view = 'fcmcentral::filament.fcmcentral.resources.parcours-resource.pages.view-parcours';
 
     public $parcours;
+    public $annee_id;
+    public $savoirfaire_id = [];
+    public $pivot_libelle_court = [];
+    public $pivot_heures = [];
+    public $pivot_jours = [];
+    public $pivot_ordre = [];
+    public $pivot_savoirfaire_type_id = [];
+    public $editingAsfId = null;
+    public $editingAsf = [
+        'libelle_court' => '',
+        'heures' => null,
+        'jours' => null,
+        'ordre' => null,
+    ];
 
     public function mount($record): void
     {
-         parent::mount($record);
+        parent::mount($record);
+        $this->parcours = $this->getFullParcours($record);
+    }
 
-        // Charger le parcours complet avec ses relations
-         $this->parcours = $this->getFullParcours($record);
- }
+    public function getFullParcours(int $id): ?Parcours
+    {
+        return Parcours::with([
+            'annees.anneeSavoirfaires.objectifs',
+            'parcoursType'
+        ])->find($id);
+    }
 
-     /**
-      * Récupere le parcours entier avec ses relations en fonction ID
-      * @param int $id
-      * @return Parcours|null
-      */
-     public function getFullParcours(int $id): ?Parcours
-     {
-         $parcours = Parcours::with([
-             'annees.anneeSavoirfaires.objectifs',
-         ])->find($id);
+    public function addAnnee()
+    {
+        if (!$this->annee_id) {
+            Notification::make()->title('Sélection requise')->danger()->send();
+            return;
+        }
+        if ($this->parcours->annees->contains($this->annee_id)) {
+            Notification::make()->title('Année déjà liée')->warning()->send();
+            return;
+        }
+        $this->parcours->annees()->attach($this->annee_id);
+        Notification::make()->title('Année ajoutée')->success()->send();
+        $this->parcours = $this->getFullParcours($this->parcours->id);
+        $this->annee_id = null;
+    }
 
-         
-    
-    return $parcours;
-     }
+    public function removeAnnee($anneeId)
+    {
+        $this->parcours->annees()->detach($anneeId);
+        Notification::make()->title('Année détachée')->success()->send();
+        $this->parcours = $this->getFullParcours($this->parcours->id);
+    }
 
+    public function addSavoirFaire($anneeId)
+    {
+        $sfId = $this->savoirfaire_id[$anneeId] ?? null;
+        $pivot = [
+            'libelle_court' => $this->pivot_libelle_court[$anneeId] ?? null,
+            'heures' => $this->pivot_heures[$anneeId] ?? null,
+            'jours' => $this->pivot_jours[$anneeId] ?? null,
+            'ordre' => $this->pivot_ordre[$anneeId] ?? null,
+            'savoirfaire_type_id' => $this->pivot_savoirfaire_type_id[$anneeId] ?? null,
+        ];
+        if (!$sfId) {
+            Notification::make()->title('Sélection requise')->danger()->send();
+            return;
+        }
+        $asf = AnneeSavoirfaire::create(array_merge([
+            'annee_id' => $anneeId,
+            'savoirfaire_id' => $sfId,
+        ], $pivot));
+        if ($this->parcours->parcoursType && $this->parcours->parcoursType->code === 'C') {
+            Objectif::create([
+                'annee_savoirfaire_id' => $asf->id,
+                'libelle_court' => 'Objectif automatique',
+            ]);
+        }
+        Notification::make()->title('Savoir-faire ajouté')->success()->send();
+        $this->parcours = $this->getFullParcours($this->parcours->id);
+        $this->savoirfaire_id[$anneeId] = null;
+        $this->pivot_libelle_court[$anneeId] = null;
+        $this->pivot_heures[$anneeId] = null;
+        $this->pivot_jours[$anneeId] = null;
+        $this->pivot_ordre[$anneeId] = null;
+        $this->pivot_savoirfaire_type_id[$anneeId] = null;
+    }
 
-     /**
-      *  Function pour Modifier 
-      */
-     public function editAction(): Action
-     {
-         return Action::make('edit')
-        
-             ->label('Modifier')
-             ->modalHeading('Modifier ')
-             ->modalWidth('lg')
-             ->link()
-             
-             // Cree le form en fonction du type argument
-             ->form(
-                function(array $arguments){  
-                    $model = $this->getModelByType($arguments['type']);
-                    $record= $model::find($arguments['recordId']);
+    public function removeSavoirFaireFromAnnee($asfId)
+    {
+        $asf = AnneeSavoirfaire::find($asfId);
+        if ($asf) {
+            $asf->objectifs()->delete();
+            $asf->delete();
+            Notification::make()->title('Savoir-faire supprimé')->success()->send();
+            $this->parcours = $this->getFullParcours($this->parcours->id);
+            if ($this->editingAsfId === $asfId) {
+                $this->editingAsfId = null;
+                $this->editingAsf = ['libelle_court' => '', 'heures' => null, 'jours' => null, 'ordre' => null];
+            }
+        }
+    }
 
-                    return $record 
-                    ? collect($this->getFieldsByType($arguments['type']))->map(fn ($field) => $field->default($record->{$field->getName()}))->toArray() // je le transforme en collection car j'arrive pas a le charger en Array les data
-                    : $this->getFieldsByType($arguments['type']);
+    public function startEditAsf($asfId)
+    {
+        // dd('test');
+        $asf = AnneeSavoirfaire::find($asfId);
+        if ($asf) {
+            $this->editingAsfId = $asfId;
+            $this->editingAsf = [
+                'libelle_court' => $asf->libelle_court,
+                'heures' => $asf->heures,
+                'jours' => $asf->jours,
+                'ordre' => $asf->ordre,
+            ];
+        }
+    }
 
-                }) // Récupérer les champs dynamiquement
-             // Action
-             ->action(function (array $data, array $arguments): void {
-                 // Récupérer le modèle en fonction du type
-                 $model = $this->getModelByType($arguments['type']);
-                 $record = $model::find($arguments['recordId']);
-              
-                 if ($record) {
-                     $record->update($data); // Mettre à jour les champs
-                     Notification::make()
-                        ->title('Mise a jour OK.')
-                        ->success()
-                        ->body('Ok: ' . $record->libelleCourt)
-                        ->send();
-                 }
-             });
-     }
-     
-        /**
-      *  Function pour Creer
-      */
-     public function createAction(): Action
-     {
-         return Action::make('create')
-             ->label('Ajouter')
-             ->modalHeading('Créer un nouvel élément')
-             ->modalWidth('lg')
-             ->link()
-             ->form(fn (array $arguments) => $this->getFieldsByType($arguments['type'])) // Formulaire dynamique
-             ->action(function (array $data, array $arguments): void {
-                 $model = $this->getModelByType($arguments['type']);
-                 // Recupere le Model Parent
-                 $parentModel = $this->getModelByType($arguments['parentType']);
+    public function saveEditAsf()
+    {
+        if (!$this->editingAsfId) return;
+        $asf = AnneeSavoirfaire::find($this->editingAsfId);
+        if ($asf) {
+            $asf->update($this->editingAsf);
+            Notification::make()->title('Mise à jour OK')->success()->send();
+            $this->parcours = $this->getFullParcours($this->parcours->id);
+            $this->editingAsfId = null;
+            $this->editingAsf = ['libelle_court' => '', 'heures' => null, 'jours' => null, 'ordre' => null];
+        }
+    }
 
-                 
-                 // Trouve entite parent
-                 $parent =  $parentModel::find($arguments['parentId']);
-     
-                     $record = $model::create($data); // Créer l'enregistrement
-                     if ($parent && $model){
-                        // Recupere dynamiquement la relation ManyToMany
-                        $relationMethod = $this->getRelationMethod($arguments['type']);
-
-                        // dd([
-                        //     'parent_class'=>get_class($parent),
-                        //     'relation_method'=>$relationMethod,
-                        //     'available_methods'=>get_class_methods($parent),
-                        // ]);
-                        if (method_exists($parent,$relationMethod)){
-                            $parent->$relationMethod()->attach($record->id);
-                        }
-
-
-                     }
-     
-                     Notification::make()
-                        ->title('Creation Ok.')
-                        ->success()
-                        ->send();
-                    
-                 
-             });
-     }
-     
-     
-     public function attachAction(): Action
-     {
-         return Action::make('attach')
-             ->label('Associer')
-             ->modalHeading('Associer un élément existant')
-             ->modalWidth('lg')
-             ->link()
-             ->form(fn (array $arguments) => [
-                 Select::make('recordId')
-                     ->label('Sélectionner un élément')
-                     ->options($this->getModelByType($arguments['parentType'])::pluck('libelle_long', 'id')) // Récupérer les options
-                     ->searchable()
-                     ->required(),
-             ])
-             ->action(function (array $data, array $arguments): void {
-                 $parentModel = $this->getModelByType($arguments['parentType']);
-                 $childModel = $this->getModelByType($arguments['type']);
-     
-                 $parent = $parentModel::find($arguments['parentId']);
-                 $child = $childModel::find($data['recordId']);
-     
-                 if ($parent && $child) {
-                     $parent->relatedModels()->attach($child); // Remplace `relatedModels()` par ta relation
-     
-                     Notification::make()
-                     ->title('Attachement Ok.')
-                     ->success()
-                     ->send();
-                 }
-             });
-     }
-     
-
-    /**
-     *  Creation du Formulaire en fonction du Type
-     * 
-     */
-    public function getFieldsByType(string $type): array
-{
-    return match ($type) {
-        'fonction' => [
-            TextInput::make('libelle_long')
-                ->label('Libellé Long de la Fonction')
-                ->live()
-                ->required(),
-            TextInput::make('libelle_court')
-                ->label('Libellé Court de la Fonction')
-                ->required(),
-            TextInput::make('lien_url')
-                ->label('Lien de la Fonction')
-                
-        ],
-        'competence' => [
-            TextInput::make('libelle_long')
-                ->label('Libellé de la Compétence')
-                ->required(),
-            TextInput::make('libelle_court')
-                ->label('Libellé Court Competence')
-                ->required(),
-        ],
-        'savoirFaire' => [
-            TextInput::make('libelle_long')
-                ->label('Libellé du Savoir-Faire')
-                ->required(),
-            TextInput::make('libelle_court')
-                ->label('Libellé Court Savoir Faire')
-                ->required(),
-        ],
-        'activite' => [
-            TextInput::make('libelle_long')
-                ->label('Libellé de l\'Activité')
-                ->required(),
-            TextInput::make('libelle_court')
-                ->label('Libellé Court Activite')
-                ->required(),
-        ],
-        default => [],
-    };
+    public function cancelEditAsf()
+    {
+        $this->editingAsfId = null;
+        $this->editingAsf = ['libelle_court' => '', 'heures' => null, 'jours' => null, 'ordre' => null];
+    }
 }
 
-private function getModelByType(string $type)
-{
-    return match ($type) {
-        'fonction' => \Modules\FcmCentral\Models\Fonction::class,
-        'competence' => \Modules\FcmCentral\Models\Competence::class,
-        'savoirFaire' => \Modules\FcmCentral\Models\SavoirFaire::class,
-        'activite' => \Modules\FcmCentral\Models\Activite::class,
-        'parcours' => \Modules\FcmCentral\Models\Parcours::class,
-        default => null,
-    };
-}
-
-private function getRelationMethod(string $type)
-{
-    return match ($type) {
-        'fonction' => 'fonctions',
-        'competence' => 'competences',
-        'savoirFaire' => 'savoirfaires',
-        'activite' => 'activites',
-        'parcours' => 'parcours',
-        default => null,
-    };
-}
-
-
-   
-
-}
