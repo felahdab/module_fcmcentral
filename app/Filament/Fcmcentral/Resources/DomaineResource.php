@@ -51,7 +51,7 @@ class DomaineResource extends Resource
                     ->maxLength(1500)
                     ->label('Libellé long'),
                 TextInput::make('code')
-                    ->required()
+                   
                     ->label('Code')
                     ->maxLength(150),    
                 Select::make('color')

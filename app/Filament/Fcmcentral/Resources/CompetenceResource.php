@@ -63,7 +63,8 @@ class CompetenceResource extends Resource
                     ->maxLength(150),    
                 Select::make('parcours_type_id')
                     ->relationship(name: 'parcoursType', titleAttribute: 'libelle_court')
-                    ->label('Type de Parcours'),    
+                    ->label('Type de Parcours')
+                    ->required(),    
                 Select::make('color')
                     ->options(OutilsHelper::selectColors())
                     ->label('Couleur du Badge'),        

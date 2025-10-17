@@ -43,7 +43,7 @@ use Modules\FcmCentral\Traits\FcmAccessControl;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
-//use Modules\FcmCentral\Filament\Fcmcentral\Resources\AnneeResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\AnneeResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\AnneeSavoirfaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
@@ -272,7 +272,18 @@ class FcmcentralPanelProvider extends PanelProvider
                     ( self::canAccess('droits_admin') 
                     // || self::canAccess('droits_gestion')
                     )
-                ),   
+                ),  
+                
+                NavigationItem::make('Durée')
+                ->icon('heroicon-o-briefcase')
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'annee') && !str_contains(request()->route()?->getName() ?? '', '-savoirfaire'))
+                ->url(fn (): string => AnneeResource::getUrl('index'))
+                ->visible(fn (): bool => 
+                self::canAccess('gerer_parcours') &&
+                ( self::canAccess('droits_admin') 
+                // || self::canAccess('droits_gestion')
+                )
+            ),   
 
                 NavigationItem::make('Domaines')
                     ->icon('heroicon-o-rectangle-stack')
