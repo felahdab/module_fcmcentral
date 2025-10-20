@@ -36,6 +36,7 @@ use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 use App\Filament\Pages\UserPreferences;
 use Filament\Support\Assets\Theme;
 use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 
 
@@ -62,6 +63,8 @@ class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
     use FcmAccessControl;
+    use FilamentPermissionTrait;
+
 
     private string $module = "FcmCentral";
 
