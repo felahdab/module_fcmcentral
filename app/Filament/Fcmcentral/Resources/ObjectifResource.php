@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 use Filament\Tables\Columns\TextColumn;
@@ -23,7 +23,7 @@ use Filament\Forms\Components\Select;
 
 class ObjectifResource extends Resource
 {
-    use FcmAccessControl;
+  
     use FilamentPermissionTrait;
     
     protected static ?string $model = Objectif::class;

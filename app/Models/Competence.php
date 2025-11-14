@@ -37,6 +37,7 @@ class Competence extends Model
         return CompetenceFactory::new();
     }
 
+    // Catalogue
     public function parcoursType()
     {
         return $this->belongsTo(ParcoursType::class, 'parcours_type_id');
@@ -46,6 +47,42 @@ class Competence extends Model
     {
         return $this->hasMany(Savoirfaire::class, 'competence_id');
     }
+
+    // Parcours
+    public function affectation()
+    {
+        return $this->belongsTo(Affectation::class, 'affectation_id');
+    }
+
+   
+
+
+      // Relation Many To Many avec Savoirfaire via pivot
+      public function savoirfairesPivot()
+      {
+          return $this->belongsToMany(
+              Savoirfaire::class,
+              'fcmcentral_competence_savoirfaires',
+              'competence_id',
+              'savoirfaire_id'
+          )
+          ->withPivot([
+              'id', // clé primaire du pivot
+              'uuid',
+              'ordre',
+              'heures',
+              'jours',
+              'libelle_court',
+              'savoirfaire_type_id'
+          ])
+          ->withTimestamps();
+      }
+  
+  
+      // Accès direct aux objets pivot
+      public function competenceSavoirfaires(){
+          return $this->hasMany(CompetenceSavoirfaire::class,'competence_id');
+      }
 
 
 

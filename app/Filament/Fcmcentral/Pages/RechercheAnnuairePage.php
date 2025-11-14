@@ -29,12 +29,12 @@ use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuaireForms\RechercheAnnuaireForm;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 
 
 class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
 {
-    use FcmAccessControl;
+    
     
     protected static ?string $navigationGroup = 'Marins';
     protected static ?string $navigationLabel = 'Recherche Annudef';

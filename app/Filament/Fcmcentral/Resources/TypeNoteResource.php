@@ -12,14 +12,14 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 
 
 class TypeNoteResource extends Resource
 {
-    use FcmAccessControl;
+   
     use FilamentPermissionTrait;
    
     protected static ?string $model = TypeNote::class;

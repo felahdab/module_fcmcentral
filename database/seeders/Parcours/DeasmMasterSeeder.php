@@ -29,15 +29,16 @@ class DeasmMasterSeeder extends Seeder
 
 
             // Catalogue
+            DeasmAffectationsSeeder::class,
             DeasmCompetencesSeeder::class,
             DeasmSavoirfairesSeeder::class,
             //DeasmCompetenceSavoirfaireSeeder::class,
             
             // Parcours
             DeasmParcoursSeeder::class,
-            DeasmAnneesSeeder::class,
-            DeasmAnneeParcoursSeeder::class,
-            DeasmAnneeSavoirfairesSeeder::class,
+            
+            DeasmAffectationParcoursSeeder::class,
+            DeasmCompetenceSavoirfairesSeeder::class,
             DeasmObjectifsSeeder::class,
            
         ]);

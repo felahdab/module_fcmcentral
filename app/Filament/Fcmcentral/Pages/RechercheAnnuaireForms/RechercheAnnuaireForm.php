@@ -8,11 +8,11 @@ use Filament\Forms\Get;
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 
 class RechercheAnnuaireForm 
 {
-    use FcmAccessControl;
+   
 
     public static function getSchema()
     {

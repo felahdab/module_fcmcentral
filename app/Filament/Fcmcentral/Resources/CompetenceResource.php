@@ -2,6 +2,7 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Actions\Exports\Enums\Contracts\ExportFormat;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\RelationManagers;
 use Modules\FcmCentral\Models\Competence;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 
@@ -23,9 +24,18 @@ use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\RelationManagers\SavoirfairesRelationManager;
 use Modules\FcmCentral\Helpers\OutilsHelper;
 
+// Import/ Export
+use Modules\FcmCentral\Filament\Fcmcentral\Exports\CompetenceExporter;
+use Modules\FcmCentral\Filament\Fcmcentral\Imports\CompetenceImporter;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ImportAction;
+use Filament\Tables\Actions\ExportBulkAction;
+use Filament\Tables\Actions\Action;
+// Fin Import / Export
+
 class CompetenceResource extends Resource
 {
-    use FcmAccessControl;
+
     use FilamentPermissionTrait;
     
     protected static ?string $model = Competence::class;
@@ -117,6 +127,22 @@ class CompetenceResource extends Resource
                 //     ->sortable()
                 //     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->headerActions([
+                Action::make('downloadCsv')
+        ->label('Télécharger Data CSV')
+        ->url(fn () => route('fcmcentral.competences.export_csv'))
+        ->openUrlInNewTab()
+       ,
+
+                // ExportAction::make()
+                //     ->exporter(CompetenceExporter::class)
+                //     ->label('Exportation data'),
+                    ImportAction::make()
+                    ->importer(CompetenceImporter::class)
+                    ->label('Importation data'),
+                    
+            ])
+    
             ->filters([
                 //
             ])
@@ -139,9 +165,13 @@ class CompetenceResource extends Resource
 
             ])
             ->bulkActions([
-                // Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
+                 Tables\Actions\BulkActionGroup::make([
+                     Tables\Actions\DeleteBulkAction::make(),
+                 ]),
+               
+              
+
+
             ]);
     }
 

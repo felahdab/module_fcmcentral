@@ -12,13 +12,13 @@ use Filament\Tables\Columns\TextColumn;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages;
 use Modules\FcmCommun\Models\Cohorte;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 class CohorteResource extends Resource
 {
     
-    use FcmAccessControl;
+
     use FilamentPermissionTrait;
     
     protected static ?string $model = Cohorte::class;

@@ -32,7 +32,7 @@ return new class extends Migration
         });
 
         // Années du parcours
-        Schema::create('fcmcentral_annees', function (Blueprint $table) use ($default_value) {
+        Schema::create('fcmcentral_affectations', function (Blueprint $table) use ($default_value) {
             $table->id();
             $table->uuid('uuid')->default($default_value);
             $table->string('code');
@@ -44,23 +44,35 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('fcmcentral_annee_parcours', function (Blueprint $table) {
+        Schema::create('fcmcentral_affectation_parcours', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('parcours_id');
-            $table->unsignedBigInteger('annee_id');
+            $table->unsignedBigInteger('affectation_id');
             $table->integer('ordre')->default(0);
             $table->foreign('parcours_id')->references('id')->on('fcmcentral_parcours')->onDelete('cascade');
-			$table->foreign('annee_id')->references('id')->on('fcmcentral_annees')->onDelete('cascade');
-            $table->unique(['parcours_id','annee_id']);
+			$table->foreign('affectation_id')->references('id')->on('fcmcentral_affectations')->onDelete('cascade');
+            $table->unique(['parcours_id','affectation_id'],'fcmcentral_aff_par_unique');
             $table->timestamps();
             
         });
+
+        Schema::table('fcmcentral_competences', function (Blueprint $table) {
+            $table->foreignId('affectation_id')
+            ->nullable()
+            ->constrained('fcmcentral_affectations')
+             ->nullOnDelete()
+             ->after('parcours_type_id');
+         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('fcmcentral_annees');
+        Schema::dropIfExists('fcmcentral_affectations');
         Schema::dropIfExists('fcmcentral_parcours');
+        Schema::table('fcmcentral_competences', function (Blueprint $table){
+            $table->dropForeign(['annee_id']);
+            $table->dropColumn('annee_id');
+        });
     }
 };
 

@@ -35,7 +35,7 @@ use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 
 use App\Filament\Pages\UserPreferences;
 use Filament\Support\Assets\Theme;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FcmPermissionTrait;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 
@@ -44,8 +44,8 @@ use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\AnneeResource;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\AnneeSavoirfaireResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
@@ -62,8 +62,9 @@ use Modules\FcmCentral\Models\ParcoursType;
 class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
-    use FcmAccessControl;
+    use FcmPermissionTrait;
     use FilamentPermissionTrait;
+
 
 
     private string $module = "FcmCentral";
@@ -131,7 +132,7 @@ class FcmcentralPanelProvider extends PanelProvider
         NavigationGroup::make()
             ->items([
                 // Dashboard - toujours visible
-                NavigationItem::make('Tableau de bord')
+                NavigationItem::make('Tableau de bord ')
                     ->icon('heroicon-o-home')
                     ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.dashboard'))
                     ->url(fn (): string => Pages\Dashboard::getUrl()),
@@ -142,7 +143,7 @@ class FcmcentralPanelProvider extends PanelProvider
                     ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.mon-livret-de-fcm'))
                     ->url(fn (): string => MonLivretDeFcm::getUrl())
                     ->badge(fn () => $this->getMarinProgressBadge())
-                    ->visible(fn (): bool => $this->canAccessMarinLivret()),
+                    ->visible(fn (): bool => $this->canAccesMarinLivret()),
                 
                 // Mes marins FCM - visible seulement pour les mentors
                 NavigationItem::make('Mes marins FCM')
@@ -150,7 +151,7 @@ class FcmcentralPanelProvider extends PanelProvider
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'marin'))
                     ->url(fn (): string => MarinResource::getUrl('index'))
                     ->badge(fn () => $this->getMentorMarinsCount())
-                    ->visible(fn (): bool => $this->canAccessMentorFeatures()),
+                    ->visible(fn (): bool => $this->canAccessModuleWithPermissions('permission.mentor',['permission.bcf'])),
             ]),
 
         // Groupe Administration
@@ -164,11 +165,8 @@ class FcmcentralPanelProvider extends PanelProvider
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'marin'))
                     ->url(fn (): string => MarinResource::getUrl('index'))
                     ->visible(fn (): bool => 
-                    self::canAccess('gerer_marin') &&
-                    ( self::canAccess('droits_admin') 
-                    || self::canAccess('droits_gestion')
-                    )
-                ),
+                    $this->canAccessAnyPermission(['marin.index']))
+                    ,
                 
                 NavigationItem::make('Gestion des cohortes')
                     ->icon('heroicon-o-user-group')
@@ -176,11 +174,8 @@ class FcmcentralPanelProvider extends PanelProvider
                     ->url(fn (): string => CohorteResource::getUrl('index'))
                     //->visible(fn (): bool => $this->canAccessAdminMenus()),
                     ->visible(fn (): bool => 
-                    self::canAccess('attribuer_cohorte') &&
-                    ( self::canAccess('droits_admin') 
-                    || self::canAccess('droits_gestion')
-                    )
-                ),
+                    $this->canAccessAnyPermission(['cohorte.index']))
+                    ,
 
                 NavigationItem::make('Gestion des Notes')
                 ->icon('heroicon-o-user-group')
@@ -188,11 +183,8 @@ class FcmcentralPanelProvider extends PanelProvider
                 ->url(fn (): string => NoteResource::getUrl('index'))
                 //->visible(fn (): bool => $this->canAccessAdminMenus()),
                 ->visible(fn (): bool => 
-                self::canAccess('gerer_note') &&
-                ( self::canAccess('droits_admin') 
-                || self::canAccess('droits_gestion')
-                )
-            ),
+                $this->canAccessAnyPermission(['note.index']))
+                ,
             ])
             //->visible(fn (): bool => $this->canAccessAdminMenus())
             ,
@@ -206,45 +198,41 @@ class FcmcentralPanelProvider extends PanelProvider
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours-serialise'))
                     ->url(fn (): string => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource::getUrl('index'))
                     ->visible(fn (): bool => 
-                    self::canAccess('attribuer_parcours') &&
-                    ( self::canAccess('droits_admin') 
-                     || self::canAccess('droits_gestion')
-                    )
-                ),
+                    $this->canAccessAnyPermission(['parcours.index']))
+                    ,
                 
                 NavigationItem::make('Parcours')
                     ->icon('heroicon-o-map')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours') && !str_contains(request()->route()?->getName() ?? '', 'serialise'))
                     ->url(fn (): string => ParcoursResource::getUrl('index'))
+                    
                     ->visible(fn (): bool => 
-                    self::canAccess('gerer_parcours') &&
-                    ( self::canAccess('droits_admin') 
-                    // || self::canAccess('droits_gestion')
-                    )
-                ),   
+                    $this->canAccessAnyPermission(['parcoursSerialise.index']))
+                    ,
+
+                NavigationItem::make('Affectation')
+                ->icon('heroicon-o-briefcase')
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'affectation') )
+                ->url(fn (): string => AffectationResource::getUrl('index'))
+                ->visible(fn (): bool => 
+                $this->canAccessAnyPermission(['affectation.index']))
+                ,
                 
-                NavigationItem::make('Annees Savoirfaire')
+                NavigationItem::make('Competences Savoirfaire')
                     ->icon('heroicon-o-briefcase')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'annee-savoirfaire'))
-                    ->url(fn (): string => AnneeSavoirfaireResource::getUrl('index'))
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence-savoirfaire') )
+                    ->url(fn (): string => CompetenceSavoirfaireResource::getUrl('index'))
                     ->visible(fn (): bool => 
-                    self::canAccess('attribuer_cohorte') &&
-                    ( self::canAccess('droits_admin') 
-                    // || self::canAccess('droits_gestion')
-                    )
-                ),   
-                
+                    $this->canAccessAnyPermission(['competenceSavoirfaire.index']))
+                    ,
                 
                 NavigationItem::make('Objectifs')
                     ->icon('heroicon-o-rectangle-stack')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'objectif'))
                     ->url(fn (): string => ObjectifResource::getUrl('index'))
                     ->visible(fn (): bool => 
-                    self::canAccess('gerer_parcours') &&
-                    ( self::canAccess('droits_admin') 
-                    // || self::canAccess('droits_gestion')
-                    )
-                ),  
+                    $this->canAccessAnyPermission(['objectif.index']))
+                    ,
                 
                 
             ])
@@ -257,58 +245,37 @@ class FcmcentralPanelProvider extends PanelProvider
 
                 NavigationItem::make('Compétences')
                     ->icon('heroicon-o-star')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence'))
+                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence') && !str_contains(request()->route()?->getName() ?? '', '-savoirfaire') )
                     ->url(fn (): string => CompetenceResource::getUrl('index'))
                     ->visible(fn (): bool => 
-                    self::canAccess('gerer_parcours') &&
-                    ( self::canAccess('droits_admin') 
-                    // || self::canAccess('droits_gestion')
-                    )
-                ),   
+                    $this->canAccessAnyPermission(['competence.index']))
+                    ,
                 
                 NavigationItem::make('Savoir Faire')
                     ->icon('heroicon-o-wrench-screwdriver')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'savoir-faire'))
                     ->url(fn (): string => SavoirFaireResource::getUrl('index'))
                     ->visible(fn (): bool => 
-                    self::canAccess('gerer_parcours') &&
-                    ( self::canAccess('droits_admin') 
-                    // || self::canAccess('droits_gestion')
-                    )
-                ),  
+                    $this->canAccessAnyPermission(['savoirfaire.index']))
+                    ,
                 
-                NavigationItem::make('Durée')
-                ->icon('heroicon-o-briefcase')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'annee') && !str_contains(request()->route()?->getName() ?? '', '-savoirfaire'))
-                ->url(fn (): string => AnneeResource::getUrl('index'))
-                ->visible(fn (): bool => 
-                self::canAccess('gerer_parcours') &&
-                ( self::canAccess('droits_admin') 
-                // || self::canAccess('droits_gestion')
-                )
-            ),   
+                
 
                 NavigationItem::make('Domaines')
                     ->icon('heroicon-o-rectangle-stack')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'domaine'))
                     ->url(fn (): string => DomaineResource::getUrl('index'))
                     ->visible(fn (): bool => 
-                    self::canAccess('gerer_parcours') &&
-                    ( self::canAccess('droits_admin') 
-                    // || self::canAccess('droits_gestion')
-                    )
-                ),
+                    $this->canAccessAnyPermission(['domaine.index']))
+                    ,
 
                 NavigationItem::make('Type ')
                     ->icon('heroicon-o-rectangle-stack')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours-types'))
                     ->url(fn (): string => ParcoursTypeResource::getUrl('index'))
                     ->visible(fn (): bool => 
-                    self::canAccess('gerer_parcours') &&
-                    ( self::canAccess('droits_admin') 
-                    // || self::canAccess('droits_gestion')
-                    )
-                ),
+                    $this->canAccessAnyPermission(['parcoursType.index']))
+                    ,
             ])
            
             ,
@@ -324,25 +291,33 @@ class FcmcentralPanelProvider extends PanelProvider
                 ->icon('heroicon-o-cog-6-tooth')
                 ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.configuration'))
                 ->url(fn (): string => '#') // TODO: Remplacer par votre URL
-                ->visible(fn (): bool => self::canAccess('configuration_module')),
+                ->visible(fn (): bool => 
+                    $this->canAccessAnyPermission(['permission.bcf','admin']))
+                    ,
             
             NavigationItem::make('Gestion permissions')
                 ->icon('heroicon-o-shield-check')
                 ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.permissions'))
                 ->url(fn (): string => '#') // TODO: Remplacer par votre URL
-                ->visible(fn (): bool => self::canAccess('gerer_permissions')),
+                ->visible(fn (): bool => 
+                    $this->canAccessAnyPermission(['permission.bcf','admin']))
+                    ,
             
             NavigationItem::make('Logs système')
                 ->icon('heroicon-o-document-text')
                 ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.logs'))
                 ->url(fn (): string => '#') // TODO: Remplacer par votre URL
-                ->visible(fn (): bool => self::canAccess('voir_logs')),
+                ->visible(fn (): bool => 
+                    $this->canAccessAnyPermission(['permission.bcf','admin']))
+                    ,
             
             NavigationItem::make('Debug Permissions')
                 ->icon('heroicon-o-bug-ant')
                 ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.debug-permissions'))
                 ->url(fn (): string => '#') // TODO: Remplacer par votre URL de debug
-                ->visible(fn (): bool => self::canAccess('admin')),
+                ->visible(fn (): bool => 
+                $this->canAccessAnyPermission(['permission.bcf','admin']))
+                ,
         ])
     ]);
 }
@@ -360,14 +335,14 @@ class FcmcentralPanelProvider extends PanelProvider
        
            
                 $widgets = array_merge($widgets, [
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorStatsWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinsSupervisesWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MentorProgressionWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorStatsWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MarinsSupervisesWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorProgressionWidget::class,
                 
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinProgressWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinStatsWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinEvolutionWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinRepartitionWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinProgressWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinStatsWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinEvolutionWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinRepartitionWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\TestMarinRolesPermissionsWidget::class,
                 ]);
            
@@ -377,14 +352,21 @@ class FcmcentralPanelProvider extends PanelProvider
     }
 
     /**
-     * Menu utilisateur conditionnel
+     * Menu utilisateur conditionnel (MEnu Avatar)
      */
     private function getConditionalUserMenuItems(): array
     {
         $menuItems = [
-            'profile' => MenuItem::make()
-                ->label('Mon profil')
-                ->icon('heroicon-m-user-circle'),
+            
+
+            'mon-parcours' => MenuItem::make()
+                ->label('Mon parcours FCM')
+                ->icon('heroicon-m-document-text')
+                ->url(fn() => MonLivretDeFcm::getUrl())
+                
+                ->visible(fn (): bool => 
+                $this->canAccessAnyPermission(['permission.mentor','permission.bcf']))
+                ,
             
             'help' => MenuItem::make()
                 ->label('Aide')
@@ -395,99 +377,66 @@ class FcmcentralPanelProvider extends PanelProvider
                 ->label('API')
                 ->icon('heroicon-m-cloud')
                 ->url(fn () => url(route('l5-swagger.default.api')), shouldOpenInNewTab: true)
-                ->visible(fn (): bool => $this->canAccessAdminMenus()),
+                ->visible(fn (): bool => 
+                $this->canAccessAnyPermission(['permission.mentor','permission.bcf']))
+                ,
         ];
 
-        try {
-            // Menu rapide pour les marins FCM
-            $menuItems['mon-parcours'] = MenuItem::make()
-                ->label('Mon parcours FCM')
-                ->icon('heroicon-m-document-text')
-                ->url(fn() => MonLivretDeFcm::getUrl())
-                ->badge(fn() => $this->getMarinProgressBadge())
-                ->visible(fn (): bool => $this->canAccessMarinLivret());
-
-            // Menu rapide pour les mentors
-            $menuItems['mes-marins'] = MenuItem::make()
-                ->label('Mes marins supervisés')
-                ->icon('heroicon-m-users')
-                ->url(fn() => MarinResource::getUrl('index'))
-                ->badge(fn() => $this->getMentorMarinsCount())
-                //->badgeColor('success')
-                ->visible(fn (): bool => $this->canAccessMentorFeatures());
-                
-            $menuItems['validations-attente'] = MenuItem::make()
-                ->label('Validations en attente')
-                ->icon('heroicon-m-clock')
-                ->url(fn() => MarinResource::getUrl('index', ['tableFilters[en_attente][value]' => true]))
-                ->badge(fn() => $this->getMentorPendingValidationsCount())
-                //->badgeColor('warning')
-                ->visible(fn(): bool => $this->canAccessMentorFeatures() && $this->getMentorPendingValidationsCount() > 0);
-
-            // Menu spécifique aux admins
-            $menuItems['admin-stats'] = MenuItem::make()
-                ->label('Statistiques générales')
-                ->icon('heroicon-m-chart-bar')
-                ->url(fn() => Pages\Dashboard::getUrl())
-                ->visible(fn (): bool => $this->canAccessAdminMenus());
-            
-            $menuItems['logout'] = MenuItem::make()
-                ->label('Se déconnecter')
-                ->icon('heroicon-m-arrow-right-on-rectangle');
-                
-        } catch (\Exception $e) {
-            // En cas d'erreur, menu de base seulement
-        }
 
         return $menuItems;
     }
 
     // ... reste des méthodes helper inchangées ...
-
+    // Fonction pour calculer pourcentage parcours a cote de Mon LivretFCM
     private function getMarinProgressBadge(): ?string
-    {
-        try {
-            if (!$this->canAccessMarinLivret()) {
-                return null;
-            }
+{
+    $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
 
-            $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
-            if (!$marin || !$marin->complements_fcm) {
-                return null;
-            }
+    if (!$marin || !$marin->complements_fcm) {
+        return null;
+    }
 
-            $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
-            if (!$parcours) return null;
+    $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
 
-            $totalActivites = 0;
-            $activitesValidees = 0;
-            
-            foreach ($parcours['fonctions'] ?? [] as $fonction) {
-                foreach ($fonction['competences'] ?? [] as $competence) {
-                    foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
-                        foreach ($savoirfaire['activites'] ?? [] as $activite) {
-                            $totalActivites++;
-                            if (($activite['etat_valid'] ?? false) === true) {
-                                $activitesValidees++;
-                            }
-                        }
-                    }
+    if (!is_array($parcours) || empty($parcours['affectations'])) {
+        return null;
+    }
+
+    $heuresTotal = 0.0;
+    $heuresValidees = 0.0;
+
+    foreach ($parcours['affectations'] as $affectation) {
+        foreach ($affectation['competences'] ?? [] as $competence) {
+            foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                $heures = 0.0;
+                if (isset($csf['heures']) && is_numeric($csf['heures'])) {
+                    $heures = (float) $csf['heures'];
+                } elseif (isset($csf['jours']) && is_numeric($csf['jours'])) {
+                    $heures = (float) $csf['jours'] * 7;
+                }
+
+                $heuresTotal += $heures;
+
+                if (!empty($csf['etat_valid'])) {
+                    $heuresValidees += $heures;
                 }
             }
-
-            $progress = $totalActivites > 0 ? round(($activitesValidees / $totalActivites) * 100) : 0;
-            return $progress . '%';
-        } catch (\Exception $e) {
-            return null;
         }
     }
+
+    $progress = $heuresTotal > 0 ? round(($heuresValidees / $heuresTotal) * 100) : 0;
+
+    return $progress . '%';
+}
+
+
 
     private function getMentorMarinsCount(): ?string
     {
         try {
-            if (!$this->canAccessMentorFeatures()) {
-                return null;
-            }
+            // if (!$this->canAccessMentorFeatures()) {
+            //     return null;
+            // }
 
             $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
             if (!$currentMarin) {
@@ -504,9 +453,9 @@ class FcmcentralPanelProvider extends PanelProvider
     private function getMentorPendingValidationsCount(): int
     {
         try {
-            if (!$this->canAccessMentorFeatures()) {
-                return 0;
-            }
+            // if (!$this->canAccessMentorFeatures()) {
+            //     return 0;
+            // }
 
             $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
             if (!$currentMarin) {
@@ -551,24 +500,7 @@ class FcmcentralPanelProvider extends PanelProvider
         // MÉTHODES UTILITAIRES
         // ========================================
     
-        /**
-         * Vérification centralisée des permissions
-         */
-        public static function canAccess(string $permission): bool
-        {
-            $user = auth()->user();
-            
-            if (!$user) {
-                return false;
-            }
     
-            // Ajouter le préfixe fcmcentral:: si nécessaire
-            if (!str_starts_with($permission, 'fcmcentral::')) {
-                $permission = 'fcmcentral::' . $permission;
-            }
-    
-            return $user->can($permission);
-        }
 
 
     protected function getModuleNamespace(): string

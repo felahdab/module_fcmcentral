@@ -29,7 +29,7 @@ class SavoirfaireType extends Model
      */
     public function competences()
     {
-        return $this->hasMany(AnneeSavoirfaire::class, 'savoirfaire_type_id');
+        return $this->hasMany(CompetenceSavoirfaire::class, 'savoirfaire_type_id');
     }
 
 	

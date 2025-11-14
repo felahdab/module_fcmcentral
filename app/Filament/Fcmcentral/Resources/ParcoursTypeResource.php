@@ -17,7 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Modules\FcmCentral\Helpers\OutilsHelper;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 
 class ParcoursTypeResource extends Resource
 {
@@ -25,7 +25,7 @@ class ParcoursTypeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    use FcmAccessControl;
+    
     use FilamentPermissionTrait;
 
     // Permissions marche avec le Trait

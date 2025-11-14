@@ -25,12 +25,12 @@ use Modules\FcmCentral\Policies;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 
 
 class FcmCentralServiceProvider extends ServiceProvider
 {
-    use FcmAccessControl;
+
     
     protected string $moduleName = 'FcmCentral';
 
@@ -44,13 +44,21 @@ class FcmCentralServiceProvider extends ServiceProvider
     protected $policies = [
         Models\Parcours::class => Policies\ParcoursPolicy::class,
         Models\ParcoursSerialise::class => Policies\ParcoursSerialisePolicy::class,
-        Models\Annee::class => Policies\AnneePolicy::class,
+        Models\Affectation::class => Policies\AffectationPolicy::class,
         Models\Competence::class => Policies\CompetencePolicy::class,
         Models\Savoirfaire::class => Policies\SavoirfairePolicy::class,
         Models\Objectif::class => Policies\ObjectifPolicy::class,
         Models\Marin::class => Policies\MarinPolicy::class,
         Models\Domaine::class => Policies\DomainePolicy::class,
-        Models\Cohorte::class => Policies\CohortePolicy::class
+        Models\Cohorte::class => Policies\CohortePolicy::class,
+        Models\Etat::class => Policies\EtatPolicy::class,
+        Models\CompetenceSavoirfaire::class => Policies\CompetenceSavoirfairePolicy::class,
+        Models\Note::class => Policies\NotePolicy::class,
+        Models\ParcoursType::class => Policies\ParcoursTypePolicy::class,
+        Models\SavoirfaireType::class => Policies\SavoirfaireTypePolicy::class,
+        Models\TypeEtat::class => Policies\TypeEtatPolicy::class,
+        Models\TypeNote::class => Policies\TypeNotePolicy::class
+
     ];
 
     /**
@@ -79,124 +87,26 @@ class FcmCentralServiceProvider extends ServiceProvider
             $this->registerPolicies();
         });
 
-        $this->registerDirectMenuItems();
+       // $this->registerDirectMenuItems();
         $this->registerPreferedPagesItems();
     }
 
     public function registerDirectMenuItems()
     {
-        if (static::canAccessAdminMenus()) {
+       
         app(ModuleDefinedMenusRegistry::class)->registerDirectMenuItems([
             DirectMenuItem::make()
                 ->name('FCM central')
-                ->children([
-                    DirectMenuItem::make()
-                        ->name('Mon livret de FCM')
-                        ->visible(fn() => auth()->check() && Models\Marin::fromCurrentUser()?->hasLivret())
-                        ->url(fn() => MonLivretDeFcm::getUrl(panel: 'FCM Central')),
-                    DirectMenuItem::make()
-                        ->name('Liste des marins')
-                        ->visible(fn() => auth()->check() && auth()->user()->can('fcmcentral::marin.index'))
-                        ->url(fn() => ListMarins::getUrl(panel: 'FCM Central')),
-                        
-                ])
-        ]);
-    }
-    }
-
-    private function getConditionalMenuItems(): array
-    {
-        $menuItems = [];
-       
-        
-        // Menu pour les marins FCM non-mentors (leur livret personnel)
-        if ( $this->canAccessMarinLivret()) {
-            $menuItems[] = DirectMenuItem::make()
-                ->name('Mon livret FCM')
-                ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(panel: 'FCM Central'))
-               ;
-        }
-        
-        // Menus pour les mentors
-        if ( $this->canAccessMentorFeatures()) {
-            $menuItems[] = DirectMenuItem::make()
-                ->name('Mes marins FCM')
-                ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins::getUrl(panel: 'FCM Central'))
-               ;
-        }
-        
-        // Menus administratifs (seulement pour superviseurs/admins)
-        if (static::canAccessAdminMenus()) {
-            // Groupe Administration
-            $menuItems[] = DirectMenuItem::make()
-                ->name('Administration')
-                
-                ->children([
-                    DirectMenuItem::make()
-                        ->name('Gestion des marins')
-                        ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins::getUrl(panel: 'FCM Central'))
-                        ,
-                    
-                    DirectMenuItem::make()
-                        ->name('Gestion des cohortes')
-                        ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages\ListCohortes::getUrl(panel: 'FCM Central'))
-                        ,
-                ]);
-
-            // Groupe Parcours
-            $menuItems[] = DirectMenuItem::make()
-                ->name('Gestion des parcours')
                
-                ->children([
-                    DirectMenuItem::make()
-                        ->name('Parcours')
-                        ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours::getUrl(panel: 'FCM Central'))
-                        ,
-                    
-                    DirectMenuItem::make()
-                        ->name('Fonctions')
-                        ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\FonctionResource\Pages\ListFonctions::getUrl(panel: 'FCM Central'))
-                        ,
-                    
-                    DirectMenuItem::make()
-                        ->name('Compétences')
-                        ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages\ListCompetences::getUrl(panel: 'FCM Central'))
-                        ,
-                    
-                    DirectMenuItem::make()
-                        ->name('Savoir-faire')
-                        ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\Pages\ListSavoirFaires::getUrl(panel: 'FCM Central'))
-                        ,
-                    
-                    DirectMenuItem::make()
-                        ->name('Objectifs, Stages et EAD')
-                        ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ActiviteResource\Pages\ListActivites::getUrl(panel: 'FCM Central'))
-                       ,
-
-                    DirectMenuItem::make()
-                       ->name('Domaines')
-                       ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages\ListDomaines::getUrl(panel: 'FCM Central'))
-                      ,   
-                ]);
-
-            // Outils
-            $menuItems[] = DirectMenuItem::make()
-                ->name('Outils')
-                
-                ->children([
-                    DirectMenuItem::make()
-                        ->name('Recherche annuaire')
-                        ->url(fn() => \Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage::getUrl(panel: 'FCM Central'))
-                       ,
-                ]);
-        }
-        
-        return $menuItems;
+        ]);
+   
     }
 
+    
 
 
 
+    /// PAge Preferée
     public function registerPreferedPagesItems()
     {
         app(ModuleDefinedPreferedPagesRegistry::class)->registerPreferedPagesItems(
@@ -213,10 +123,10 @@ class FcmCentralServiceProvider extends ServiceProvider
                 ->name('FCM central: recherche dans l\' annuaire')
                 ->visible(fn() => auth()->check() && RechercheAnnuairePage::canAccess())
                 ->routeName(fn() => RechercheAnnuairePage::getRouteName(panel: 'FCM Central')),
-            PreferedPageItem::make()
-                ->name('FCM central: Mon livret de FCM')
-                ->visible(fn() => auth()->check() && MonLivretDeFcm::canAccess())
-                ->routeName(fn() => MonLivretDeFcm::getRouteName(panel: 'FCM Central'))
+            // PreferedPageItem::make()
+            //     ->name('FCM central: Mon livret de FCM')
+            //     ->visible(fn() => auth()->check() && MonLivretDeFcm::canAccess())
+            //     ->routeName(fn() => MonLivretDeFcm::getRouteName(panel: 'FCM Central'))
             ]
         );
     }

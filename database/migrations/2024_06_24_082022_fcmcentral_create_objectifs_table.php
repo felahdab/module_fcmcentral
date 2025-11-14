@@ -22,7 +22,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->default($default_value);
             $table->string('code');
-            $table->unsignedBigInteger('annee_savoirfaire_id');
+            $table->unsignedBigInteger('competence_savoirfaire_id');
             $table->string('libelle_court')->nullable();
             $table->string('libelle_long')->nullable();
             //$table->string('duree')->nullable();
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->integer('ordre')->default(0);
             $table->timestamps();
 
-            $table->foreign('annee_savoirfaire_id')->references('id')->on('fcmcentral_annee_savoirfaires')->onDelete('cascade');
+            $table->foreign('competence_savoirfaire_id')->references('id')->on('fcmcentral_competence_savoirfaires')->onDelete('cascade');
         });
     }
 

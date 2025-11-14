@@ -20,16 +20,16 @@ class Objectif extends Model
 
 
     protected $fillable = [
-        'annee_savoirfaire_id',
+        'competence_savoirfaire_id',
         'libelle_long',
         'libelle_court',
         'coeff',
         'ordre',
     ];
 
-    public function anneeSavoirfaire()
+    public function competenceSavoirfaire()
     {
-        return $this->belongsTo(AnneeSavoirfaire::class, 'annee_savoirfaire_id');
+        return $this->belongsTo(CompetenceSavoirfaire::class, 'competence_savoirfaire_id');
     }
 
     

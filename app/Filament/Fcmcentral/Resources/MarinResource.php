@@ -26,12 +26,15 @@ use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCommun\Services\EventTriggerService;
 use Modules\RH\Models\Specialite;
 use Modules\RH\Models\Unite;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+use Modules\FcmCentral\Traits\FcmPermissionTrait;
+
 
 class MarinResource extends Resource
 {
     
-    use FcmAccessControl;
+    use FilamentPermissionTrait;
+    use FcmPermissionTrait;
     
     protected static ?string $model = Marin::class;
 
@@ -40,49 +43,16 @@ class MarinResource extends Resource
     protected static ?string $navigationGroup = 'Marins';
     protected static ?string $navigationLabel = "Marins";
 
-    /**
-     * Contrôle d'accès global à la resource
-     */
-    public static function canAccess(array $parameters = []): bool
-    {
-        // Admins ET mentors peuvent accéder
-        return static::canAccessAdminMenus() || static::canAccessMentorFeatures();
-    }
+    
+     // Permissions marche avec le Trait
+     protected static array $permissions = [
+        'fcmcentral::marin.index',
+        'fcmcentral::admin',
+        'fcmcentral::permission.bcf',
+        'fcmcentral::permission.fps',
+    ];
 
-    public static function canViewAny(): bool
-    {
-        return static::canAccessAdminMenus() || static::canAccessMentorFeatures();
-    }
-
-    public static function canCreate(): bool
-    {
-        return false; // Pas de création directe
-    }
-
-    public static function canEdit($record): bool
-    {
-        // Admins peuvent tout éditer, mentors seulement leurs marins
-        if (static::canAccessAdminMenus()) {
-            return true;
-        }
-        
-        if (static::canAccessMentorFeatures()) {
-            return static::isMentorOfMarin($record);
-        }
-        
-        return false;
-    }
-
-    public static function canDelete($record): bool
-    {
-        return static::canAccessAdminMenus(); // Seuls les admins peuvent supprimer
-    }
-
-    public static function canDeleteAny(): bool
-    {
-        return static::canAccessAdminMenus();
-    }
-
+   
     /**
      * Vérifie si l'utilisateur connecté est mentor du marin donné
      */
@@ -108,12 +78,16 @@ class MarinResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         try {
-            if (static::canAccessAdminMenus()) {
+            if (static:: canAccessPermission('admin')) {
                 // Admins voient tous les marins FCM
                 return (string) Marin::enFcm()->count();
             }
             
-            if (static::canAccessMentorFeatures()) {
+            if (static:: canAccessAnyPermission([
+                'permission.mentor',
+                'permission.bcf',
+                'permission.fps'
+            ])) {
                 // Mentors voient seulement leurs marins
                 $currentMarin = Marin::fromCurrentUser();
                 if ($currentMarin) {
@@ -137,12 +111,16 @@ class MarinResource extends Resource
 
         try {
             // Les admins voient tout
-            if (static::canAccessAdminMenus()) {
+            if (static:: canAccessPermission('admin')) {
                 return $query;
             }
             
             // Les mentors voient seulement leurs marins
-            if (static::canAccessMentorFeatures()) {
+            if (static:: canAccessAnyPermission([
+                'permission.mentor',
+                'permission.bcf',
+                'permission.fps']
+                )) {
                 $currentMarin = Marin::fromCurrentUser();
                 if ($currentMarin) {
                     $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
@@ -221,7 +199,13 @@ class MarinResource extends Resource
                     'style'=>'background:linear-gradient(135deg, #059669 0%, #047857 100%);'
                 ])
                 ->url(fn()=> RechercheAnnuairePage::getUrl())
-                ->visible(fn()=>static::canAccessAdminMenus()||static::canAccessMentorFeatures())
+                ->visible(fn()=>
+                static:: canAccessAnyPermission([
+                    'admin',
+                    'permission.mentor',
+                    'permission.bcf',
+                    'permission.fps'
+            ]))
                 ->tooltip('Recherche un marin dans l\'annuaire pour ajouter dans  au suivi FCM')
             ])
             ->columns([
@@ -379,11 +363,17 @@ class MarinResource extends Resource
                         'title' => 'Suivre en FCM',
                         'class' => 'btn-suivifcm',
                     ])
-                    ->hidden(function ($record) {
-                        return $record->suiviEnFcm &&
-                            auth()->user()?->can('fcmcentral::suivre_en_fcm');
+                    ->hidden(function () {
+                        return static::canAccessPermission('marin.suivreEnFcm');
                     })
-                    ->visible(fn ($record) => static::canAccessAdminMenus()) // Seuls les admins
+                    ->visible(fn () => 
+                    static:: canAccessAnyPermission([
+                        'admin',
+                        'permission.mentor',
+                        'permission.bcf',
+                        'permission.fps'
+                ])
+                    ) // Seuls les admins
                     ->action(function ($record) {
                         $event = new UserGeneratedEvent(
                             UserGeneratedEventTypes::MARIN_EN_FCM,
@@ -403,10 +393,9 @@ class MarinResource extends Resource
                         'class' => 'btn-livret',
                     ])
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm && 
-                                $record->complements_fcm && 
-                                $record->complements_fcm->parcoursSerialises()->exists() &&
-                                auth()->user()?->can('fcmcentral::voir_les_livrets');
+                        return static::canAccessPermission('livret.voir')
+                        && $record->complements_fcm
+                        && $record->complements_fcm->donnees_du_parcours;
                     })
                     ->action(function ($record){
                         $url = static::getUrl('livret-de-fcm',['record' => $record->id]);
@@ -423,10 +412,10 @@ class MarinResource extends Resource
         'class' => 'btn-pdf',
     ])
     ->visible(function ($record) {
-        return $record->suiviEnFcm &&
-                $record->complements_fcm &&
-                $record->complements_fcm->parcoursSerialises()->exists() &&
-                auth()->user()?->can('fcmcentral::telecharger_les_livrets');
+        return static::canAccessPermission('livret.telecharger')
+        && $record->complements_fcm
+        && $record->complements_fcm->donnees_du_parcours;
+;
     })
     ->action(function ($record) {
         return response()->streamDownload(function () use ($record) {
@@ -439,15 +428,20 @@ class MarinResource extends Resource
 // ✅ NOUVEAU BOUTON NOTE
 Tables\Actions\Action::make('create-note')
     ->iconButton()
-    ->icon('heroicon-m-pencil-square')
+    ->icon('heroicon-m-newspaper')
     ->extraAttributes([
         'title' => 'Créer une note',
         'class' => 'btn-note',
     ])
     ->visible(function ($record) {
         // Visible si le marin est suivi en FCM et que l'utilisateur peut créer des notes
-        return $record->suiviEnFcm && 
-               (static::canAccessAdminMenus() || static::canAccessMentorFeatures());
+        return static:: canAccessAnyPermission([
+            'admin',
+            'attribuer.note',
+            
+        ])
+        && $record->complements_fcm
+        && $record->complements_fcm->donnees_du_parcours;
     })
     ->modalHeading('Créer une note')
     ->modalDescription(fn ($record) => "Créer une note pour {$record->prenom} {$record->nom}")
@@ -500,7 +494,11 @@ Tables\Actions\Action::make('create-note')
         // Rédacteur automatique selon le rôle
         Forms\Components\Hidden::make('redacteur_id')
             ->default(function () {
-                if (static::canAccessMentorFeatures()) {
+                if (static::canAccessAnyPermission([
+                    
+                    'permission.mentor',
+                   
+                ])) {
                     // Si c'est un mentor, utiliser son ID marin
                     $currentMarin = Marin::fromCurrentUser();
                     return $currentMarin ? $currentMarin->id : auth()->user()->id;
@@ -513,7 +511,11 @@ Tables\Actions\Action::make('create-note')
         Forms\Components\Placeholder::make('redacteur_info')
             ->label('Rédacteur')
             ->content(function () {
-                if (static::canAccessMentorFeatures()) {
+                if (static::canAccessAnyPermission([
+                    
+                    'permission.mentor',
+                    
+                ])) {
                     $currentMarin = Marin::fromCurrentUser();
                     if ($currentMarin) {
                         return $currentMarin->grade?->libelle_court . ' ' . $currentMarin->prenom . ' ' . $currentMarin->nom;
@@ -525,7 +527,10 @@ Tables\Actions\Action::make('create-note')
         Forms\Components\Toggle::make('valide_bcf')
             ->label('Validé BCF')
             ->default(false)
-            ->visible(fn () => static::canAccessAdminMenus()), // Seuls les admins peuvent cocher
+            ->visible(fn () => static:: canAccessAnyPermission([
+                'admin',
+                'permission.bcf',  
+        ])), // Seuls les admins peuvent cocher
 
         Forms\Components\TextInput::make('lien_url')
             ->label('Lien URL (optionnel)')
@@ -589,9 +594,8 @@ Tables\Actions\Action::make('create-note')
                         'class' => 'btn-suivifcm',
                     ])
                     ->color('danger')
-                    ->visible(function ($record) {
-                        return $record->suiviEnFcm &&
-                            auth()->user()?->can('fcmcentral::suivre_en_fcm');
+                    ->visible(function () {
+                        return static::canAccessPermission('marin.suivreEnFcm');
                     })
                     ->action(function ($record) {
                         $event = new UserGeneratedEvent(
@@ -612,10 +616,9 @@ Tables\Actions\Action::make('create-note')
         'class' => 'btn-bilan',
     ])
     ->visible(function ($record) {
-        return $record->suiviEnFcm &&
-                $record->complements_fcm &&
-                $record->complements_fcm->parcoursSerialises()->exists() &&
-                auth()->user()?->can('fcmcentral::voir_les_livrets');
+        return static::canAccessPermission('livret.voir')
+        && $record->complements_fcm
+        && $record->complements_fcm->donnees_du_parcours;
     })
     ->action(function ($record){
         $url = static::getUrl('fiche-bilan', ['record' => $record->id]);
@@ -633,18 +636,19 @@ Tables\Actions\Action::make('create-note')
                         'class' => 'btn-suivifcm',
                     ])
                     ->visible(function ($record) {
-                        return $record->suiviEnFcm && (
-                            auth()->user()?->can('fcmcentral::attribuer_cohorte') ||
-                            auth()->user()?->can('fcmcentral::attribuer_mentor') ||
-                            auth()->user()?->can('fcmcentral::attribuer_parcours')
-                        );
+                        return 
+                        static::canAccessAnyPermission([
+                            'attribuer.cohorte',
+                            'attribuer.mentor',
+                            'attribuer.parcours'
+                        ]);
                     }) 
                     ->requiresConfirmation()
                     ->form([
                         Forms\Components\Select::make('cohorte_id')
                             ->label("Choisir la cohorte")
                             ->visible(function(){
-                                return auth()->user()?->can('fcmcentral::attribuer_cohorte');
+                                return  static::canAccessPermission('attribuer.cohorte');
                             })
                             ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
                 
@@ -652,16 +656,7 @@ Tables\Actions\Action::make('create-note')
                         Forms\Components\Select::make('mentor_id')
                             ->label("Choisir un mentor")
                             ->visible(function(){
-                                // Visible si peut attribuer mentor ET n'est pas juste mentor
-
-                                $user = auth()->user();
-                                // $isMentorOnly = $user?->can('fcmcentral::mentor') && 
-                                //                !$user?->can('fcmcentral::admin') && 
-                                //                !$user?->can('fcmcentral::bcf');
-                                
-                                // return $user?->can('fcmcentral::attribuer_mentor') && !$isMentorOnly;
-                                $isMentorOnly = $user?->can('fcmcentral::droits_admin');
-                                return !$user?->can('fcmcentral::attribuer_mentor') || $isMentorOnly;
+                                return static::canAccessPermission('attribuer.mentor');
                             })
                             ->options(
                                 Marin::query()
@@ -681,14 +676,7 @@ Tables\Actions\Action::make('create-note')
                         // === MENTOR CACHÉ POUR LES MENTORS (assignation automatique) ===
                         Forms\Components\Hidden::make('mentor_id')
                             ->visible(function(){
-                                // Visible si peut attribuer mentor ET est seulement mentor
-                                 $user = auth()->user();
-                                // $isMentorOnly = $user?->can('fcmcentral::mentor') && 
-                                //                !$user?->can('fcmcentral::admin') && 
-                                //                !$user?->can('fcmcentral::bcf');
-                                
-                                // return $user?->can('fcmcentral::attribuer_mentor') && $isMentorOnly;
-                                return $user?->can('fcmcentral::attribuer_mentor');
+                                static::canAccessPermission('attribuer.mentor');
                             })
                             ->default(function() {
                                 $currentMarin = Marin::fromCurrentUser();
@@ -698,13 +686,7 @@ Tables\Actions\Action::make('create-note')
                         // === MESSAGE INFORMATIF POUR LES MENTORS ===
                         Forms\Components\Placeholder::make('mentor_info')
                             ->visible(function(){
-                                $user = auth()->user();
-                                // $isMentorOnly = $user?->can('fcmcentral::mentor') && 
-                                //                !$user?->can('fcmcentral::admin') && 
-                                //                !$user?->can('fcmcentral::bcf');
-                                
-                                // return $user?->can('fcmcentral::attribuer_mentor') && $isMentorOnly;
-                                return $user?->can('fcmcentral::attribuer_mentor');
+                                static::canAccessPermission('attribuer.mentor');
                             })
                             ->label('Mentor assigné automatiquement')
                             ->content(function() {
@@ -725,7 +707,7 @@ Tables\Actions\Action::make('create-note')
                             ->searchable()
                             ->visible(function () {
                                 // Simplifier : juste vérifier la permission
-                                return auth()->user()?->can('fcmcentral::attribuer_parcours');
+                                return  static::canAccessPermission('attribuer.parcours');
                             }),
                     ])
                 
@@ -767,7 +749,14 @@ Tables\Actions\Action::make('create-note')
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn () => static::canAccessAdminMenus()), // Seuls les admins
+                        ->visible(fn () => 
+                        static::canAccessAnyPermission([
+                            'admin',
+                            'permission.mentor',
+                            'permission.bcf',
+                            'permission.fps'
+                        ])
+                    ), // Seuls les admins
                 ]),
             ]);
     }
@@ -788,13 +777,13 @@ Tables\Actions\Action::make('create-note')
             }
 
             $pendingCount = 0;
-            foreach ($parcours['fonctions'] ?? [] as $fonction) {
-                foreach ($fonction['competences'] ?? [] as $competence) {
-                    foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
-                        foreach ($savoirfaire['activites'] ?? [] as $activite) {
-                            $estProposee = !empty($activite['date_proposition']);
-                            $estValidee = ($activite['etat_valid'] ?? false) === true;
-                            $aDateValidation = !empty($activite['date_validation']);
+            foreach ($parcours['affectations'] ?? [] as $affectation) {
+                foreach ($affectations['competences'] ?? [] as $competence) {
+                    foreach ($competence['competencesSavoirfaires'] ?? [] as $savoirfaire) {
+                        foreach ($savoirfaire['objectifs'] ?? [] as $objectif) {
+                            $estProposee = !empty($objectif['date_proposition']);
+                            $estValidee = ($objectif['etat_valid'] ?? false) === true;
+                            $aDateValidation = !empty($objectif['date_validation']);
                             
                             //if ($estProposee && !$estValidee && !$aDateValidation) {
                             if ($estProposee && !$estValidee) {   
@@ -866,7 +855,12 @@ Tables\Actions\Action::make('create-note')
     // Optionnel : Titre personnalisé selon les droits
     public function getTitle(): string
     {
-        if (static::canAccessMentorFeatures() && !static::canAccessAdminMenus()) {
+        if ( static:: canAccessAnyPermission([
+            //'admin',
+            'permission.mentor',
+            'permission.bcf',
+            'permission.fps'
+        ])) {
             return 'Mes marins supervisés';
         }
         
@@ -877,7 +871,12 @@ Tables\Actions\Action::make('create-note')
     public function getSubheading(): ?string
     {
         try {
-            if (static::canAccessMentorFeatures() && !static::canAccessAdminMenus()) {
+            if ( static:: canAccessAnyPermission([
+                'admin',
+                'permission.mentor',
+                'permission.bcf',
+                'permission.fps'
+            ])) {
                 $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
                 if ($currentMarin) {
                     $count = \Modules\FcmCentral\Models\FcmMarin::where('mentor_id', $currentMarin->id)->count();
@@ -887,7 +886,10 @@ Tables\Actions\Action::make('create-note')
                 }
             }
             
-            if (static::canAccessAdminMenus()) {
+            if ( static:: canAccessAnyPermission([
+                'admin',
+               
+            ])) {
                 $totalMarins = \Modules\FcmCentral\Models\Marin::enFcm()->count();
                 return "Gestion de {$totalMarins} marins en formation continue.";
             }

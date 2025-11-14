@@ -52,14 +52,14 @@ class Savoirfaire extends Model
         return $this->belongsTo(Domaine::class, 'domaine_id');
     }
 
-    // Relation many-to-many avec Annee via le pivot enrichi
-    public function annees()
+    // Relation many-to-many avec Competence via le pivot enrichi
+    public function competences()
     {
         return $this->belongsToMany(
-            Annee::class,
-            'fcmcentral_annee_savoirfaires',
+            Competence::class,
+            'fcmcentral_competence_savoirfaires',
             'savoirfaire_id',
-            'annee_id'
+            'competence_id'
         )
         ->withPivot([
             'id',
@@ -76,18 +76,18 @@ class Savoirfaire extends Model
 
 
     // Accès direct aux objets pivot
-    public function anneeSavoirfaires()
+    public function competenceSavoirfaires()
     {
-        return $this->hasMany(AnneeSavoirfaire::class, 'savoirfaire_id');
+        return $this->hasMany(CompetenceSavoirfaire::class, 'savoirfaire_id');
     }
 
     public function objectifs()
 {
     return $this->hasManyThrough(
         Objectif::class,
-        AnneeSavoirfaire::class,
+        CompetenceSavoirfaire::class,
         'savoirfaire_id', // Clé étrangère dans annee_savoirfaires
-        'annee_savoirfaire_id', // Clé étrangère dans objectifs
+        'competence_savoirfaire_id', // Clé étrangère dans objectifs
         'id', // Clé locale dans savoirfaires
         'id' // Clé locale dans annee_savoirfaires
     );

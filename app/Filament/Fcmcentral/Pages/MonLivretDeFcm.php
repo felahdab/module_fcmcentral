@@ -7,14 +7,16 @@ use Modules\FcmCentral\Models\Marin;
 use Filament\Pages\Page;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Livewire;
+use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight as LivretDeFcm;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 
 class MonLivretDeFcm extends Page
 {
-    use FcmAccessControl;
+   
+    use FcmPermissionTrait;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
@@ -23,7 +25,7 @@ class MonLivretDeFcm extends Page
 
     public static function canAccess(array $parameters = []): bool
     {
-        return static::canAccessMarinLivret();
+        return static::canAccessPermission('livret.voir');
     }
 
     public function mount()

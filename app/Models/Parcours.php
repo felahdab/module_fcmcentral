@@ -40,31 +40,36 @@ class Parcours extends Model
 
    
 
-    public function parcoursType() {
-        return $this->belongsTo(ParcoursType::class,'parcours_type_id');
-    }
+   
 
 
-    protected $with = [
-        'annees.savoirfaires.objectifs' 
-    ];
+
+    ////////////////////
+    /// Parcours      //
+    ////////////////////
 
     /**
-     * Les fonctions qui constituent un parcours
+     * Les affectations qui constituent un parcours
      */
-    public function annees(): BelongsToMany
+    public function affectations(): BelongsToMany
     {
-        return $this->belongsToMany(Annee::class, 
-        'fcmcentral_annee_parcours', 'parcours_id', 'annee_id')
+        return $this->belongsToMany(Affectation::class, 
+        'fcmcentral_affectation_parcours', 'parcours_id', 'affectation_id')
             ->withPivot('ordre')
             ->withTimestamps()
-            ->orderBy('fcmcentral_annee_parcours.ordre'); 
+            ->orderBy('fcmcentral_affectation_parcours.ordre'); 
     }
+
+
+    ////////////////////
+    /// Serialisation //
+    ////////////////////
 
     public function parcoursSerialise()
 	{
 		return $this->hasMany(ParcoursSerialise::class, 'parcours_id', 'id');
 	}
+
 
     public function getLatestSerializedVersion()
     {
@@ -75,6 +80,15 @@ class Parcours extends Model
         }
         return $last_version->version;
     }
+
+    //  Fonction pour serialise
+    public function parcoursType() {
+        return $this->belongsTo(ParcoursType::class,'parcours_type_id');
+    }
+
+    protected $with = [
+        'affectations.competences.competenceSavoirfaires.objectifs' 
+    ];
     
     
 }

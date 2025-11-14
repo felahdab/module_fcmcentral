@@ -17,13 +17,13 @@ use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Modules\FcmCentral\Helpers\OutilsHelper;
 
 class DomaineResource extends Resource
 {
-    use FcmAccessControl;
+
     use FilamentPermissionTrait;
    
     protected static ?string $model = Domaine::class;

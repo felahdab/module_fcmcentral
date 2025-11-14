@@ -18,7 +18,7 @@ use Filament\Forms\Components\Select;
 use Modules\FcmCentral\Models\Domaine;
 use Modules\FcmCentral\Models\Competence;
 use Filament\Tables\Filters\SelectFilter;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\ActivitesRelationManager;
 use Modules\FcmCentral\Helpers\OutilsHelper;
@@ -27,7 +27,7 @@ use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 class SavoirfaireResource extends Resource
 {
     
-    use FcmAccessControl;
+    
     use FilamentPermissionTrait;
     
     protected static ?string $model = Savoirfaire::class;

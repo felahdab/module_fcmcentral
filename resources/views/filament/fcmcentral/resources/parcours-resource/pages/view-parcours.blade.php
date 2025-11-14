@@ -1,195 +1,145 @@
 <x-filament::page>
     <div class="space-y-4">
-        <div class="tree-view">
-            @if ($parcours)              
-                <div class="flex items-center justify-between text-2xl font-bold mt1 mb1">
-                    {{ $parcours->libelle_long }} 
-                </div>
-                <ul>
-                    <li>
-                        @if ($parcours->annees->isNotEmpty())
-                            <ul>
-                                @foreach ($parcours->annees->sortBy('pivot.ordre') as $annee)
-                                    <li>
-                                        <div class="flex items-center mt1 mb1">
-                                            <div class="flex items-center">
-                                                <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+        @if ($parcours)
+            <div class="text-2xl font-bold mb-4">{{ $parcours->libelle_long }}</div>
+
+            <div class="space-y-3">
+                @foreach($parcours->affectations->sortBy('pivot.ordre') as $affectation)
+                    <div class="p-3 border rounded bg-white">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <button type="button" class="toggle-btn text-sm font-medium text-indigo-600">[+]</button>
+                                <div>
+                                    <div class="font-semibold" style="color: #2b6cb0">
+                                        {{ $affectation->libelle_long }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        {{ $affectation->competences->count() }} compétence(s)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-600">ordre: {{ $affectation->pivot->ordre ?? '-' }}</div>
+                        </div>
+
+                        <div class="collapsible mt-3 space-y-2" style="display:none;">
+                            @if($affectation->competences->isNotEmpty())
+                                @foreach($affectation->competences->sortBy('ordre') as $competence)
+                                    <div class="p-2 border rounded bg-gray-50">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                <button type="button" class="toggle-btn text-sm ">[+]</button>
+                                                <div>
+                                                    <div class="font-medium bleu">
+                                                        {{ $competence->code ?? '' }} - {{ $competence->libelle_long }}
+                                                    </div>
+                                                    <div class="text-xs text-gray-500">
+                                                        {{ $competence->competenceSavoirfaires->count() }} liaison(s) SF
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <strong class="vert" style="color: {{ $annee->color ?? '#389D60' }}">&nbsp;&nbsp;
-                                                {{ $annee->libelle_long }}  
-                                                <span class="badge-count">({{ $annee->anneeSavoirfaires->count() }} SF)</span>
-                                            </strong>
+                                            <div class="text-xs text-gray-500">ordre: {{ $competence->ordre ?? '-' }}</div>
                                         </div>
 
-                                        @if ($annee->anneeSavoirfaires->isNotEmpty())
-                                            <ul class="collapsible">
-                                                @foreach ($annee->anneeSavoirfaires->sortBy('ordre') as $anneeSavoirfaire)
-                                                    <li>
-                                                        <div class="flex items-center mt1 mb1">
-                                                            <div class="flex items-center space-x-2">
-                                                                @if($anneeSavoirfaire->savoirfaireType->code == 'C')
-                                                                <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+                                        <div class="collapsible mt-2 ml-8 space-y-2" style="display:none;">
+                                            @if($competence->competenceSavoirfaires->isNotEmpty())
+                                                @foreach($competence->competenceSavoirfaires->sortBy('ordre') as $csf)
+                                                    <div class="p-2 border rounded bg-white">
+                                                        <div class="flex items-start justify-between">
+                                                            
+                                                            <div class="flex items-center gap-3">
+                                                                @if($csf->objectifs->isNotEmpty())    
+                                                                <button type="button" class="toggle-btn text-sm ">[+]</button>
                                                                 @endif
+                                                                <div>
+                                                                   
+                                                                    <div class="text-sm font-medium vert" >
+                                                                        {{ $csf->savoirfaire->code ?? '' }} - {{ \Illuminate\Support\Str::limit($csf->savoirfaire->libelle_long, 80) }}
+                                                                    </div>
+                                                                    <div class="text-xs text-gray-500">
+                                                                        {{ $csf->libelle_court ? "intitulé: {$csf->libelle_court}" : '' }}
+                                                                        • heures: {{ $csf->heures ?? '—' }} • jours: {{ $csf->jours ?? '—' }}
+                                                                        @if($csf->savoirfaireType)
+                                                                            • <span class="px-2 py-0.5 bg-gray-100 rounded text-xs">{{ $csf->savoirfaireType->libelle_court }}</span>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <strong class="bleu" style="color: {{ $anneeSavoirfaire->savoirfaire->color ?? $anneeSavoirfaire->savoirfaire->competence->color ?? '#6AADE8' }}">&nbsp;&nbsp;
-                                                                {{ $anneeSavoirfaire->savoirfaire->code }} - {{ Str::limit($anneeSavoirfaire->savoirfaire->libelle_long, 60) }}
-                                                                @if($anneeSavoirfaire->libelle_court)
-                                                                    <em>({{ $anneeSavoirfaire->libelle_court }})</em>
-                                                                @endif
-                                                                @if($anneeSavoirfaire->savoirfaireType)
-                                                                    <span class="type-badge">{{ $anneeSavoirfaire->savoirfaireType->libelle_court }}</span>
-                                                                @endif
-                                                            </strong>
-                                                            <div class="sf-details">
-                                                                @if($anneeSavoirfaire->heures)
-                                                                    <span class="detail-item">{{ $anneeSavoirfaire->heures }}h</span>
-                                                                @endif
-                                                                @if($anneeSavoirfaire->jours)
-                                                                    <span class="detail-item">{{ $anneeSavoirfaire->jours }}j</span>
-                                                                @endif
-                                                                {{-- <span class="detail-item">Ordre: {{ $anneeSavoirfaire->ordre }}</span> --}}
-                                                            </div>
+                                                            <div class="text-xs text-gray-400">ordre: {{ $csf->ordre ?? '-' }}</div>
                                                         </div>
 
-                                                        @if ($anneeSavoirfaire->objectifs->isNotEmpty())
-                                                            <ul class="collapsible">
-                                                                @foreach ($anneeSavoirfaire->objectifs as $objectif)
-                                                                    <li>
-                                                                        <div class="flex items-center mt1 mb1">
-                                                                            <strong class="orange">&nbsp;&nbsp;
-                                                                                📎 {{ $objectif->libelle_court  }}
-                                                                            </strong>
-                                                                            @if($objectif->description)
-                                                                                <div class="objectif-description">
-                                                                                    {{ Str::limit($objectif->libelle_court, 100) }}
-                                                                                </div>
+                                                        <div class="collapsible mt-2 ml-8" style="display:none;">
+                                                            @if($csf->objectifs->isNotEmpty())
+                                                                <ul class="space-y-1">
+                                                                    @foreach($csf->objectifs as $objectif)
+                                                                        <li class="p-2 bg-gray-50 rounded border">
+                                                                            <div class="font-medium text-sm orange">📎 {{ $objectif->libelle_court }}</div>
+                                                                            @if(!empty($objectif->description))
+                                                                                <div class="text-xs text-gray-600 mt-1">{{ \Illuminate\Support\Str::limit($objectif->description, 140) }}</div>
                                                                             @endif
-                                                                        </div>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
-                                                        {{-- @else
-                                                            <ul class="collapsible">
-                                                                <li>
-                                                                    <em class="no-objectifs">Aucun objectif défini</em>
-                                                                </li>
-                                                            </ul> --}}
-                                                        @endif
-                                                    </li>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @else
+                                                                <div class="text-xs text-gray-500 italic">Aucun objectif</div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
                                                 @endforeach
-                                            </ul>
-                                        @endif
-                                    </li>
+                                            @else
+                                                <div class="text-xs text-gray-500 italic">Aucune liaison savoir faire pour cette compétence</div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 @endforeach
-                            </ul>
-                        @endif
-                    </li>
-                </ul>
-            @else
-                <p>Aucun parcours trouvé.</p>
-            @endif
-        </div>
+                            @else
+                                <div class="text-xs text-gray-500 italic">Aucune compétence attachée</div>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div>Aucun parcours trouvé.</div>
+        @endif
     </div>
 
     <style>
-        .tree-view ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .tree-view ul ul {
-            margin-left: 20px;
-            border-left: 1px solid #ccc;
-            padding-left: 10px;
-        }
-
-        .tree-view li {
-            margin: 5px 0;
-        }
-
+        .ml-8{ margin-left: 2rem }
+        .mt-3{ margin-top: .75rem }
+        .mb-4{ margin-bottom: 1rem }
+        .toggle-btn { background: none; border: none; color: #D81B60; cursor: pointer; font-size: 14px; padding:0; }
         .bleu { color: #6AADE8; }
         .vert { color: #389D60; }
         .orange { color: #e67b47; }
 
-        .badge-count {
-            font-size: 0.8em;
-            color: #666;
-            font-weight: normal;
-        }
-
-        .type-badge {
-            display: inline-block;
-            background: #f3f4f6;
-            color: #374151;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.75em;
-            margin-left: 8px;
-        }
-
-        .sf-details {
-            margin-left: 20px;
-            margin-top: 5px;
-        }
-
-        .detail-item {
-            display: inline-block;
-            background: #e5e7eb;
-            color: #4b5563;
-            padding: 2px 6px;
-            margin-right: 8px;
-            border-radius: 3px;
-            font-size: 0.8em;
-        }
-
-        .objectif-description {
-            font-size: 0.9em;
-            color: #6b7280;
-            margin-top: 4px;
-            font-style: italic;
-        }
-
-        .no-objectifs {
-            color: #9ca3af;
-            font-size: 0.9em;
-        }
-
-        .tree-view .collapsible {
-            display: none;
-        }
-
-        .tree-view .toggle-btn {
-            background: none;
-            border: none;
-            color: #D81B60;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .tree-view .toggle-btn:focus {
-            outline: none;
-        }
-
-        .mt1 { margin-top: 15px; }
-        .mb1 { margin-bottom: 15px; }
-        .mr1 { margin-right: 15px; }
-        .ml1 { margin-left: 15px; }
     </style>
 
     <script>
-        function toggleCollapse(button) {
-            const collapsible = button.parentElement.parentElement.nextElementSibling;
-
-            if (collapsible && collapsible.classList.contains('collapsible')) {
-                if (collapsible.style.display === 'none' || collapsible.style.display === '') {
-                    collapsible.style.display = 'block';
-                    button.textContent = '[-]';
-                } else {
-                    collapsible.style.display = 'none';
-                    button.textContent = '[+]';
-                }
-            }
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toggle-btn').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    // trouve l'élément collapsible le plus proche qui suit le container parent
+                    let container = btn.closest('div'); // bouton -> son block
+                    // cherche le collapsible immédiatement après le container (remonte si nécessaire)
+                    let next = container.nextElementSibling;
+                    // si next n'est pas collapsible, essaie de remonter jusqu'au parent qui a le collapsible suivant
+                    let attempts = 0;
+                    while (next && !next.classList.contains('collapsible') && attempts < 5) {
+                        container = container.parentElement;
+                        next = container ? container.nextElementSibling : null;
+                        attempts++;
+                    }
+                    if (!next || !next.classList.contains('collapsible')) return;
+                    if (next.style.display === 'none' || next.style.display === '') {
+                        next.style.display = 'block';
+                        btn.textContent = '[-]';
+                    } else {
+                        next.style.display = 'none';
+                        btn.textContent = '[+]';
+                    }
+                });
+            });
+        });
     </script>
 </x-filament::page>
+

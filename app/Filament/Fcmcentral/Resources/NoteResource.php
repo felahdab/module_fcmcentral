@@ -6,7 +6,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages;
 use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
 use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Traits\FcmAccessControl;
+
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -16,7 +16,7 @@ use Filament\Tables\Table;
 
 class NoteResource extends Resource
 {
-    use FcmAccessControl;
+
     use FilamentPermissionTrait;
 
     protected static ?string $model = Note::class;

@@ -18,10 +18,14 @@ trait FilamentPermissionTrait
         return false;
     }
 
+    // Acces a la page
+    
     public static function canAccess(array $parameters = []): bool
     {
         return static::hasAnyPermission();
     }
+
+    // Permissions
 
     public static function canViewAny(): bool
     {
@@ -44,6 +48,11 @@ trait FilamentPermissionTrait
     }
 
     public static function canDeleteAny(): bool
+    {
+        return static::hasAnyPermission();
+    }
+
+    public static function canOrder(): bool
     {
         return static::hasAnyPermission();
     }

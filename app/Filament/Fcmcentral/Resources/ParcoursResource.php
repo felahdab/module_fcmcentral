@@ -17,18 +17,17 @@ use Filament\Forms\Components\Select;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\AnneesRelationManager;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\AffectationsRelationManager;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursType;
-use Modules\FcmCentral\Traits\FcmAccessControl;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Modules\FcmCentral\Services\ParcoursService;
 
 class ParcoursResource extends Resource
 {
-    use FcmAccessControl;
+    
     use FilamentPermissionTrait;
    
     protected static ?string $model = Parcours::class;
@@ -95,17 +94,20 @@ class ParcoursResource extends Resource
                     ->badge()
                     //->color('danger') 
                     ->color(fn($record)=>$record->parcoursType->color ?? 'info')  ,  
-                    TextColumn::make('annees.libelle_court')
-                    ->label('Années')
+                    TextColumn::make('affectations.libelle_court')
+                    ->label('Affectations')
                     ->badge()
                     ->listWithLineBreaks()
                     ->color(fn($state, $record) =>
-                        $record->annees->pluck('color')->map(fn($color) => $color ?? 'info')->first()
+                        $record->affectations->pluck('color')->map(fn($color) => $color ?? 'info')->first()
                     ),    
                   
-                TextColumn::make('annees.savoirfaires.code')
-                    ->label('Savoir Faires')
+                TextColumn::make('affections.competences.code')
+                    ->label('Competences')
                     ->badge(),
+                    TextColumn::make('affections.competences.savoirfaires.code')
+                    ->label('Competences')
+                    ->badge(),    
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -241,7 +243,7 @@ class ParcoursResource extends Resource
     public static function getRelations(): array
     {
         return [
-            AnneesRelationManager::class
+            AffectationsRelationManager::class
         ];
     }
 

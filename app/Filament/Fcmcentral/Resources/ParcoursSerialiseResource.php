@@ -17,7 +17,6 @@ use Filament\Tables\Filters\Filter;
 
 use Modules\FcmCentral\Http\Livewire\ParcoursDetails;
 use Filament\Forms\Components\Placeholder;
-use Modules\FcmCentral\Traits\FcmAccessControl;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 
@@ -26,7 +25,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationMa
 class ParcoursSerialiseResource extends Resource
 {
     
-    use FcmAccessControl;
+    
     use FilamentPermissionTrait;
     
     protected static ?string $model = ParcoursSerialise::class;

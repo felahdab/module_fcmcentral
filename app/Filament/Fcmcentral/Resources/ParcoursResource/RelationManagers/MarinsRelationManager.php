@@ -16,7 +16,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\KeyValue;
 use Filament\Notifications\Notification;
 use Modules\FcmCentral\Models\FcmMarin;
-use Modules\FcmCommun\Services\CalculTauxParcoursService;
+use Modules\FcmCommun\Services\CalculHeuresParcoursService;
 
 class MarinsRelationManager extends RelationManager
 {
@@ -233,14 +233,14 @@ class MarinsRelationManager extends RelationManager
             $success = 0;
             $errors = 0;
 
-            $calculTauxService = app(CalculTauxParcoursService::class);
+            $calculTauxService = app(CalculHeuresParcoursService::class);
 
             foreach ($marins as $marin) {
                 try {
                     $pivotData = $marin->pivot;
                     $parcoursMarin = json_decode($pivotData->parcoursmarin, true);
 
-                    if ($calculTauxService->mettreAJourTauxDansJson($parcoursMarin)) {
+                    if ($calculTauxService->mettreAJourHeuresDansJson($parcoursMarin)) {
                         // Mettre à jour les données
                         $pivotData->parcoursmarin = json_encode($parcoursMarin);
                         $pivotData->taux_global = $parcoursMarin['taux_global'] ?? 0;
@@ -294,11 +294,11 @@ class MarinsRelationManager extends RelationManager
     protected function recalculerTauxMarin($marin): void
     {
         try {
-            $calculTauxService = app(CalculTauxParcoursService::class);
+            $calculTauxService = app(CalculHeuresParcoursService::class);
             $pivotData = $marin->pivot;
             $parcoursMarin = json_decode($pivotData->parcoursmarin, true);
 
-            if ($calculTauxService->mettreAJourTauxDansJson($parcoursMarin)) {
+            if ($calculTauxService->mettreAJourHeuresDansJson($parcoursMarin)) {
                 $pivotData->parcoursmarin = json_encode($parcoursMarin);
                 $pivotData->taux_global = $parcoursMarin['taux_global'] ?? 0;
                 $pivotData->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
@@ -332,14 +332,14 @@ class MarinsRelationManager extends RelationManager
     {
         $success = 0;
         $errors = 0;
-        $calculTauxService = app(CalculTauxParcoursService::class);
+        $calculTauxService = app(CalculHeuresParcoursService::class);
 
         foreach ($marins as $marin) {
             try {
                 $pivotData = $marin->pivot;
                 $parcoursMarin = json_decode($pivotData->parcoursmarin, true);
 
-                if ($calculTauxService->mettreAJourTauxDansJson($parcoursMarin)) {
+                if ($calculTauxService->mettreAJourHeuresDansJson($parcoursMarin)) {
                     $pivotData->parcoursmarin = json_encode($parcoursMarin);
                     $pivotData->taux_global = $parcoursMarin['taux_global'] ?? 0;
                     $pivotData->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
