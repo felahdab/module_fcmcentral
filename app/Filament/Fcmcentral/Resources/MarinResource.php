@@ -111,15 +111,17 @@ class MarinResource extends Resource
 
         try {
             // Les admins voient tout
-            if (static:: canAccessPermission('admin')) {
+            if (static:: canAccessAnyPermission([
+                'admin',
+                'permission.bcf',
+                'permission.fps'])) {
                 return $query;
             }
             
             // Les mentors voient seulement leurs marins
             if (static:: canAccessAnyPermission([
                 'permission.mentor',
-                'permission.bcf',
-                'permission.fps']
+                ]
                 )) {
                 $currentMarin = Marin::fromCurrentUser();
                 if ($currentMarin) {

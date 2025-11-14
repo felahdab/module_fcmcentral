@@ -7,6 +7,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\Services\CalculHeuresParcoursService;
+use Modules\FcmCommun\Services\RefaireEtatParcoursService;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
@@ -70,7 +71,11 @@ class AnnulElementMarinParcoursListener
         }
 
         // Recalcul automatique des états parents (bottom-up)
-        $this->recalculateParentStates($parcoursMarin);
+        //$this->recalculateParentStates($parcoursMarin);
+
+        // Refonte Parcours
+        RefaireEtatParcoursService::refonte($parcoursMarin);
+
 
         // Recalcul des heures
         CalculHeuresParcoursService::mettreAJourHeures($parcoursMarin);

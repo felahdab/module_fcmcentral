@@ -74,13 +74,12 @@ class ParcoursSerialiseMarinListener
         $parcoursSerialiseJson = $parcoursSerialise->parcours;
         $parcoursMarinInfos = DataParcoursMarinHelper::rajoutChampSupplementaire($parcoursSerialiseJson, null, 'init');
 
-        //dd( $parcoursMarinInfos);
+
         // Récupérer les taux et autres données
         $tauxGlobal = $data['taux_global'] ?? 0;
-        //$tauxStage = $data['taux_stage'] ?? 0;
-       // $tauxActivite = $data['taux_activite'] ?? 0;
-        $parcoursMarin = json_encode($parcoursMarinInfos);
-
+        $tauxStage = $data['taux_stage'] ?? 0;
+        $tauxActivite = $data['taux_activite'] ?? 0;
+        $parcoursMarin = json_encode($parcoursMarinInfos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         // Si un parcours sérialisé est déjà attaché, le détacher
         if ($fcmMarin->parcoursSerialises->count())
@@ -91,13 +90,10 @@ class ParcoursSerialiseMarinListener
         // Attacher le parcours serialisé au marin
         $fcmMarin->parcoursSerialises()->attach($parcoursSerialise->id, [
             'taux_global' => $tauxGlobal,
-            //'taux_stage' => $tauxStage,
-            //'taux_activite' => $tauxActivite,
+            'taux_stage' => $tauxStage,
+            'taux_activite' => $tauxActivite,
             'parcoursmarin' => $parcoursMarin,
         ]);
-
-        $fcmMarin->data = $parcoursMarin;
-        $fcmMarin->save();
 
         // Log de l'action
         Log::info('Parcours serialisé attribué au marin.', [
