@@ -52,9 +52,9 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
     {
         return [
             Action::make('create-local-user-or-marin')
-            ->visible(function(){
-                return auth()->check() && (static::canAccessAdminMenus() || static::canAccessMentorFeatures());
-            })
+            // ->visible(function(){
+            //     return auth()->check() && (static::canAccessAdminMenus() || static::canAccessMentorFeatures());
+            // })
             ->iconButton()
             ->icon('heroicon-m-user-plus')
             ->extraAttributes([
