@@ -439,7 +439,9 @@ Tables\Actions\Action::make('create-note')
         // Visible si le marin est suivi en FCM et que l'utilisateur peut créer des notes
         return static:: canAccessAnyPermission([
             'admin',
-            'attribuer.note',
+            'note.index',
+            'permission.fps',
+        'permission.bcf',
             
         ])
         && $record->complements_fcm
