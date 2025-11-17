@@ -1,4 +1,5 @@
 <div class="fi-fo-component-ctn">
+
     @if($marin)
         <x-filament::section :compact="true" class="mb-6">
             <div class="flex items-center gap-3">
@@ -18,17 +19,17 @@
     @endif
 
     <form wire:submit="save" class="space-y-6">
+       
         {{-- Type de note --}}
         <div>
             <label class="text-sm text-gray-500 p-2">
-                   Type de Note <span class="text-red-500">*</span>
+                Type de Note <span class="text-red-500">*</span>
             </label>
            
             <x-filament::input.wrapper
                 :valid="! $errors->has('typeNote')"
                 class="space-y-2"
             >
-              
                 <x-filament::input.select
                     wire:model="typeNote"
                     id="typeNote"
@@ -46,8 +47,40 @@
                     </x-slot>
                 @enderror
             </x-filament::input.wrapper>
-    
         </div>
+
+        {{-- ✅ RÉDACTEUR --}}
+        {{-- <div>
+            <label class="text-sm text-gray-500 p-2">
+                Rédacteur <span class="text-red-500">*</span>
+            </label>
+           
+            <x-filament::input.wrapper
+                :valid="! $errors->has('redacteurId')"
+                class="space-y-2"
+            >
+                <x-filament::input.select
+                    wire:model="redacteurId"
+                    id="redacteurId"
+                    required
+                >
+                    <option value="">Sélectionnez un rédacteur</option>
+                    @foreach($redacteurs as $id => $nom)
+                        <option value="{{ $id }}">{{ $nom }}</option>
+                    @endforeach
+                </x-filament::input.select>
+               
+                @error('redacteurId')
+                    <x-slot name="helper-text">
+                        <span class="text-red-600">{{ $message }}</span>
+                    </x-slot>
+                @else
+                    <x-slot name="helper-text">
+                        <span class="text-gray-500">Qui rédige cette note ?</span>
+                    </x-slot>
+                @enderror
+            </x-filament::input.wrapper>
+        </div> --}}
 
         {{-- Date --}}
         <div>
@@ -85,13 +118,14 @@
                     Contenu de la note <span class="text-red-500">*</span>
                 </x-slot>
                
-                <x-filament::input
+                <textarea
                     wire:model="libelle"
                     id="libelle"
                     rows="4"
                     placeholder="Saisissez le contenu de la note..."
                     required
-                />
+                    class="fi-input block w-full border-gray-300 rounded-lg shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                ></textarea>
                
                 @error('libelle')
                     <x-slot name="helper-text">
@@ -110,22 +144,23 @@
             <x-filament::input.wrapper
                 :valid="! $errors->has('lienUrl')"
                 class="space-y-2"
-                prefix-icon="heroicon-m-link"
             >
                 <x-slot name="label">
                     Lien URL (optionnel)
                 </x-slot>
                
-                <x-slot name="prefix">
-                    https://
-                </x-slot>
-               
-                <x-filament::input
-                    type="url"
-                    wire:model="lienUrl"
-                    id="lienUrl"
-                    placeholder="exemple.com/document"
-                />
+                <div class="flex">
+                    <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                        https://
+                    </span>
+                    <x-filament::input
+                        type="text"
+                        wire:model="lienUrl"
+                        id="lienUrl"
+                        placeholder="exemple.com/document"
+                        class="rounded-l-none"
+                    />
+                </div>
                
                 @error('lienUrl')
                     <x-slot name="helper-text">
@@ -134,28 +169,6 @@
                 @enderror
             </x-filament::input.wrapper>
         </div>
-
-        {{-- Validation BCF --}}
-        @can('validate_bcf_notes')
-            <div>
-                <x-filament::input.wrapper class="space-y-2">
-                    <div class="flex items-start space-x-3">
-                        <x-filament::input.checkbox
-                            wire:model="valide_bcf"
-                            id="valide_bcf"
-                        />
-                        <div>
-                            <x-slot name="label">
-                                Marquer comme validé BCF
-                            </x-slot>
-                            <x-slot name="helper-text">
-                                <span class="text-gray-500">Cette validation est réservée aux utilisateurs autorisés</span>
-                            </x-slot>
-                        </div>
-                    </div>
-                </x-filament::input.wrapper>
-            </div>
-        @endcan
 
         {{-- Boutons d'action --}}
         <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">

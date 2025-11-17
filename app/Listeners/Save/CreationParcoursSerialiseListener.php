@@ -10,6 +10,7 @@ use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Helpers\OutilsHelper;
 
 class CreationParcoursSerialiseListener
 {
@@ -63,8 +64,8 @@ class CreationParcoursSerialiseListener
                 'parcours_id'   => $parcours->id,
                 'parcours'      => $serializedData,
                 'date_debut'    => $date,
-                'libelle_court' => $parcours->libelle_court,
-                'libelle_long'  => $parcours->libelle_long,
+                'libelle_court' => OutilsHelper::sanitizeForAlpine($parcours->libelle_court),
+                'libelle_long'  => OutilsHelper::sanitizeForAlpine($parcours->libelle_long),
                 'version'       => $version,
             ]);
 
@@ -101,8 +102,8 @@ class CreationParcoursSerialiseListener
             'id' => $parcours->id,
             'uuid' => $parcours->uuid,
             'code' => $parcours->code,
-            'libelle_court' => $parcours->libelle_court,
-            'libelle_long' => $parcours->libelle_long,
+            'libelle_court' => OutilsHelper::sanitizeForAlpine($parcours->libelle_court),
+            'libelle_long' => OutilsHelper::sanitizeForAlpine($parcours->libelle_long),
             'parcours_type_id' => $parcours->parcours_type_id,
             'color' => $parcours->color,
             'affectations' => [],
@@ -112,8 +113,8 @@ class CreationParcoursSerialiseListener
             $affData = [
                 'id' => $aff->id,
                 'uuid' => $aff->uuid,
-                'libelle_court' => $aff->libelle_court,
-                'libelle_long' => $aff->libelle_long,
+                'libelle_court' => OutilsHelper::sanitizeForAlpine($aff->libelle_court),
+                'libelle_long' => OutilsHelper::sanitizeForAlpine($aff->libelle_long),
                 'color' => $aff->color,
                 'pivot' => [
                     'ordre' => $aff->pivot->ordre ?? null,
@@ -126,8 +127,8 @@ class CreationParcoursSerialiseListener
                     'id' => $competence->id,
                     'uuid' => $competence->uuid,
                     'code' => $competence->code,
-                    'libelle_court' => $competence->libelle_court,
-                    'libelle_long' => $competence->libelle_long,
+                    'libelle_court' => OutilsHelper::sanitizeForAlpine($competence->libelle_court),
+                    'libelle_long' => OutilsHelper::sanitizeForAlpine($competence->libelle_long),
                     'color' => $competence->color,
                     'ordre' => $competence->ordre,
                     'competenceSavoirfaires' => [],
@@ -142,12 +143,12 @@ class CreationParcoursSerialiseListener
                         'ordre' => $csf->ordre ?? null,
                         'heures' => $csf->heures ?? null,
                         'jours' => $csf->jours ?? null,
-                        'libelle_court' => $csf->libelle_court ?? null,
+                        'libelle_court' => OutilsHelper::sanitizeForAlpine($csf->libelle_court) ?? null,
                         'savoirfaire' => null,
                         'savoirfaire_type' => $csf->savoirfaireType ? [
                             'id' => $csf->savoirfaireType->id,
                             'code' => $csf->savoirfaireType->code ?? null,
-                            'libelle_court' => $csf->savoirfaireType->libelle_court ?? null,
+                            'libelle_court' => OutilsHelper::sanitizeForAlpine($csf->savoirfaireType->libelle_court) ?? null,
                         ] : null,
                         'objectifs' => [],
                     ];
@@ -158,8 +159,8 @@ class CreationParcoursSerialiseListener
                             'id' => $sf->id,
                             'uuid' => $sf->uuid,
                             'code' => $sf->code,
-                            'libelle_court' => $sf->libelle_court,
-                            'libelle_long' => $sf->libelle_long,
+                            'libelle_court' => OutilsHelper::sanitizeForAlpine($sf->libelle_court),
+                            'libelle_long' => OutilsHelper::sanitizeForAlpine($sf->libelle_long),
                             'competence_id' => $sf->competence_id,
                             'color' => (($sf->color<>'')?$sf->color:$competence->color),
                         ];
@@ -171,8 +172,8 @@ class CreationParcoursSerialiseListener
                             return [
                                 'id' => $o->id,
                                 'uuid' => $o->uuid,
-                                'libelle_court' => $o->libelle_court,
-                                'description' => $o->description ?? null,
+                                'libelle_court' => OutilsHelper::sanitizeForAlpine($o->libelle_court),
+                                'description' => OutilsHelper::sanitizeForAlpine($o->description) ?? null,
                                 'ordre' => $o->ordre ?? null,
                                 'code' => $o->code,
                                 

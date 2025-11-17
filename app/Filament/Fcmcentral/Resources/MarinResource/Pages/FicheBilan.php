@@ -3,9 +3,11 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
 use Filament\Resources\Pages\ViewRecord;
-use Illuminate\Support\Collection;
+use Filament\Forms;
+use Filament\Notifications\Notification;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\Note;
+use Modules\FcmCentral\Models\TypeNote;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Livewire\Attributes\Computed;
 
@@ -17,36 +19,69 @@ class FicheBilan extends ViewRecord
     protected static ?string $title = 'Fiche Bilan';
 
     public ?int $marinId = null;
-    // ✅ Supprimer cette ligne - $record est déjà définie dans ViewRecord
-    // public $record = null;
+
+    // ============================================
+    // 🔧 LIFECYCLE METHODS
+    // ============================================
 
     public function mount($record): void
     {
-        // ✅ Appeler le mount parent pour initialiser correctement $record
         parent::mount($record);
         
         $this->marinId = is_numeric($record) ? $record : $record->id;
         
-        // Vérifier les droits d'accès
         if (!$this->canAccessMarin()) {
             abort(403, 'Accès non autorisé à cette fiche bilan');
         }
     }
 
+    // ============================================
+    // 🔐 CONTRÔLES D'ACCÈS
+    // ============================================
+
     private function canAccessMarin(): bool
     {
-        // Utiliser les mêmes contrôles d'accès que MarinResource
-        if (MarinResource::canAccessAdminMenus()) {
+        // Admin a tous les droits
+        if (MarinResource::canAccessAnyPermission(['admin'])) {
             return true;
         }
         
-        if (MarinResource::canAccessMentorFeatures()) {
+        // Mentor du marin
+        if (MarinResource::canAccessAnyPermission(['permission.mentor'])) {
             $marin = $this->marin;
             return $marin ? MarinResource::isMentorOfMarin($marin) : false;
         }
         
+        // BCF / FPS / Bord peuvent voir les fiches
+        if (MarinResource::canAccessAnyPermission(['permission.bcf', 'permission.fps', 'permission.bord'])) {
+            return true;
+        }
+        
         return false;
     }
+
+    public function canCreateNote(): bool
+    {
+        // ✅ SEULS BCF, BORD, FPS et ADMIN peuvent créer/voir les notes
+        return MarinResource::canAccessAnyPermission([
+            'admin',
+            'permission.bcf',
+            'permission.fps',
+            'permission.bord'
+        ]);
+    }
+
+    private function canValidateBCF(): bool
+    {
+        return MarinResource::canAccessAnyPermission([
+            'admin',
+            'permission.bcf'
+        ]);
+    }
+
+    // ============================================
+    // 📊 COMPUTED PROPERTIES
+    // ============================================
 
     #[Computed]
     public function marin()
@@ -71,53 +106,52 @@ class FicheBilan extends ViewRecord
     }
 
     #[Computed]
-public function savoirFaires()
-{
-    if (!$this->parcours) {
-        return collect([]);
-    }
+    public function savoirFaires()
+    {
+        if (!$this->parcours) {
+            return collect([]);
+        }
 
-    $savoirFairesArray = [];
+        $savoirFairesArray = [];
 
-    foreach ($this->parcours['fonctions'] ?? [] as $fonction) {
-        foreach ($fonction['competences'] ?? [] as $competence) {
-            foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
-                $activites = collect($savoirfaire['activites'] ?? []);
-                $totalActivites = $activites->count();
-                $activitesValidees = $activites->where('etat_valid', true)->count();
-               
-                $pourcentage = $totalActivites > 0
-                    ? round(($activitesValidees / $totalActivites) * 100, 1)
-                    : 0;
+        // ✅ STRUCTURE CORRIGÉE : Affectation > Compétences > CompetenceSavoirfaires > Objectifs
+        foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+            foreach ($affectation['competences'] ?? [] as $competence) {
+                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                    $objectifs = collect($csf['objectifs'] ?? []);
+                    $totalObjectifs = $objectifs->count();
+                    $objectifsValides = $objectifs->where('etat_valid', true)->count();
+                    
+                    $pourcentage = $totalObjectifs > 0
+                        ? round(($objectifsValides / $totalObjectifs) * 100, 1)
+                        : 0;
 
-                // ✅ DÉTERMINER LA COULEUR SELON LE POURCENTAGE
-                $couleurClasse = $this->getCouleurSavoirFaire($pourcentage);
+                    $couleurClasse = $this->getCouleurSavoirFaire($pourcentage);
 
-                $savoirFairesArray[] = [
-                    'id' => $savoirfaire['id'],
-                    'uuid' => $savoirfaire['uuid'] ?? '',
-                    'libelle_court' => $savoirfaire['libelle_court'],
-                    'libelle_long' => $savoirfaire['libelle_long'] ?? '',
-                    'total_activites' => $totalActivites,
-                    'activites_validees' => $activitesValidees,
-                    'pourcentage' => $pourcentage,
-                    'couleur_classe' => $couleurClasse, 
-                    'etat_valid' => $savoirfaire['etat_valid'] ?? false,
-                    'date_validation' => $savoirfaire['date_validation'] ?? null,
-                    'valideur' => $savoirfaire['valideur'] ?? null,
-                    'fonction' => $fonction['libelle_court'],
-                    'competence' => $competence['libelle_court'],
-                    'activites' => $activites->toArray()
-                ];
+                    $savoirFairesArray[] = [
+                        'id' => $csf['savoirfaire']['id'] ?? $csf['id'],
+                        'uuid' => $csf['savoirfaire']['uuid'] ?? $csf['uuid'] ?? '',
+                        'libelle_court' => $csf['savoirfaire']['libelle_court'] ?? $csf['libelle_court'] ?? '',
+                        'libelle_long' => $csf['savoirfaire']['libelle_long'] ?? '',
+                        'total_objectifs' => $totalObjectifs,
+                        'objectifs_valides' => $objectifsValides,
+                        'pourcentage' => $pourcentage,
+                        'couleur_classe' => $couleurClasse,
+                        'etat_valid' => $csf['etat_valid'] ?? false,
+                        'date_validation' => $csf['date_validation'] ?? null,
+                        'valideur' => $csf['valideur'] ?? null,
+                        'affectation' => $affectation['libelle_court'] ?? '',
+                        'competence' => $competence['libelle_court'] ?? '',
+                        'objectifs' => $objectifs->toArray()
+                    ];
+                }
             }
         }
+
+        return collect($savoirFairesArray);
     }
 
-    return collect($savoirFairesArray);
-}
-
-
-private function getCouleurSavoirFaire(float $pourcentage): array
+    private function getCouleurSavoirFaire(float $pourcentage): array
     {
         if ($pourcentage == 100) {
             return [
@@ -164,69 +198,33 @@ private function getCouleurSavoirFaire(float $pourcentage): array
         }
     }
 
-
-
     #[Computed]
     public function notes()
     {
-        return Note::where('marin_id', $this->marinId)
+        // ✅ SEULS BCF/FPS/BORD/ADMIN voient les notes
+        if (!$this->canCreateNote()) {
+            return collect([]);
+        }
+
+        $query = Note::where('marin_id', $this->marinId)
             ->with(['typeNote', 'redacteur'])
             ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->orderBy('created_at', 'desc');
+
+        // ✅ FILTRAGE SELON LES PERMISSIONS
+        if (!$this->canValidateBCF()) {
+            // Non-BCF ne voient que les notes validées
+            $query->where('valide_bcf', true);
+        }
+
+        return $query->get();
     }
-
-    /// LIVEWIRE NOTE ///
-
-protected $listeners = [
-    'note-added' => 'refreshNotes',
-    'notify' => 'handleNotification'
-];
-
-public function refreshNotes()
-{
-    // Forcer le recalcul des notes
-   // unset($this->cachedMountedProperties['notes']);
-    $this->dispatch('$refresh');
-}
-
-public function handleNotification($data)
-{
-    if ($data['type'] === 'success') {
-        \Filament\Notifications\Notification::make()
-            ->title($data['message'])
-            ->success()
-            ->send();
-    } elseif ($data['type'] === 'error') {
-        \Filament\Notifications\Notification::make()
-            ->title($data['message'])
-            ->danger()
-            ->send();
-    }
-}
-
-public function ajouterNote()
-{
-    // Vérifier les permissions
-    if (!auth()->check()) {
-        \Filament\Notifications\Notification::make()
-            ->title('Vous devez être connecté pour ajouter une note')
-            ->warning()
-            ->send();
-        return;
-    }
-
-    $this->dispatch('open-modal', id: 'ajouterNote');
-}
-
-
 
     #[Computed]
     public function statistiques()
     {
         $savoirFaires = $this->savoirFaires;
     
-        // ✅ CALCULER SEULEMENT LES STATS SAVOIR-FAIRE (pas les activités)
         $savoirFairesValides = $savoirFaires->where('etat_valid', true)->count();
         $totalSavoirFaires = $savoirFaires->count();
     
@@ -240,13 +238,10 @@ public function ajouterNote()
             'savoirfaires_en_cours' => $savoirFaires->where('pourcentage', '>', 0)->where('pourcentage', '<', 100)->count(),
             'savoirfaires_non_commences' => $savoirFaires->where('pourcentage', 0)->count(),
         
-            // ✅ GARDER AUSSI LES STATS ACTIVITÉS POUR L'AFFICHAGE DÉTAILLÉ
-            'total_activites' => $savoirFaires->sum('total_activites'),
-            'activites_validees' => $savoirFaires->sum('activites_validees'),
+            'total_objectifs' => $savoirFaires->sum('total_objectifs'),
+            'objectifs_valides' => $savoirFaires->sum('objectifs_valides'),
         ];
     }
-
-
 
     #[Computed]
     public function activitesEnAttente()
@@ -255,22 +250,21 @@ public function ajouterNote()
             return collect([]);
         }
 
-        $activitesEnAttente = [];
+        $objectifsEnAttente = [];
 
-        foreach ($this->parcours['fonctions'] ?? [] as $fonction) {
-            foreach ($fonction['competences'] ?? [] as $competence) {
-                foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
-                    foreach ($savoirfaire['activites'] ?? [] as $activite) {
-                        $estProposee = !empty($activite['date_proposition']);
-                        $estValidee = ($activite['etat_valid'] ?? false) === true;
-                        $aDateValidation = !empty($activite['date_validation']);
+        foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+            foreach ($affectation['competences'] ?? [] as $competence) {
+                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                    foreach ($csf['objectifs'] ?? [] as $objectif) {
+                        $estPropose = !empty($objectif['date_proposition']);
+                        $estValide = ($objectif['etat_valid'] ?? false) === true;
                         
-                        if ($estProposee && !$estValidee && !$aDateValidation) {
-                            $activitesEnAttente[] = [
-                                'activite' => $activite,
-                                'savoirfaire' => $savoirfaire['libelle_court'],
-                                'competence' => $competence['libelle_court'],
-                                'fonction' => $fonction['libelle_court']
+                        if ($estPropose && !$estValide) {
+                            $objectifsEnAttente[] = [
+                                'objectif' => $objectif,
+                                'savoirfaire' => $csf['savoirfaire']['libelle_court'] ?? '',
+                                'competence' => $competence['libelle_court'] ?? '',
+                                'affectation' => $affectation['libelle_court'] ?? ''
                             ];
                         }
                     }
@@ -278,7 +272,332 @@ public function ajouterNote()
             }
         }
 
-        return collect($activitesEnAttente);
+        return collect($objectifsEnAttente);
+    }
+
+    // ============================================
+    // 🎬 ACTION PUBLIQUE POUR LE BOUTON
+    // ============================================
+
+    public function ajouterNote()
+    {
+        if (!$this->canCreateNote()) {
+            Notification::make()
+                ->title('Accès refusé')
+                ->body('Vous n\'avez pas les droits pour créer une note')
+                ->warning()
+                ->send();
+            return;
+        }
+
+        $this->dispatch('open-modal', id: 'ajouterNote');
+    }
+
+    // ============================================
+    // 📝 FORMULAIRE NOTE (POUR LE LIVEWIRE COMPONENT)
+    // ============================================
+
+    protected function getNoteFormSchema(): array
+    {
+        return [
+            Forms\Components\Textarea::make('libelle')
+                ->required()
+                ->label('Contenu de la note')
+                ->rows(4)
+                ->maxLength(1000)
+                ->placeholder('Saisissez le contenu de votre note...'),
+
+            Forms\Components\Placeholder::make('marin_selected')
+                ->label('Marin concerné')
+                ->content($this->marin->grade?->libelle_court . ' ' . $this->marin->prenom . ' ' . $this->marin->nom),
+
+            Forms\Components\Select::make('type_note_id')
+                ->label('Type de note')
+                ->options(TypeNote::pluck('libelle_court', 'id'))
+                ->searchable()
+                ->preload()
+                ->nullable()
+                ->createOptionForm([
+                    Forms\Components\TextInput::make('libelle_court')
+                        ->required()
+                        ->label('Libellé court')
+                        ->maxLength(150),
+                    Forms\Components\Textarea::make('libelle_long')
+                        ->required()
+                        ->label('Libellé long')
+                        ->rows(3)
+                        ->maxLength(1500),
+                ])
+                ->createOptionUsing(function (array $data) {
+                    return TypeNote::create($data)->id;
+                }),
+
+            Forms\Components\DatePicker::make('date')
+                ->label('Date')
+                ->default(now())
+                ->nullable(),
+
+            // ✅ SÉLECTION DU RÉDACTEUR
+            Forms\Components\Select::make('redacteur_id')
+                ->label('Rédacteur')
+                ->options($this->getRedacteursOptions())
+                ->default($this->getDefaultRedacteur())
+                ->required()
+                ->searchable()
+                ->helperText('Sélectionnez le rédacteur de la note'),
+
+            Forms\Components\Toggle::make('valide_bcf')
+                ->label('Validé BCF')
+                ->default(false)
+                ->visible(fn () => $this->canValidateBCF())
+                ->helperText('Cocher pour rendre la note visible à tous'),
+
+            Forms\Components\TextInput::make('lien_url')
+                ->label('Lien URL (optionnel)')
+                ->url()
+                ->nullable()
+                ->placeholder('https://...'),
+        ];
+    }
+
+    // ============================================
+    // 🔧 HELPERS
+    // ============================================
+
+    private function getRedacteursOptions(): array
+    {
+        // Récupérer tous les marins ayant une fonction d'encadrement
+        $redacteurs = Marin::whereHas('complementsFcm', function ($query) {
+            $query->whereNotNull('cohorte_id'); // Marins ayant un lien avec la FCM
+        })
+        ->orWhereIn('id', function ($query) {
+            $query->select('mentor_id')
+                ->from('fcmcentral_complements_fcm')
+                ->whereNotNull('mentor_id');
+        })
+        ->get()
+        ->mapWithKeys(function ($marin) {
+            return [
+                $marin->id => $marin->grade?->libelle_court . ' ' . $marin->prenom . ' ' . $marin->nom
+            ];
+        })
+        ->toArray();
+
+        // Ajouter l'utilisateur connecté si c'est un marin
+        $currentMarin = Marin::fromCurrentUser();
+        if ($currentMarin && !isset($redacteurs[$currentMarin->id])) {
+            $redacteurs[$currentMarin->id] = $currentMarin->grade?->libelle_court . ' ' . $currentMarin->prenom . ' ' . $currentMarin->nom;
+        }
+
+        return $redacteurs;
+    }
+
+    private function getDefaultRedacteur(): ?int
+    {
+        // Prendre l'utilisateur connecté (marin) par défaut
+        $currentMarin = Marin::fromCurrentUser();
+        if ($currentMarin) {
+            return $currentMarin->id;
+        }
+
+        // Sinon, prendre le mentor du marin
+        return $this->marin->complementsFcm?->mentor_id;
+    }
+
+    private function createNote(array $data): void
+    {
+        try {
+            Note::create([
+                'libelle' => $data['libelle'],
+                'marin_id' => $this->marinId,
+                'type_note_id' => $data['type_note_id'] ?? null,
+                'date' => $data['date'] ?? now(),
+                'redacteur_id' => $data['redacteur_id'],
+                'valide_bcf' => $data['valide_bcf'] ?? false,
+                'lien_url' => $data['lien_url'] ?? null,
+                'objet_type' => 'marin',
+                'objet_id' => $this->marinId,
+            ]);
+
+            $this->refreshNotes();
+
+            Notification::make()
+                ->title('Note créée avec succès')
+                ->body("La note pour {$this->marin->prenom} {$this->marin->nom} a été créée.")
+                ->success()
+                ->send();
+
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Erreur lors de la création')
+                ->body('Une erreur est survenue : ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    // ============================================
+    // 🔄 LIVEWIRE LISTENERS
+    // ============================================
+
+    protected $listeners = [
+        'note-added' => 'refreshNotes',
+        'notify' => 'handleNotification'
+    ];
+
+    public function refreshNotes()
+    {
+        unset($this->cachedMountedProperties['notes']);
+        $this->dispatch('$refresh');
+    }
+
+    public function handleNotification($data)
+    {
+        Notification::make()
+            ->title($data['message'])
+            ->{$data['type'] === 'success' ? 'success' : 'danger'}()
+            ->send();
+    }
+
+    // ============================================
+    // 📏 CALCULS DE DURÉES
+    // ============================================
+
+    private function calculerDureeSedimentation(): int
+    {
+        $debut = $this->marin->debut_sedimentation;
+        $vert = $this->marin->vert_sedimentation;
+        
+        if ($debut && $vert) {
+            return \Carbon\Carbon::parse($debut)->diffInDays(\Carbon\Carbon::parse($vert));
+        }
+        
+        return 0;
+    }
+
+    private function calculerDureePPA(): int
+    {
+        $vert = $this->marin->vert_sedimentation;
+        
+        if ($vert) {
+            return \Carbon\Carbon::parse($vert)->diffInDays(now());
+        }
+        
+        return 0;
+    }
+
+    private function calculerDureeTotale(): int
+    {
+        $debut = $this->marin->debut_sedimentation;
+        
+        if ($debut) {
+            return \Carbon\Carbon::parse($debut)->diffInDays(now());
+        }
+        
+        return 0;
+    }
+
+    // ============================================
+    // 📊 INDICATEURS COMPLÉMENTAIRES
+    // ============================================
+
+    public function getDateDerniereMajFfast(): string
+    {
+        $derniereValidation = $this->getDerniereValidation();
+        return $derniereValidation ? $derniereValidation->format('d/m/Y') : 'N/A';
+    }
+
+    public function getPourcentageCompagnonnage(): float
+    {
+        if (!$this->parcours) {
+            return 0;
+        }
+
+        // ✅ CALCUL BASÉ SUR savoirfaire_type.code = "C" (Compagnonnage)
+        $totalCompagnonnage = 0;
+        $compagnonnageValide = 0;
+
+        foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+            foreach ($affectation['competences'] ?? [] as $competence) {
+                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                    // ✅ Vérifier si c'est du compagnonnage
+                    if (($csf['savoirfaire_type']['code'] ?? null) === 'C') {
+                        $totalCompagnonnage++;
+                        
+                        if ($csf['etat_valid'] ?? false) {
+                            $compagnonnageValide++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $totalCompagnonnage > 0 
+            ? round(($compagnonnageValide / $totalCompagnonnage) * 100, 1)
+            : 0;
+    }
+
+    public function getPourcentageStages(): float
+    {
+        if (!$this->parcours) {
+            return 0;
+        }
+
+        // ✅ CALCUL BASÉ SUR savoirfaire_type.code = "S" (Stage)
+        $totalStages = 0;
+        $stagesValides = 0;
+
+        foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+            foreach ($affectation['competences'] ?? [] as $competence) {
+                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                    // ✅ Vérifier si c'est un stage
+                    if (($csf['savoirfaire_type']['code'] ?? null) === 'S') {
+                        $totalStages++;
+                        
+                        if ($csf['etat_valid'] ?? false) {
+                            $stagesValides++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $totalStages > 0 
+            ? round(($stagesValides / $totalStages) * 100, 1)
+            : 0;
+    }
+
+    private function getDerniereValidation()
+    {
+        if (!$this->parcours) {
+            return null;
+        }
+
+        $derniereDate = null;
+
+        foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+            foreach ($affectation['competences'] ?? [] as $competence) {
+                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                    if (!empty($csf['date_validation'])) {
+                        $date = \Carbon\Carbon::parse($csf['date_validation']);
+                        if (!$derniereDate || $date->gt($derniereDate)) {
+                            $derniereDate = $date;
+                        }
+                    }
+                    
+                    foreach ($csf['objectifs'] ?? [] as $objectif) {
+                        if (!empty($objectif['date_validation'])) {
+                            $date = \Carbon\Carbon::parse($objectif['date_validation']);
+                            if (!$derniereDate || $date->gt($derniereDate)) {
+                                $derniereDate = $date;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $derniereDate;
     }
 
     public function getTitle(): string
@@ -289,102 +608,4 @@ public function ajouterNote()
         
         return 'Fiche Bilan FCM';
     }
-
-    // ✅ MÉTHODES DE CALCUL DES DURÉES
-private function calculerDureeSedimentation(): int
-{
-    $debut = $this->marin->debut_sedimentation;
-    $vert = $this->marin->vert_sedimentation;
-    
-    if ($debut && $vert) {
-        return \Carbon\Carbon::parse($debut)->diffInDays(\Carbon\Carbon::parse($vert));
-    }
-    
-    return 0;
 }
-
-private function calculerDureePPA(): int
-{
-    $vert = $this->marin->vert_sedimentation;
-    
-    if ($vert) {
-        return \Carbon\Carbon::parse($vert)->diffInDays(now());
-    }
-    
-    return 0;
-}
-
-private function calculerDureeTotale(): int
-{
-    $debut = $this->marin->debut_sedimentation;
-    
-    if ($debut) {
-        return \Carbon\Carbon::parse($debut)->diffInDays(now());
-    }
-    
-    return 0;
-}
-
-// ✅ MÉTHODES POUR LES INDICATEURS
-private function getDateDerniereMajFfast(): string
-{
-    // Récupérer la date de dernière validation
-    $derniereValidation = $this->getDerniereValidation();
-    return $derniereValidation ? $derniereValidation->format('d/m/Y') : 'N/A';
-}
-
-private function getPourcentageCompagnonnage(): float
-{
-    // À implémenter selon votre logique métier
-    return 0;
-}
-
-private function getPourcentageStages(): float
-{
-    // À implémenter selon votre logique métier
-    return 0;
-}
-
-private function getDerniereValidation()
-{
-    // Parcourir le parcours pour trouver la dernière date de validation
-    if (!$this->parcours) {
-        return null;
-    }
-
-    $derniereDate = null;
-
-    foreach ($this->parcours['fonctions'] ?? [] as $fonction) {
-        foreach ($fonction['competences'] ?? [] as $competence) {
-            foreach ($competence['savoirfaires'] ?? [] as $savoirfaire) {
-                if (!empty($savoirfaire['date_validation'])) {
-                    $date = \Carbon\Carbon::parse($savoirfaire['date_validation']);
-                    if (!$derniereDate || $date->gt($derniereDate)) {
-                        $derniereDate = $date;
-                    }
-                }
-                
-                foreach ($savoirfaire['activites'] ?? [] as $activite) {
-                    if (!empty($activite['date_validation'])) {
-                        $date = \Carbon\Carbon::parse($activite['date_validation']);
-                        if (!$derniereDate || $date->gt($derniereDate)) {
-                            $derniereDate = $date;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return $derniereDate;
-}
-
-
-
-
-
-
-}
-
-
-
