@@ -4,7 +4,7 @@ namespace Modules\FcmCentral\Database\Seeders\Parcours;
  
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-// use Illuminate\Support\Str;
+use Illuminate\Support\Str;
  
 class DeasmCompetenceSavoirfairesSeeder extends Seeder
 {
@@ -44,7 +44,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
 
           // AN 2
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C1'],
             'savoirfaire_id' => $savoirfaires['C1-SF1'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -56,7 +56,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C1'],
             'savoirfaire_id' => $savoirfaires['C1-SF2'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -68,7 +68,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C1'],
             'savoirfaire_id' => $savoirfaires['C1-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -80,7 +80,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C2'],
             'savoirfaire_id' => $savoirfaires['C2-SF1'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -92,7 +92,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C2'],
             'savoirfaire_id' => $savoirfaires['C2-SF2'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -104,7 +104,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C2'],
             'savoirfaire_id' => $savoirfaires['C2-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -116,7 +116,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C2'],
             'savoirfaire_id' => $savoirfaires['C2-SF4'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -128,7 +128,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C2'],
             'savoirfaire_id' => $savoirfaires['C2-SF5'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -143,7 +143,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
 
           // An 3 
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C3'],
             'savoirfaire_id' => $savoirfaires['C3-SF1'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -155,7 +155,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C3'],
             'savoirfaire_id' => $savoirfaires['C3-SF2'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -167,7 +167,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C3'],
             'savoirfaire_id' => $savoirfaires['C3-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -179,7 +179,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C3'],
             'savoirfaire_id' => $savoirfaires['C3-SF4'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -191,7 +191,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C3'],
             'savoirfaire_id' => $savoirfaires['C3-SF5'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -203,7 +203,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C4'],
             'savoirfaire_id' => $savoirfaires['C4-SF1'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -215,7 +215,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C4'],
             'savoirfaire_id' => $savoirfaires['C4-SF2'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -227,7 +227,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C4'],
             'savoirfaire_id' => $savoirfaires['C4-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -239,7 +239,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C3'],
             'savoirfaire_id' => $savoirfaires['C4-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -251,7 +251,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C4'],
             'savoirfaire_id' => $savoirfaires['C4-SF4'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -263,7 +263,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C4'],
             'savoirfaire_id' => $savoirfaires['C4-SF5'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -275,7 +275,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C4'],
             'savoirfaire_id' => $savoirfaires['C4-SF6'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -290,7 +290,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
 
           // An 4
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C4'],
             'savoirfaire_id' => $savoirfaires['C4-SF7'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -302,7 +302,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C4'],
             'savoirfaire_id' => $savoirfaires['C4-SF7'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -314,7 +314,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C5'],
             'savoirfaire_id' => $savoirfaires['C5-SF1'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -326,7 +326,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C5'],
             'savoirfaire_id' => $savoirfaires['C5-SF2'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -339,7 +339,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
           ],
 
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C5'],
             'savoirfaire_id' => $savoirfaires['C5-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -351,7 +351,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C6'],
             'savoirfaire_id' => $savoirfaires['C6-SF1'],
             'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
@@ -363,7 +363,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C6'],
             'savoirfaire_id' => $savoirfaires['C6-SF2'],
             'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
@@ -375,7 +375,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C6'],
             'savoirfaire_id' => $savoirfaires['C6-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
@@ -387,7 +387,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C6'],
             'savoirfaire_id' => $savoirfaires['C6-SF4'],
             'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
@@ -399,7 +399,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C6'],
             'savoirfaire_id' => $savoirfaires['C6-SF5'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -411,7 +411,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C6'],
             'savoirfaire_id' => $savoirfaires['C6-SF6'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -428,7 +428,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
           
           
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C7'],
             'savoirfaire_id' => $savoirfaires['C7-SF1'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -440,7 +440,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C7'],
             'savoirfaire_id' => $savoirfaires['C7-SF2'],
             'savoirfaire_type_id' => $savoirfaireTypes['C'],
@@ -452,7 +452,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C7'],
             'savoirfaire_id' => $savoirfaires['C7-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -464,7 +464,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C8'],
             'savoirfaire_id' => $savoirfaires['C8-SF1'],
             'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
@@ -476,7 +476,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C8'],
             'savoirfaire_id' => $savoirfaires['C8-SF2'],
             'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
@@ -488,7 +488,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C8'],
             'savoirfaire_id' => $savoirfaires['C8-SF2'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -500,7 +500,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C8'],
             'savoirfaire_id' => $savoirfaires['C8-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -512,7 +512,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C8'],
             'savoirfaire_id' => $savoirfaires['C8-SF4'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -524,7 +524,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C8'],
             'savoirfaire_id' => $savoirfaires['C8-SF5'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -536,7 +536,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C8'],
             'savoirfaire_id' => $savoirfaires['C8-SF6'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -548,7 +548,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C8'],
             'savoirfaire_id' => $savoirfaires['C8-SF7'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -560,7 +560,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C8'],
             'savoirfaire_id' => $savoirfaires['C8-SF8'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
@@ -575,7 +575,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
 
           // AN 6
           [
-            // 'uuid' => Str::uuid()->toString(),
+            'uuid' => Str::uuid()->toString(),
             'competence_id' => $competences['C9'],
             'savoirfaire_id' => $savoirfaires['C9-SF1'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
