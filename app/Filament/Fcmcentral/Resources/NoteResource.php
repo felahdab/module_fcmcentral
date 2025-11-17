@@ -25,10 +25,9 @@ class NoteResource extends Resource
 
     // Permissions marche avec le Trait
     protected static array $permissions = [
-        'fcmcentral::gerer_parcours',
-        'fcmcentral::droits_admin',
-        'fcmcentral::droits_bcf',
-        'fcmcentral::droits_supadmin',
+        'fcmcentral::admin',
+        'fcmcentral::permission.fps',
+        'fcmcentral::permission.bcf',
     ];
 
     public static function form(Form $form): Form
