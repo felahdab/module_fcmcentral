@@ -29,10 +29,9 @@ class TypeNoteResource extends Resource
 
    // Permissions marche avec le Trait
    protected static array $permissions = [
-    'fcmcentral::gerer_parcours',
-    'fcmcentral::droits_admin',
-    'fcmcentral::droits_bcf',
-    'fcmcentral::droits_supadmin',
+    'fcmcentral::admin',
+    'fcmcentral::permission.bcf',
+    'fcmcentral::permission.fps',
 ];
     
 
@@ -40,14 +39,16 @@ class TypeNoteResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),
+
                 Forms\Components\TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
                     ->maxLength(150),
-                Forms\Components\TextInput::make('libelle_long')
-                    ->required()
-                    ->label('Libellé long')
-                    ->maxLength(1500),
+               
             ]);
     }
 
@@ -61,14 +62,15 @@ class TypeNoteResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
                
-                Tables\Columns\TextColumn::make('libelle_court')
+                Tables\Columns\TextColumn::make('code')
                     ->searchable()
                     ->sortable()
-                    ->label('Libellé court'),
-                Tables\Columns\TextColumn::make('libelle_long')
-                    ->searchable()
-                    ->label('Libellé long')
+                    ->label('Code')
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('libelle_court')
+                    ->searchable()
+                    ->label('Libellé'),
+                    
             ])
             ->filters([
                 //

@@ -240,7 +240,7 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
           ],
           [
             'uuid' => Str::uuid()->toString(),
-            'competence_id' => $competences['C3'],
+            'competence_id' => $competences['C4'],
             'savoirfaire_id' => $savoirfaires['C4-SF3'],
             'savoirfaire_type_id' => $savoirfaireTypes['S'],
             'libelle_court' => 'FCM/LSM NIVEAU 3',
@@ -574,18 +574,18 @@ class DeasmCompetenceSavoirfairesSeeder extends Seeder
           
 
           // AN 6
-          [
-            'uuid' => Str::uuid()->toString(),
-            'competence_id' => $competences['C9'],
-            'savoirfaire_id' => $savoirfaires['C9-SF1'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'EXA TC',
-            'ordre' => $i++,
-            'heures' => 70,
-            'jours' => 10,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
+          // [
+          //   'uuid' => Str::uuid()->toString(),
+          //   'competence_id' => $competences['C9'],
+          //   'savoirfaire_id' => $savoirfaires['C9-SF1'],
+          //   'savoirfaire_type_id' => $savoirfaireTypes['S'],
+          //   'libelle_court' => 'EXA TC',
+          //   'ordre' => $i++,
+          //   'heures' => 70,
+          //   'jours' => 10,
+          //   'created_at' => now(),
+          //   'updated_at' => now(),
+          // ],
           
         ];
        

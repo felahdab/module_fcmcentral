@@ -50,6 +50,9 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeNoteResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\EtatResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeEtatResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource;
 
@@ -143,7 +146,7 @@ class FcmcentralPanelProvider extends PanelProvider
                     ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.mon-livret-de-fcm'))
                     ->url(fn (): string => MonLivretDeFcm::getUrl())
                     ->badge(fn () => $this->getMarinProgressBadge())
-                    ->visible(fn (): bool => $this->canAccesMarinLivret()),
+                    ->visible(fn (): bool => $this->canAccessModuleWithPermissions('permission.marin')),
                 
                 // Mes marins FCM - visible seulement pour les mentors
                 NavigationItem::make('Mes marins FCM')
@@ -185,6 +188,32 @@ class FcmcentralPanelProvider extends PanelProvider
                 ->visible(fn (): bool => 
                 $this->canAccessAnyPermission(['note.index']))
                 ,
+                NavigationItem::make('Gestion des Types Notes')
+                ->icon('heroicon-o-user-group')
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'typeNote'))
+                ->url(fn (): string => TypeNoteResource::getUrl('index'))
+                //->visible(fn (): bool => $this->canAccessAdminMenus()),
+                ->visible(fn (): bool => 
+                $this->canAccessAnyPermission(['typeNote.index']))
+                ,
+
+                NavigationItem::make('Gestion des Etats')
+                ->icon('heroicon-o-user-group')
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'etat'))
+                ->url(fn (): string => EtatResource::getUrl('index'))
+                //->visible(fn (): bool => $this->canAccessAdminMenus()),
+                ->visible(fn (): bool => 
+                $this->canAccessAnyPermission(['etat.index']))
+                ,
+                NavigationItem::make('Gestion des Types Etats')
+                ->icon('heroicon-o-user-group')
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'typeEtat'))
+                ->url(fn (): string => TypeEtatResource::getUrl('index'))
+                //->visible(fn (): bool => $this->canAccessAdminMenus()),
+                ->visible(fn (): bool => 
+                $this->canAccessAnyPermission(['typeEtat.index']))
+                ,
+
             ])
             //->visible(fn (): bool => $this->canAccessAdminMenus())
             ,
@@ -335,6 +364,9 @@ class FcmcentralPanelProvider extends PanelProvider
        
            
                 $widgets = array_merge($widgets, [
+
+                    
+
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorStatsWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MarinsSupervisesWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorProgressionWidget::class,

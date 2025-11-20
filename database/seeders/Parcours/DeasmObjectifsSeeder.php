@@ -122,6 +122,24 @@ $array = [
         'libelle_court' => "O1 - Employer les moyens AERO suivant les opérations en cours.",
     ],
     [
+        'sf' => 'C2-SF1',
+        'competence' => 'C2',
+        'code' => 'O2',
+        'libelle_court' => "O2 - Adapter la guerre électronique au différents domaines de luttes.",
+    ],
+    [
+        'sf' => 'C2-SF1',
+        'competence' => 'C2',
+        'code' => 'O3',
+        'libelle_court' => "O3 - Conduire les opérations en LAN.",
+    ],
+    [
+        'sf' => 'C2-SF1',
+        'competence' => 'C2',
+        'code' => 'O4',
+        'libelle_court' => "O4 - Conduire les opérations en LAA.",
+    ],
+    [
         'sf' => 'C2-SF2',
         'competence' => 'C2',
         'code' => 'O2',
@@ -139,37 +157,9 @@ $array = [
         'code' => 'O4',
         'libelle_court' => "O4 - Conduire les opérations en LAA.",
     ],
-
-
-
-
     [
-        'sf' => 'C1-SF3',
-        'competence' => 'A3',
-        'code' => 'O1',
-        'libelle_court' => "O1 - Employer les systèmes du bord suivant les opérations en cours. ",
-    ],
-    [
-        'sf' => 'C1-SF3',
-        'competence' => 'A3',
-        'code' => 'O2',
-        'libelle_court' => "O2 - Adapter la guerre électronique au différents domaines de luttes.",
-    ],
-    [
-        'sf' => 'C6-SF3',
-        'competence' => 'A3',
-        'code' => 'O3',
-        'libelle_court' => "O3 - Conduire les opérations en LAN.",
-    ],
-    [
-        'sf' => 'C6-SF3',
-        'competence' => 'A3',
-        'code' => 'O4',
-        'libelle_court' => "O4 - Conduire les opérations en LAA.",
-    ],
-    [
-        'sf' => 'C6-SF7',
-        'competence' => 'A3',
+        'sf' => 'C2-SF2',
+        'competence' => 'C2',
         'code' => 'O5',
         'libelle_court' => "O5 - Conduire les opérations en LSM.",
     ],
@@ -177,11 +167,15 @@ $array = [
 
 
 
+    
+
+
+
     [
         'sf' => 'C2-SF2',
         'competence' => 'C2',
         'code' => 'O1',
-        'libelle_court' => "O1 - Identifier la mise en œuvre du système d'arme MDCN.",
+        'libelle_court' => "O1 - Identifier la mise en oeuvre du système d'arme MDCN.",
     ],
     [
         'sf' => 'C2-SF2',
@@ -257,6 +251,8 @@ $array = [
         'code' => 'O2',
         'libelle_court' => "O2 - Conduire un tir torpille et le lancement de contre-mesures.",
     ],
+
+    // An 5
     [
         'sf' => 'C4-SF4',
         'competence' => 'C4',
@@ -284,42 +280,37 @@ $array = [
 
 
     [
-        'sf' => 'C1-SF7',
-        'competence' => 'C1',
+        'sf' => 'C4-SF7',
+        'competence' => 'C4',
         'code' => 'O1',
         'libelle_court' => "O1 - Diriger le module ASM en tant que CASM.",
     ],
+   
+
+
+
+    
     [
-        'sf' => 'C1-SF7',
-        'competence' => 'C1',
-        'code' => 'O2',
-        'libelle_court' => "O2 - Diriger le module ASM en tant que CASM.",
-    ],
-
-
-
-    // An 5
-    [
-        'sf' => 'C2-SF3',
+        'sf' => 'C2-SF4',
         'competence' => 'C2',
         'code' => 'O1',
         'libelle_court' => "O1 -  Adapter le plan EMCON et les mesures ZIPPO suivant la menace.",
     ],
     [
-        'sf' => 'C2-SF3',
+        'sf' => 'C2-SF4',
         'competence' => 'C2',
         'code' => 'O2',
         'libelle_court' => "O2 -  Gérer la menace en LAA.",
     ],
     
     [
-        'sf' => 'C2-SF3',
+        'sf' => 'C2-SF4',
         'competence' => 'C2',
         'code' => 'O3',
         'libelle_court' => "O3 -  Gérer la menace et l'engagement en LAN.",
     ],
     [
-        'sf' => 'C2-SF3',
+        'sf' => 'C2-SF4',
         'competence' => 'C2',
         'code' => 'O4',
         'libelle_court' => "O4 - Identifier la documentation et systèmes nécessaires à la réalisation des opérations dans tous les domaines de lutte.",

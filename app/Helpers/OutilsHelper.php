@@ -24,8 +24,10 @@ class OutilsHelper
 
         // Remplace les caractères problématiques
         $text = str_replace(
-            ["'", '"', "\n", "\r", "\t", "\\", "`"],
-            ["&apos;", "&quot;", " ", "", " ", "", ""],
+            //["'", '"', "\n", "\r", "\t", "\\", "`"],
+            //["&apos;", "&quot;", " ", "", " ", "", ""],
+            [ '"', "\n", "\r", "\t", "\\", "`"],
+            [ "&quot;", " ", "", " ", "", ""],
             $text
         );
        

@@ -14,20 +14,21 @@ class Etat extends BaseEtat
 
 
    
-    public function marin(): BelongsTo
-    {
-        return $this->belongsTo(Marin::class, 'marin_id');
-    }
+    public function fcmMarin()
+{
+    return $this->belongsTo(FcmMarin::class, 'marin_id', 'id');
+}
+
 
     public function typeEtat(): BelongsTo
     {
-        return $this->belongsTo(TypeEtat::class, 'type_note_id');
+        return $this->belongsTo(TypeEtat::class, 'type_etat_id');
     }
 
-    public function redacteur(): BelongsTo
-    {
-        return $this->belongsTo(Marin::class, 'marin_id');
-    }
+    // public function redacteur(): BelongsTo
+    // {
+    //     return $this->belongsTo(Marin::class, 'marin_id');
+    // }
     
 
 

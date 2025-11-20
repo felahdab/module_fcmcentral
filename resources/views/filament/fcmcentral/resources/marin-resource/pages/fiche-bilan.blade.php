@@ -287,7 +287,7 @@
                             {{ $this->marin->vert_competence ? \Carbon\Carbon::parse($this->marin->vert_competence)->format('d/m/Y') : 'N/A' }}
                         </span>
                     </div>
-                    <div class="flex items-center justify-between py-2 border-b">
+                    {{-- <div class="flex items-center justify-between py-2 border-b">
                         <div class="flex items-center space-x-2">
                             <input type="checkbox" {{ $this->marin->selection_bs ? 'checked' : '' }} disabled class="rounded text-blue-600">
                             <span class="text-sm font-medium">Sélection BS</span>
@@ -304,7 +304,7 @@
                         <span class="text-xs text-gray-500">
                             {{ $this->marin->validation_exa ? \Carbon\Carbon::parse($this->marin->validation_exa)->format('d/m/Y') : 'N/A' }}
                         </span>
-                    </div>
+                    </div> --}}
                 </div>
                 <div class="mt-4 pt-4 border-t space-y-2">
                     <div class="flex justify-between text-sm">

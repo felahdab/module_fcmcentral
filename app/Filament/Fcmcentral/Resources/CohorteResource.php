@@ -30,10 +30,9 @@ class CohorteResource extends Resource
 
      // Permissions marche avec le Trait
     protected static array $permissions = [
-        'fcmcentral::gerer_cohorte',
-        'fcmcentral::droits_admin',
-        'fcmcentral::droits_bcf',
-        'fcmcentral::droits_supadmin',
+        'fcmcentral::cohorte.index',
+        'fcmcentral::admin',
+        'fcmcentral::permission.bcf',
     ];
 
     
@@ -58,7 +57,7 @@ class CohorteResource extends Resource
                     ->required(),
                 DatePicker::make('date_sortie_cours')
                     ->label('Date fin')
-                    ->required(),    
+                   ,    
             ]);
     }
 

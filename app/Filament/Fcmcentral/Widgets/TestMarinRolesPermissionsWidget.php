@@ -7,19 +7,21 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
 class TestMarinRolesPermissionsWidget extends BaseWidget
 {
     
         protected static ?int $sort = 5;
+        use FcmPermissionTrait;
 
         /**
          * Widget visible seulement pour les admins FCM
          */
-        // public static function canView(): bool
-        // {
-        //     return auth()->user()?->can('fcmcentral::admin') ?? false;
-        // }
+        public static function canView(): bool
+        {
+            return static::canAccessModuleWithPermissions('admin');
+        }
     
         protected function getStats(): array
         {
