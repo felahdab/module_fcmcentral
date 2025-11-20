@@ -29,9 +29,10 @@ class TypeNoteResource extends Resource
 
    // Permissions marche avec le Trait
    protected static array $permissions = [
+    'fcmcentral::typeNote.index',
     'fcmcentral::admin',
-    'fcmcentral::permission.bcf',
     'fcmcentral::permission.fps',
+    'fcmcentral::permission.bcf',
 ];
     
 

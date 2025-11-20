@@ -47,10 +47,10 @@ class CompetenceResource extends Resource
 
     // Permissions marche avec le Trait
     protected static array $permissions = [
-        'fcmcentral::gerer_parcours',
-        'fcmcentral::droits_admin',
-        'fcmcentral::droits_bcf',
-        'fcmcentral::droits_supadmin',
+        'fcmcentral::competence.index',
+        'fcmcentral::admin',
+        'fcmcentral::permission.bcf',
+        'fcmcentral::permission.fps',
     ];
 
 

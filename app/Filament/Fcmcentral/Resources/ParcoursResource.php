@@ -35,10 +35,10 @@ class ParcoursResource extends Resource
 
 
     protected static array $permissions = [
-        'fcmcentral::gerer_parcours',
-        'fcmcentral::droits_admin',
-        'fcmcentral::droits_bcf',
-        'fcmcentral::droits_supadmin',
+        'fcmcentral::parcours.index',
+        'fcmcentral::admin',
+        'fcmcentral::permission.bcf',
+        'fcmcentral::permission.fps',
     ];
 
     public static function form(Form $form): Form

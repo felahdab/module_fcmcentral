@@ -33,6 +33,7 @@ class CohorteResource extends Resource
         'fcmcentral::cohorte.index',
         'fcmcentral::admin',
         'fcmcentral::permission.bcf',
+        'fcmcentral::permission.fps'
     ];
 
     

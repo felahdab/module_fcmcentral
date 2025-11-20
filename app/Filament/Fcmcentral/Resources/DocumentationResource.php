@@ -33,10 +33,12 @@ class DocumentationResource extends Resource
 
      // Permissions marche avec le Trait
      protected static array $permissions = [
-        'fcmcentral::gerer_parcours',
-        'fcmcentral::droits_admin',
-        'fcmcentral::droits_bcf',
-        'fcmcentral::droits_supadmin',
+        'fcmcentral::documentation.index',
+        'fcmcentral::admin',
+        'fcmcentral::permission.bcf',
+        'fcmcentral::permission.fps',
+        'fcmcentral::permission.marin',
+        'fcmcentral::permission.mentor',
     ];
 
     public static function form(Form $form): Form

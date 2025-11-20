@@ -24,11 +24,12 @@ class TypeEtatResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     // Permissions marche avec le Trait
-   protected static array $permissions = [
-    'fcmcentral::admin',
-    'fcmcentral::permission.bcf',
-    'fcmcentral::permission.fps',
-];
+    protected static array $permissions = [
+        'fcmcentral::typeEtat.index',
+        'fcmcentral::admin',
+        'fcmcentral::permission.fps',
+        'fcmcentral::permission.bcf',
+    ];
 
 public static function form(Form $form): Form
 {

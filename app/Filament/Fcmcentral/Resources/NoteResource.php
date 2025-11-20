@@ -25,6 +25,7 @@ class NoteResource extends Resource
 
     // Permissions marche avec le Trait
     protected static array $permissions = [
+        'fcmcentral::note.index',
         'fcmcentral::admin',
         'fcmcentral::permission.fps',
         'fcmcentral::permission.bcf',

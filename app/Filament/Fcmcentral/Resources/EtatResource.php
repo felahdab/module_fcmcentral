@@ -26,6 +26,7 @@ class EtatResource extends Resource
 
      // Permissions marche avec le Trait
      protected static array $permissions = [
+        'fcmcentral::etat.index',
         'fcmcentral::admin',
         'fcmcentral::permission.fps',
         'fcmcentral::permission.bcf',
