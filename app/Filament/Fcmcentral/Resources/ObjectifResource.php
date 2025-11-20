@@ -65,7 +65,8 @@ class ObjectifResource extends Resource
                 ->label('Type')
                 ->required()
                 ->in(Objectif::getValidTypes()) // Validation stricte
-                ->default(Objectif::TYPE_OBJECTIF),
+                //->default(Objectif::TYPE_OBJECTIF)
+                ,
 
                 
             Forms\Components\TextInput::make('url')

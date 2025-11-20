@@ -13,6 +13,8 @@ class OutilsHelper
             'gray' => 'Gris',
             'warning' => 'Orange',
             'danger' => 'Rouge',
+            'brown'    => 'Marron',
+            'purple'    => 'Violet',
         ];
     }
 
