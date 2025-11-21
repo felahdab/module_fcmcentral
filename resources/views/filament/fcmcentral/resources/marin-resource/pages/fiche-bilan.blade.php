@@ -178,7 +178,7 @@
             <x-filament::section class="text-center section-card">
                 <div class="p-4">
                     <div class="text-3xl font-bold text-success-800">
-                        {{ $this->statistiques['savoirfaires_valides'] }}
+                       SF : {{ $this->statistiques['savoirfaires_valides'] }}
                     </div>
                     <div class="text-sm text-gray-600 mt-1">Validés</div>
                     <div class="text-xs text-gray-500">/ {{ $this->statistiques['total_savoirfaires'] }} total</div>
@@ -188,7 +188,7 @@
             <x-filament::section class="text-center section-card">
                 <div class="p-4">
                     <div class="text-3xl font-bold text-warning-800">
-                        {{ $this->statistiques['savoirfaires_en_cours'] }}
+                      SF :  {{ $this->statistiques['savoirfaires_en_cours'] }}
                     </div>
                     <div class="text-sm text-gray-600 mt-1">En Cours</div>
                     <div class="text-xs text-gray-500">Partiellement complétés</div>
@@ -198,7 +198,7 @@
             <x-filament::section class="text-center section-card">
                 <div class="p-4">
                     <div class="text-3xl font-bold text-danger-800">
-                        {{ $this->statistiques['savoirfaires_non_commences'] }}
+                      SF :  {{ $this->statistiques['savoirfaires_non_commences'] }}
                     </div>
                     <div class="text-sm text-gray-600 mt-1">Non Commencés</div>
                     <div class="text-xs text-gray-500">0% de progression</div>
