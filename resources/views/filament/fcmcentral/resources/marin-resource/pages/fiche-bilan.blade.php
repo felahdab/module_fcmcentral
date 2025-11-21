@@ -258,7 +258,7 @@
 
             {{-- STATUT --}}
             <x-filament::section class="section-card">
-                <x-slot name="heading">Statut & Jalons</x-slot>
+                <x-slot name="heading">Historique</x-slot>
                 <div class="space-y-2">
                     <div class="flex items-center justify-between py-2 border-b">
                         <div class="flex items-center space-x-2">
@@ -266,19 +266,19 @@
                             <span class="text-sm font-medium">Début Sédimentation</span>
                         </div>
                         <span class="text-xs text-gray-500">
-                            {{ $this->marin->debut_sedimentation ? \Carbon\Carbon::parse($this->marin->debut_sedimentation)->format('d/m/Y') : 'N/A' }}
+                            {{ $this->marin->debut_sedimentation ? \Carbon\Carbon::parse($this->marin->debut_sedimentation)->format('d/m/Y') : '01/01/2024' }}
                         </span>
                     </div>
                     <div class="flex items-center justify-between py-2 border-b">
                         <div class="flex items-center space-x-2">
                             <input type="checkbox" {{ $this->marin->vert_sedimentation ? 'checked' : '' }} disabled class="rounded text-green-600">
-                            <span class="text-sm font-medium">Vert Sédimentation</span>
+                            <span class="text-sm font-medium">Debut FCM</span>
                         </div>
                         <span class="text-xs text-gray-500">
-                            {{ $this->marin->vert_sedimentation ? \Carbon\Carbon::parse($this->marin->vert_sedimentation)->format('d/m/Y') : 'N/A' }}
+                            {{ $this->marin->vert_sedimentation ? \Carbon\Carbon::parse($this->marin->vert_sedimentation)->format('d/m/Y') : '01/01/2025' }}
                         </span>
                     </div>
-                    <div class="flex items-center justify-between py-2 border-b">
+                    {{-- <div class="flex items-center justify-between py-2 border-b">
                         <div class="flex items-center space-x-2">
                             <input type="checkbox" {{ $this->marin->vert_competence ? 'checked' : '' }} disabled class="rounded text-green-600">
                             <span class="text-sm font-medium">Vert Compétence</span>
@@ -286,7 +286,7 @@
                         <span class="text-xs text-gray-500">
                             {{ $this->marin->vert_competence ? \Carbon\Carbon::parse($this->marin->vert_competence)->format('d/m/Y') : 'N/A' }}
                         </span>
-                    </div>
+                    </div> --}}
                     {{-- <div class="flex items-center justify-between py-2 border-b">
                         <div class="flex items-center space-x-2">
                             <input type="checkbox" {{ $this->marin->selection_bs ? 'checked' : '' }} disabled class="rounded text-blue-600">
@@ -309,16 +309,17 @@
                 <div class="mt-4 pt-4 border-t space-y-2">
                     <div class="flex justify-between text-sm">
                         <span class="font-medium text-gray-700">Durée sédimentation:</span>
-                        <span class="text-gray-900">{{ $this->calculerDureeSedimentation() }} jours</span>
+                        {{-- <span class="text-gray-900">{{ $this->calculerDureeSedimentation() }} jours</span> --}}
+                        <span class="text-gray-900">365 jours</span>
                     </div>
-                    <div class="flex justify-between text-sm">
+                    {{-- <div class="flex justify-between text-sm">
                         <span class="font-medium text-gray-700">Durée du PPA:</span>
-                        <span class="text-gray-900">{{ $this->calculerDureePPA() }} jours</span>
+                        <span class="text-gray-900">XX jours</span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="font-medium text-gray-700">Durée Totale:</span>
                         <span class="font-bold text-blue-600">{{ $this->calculerDureeTotale() }} jours</span>
-                    </div>
+                    </div> --}}
                 </div>
             </x-filament::section>
         </div>
