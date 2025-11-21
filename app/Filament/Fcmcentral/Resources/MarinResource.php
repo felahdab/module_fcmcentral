@@ -476,15 +476,15 @@ Tables\Actions\Action::make('create-note')
             ->preload()
             ->nullable()
             ->createOptionForm([
+                Forms\Components\Textarea::make('code')
+                    ->required()
+                    ->label('code')
+                    ,
                 Forms\Components\TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
                     ->maxLength(150),
-                Forms\Components\Textarea::make('libelle_long')
-                    ->required()
-                    ->label('Libellé long')
-                    ->rows(3)
-                    ->maxLength(1500),
+                
             ])
             ->createOptionUsing(function (array $data) {
                 return \Modules\FcmCentral\Models\TypeNote::create($data)->id;

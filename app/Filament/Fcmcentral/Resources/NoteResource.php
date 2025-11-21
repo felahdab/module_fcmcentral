@@ -56,15 +56,15 @@ class NoteResource extends Resource
                         ->preload()
                         ->nullable()
                         ->createOptionForm([
-                            Forms\Components\TextInput::make('libelle_court')
+                            Forms\Components\TextInput::make('code')
                                 ->required()
-                                ->label('Libellé court')
+                                ->label('code')
                                 ->maxLength(150),
-                            // Forms\Components\Textarea::make('libelle_long')
-                            //     ->required()
-                            //     ->label('Libellé long')
-                            //     ->rows(3)
-                            //     ->maxLength(1500),
+                            Forms\Components\Textarea::make('libelle_court')
+                                ->required()
+                                ->label('Libellé')
+                                ->rows(3)
+                                ->maxLength(150),
                         ])
                         ->createOptionUsing(function (array $data) {
                             return TypeNote::create($data)->id;
@@ -109,12 +109,18 @@ class NoteResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
 
+                    Tables\Columns\TextColumn::make('code')
+                    ->label('Code')
+                    ->searchable()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('libelle')
                     ->searchable()
                     ->sortable()
                     ->label('Libellé')
                     ->limit(100)
                     ->wrap(),
+                    
 
                 Tables\Columns\TextColumn::make('marin.nom')
                     ->label('Marin')
