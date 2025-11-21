@@ -60,11 +60,11 @@ class NoteResource extends Resource
                                 ->required()
                                 ->label('Libellé court')
                                 ->maxLength(150),
-                            Forms\Components\Textarea::make('libelle_long')
-                                ->required()
-                                ->label('Libellé long')
-                                ->rows(3)
-                                ->maxLength(1500),
+                            // Forms\Components\Textarea::make('libelle_long')
+                            //     ->required()
+                            //     ->label('Libellé long')
+                            //     ->rows(3)
+                            //     ->maxLength(1500),
                         ])
                         ->createOptionUsing(function (array $data) {
                             return TypeNote::create($data)->id;
