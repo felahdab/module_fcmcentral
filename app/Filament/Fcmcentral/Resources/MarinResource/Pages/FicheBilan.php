@@ -447,7 +447,7 @@ class FicheBilan extends ViewRecord
 
     public function refreshNotes()
     {
-        unset($this->cachedMountedProperties['notes']);
+        //unset($this->cachedMountedProperties['notes']);
         $this->dispatch('$refresh');
     }
 
