@@ -11,6 +11,7 @@ use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Helpers\OutilsHelper;
+use Modules\FcmCommun\Jobs\MajPpaMarinfcm;
 
 class CreationParcoursSerialiseListener
 {
@@ -60,7 +61,7 @@ class CreationParcoursSerialiseListener
             Log::info("Total objectifs sérialisés: {$totalObjectifs}");
 
             // Enregistrer la sérialisation
-            ParcoursSerialise::create([
+            $nouveauParcoursSerialise=ParcoursSerialise::create([
                 'parcours_id'   => $parcours->id,
                 'parcours'      => $serializedData,
                 'date_debut'    => $date,
@@ -71,6 +72,68 @@ class CreationParcoursSerialiseListener
 
             Log::info("Parcours {$parcours->libelle_court} sérialisé (version={$version}) avec {$totalObjectifs} objectifs");
 
+
+            // Partie si ancienne version existe (mettre une date de fin au parcours precedent +  recloner les parcours existant avec les datas anciennes)
+            $ancienneVersion = ParcoursSerialise::where('parcours_id', $parcours->id)
+            //->whereNull('date_fin')
+            ->where('version','<',$version)
+            ->orderByDesc('version')
+            ->first();
+
+            Log::info('RECH ANCIENNE VERSION', [
+                'parcours_id' => $parcours->id,
+                'type' => $ancienneVersion ? $ancienneVersion->version :  'AUCUNE',
+                'New version' => $version,
+            ]);
+
+            if ($ancienneVersion) {
+                $versionN1 = $ancienneVersion->version;
+                $marinParcoursList = \Modules\FcmCentral\Models\MarinParcours::where('parcoursserialise_id', $ancienneVersion->id)->get();
+                
+                Log::info('DEBUT MODIFICATION', [
+                    
+                    'nb_marins' => $marinParcoursList->count(),
+                    'Ancienne version' => $versionN1,
+                ]);
+
+                foreach ($marinParcoursList as $marinParcours) {
+                    $marinUuid = $marinParcours->marin?->uuid ?? $marinParcours->fcmMarin?->marin?->uuid ?? null;
+
+                    
+                    $parcoursMarinJson = is_string($marinParcours->parcoursmarin)
+                        ? json_decode($marinParcours->parcoursmarin, true)
+                        : $marinParcours->parcoursmarin;
+
+                       
+                        Log::info('AVANT BACKUP', [
+                            'marinuuid' => $marinUuid,
+                            'type' => gettype($parcoursMarinJson),
+                            'version' => $versionN1,
+                        ]);
+                    \Modules\FcmCommun\Services\ParcoursMarinBackupService::backup(
+                        $marinUuid,
+                        $parcoursMarinJson,
+                        $versionN1,
+                        'FcmCentral',
+                        now()->format('Y-m-d_His')
+                    );
+                    Log::info('FIN BACKUP');
+                }
+            
+                $ancienneVersion->date_fin = $date;
+                $ancienneVersion->save();
+            
+                if ($marinParcoursList->isNotEmpty()) {
+                    Log::info('AVANT DISPATCH JOB', [
+                        'uuid' => $nouveauParcoursSerialise->uuid
+                    ]);
+                    MajPpaMarinfcm::dispatchSync($nouveauParcoursSerialise->uuid);
+                    Log::info('APRES DISPATCH JOB');
+                }
+            }
+            
+            // Fin partie ancienne
+
             $notification = Constants::getMess(Constants::PARCOURS, $parcours->libelle_court);
 
             Notification::make()
@@ -78,6 +141,8 @@ class CreationParcoursSerialiseListener
                 ->success()
                 ->body($notification['message'] ?? 'Sérialisation terminée')
                 ->send();
+
+                
         } catch (\Exception $e) {
             Log::error("Erreur lors de la sérialisation du parcours", [
                 'uuid' => $event->object_uuid,

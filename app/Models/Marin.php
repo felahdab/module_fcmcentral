@@ -675,4 +675,23 @@ class Marin extends BaseMarin
         
         return $grade ? $grade . ' ' . $nom : $nom;
     }
+
+
+        // ETAT
+        public function getDernierTypeEtat()
+        {
+            return $this->complementsFcm?->etats()->latest('date_debut')->first();
+        }
+        public function getDernierTypeEtatCode()
+        {
+            return $this->getDernierTypeEtat()?->typeEtat?->code;
+        }
+        public function getDernierTypeEtatLibelle()
+        {
+            return $this->getDernierTypeEtat()?->typeEtat?->libelle_court;
+        }
+        public function getDernierTypeEtatId()
+        {
+            return $this->getDernierTypeEtat()?->typeEtat?->id;
+        }
 }

@@ -77,6 +77,9 @@ class FcmMarin extends Model
         ]);
     }
 
+
+
+
     // Attributs calculés
     public function getDonneesDuParcoursAttribute()
     {

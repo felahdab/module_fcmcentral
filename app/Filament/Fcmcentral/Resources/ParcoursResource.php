@@ -150,7 +150,7 @@ class ParcoursResource extends Resource
                         DatePicker::make('date de debut')
                             ->label('Date')
                             ->required()
-                            ->minDate(fn ($record) => Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($record))),
+                            //->minDate(fn ($record) => Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($record))),
                     ])
                     ->fillForm(function ($record) use ($parcours_service){
                         return 
@@ -181,48 +181,7 @@ class ParcoursResource extends Resource
             ]);
     }
 
-    /**
-     * Créer un parcours sérialisé
-     */
-    protected static function createParcoursSerialise(Parcours $parcours, array $parcours_data, $date_de_debut, $version): ?ParcoursSerialise
-    {
-        // Vérifier la version précédente
-        $previous = ParcoursSerialise::where('uuid', $parcours->uuid)
-            ->orderBy('version')
-            ->get()
-            ->last();
-
-        if ($previous) {
-            if ((new Carbon($previous->date_debut))->isAfter((new Carbon($date_de_debut)))) {
-                return null;
-            }
-        } else {
-            if (Carbon::now()->isAfter((new Carbon($date_de_debut)))) {
-                return null;
-            }
-        }
-
-        // Créer le nouveau parcours sérialisé
-        $parcours_serialise = ParcoursSerialise::create([
-            "uuid" => $parcours->uuid,
-            "libelle_long" => $parcours->libelle_long,
-            "libelle_court" => $parcours->libelle_court,
-            "version" => $version,
-            "date_debut" => $date_de_debut,
-            "date_fin" => null,
-            "parcours_id" => $parcours->id,
-            "parcours" => $parcours_data // Structure complète avec années
-        ]);
-
-        // Mettre à jour les versions précédentes
-        ParcoursSerialise::where('uuid', $parcours->uuid)
-            ->where('version', '<', $version)
-            ->whereNull('date_fin')
-            ->update(['date_fin' => Carbon::parse($date_de_debut)->subDay()]);
-
-        return $parcours_serialise;
-    }
-
+    
     /**
      * Obtenir la première date possible pour une nouvelle version
      */

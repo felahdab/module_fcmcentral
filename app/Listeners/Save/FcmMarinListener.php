@@ -24,78 +24,79 @@ class FcmMarinListener
      * @return void
      */
     public function handle(UserGeneratedEvent $event): void
-    {
-        if (
-            !$event->isOfType(UserGeneratedEventTypes::MARIN_EN_FCM) &&
-            !$event->isOfType(UserGeneratedEventTypes::MARIN_PAS_FCM)
-        ) {
-            return;
-        }
-        
-        $marin = Marin::where('uuid', $event->object_uuid)->first();
-
-        if ($marin) {
-            Log::info('Marin trouvé :', ['id' => $marin->id]);
-
-            /**
-             * Si l'évènement demande à retirer le marin du suivi de la FCM est qu'il est effectivement suivi.
-             */
-            if ($event->isOfType(UserGeneratedEventTypes::MARIN_PAS_FCM) && $marin->suivi_en_fcm) {
-
-                $marin->suivi_en_fcm = false;
-                $marin->lignes_dans_fcm_marin()->delete();
-
-                // Log de l'action
-                Log::info('Le marin a été retiré du suivi FCM', [
-                    'nom' => $marin->nom,
-                    'uuid' => $marin->uuid,
-                ]);
-
-                $notification = Constants::getMess(Constants::MARIN_PAS_FCM, $marin->nom);
-
-                // Notification
-                Notification::make()
-                    ->title($notification['title'])
-                    ->success()
-                    ->body($notification['message'])
-                    ->send();
-
-            } 
-
-            /**
-             * Si l'évènement demande la mise en suivi et que le marin n'est pas déjà suivi:
-             */
-            if ( $event->isOfType(UserGeneratedEventTypes::MARIN_EN_FCM) && ! $marin->suivi_en_fcm) {
-
-                $marin->suivi_en_fcm = true;
-                FcmMarin::create(["rh_marin_id" => $marin->id]);
-
-                // Log de l'action
-                Log::info('Le marin a été ajouté au suivi FCM', [
-                    'nom' => $marin->nom,
-                    'uuid' => $marin->uuid,
-                ]);
-
-                $notification = Constants::getMess(Constants::MARIN_EN_FCM, $marin->nom);
-
-                // Notification
-                Notification::make()
-                    ->title($notification['title'])
-                    ->success()
-                    ->body($notification['message'])
-                    ->send();
-
-                // Retour Log
-                Log::info($marin->prefixTable . 'fcm_marin  :', [
-                    'rh_marin_id' => $marin->id,
-                    'nom' => $marin->nom,
-                    'uuid' => $marin->uuid,
-                    //'cohorte_id' => $data['cohorte_id'] ?? null,
-                    //'mentor_id' =>   $data['mentor_id'] ?? null,
-                ]);
-            }
-        } else {
-            Log::warning('Aucun Marin trouvé avec UUID : ' . $event->object_uuid);
-        }
+{
+    if (
+        !$event->isOfType(UserGeneratedEventTypes::MARIN_EN_FCM) &&
+        !$event->isOfType(UserGeneratedEventTypes::MARIN_PAS_FCM)
+    ) {
+        return;
     }
+
+    $marin = Marin::where('uuid', $event->object_uuid)->first();
+
+    if ($marin) {
+        Log::info('Marin trouvé :', ['id' => $marin->id]);
+
+        // === RETRAIT DU SUIVI FCM ===
+        if ($event->isOfType(UserGeneratedEventTypes::MARIN_PAS_FCM) && $marin->suivi_en_fcm) {
+
+            $marin->suivi_en_fcm = false;
+            // $marin->lignes_dans_fcm_marin()->delete(); // Désactivé, on garde l'historique
+
+            // Historiser l'état "Fin FCM"
+            $fcmMarin = $marin->complementsFcm;
+            if ($fcmMarin) {
+                $fcmMarin->historiserEtat('FCM_fin');
+            }
+
+            Log::info('Le marin a été retiré du suivi FCM', [
+                'nom' => $marin->nom,
+                'uuid' => $marin->uuid,
+            ]);
+
+            $notification = Constants::getMess(Constants::MARIN_PAS_FCM, $marin->nom);
+
+            Notification::make()
+                ->title($notification['title'])
+                ->success()
+                ->body($notification['message'])
+                ->send();
+        }
+
+        // === AJOUT AU SUIVI FCM ===
+        if ($event->isOfType(UserGeneratedEventTypes::MARIN_EN_FCM) && !$marin->suivi_en_fcm) {
+
+            // Si pas encore FcmMarin : création + état "En Sedimentation"
+            if (!$marin->complementsFcm) {
+                $fcmMarin = FcmMarin::create(["rh_marin_id" => $marin->id]);
+                $fcmMarin->historiserEtat('FCM_sed');
+            } else {
+                // Si déjà FcmMarin : état "En FCM Actif"
+                $marin->complementsFcm->historiserEtat('FCM_act');
+            }
+
+            Log::info('Le marin a été ajouté au suivi FCM', [
+                'nom' => $marin->nom,
+                'uuid' => $marin->uuid,
+            ]);
+
+            $notification = Constants::getMess(Constants::MARIN_EN_FCM, $marin->nom);
+
+            Notification::make()
+                ->title($notification['title'])
+                ->success()
+                ->body($notification['message'])
+                ->send();
+
+            Log::info($marin->prefixTable . 'fcm_marin  :', [
+                'rh_marin_id' => $marin->id,
+                'nom' => $marin->nom,
+                'uuid' => $marin->uuid,
+            ]);
+        }
+    } else {
+        Log::warning('Aucun Marin trouvé avec UUID : ' . $event->object_uuid);
+    }
+}
+
 }
