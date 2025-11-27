@@ -182,7 +182,7 @@ class FcmcentralPanelProvider extends PanelProvider
 
                 NavigationItem::make('Gestion des Notes')
                 ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'note'))
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'note') && !str_contains(request()->route()?->getName() ?? '', 'type'))
                 ->url(fn (): string => NoteResource::getUrl('index'))
                 //->visible(fn (): bool => $this->canAccessAdminMenus()),
                 ->visible(fn (): bool => 
@@ -190,7 +190,7 @@ class FcmcentralPanelProvider extends PanelProvider
                 ,
                 NavigationItem::make('Gestion des Types Notes')
                 ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'typeNote'))
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'type-notes'))
                 ->url(fn (): string => TypeNoteResource::getUrl('index'))
                 //->visible(fn (): bool => $this->canAccessAdminMenus()),
                 ->visible(fn (): bool => 
@@ -199,7 +199,7 @@ class FcmcentralPanelProvider extends PanelProvider
 
                 NavigationItem::make('Gestion des Etats')
                 ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'etat'))
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'etat') && !str_contains(request()->route()?->getName() ?? '', 'type'))
                 ->url(fn (): string => EtatResource::getUrl('index'))
                 //->visible(fn (): bool => $this->canAccessAdminMenus()),
                 ->visible(fn (): bool => 
@@ -207,7 +207,7 @@ class FcmcentralPanelProvider extends PanelProvider
                 ,
                 NavigationItem::make('Gestion des Types Etats')
                 ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'typeEtat'))
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'type-etats'))
                 ->url(fn (): string => TypeEtatResource::getUrl('index'))
                 //->visible(fn (): bool => $this->canAccessAdminMenus()),
                 ->visible(fn (): bool => 

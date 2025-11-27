@@ -86,21 +86,16 @@ class EtatResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->defaultSort('date', 'desc')
+        ->defaultSort('date_debut', 'desc')
         ->columns([
             Tables\Columns\TextColumn::make('id')
                 ->label('ID')
                 ->toggleable(isToggledHiddenByDefault: true)
                 ->searchable(),
 
-            Tables\Columns\TextColumn::make('libelle')
-                ->searchable()
-                ->sortable()
-                ->label('Libellé')
-                ->limit(100)
-                ->wrap(),
+           
 
-            Tables\Columns\TextColumn::make('marin.nom')
+            Tables\Columns\TextColumn::make('fcmMarin.marin.nom')
                 ->label('Marin')
                 ->searchable()
                 ->sortable(),
