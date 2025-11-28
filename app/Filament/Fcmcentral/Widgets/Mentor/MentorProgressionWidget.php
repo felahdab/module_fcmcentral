@@ -114,7 +114,7 @@ class MentorProgressionWidget extends ChartWidget
 
         foreach ($parcours['affectations'] ?? [] as $affectation) {
             foreach ($affectation['competences'] ?? [] as $competence) {
-                foreach ($competence['competencesSavoirfaires'] ?? [] as $csf) {
+                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
                     $total++;
                     if ($this->verifierStatut($csf, 'valides')) $valides++;
                     if ($this->verifierStatut($csf, 'proposes')) $proposes++;
