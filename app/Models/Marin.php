@@ -694,4 +694,16 @@ class Marin extends BaseMarin
         {
             return $this->getDernierTypeEtat()?->typeEtat?->id;
         }
+
+        public static function fromCurrentUser(): ?self
+{
+    $user = auth()->user();
+   
+    if (!$user) {
+        return null;
+    }
+
+    return static::where('user_id', $user->id)->first();
+}
+
 }
