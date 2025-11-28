@@ -40,6 +40,77 @@ class MarinResource extends Resource
         'fcmcentral::permission.fps',
     ];
 
+
+    /**
+     * Badge de navigation avec comptage selon les droits
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        try {
+            if (static:: canAccessPermission('admin')) {
+                // Admins voient tous les marins FCM
+                return (string) Marin::enFcm()->count();
+            }
+            
+            if (static:: canAccessAnyPermission([
+                'permission.mentor',
+                'permission.bcf',
+                'permission.fps'
+            ])) {
+                // Mentors voient seulement leurs marins
+                $currentMarin = Marin::fromCurrentUser();
+                if ($currentMarin) {
+                    $count = FcmMarin::where('mentor_id', $currentMarin->id)->count();
+                    return $count > 0 ? (string) $count : null;
+                }
+            }
+        } catch (\Exception $e) {
+            // En cas d'erreur, pas de badge
+        }
+        
+        return null;
+    }
+
+    /**
+     * Filtrage automatique selon les droits
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        try {
+            // Les admins voient tout
+            if (static:: canAccessAnyPermission([
+                'admin',
+                'permission.bcf',
+                'permission.fps'])) {
+                return $query;
+            }
+            
+            // Les mentors voient seulement leurs marins
+            if (static:: canAccessAnyPermission([
+                'permission.mentor',
+                ]
+                )) {
+                $currentMarin = Marin::fromCurrentUser();
+                if ($currentMarin) {
+                    $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
+                        ->pluck('rh_marin_id');
+                    
+                    return $query->whereIn('id', $marinIds);
+                }
+            }
+        } catch (\Exception $e) {
+            // En cas d'erreur, query vide
+            return $query->whereRaw('1 = 0');
+        }
+
+        // Par défaut, query vide
+        return $query->whereRaw('1 = 0');
+    }
+
+    
+
     public static function form(Form $form): Form
     {
         return $form->schema([

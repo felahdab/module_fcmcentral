@@ -44,30 +44,32 @@ class EtatResource extends Resource
 
             Forms\Components\Select::make('marin_id')
                 ->label('Marin')
-                ->relationship('marin', 'nom')
+                ->relationship('fcmMarin.marin', 'nom')
                 ->searchable()
                 ->preload()
                 ->required(),
 
-            Forms\Components\Group::make([
                 Forms\Components\Select::make('type_etat_id')
-                    ->label('Type Etat')
-                    ->relationship('typeEtat', 'libelle_court')
-                    ->searchable()
-                    ->preload()
-                    ->nullable()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('libelle_court')
-                            ->required()
-                            ->label('Libellé court')
-                            ->maxLength(150),
-                        
-                    ])
-                    ->createOptionUsing(function (array $data) {
-                        return TypeEtat::create($data)->id;
-                    }),
-            ])->columnSpan(1),
-
+                ->label('Type Etat')
+                ->relationship('typeEtat', 'libelle_court')
+                ->searchable()
+                ->preload()
+                ->nullable()
+                ->createOptionForm([
+                    Forms\Components\TextInput::make('libelle_court')
+                        ->required()
+                        ->label('Libellé court')
+                        ->maxLength(150),
+                    Forms\Components\TextInput::make('code')
+                        ->required()
+                        ->label('Code')
+                        ->maxLength(50),
+                ])
+                ->createOptionUsing(function (array $data) {
+                    return TypeEtat::create($data)->id;
+                }),
+            
+            
 
             Forms\Components\DatePicker::make('date_debut')
             ->label('Debut')

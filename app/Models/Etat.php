@@ -20,10 +20,12 @@ class Etat extends BaseEtat
 }
 
 
-    public function typeEtat(): BelongsTo
-    {
-        return $this->belongsTo(TypeEtat::class, 'type_etat_id');
-    }
+public function typeEtat(): BelongsTo
+{
+    return $this->belongsTo(TypeEtat::class, 'type_etat_id');
+}
+
+
 
     // public function redacteur(): BelongsTo
     // {
