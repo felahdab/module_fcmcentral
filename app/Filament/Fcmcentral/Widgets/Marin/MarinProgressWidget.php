@@ -26,8 +26,8 @@ class MarinProgressWidget extends Widget
         $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
         
         return static::canAccessModuleWithPermissions('widget.marin')
-        && $marin->complements_fcm
-        && $marin->complements_fcm->donnees_du_parcours
+       // && $marin->complements_fcm
+        //&& $marin->complements_fcm->donnees_du_parcours
         ;
     }
 
