@@ -139,7 +139,7 @@ private function calculateProgression(Marin $marin): array
 
     foreach ($parcours['affectations'] ?? [] as $affectation) {
         foreach ($affectation['competences'] ?? [] as $competence) {
-            foreach ($competence['competencesSavoirfaires'] ?? [] as $savoirfaire) {
+            foreach ($competence['competenceSavoirfaires'] ?? [] as $savoirfaire) {
                 foreach ($savoirfaire['objectifs'] ?? [] as $objectif) {
                     $total++;
                     if (($objectif['etat_valid'] ?? false) === true) {
@@ -168,7 +168,7 @@ private function calculateEnAttente(Marin $marin): int
 
     foreach ($parcours['affectations'] ?? [] as $affectation) {
         foreach ($affectation['competences'] ?? [] as $competence) {
-            foreach ($competence['competencesSavoirfaires'] ?? [] as $savoirfaire) {
+            foreach ($competence['competenceSavoirfaires'] ?? [] as $savoirfaire) {
                 foreach ($savoirfaire['objectifs'] ?? [] as $objectif) {
                     $estProposee = !empty($objectif['date_proposition']);
                     $estValidee = ($objectif['etat_valid'] ?? false) === true;
@@ -194,7 +194,7 @@ private function getDerniereValidation(Marin $marin): ?string
 
     foreach ($parcours['affectations'] ?? [] as $affectation) {
         foreach ($affectation['competences'] ?? [] as $competence) {
-            foreach ($competence['competencesSavoirfaires'] ?? [] as $savoirfaire) {
+            foreach ($competence['competenceSavoirfaires'] ?? [] as $savoirfaire) {
                 foreach ($savoirfaire['objectifs'] ?? [] as $objectif) {
                     if (($objectif['etat_valid'] ?? false) === true && !empty($objectif['date_validation'])) {
                         $dateValidation = \Carbon\Carbon::parse($objectif['date_validation']);
