@@ -6,6 +6,7 @@ use Filament\Widgets\ChartWidget;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Traits\FcmPermissionTrait;
+use Illuminate\Support\Facades\Log;
 
 class MentorProgressionWidget extends ChartWidget
 {
@@ -40,10 +41,33 @@ class MentorProgressionWidget extends ChartWidget
         $progressions = [];
 
         foreach ($marins as $marin) {
-            $stats = $this->calculerStatistiques($marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? []);
+            // ✅ Vérifications renforcées
+            if (!$marin->complements_fcm) {
+                Log::warning("Marin {$marin->id} n'a pas de complements_fcm");
+                continue;
+            }
+
+            if (!$marin->complements_fcm->donnees_du_parcours) {
+                Log::warning("Marin {$marin->id} n'a pas de donnees_du_parcours");
+                continue;
+            }
+
+            $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? [];
+            
+            if (empty($parcours)) {
+                Log::warning("Marin {$marin->id} a un parcoursmarin vide");
+                continue;
+            }
+
+            $stats = $this->calculerStatistiques($parcours);
+            
             $labels[] = $marin->nom . ' ' . $marin->prenom;
             $progressions[] = $stats['progress'];
         }
+
+        // ✅ Debug : afficher les données récupérées
+        Log::info('MentorProgressionWidget - Labels:', $labels);
+        Log::info('MentorProgressionWidget - Progressions:', $progressions);
 
         return [
             'datasets' => [

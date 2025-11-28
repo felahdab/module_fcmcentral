@@ -73,8 +73,11 @@ class MentorStatsWidget extends BaseWidget
 
         foreach ($marins as $marin) {
             if (!$marin->complements_fcm) continue;
+            
+            // ✅ Passer le parcours en paramètre
             $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? [];
             $stats = $this->calculerStatistiques($parcours);
+            
             $progressions[] = $stats['progress'];
             $propose += $stats['proposes'];
             $validationsSemaine += $stats['validations_semaine'];
@@ -94,24 +97,25 @@ class MentorStatsWidget extends BaseWidget
      * Calcule les statistiques de progression, validés, proposés, non validés
      * sur la structure parcours['affectations']['competences']['competencesSavoirfaires']['objectifs']
      */
-
-     private function calculerStatistiques(): array
+    private function calculerStatistiques(array $parcours): array
     {
         $total = 0;
         $valides = 0;
         $proposes = 0;
         $validationsSemaine = 0;
 
-        foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+        foreach ($parcours['affectations'] ?? [] as $affectation) {
             foreach ($affectation['competences'] ?? [] as $competence) {
                 foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
                     $total++;
                    
                     if ($csf['etat_valid'] ?? false) {
                         $valides++;
-                        $dateValidation = \Carbon\Carbon::parse($csf['date_validation']);
-                        if ($dateValidation->isCurrentWeek()) {
-                            $validationsSemaine++;
+                        if (!empty($csf['date_validation'])) {
+                            $dateValidation = \Carbon\Carbon::parse($csf['date_validation']);
+                            if ($dateValidation->isCurrentWeek()) {
+                                $validationsSemaine++;
+                            }
                         }
                     }
                     if (!empty($csf['date_proposition'])) {
@@ -123,9 +127,11 @@ class MentorStatsWidget extends BaseWidget
                        
                         if ($objectif['etat_valid'] ?? false) {
                             $valides++;
-                            $dateValidation = \Carbon\Carbon::parse($objectif['date_validation']);
-                            if ($dateValidation->isCurrentWeek()) {
-                                $validationsSemaine++;
+                            if (!empty($objectif['date_validation'])) {
+                                $dateValidation = \Carbon\Carbon::parse($objectif['date_validation']);
+                                if ($dateValidation->isCurrentWeek()) {
+                                    $validationsSemaine++;
+                                }
                             }
                         }
                         if (!empty($objectif['date_proposition'])) {
@@ -147,6 +153,4 @@ class MentorStatsWidget extends BaseWidget
             'non_valides' => $total - $valides
         ];
     }
-
-    
 }
