@@ -44,7 +44,7 @@ class EtatResource extends Resource
 
             Forms\Components\Select::make('marin_id')
                 ->label('Marin')
-                ->relationship('fcmMarin.marin', 'nom')
+                ->relationship('marin', 'nom')
                 ->searchable()
                 ->preload()
                 ->required(),
@@ -97,7 +97,7 @@ class EtatResource extends Resource
 
            
 
-            Tables\Columns\TextColumn::make('fcmMarin.marin.nom')
+            Tables\Columns\TextColumn::make('marin.nom')
                 ->label('Marin')
                 ->searchable()
                 ->sortable(),

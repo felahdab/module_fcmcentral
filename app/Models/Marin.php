@@ -11,6 +11,7 @@ use Modules\RH\Models\Marin as RHMarin;
 use Modules\FcmCommun\Models\Marin as BaseMarin;
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCentral\Models\FcmMarin;
+use Illuminate\Support\Str;
 
 /**
 * Modèle Marin pour le module FCM Central
@@ -680,7 +681,8 @@ class Marin extends BaseMarin
         // ETAT
         public function getDernierTypeEtat()
         {
-            return $this->complementsFcm?->etats()->latest('date_debut')->first();
+            //return $this->marin?->complementsFcm?->etats()->latest('date_debut')->first();
+            return $this->etats()->latest('date_debut')->first();
         }
         public function getDernierTypeEtatCode()
         {
@@ -695,15 +697,22 @@ class Marin extends BaseMarin
             return $this->getDernierTypeEtat()?->typeEtat?->id;
         }
 
-        public static function fromCurrentUser(): ?self
-{
-    $user = auth()->user();
-   
-    if (!$user) {
-        return null;
+        public function etats()
+    {
+        return $this->hasMany(Etat::class, 'rh_marin_id', 'id');
     }
 
-    return static::where('user_id', $user->id)->first();
-}
+    public function historiserEtat(string $codeEtat, ?\Carbon\Carbon $dateDebut = null, ?\Carbon\Carbon $dateFin = null ):void
+    {
+        $typeEtat = TypeEtat::where('code', $codeEtat)->firstOrFail();
+        Etat::create([
+            'uuid' => Str::uuid(),
+            'rh_marin_id' => $this->id,
+            'type_etat_id' => $typeEtat->id,
+            'date_debut' => $dateDebut ?? now(),
+            'date_fin' => $dateFin,
+        ]);
+    }
+      
 
 }

@@ -40,6 +40,11 @@ class MarinResource extends Resource
         'fcmcentral::permission.fps',
     ];
 
+    // Retirer bouton Creer Create
+    public static function canCreate(): bool
+    {
+        return false;
+    }
 
     /**
      * Badge de navigation avec comptage selon les droits
@@ -109,7 +114,7 @@ class MarinResource extends Resource
         return $query->whereRaw('1 = 0');
     }
 
-    
+
 
     public static function form(Form $form): Form
     {
@@ -128,6 +133,7 @@ class MarinResource extends Resource
 
     public static function table(Table $table): Table
     {
+        
         return $table
             ->defaultSort('nom', 'asc')
             ->headerActions([
@@ -284,16 +290,17 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
         ])
         ->action(function ($record, array $data) {
             // Historiser chaque changement dans la table etat
-            $fcmMarin = $record->complementsFcm;
-            if ($fcmMarin) {
+            // $fcmMarin = $record->complementsFcm;
+            // if ($fcmMarin) {
                 // Mettre date de fin au statut actuel
-                $etatActuel = $fcmMarin->etats()->latest('date_debut')->first();
+               // $etatActuel = $fcmMarin->etats()->latest('date_debut')->first();
+               $etatActuel = $record->etats()->latest('date_debut')->first();
                 if ($etatActuel && !$etatActuel->date_fin){
                     $etatActuel->update(['date_fin'=>now()]);
                 }
                 $typeEtat = \Modules\FcmCentral\Models\TypeEtat::find($data['type_etat_id']);
-                $fcmMarin->historiserEtat($typeEtat->code);
-            }
+                $record->historiserEtat($typeEtat->code);
+            //}
         })
         ->visible(fn ($record) =>
             $record->estEnFcm()
@@ -445,10 +452,110 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
             ->actions([
 
                 //EDIT
-                // Tables\Actions\EditAction::make()
-                //     ->iconButton()
-                //     ->icon('heroicon-m-pencil-square')
-                //     ->visible(fn ($record) => static::canEdit($record)),
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->icon('heroicon-m-pencil-square')
+                    ->visible(fn ($record) => static::canEdit($record)),
+
+                   
+                // USERS
+        //         Tables\Actions\Action::make('associer_user')
+        //         ->icon(fn ($record) => $record->user ? 'heroicon-m-pencil-square' : 'heroicon-m-user-plus')
+        //         ->color(fn ($record) => $record->user ? 'warning' : 'success')
+        //         ->iconButton()
+        //         ->visible(fn ($record) =>
+        //             static::canAccessAnyPermission(['admin', 'permission.bcf'])
+        //         )
+        //         ->form(fn ($record) => $record->user
+        //             ? [
+        //                 Forms\Components\TextInput::make('password')
+        //                     ->label('Nouveau mot de passe')
+        //                     //->password()
+        //                     ->minLength(8)
+        //                     ->maxLength(100)
+        //                     //->dehydrateStateUsing(fn ($state) => $state ? bcrypt($state) : null)
+        //                     //->required(fn ($record) => !$record->user)
+        //                     ,
+        //                 Forms\Components\Select::make('roles')
+        //                     ->label('Rôles')
+        //                     ->multiple()
+        //                     ->options(
+        //                         \Spatie\Permission\Models\Role::query()
+        //                             ->where('guard_name','web')
+        //                             ->where('name', 'like', 'fcmcentral::%')
+        //                             ->pluck('name', 'name')
+        //                     )
+        //                     ->searchable()
+        //                     ->preload()
+        //                     ->default(fn ($record) => $record->user?->roles->pluck('id')->toArray()??[])
+        //                    // ->required(fn ($record) => !$record->user)
+        //                    ,
+        //             ]
+        //             : [
+        //                 Forms\Components\Placeholder::make('email')
+        //                     ->label('Email')
+        //                     ->content($record->email),
+        //                 Forms\Components\TextInput::make('password')
+        //                     ->label('Mot de passe')
+        //                     ->password()
+        //                     ->minLength(8)
+        //                     ->maxLength(100)
+        //                     //->dehydrateStateUsing(fn ($state) => $state ? bcrypt($state) : null)
+        //                     ->required(),
+        //                 Forms\Components\Select::make('roles')
+        //                     ->label('Rôles')
+        //                     ->multiple()
+        //                     ->options(
+        //                         \Spatie\Permission\Models\Role::query()
+        //                             ->where('guard_name','web')
+        //                             ->where('name', 'like', 'fcmcentral::%')
+        //                             ->pluck('name', 'id')
+        //                     )
+        //                     ->searchable()
+        //                     ->default(fn ($record) => $record->roles->pluck('name')->toArray())
+        //                     ->preload()
+        //                     ->required(),
+        //             ]
+        //         )
+        //         ->action(function ($record, array $data) {
+        //             $user = $record->user;
+                
+        //             if (!$user) {
+        //                 $user = \Modules\RH\Models\User::create([
+        //                     'email' => $record->email,
+        //                     'display_name' => $record->prenom . ' ' . $record->nom,
+        //                     'password' => $data['password'],
+        //                     'admin' => false,
+        //                 ]);
+        //                 $record->user_id = $user->id;
+        //                 $record->save();
+        //             } else {
+        //                 $user->update([
+        //                     'password' => $data['password'],
+        //                 ]);
+        //             }
+                
+        //             // Filtrer les rôles vides et assigner
+        //             if (!empty($data['roles'])) {
+                      
+        //                 //$user->syncRoles($data['roles']);
+        //             }
+                
+        //             \Filament\Notifications\Notification::make()
+        //                 ->title('Compte utilisateur mis à jour')
+        //                 ->body('Le compte utilisateur et les rôles ont été mis à jour.')
+        //                 ->success()
+        //                 ->send();
+        //         })
+                
+                
+            
+        
+        // ->modalHeading(fn ($record) => $record->user ? 'Modifier le compte utilisateur' : 'Créer le compte utilisateur')
+        // ->modalSubmitActionLabel(fn ($record) => $record->user ? 'Mettre à jour' : 'Créer')
+        // ->modalCancelActionLabel('Annuler'),
+
+                    
 
                 // VOIR LIVRET    
                 Tables\Actions\Action::make('livret-de-fcm')
@@ -576,37 +683,56 @@ Tables\Actions\Action::make('create-note')
         ->nullable(),
 
     // Rédacteur automatique selon le rôle
-    Forms\Components\Hidden::make('redacteur_id')
-        ->default(function () {
-            if (static::canAccessAnyPermission([
+    // Forms\Components\Hidden::make('redacteur_id')
+    //     ->default(function () {
+    //         if (static::canAccessAnyPermission([
                 
-                'permission.mentor',
+    //             'permission.bcf','admin'
                
-            ])) {
-                // Si c'est un mentor, utiliser son ID marin
-                $currentMarin = Marin::fromCurrentUser();
-                return $currentMarin ? $currentMarin->id : auth()->user()->id;
-            }
-            // Sinon utiliser l'ID utilisateur
-            return auth()->user()->id;
-        }),
+    //         ])) {
+    //             // Si c'est un mentor, utiliser son ID marin
+    //             $currentMarin = Marin::fromCurrentUser();
+    //             return $currentMarin ? $currentMarin->id : auth()->user()->id;
+    //         }
+    //         // Sinon utiliser l'ID utilisateur
+    //         return auth()->user()->id;
+    //     }),
 
     // Affichage du rédacteur
-    Forms\Components\Placeholder::make('redacteur_info')
-        ->label('Rédacteur')
-        ->content(function () {
-            if (static::canAccessAnyPermission([
+    // Forms\Components\Placeholder::make('redacteur_info')
+        // ->label('Rédacteur')
+        // ->content(function () {
+        //     if (static::canAccessAnyPermission([
                 
-                'permission.mentor',
+        //         'permission.bcf','admin'
                 
-            ])) {
-                $currentMarin = Marin::fromCurrentUser();
-                if ($currentMarin) {
-                    return $currentMarin->grade?->libelle_court . ' ' . $currentMarin->prenom . ' ' . $currentMarin->nom;
-                }
-            }
-            return auth()->user()->name ?? 'Utilisateur connecté';
-        }),
+        //     ])) {
+        //         $currentMarin = Marin::fromCurrentUser();
+        //         if ($currentMarin) {
+        //             return $currentMarin->grade?->libelle_court . ' ' . $currentMarin->prenom . ' ' . $currentMarin->nom;
+        //         }
+        //     }
+        //     return auth()->user()->name ?? 'Utilisateur connecté';
+        // }),
+        Forms\Components\Select::make('redacteur_id')
+    ->label('Rédacteur')
+    ->options(function () {
+        return \Modules\FcmCentral\Models\Marin::orderBy('nom')
+            ->get()
+            ->mapWithKeys(fn($marin) => [
+                $marin->id => ($marin->grade?->libelle_court . ' ' . $marin->prenom . ' ' . $marin->nom)
+            ])
+            ->toArray();
+    })
+    ->searchable()
+    ->required()
+    ->default(function () {
+        $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+        return $currentMarin ? $currentMarin->id : auth()->user()->id;
+    }),
+
+       
+    
 
     Forms\Components\Toggle::make('valide_bcf')
         ->label('Validé BCF')
@@ -630,10 +756,17 @@ Tables\Actions\Action::make('create-note')
 ])
 ->action(function ($record, array $data) {
     try {
+        \Log::info('Tentative de création de note', [
+            'record_id' => $record->id,
+            'data' => $data,
+        ]);
+
         // Créer la note
+      
         $note = \Modules\FcmCentral\Models\Note::create([
             'libelle' => $data['libelle'],
-            'marin_id' => $record->id,
+            'rh_marin_id' => $record->id,
+            //'marin_id' => $record->complementsFcm->id,
             'type_note_id' => $data['type_note_id'] ?? null,
             'date' => $data['date'] ?? now(),
             'redacteur_id' => $data['redacteur_id'],
@@ -651,6 +784,15 @@ Tables\Actions\Action::make('create-note')
             ->send();
 
     } catch (\Exception $e) {
+        \Log::error('Erreur lors de la création de la note', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+            'record_id' => $record->id,
+            'data' => $data,
+        ]);
+
         // Notification d'erreur
         \Filament\Notifications\Notification::make()
             ->title('Erreur lors de la création')

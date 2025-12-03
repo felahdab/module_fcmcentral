@@ -206,7 +206,7 @@ class FicheBilan extends ViewRecord
             return collect([]);
         }
 
-        $query = Note::where('marin_id', $this->marinId)
+        $query = Note::where('rh_marin_id', $this->marinId)
             ->with(['typeNote', 'redacteur'])
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc');
@@ -312,7 +312,7 @@ class FicheBilan extends ViewRecord
                 ->content($this->marin->grade?->libelle_court . ' ' . $this->marin->prenom . ' ' . $this->marin->nom),
 
             Forms\Components\Select::make('type_note_id')
-                ->label('Type de note')
+                ->label('Type de note ')
                 ->options(TypeNote::pluck('libelle_court', 'id'))
                 ->searchable()
                 ->preload()
@@ -372,7 +372,7 @@ class FicheBilan extends ViewRecord
         })
         ->orWhereIn('id', function ($query) {
             $query->select('mentor_id')
-                ->from('fcmcentral_complements_fcm')
+                ->from('fcmcentral_fcm_marins')
                 ->whereNotNull('mentor_id');
         })
         ->get()

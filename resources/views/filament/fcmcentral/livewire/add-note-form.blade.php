@@ -50,7 +50,7 @@
         </div>
 
         {{-- ✅ RÉDACTEUR --}}
-        {{-- <div>
+        <div>
             <label class="text-sm text-gray-500 p-2">
                 Rédacteur <span class="text-red-500">*</span>
             </label>
@@ -80,7 +80,7 @@
                     </x-slot>
                 @enderror
             </x-filament::input.wrapper>
-        </div> --}}
+        </div>
 
         {{-- Date --}}
         <div>

@@ -9,9 +9,8 @@ use Modules\FcmCentral\Traits\HasTablePrefix;
 use Modules\FcmCentral\Database\Factories\FcmMarinFactory;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\MarinParcours;
-use Modules\FcmCentral\Models\Etat;
 use Modules\FcmCommun\Models\Cohorte;
-use Illuminate\Support\Str;
+
 
 class FcmMarin extends Model
 {
@@ -60,22 +59,7 @@ class FcmMarin extends Model
         return $this->hasMany(MarinParcours::class, 'fcmmarin_id');
     }
 
-    public function etats()
-    {
-        return $this->hasMany(Etat::class, 'marin_id', 'id');
-    }
-
-    public function historiserEtat(string $codeEtat, ?\Carbon\Carbon $dateDebut = null, ?\Carbon\Carbon $dateFin = null ):void
-    {
-        $typeEtat = TypeEtat::where('code', $codeEtat)->firstOrFail();
-        Etat::create([
-            'uuid' => Str::uuid(),
-            'marin_id' => $this->id,
-            'type_etat_id' => $typeEtat->id,
-            'date_debut' => $dateDebut ?? now(),
-            'date_fin' => $dateFin,
-        ]);
-    }
+    
 
 
 

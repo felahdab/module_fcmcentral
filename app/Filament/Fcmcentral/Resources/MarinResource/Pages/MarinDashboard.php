@@ -29,8 +29,7 @@ class MarinDashboard extends Page
     public function getWidgets(): array
     {
         return [
-            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinProgressWidget::class,
-            \Modules\FcmCentral\Filament\Fcmcentral\Widgets\MarinStatsWidget::class,
+            
         ];
     }
 

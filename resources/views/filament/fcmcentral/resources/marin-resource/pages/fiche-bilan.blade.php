@@ -393,7 +393,7 @@
             </x-filament::section>
 
             {{-- NOTES --}}
-            <x-filament::section class="section-card">
+           <x-filament::section class="section-card">
                 <x-slot name="heading">
                     <div class="flex items-center justify-between">
                         <span>Notes et Observations ({{ $this->notes->count() }})</span>

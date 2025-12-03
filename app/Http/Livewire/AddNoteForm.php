@@ -55,7 +55,7 @@ class AddNoteForm extends Component
     try {
         // ✅ Ajouter des logs pour déboguer
         \Log::info('Tentative de création de note', [
-            'marin_id' => $this->marinId,
+            'rh_marin_id' => $this->marinId,
             'type_note_id' => $this->typeNote,
             'user_id' => auth()->id(),
             'data' => [
@@ -67,7 +67,7 @@ class AddNoteForm extends Component
         ]);
 
         $note = Note::create([
-            'marin_id' => $this->marinId,
+            'rh_marin_id' => $this->marinId,
             'type_note_id' => $this->typeNote,
             'libelle' => trim($this->libelle),
             'date' => $this->date,
@@ -97,7 +97,7 @@ class AddNoteForm extends Component
             'line' => $e->getLine(),
             'trace' => $e->getTraceAsString(),
             'data' => [
-                'marin_id' => $this->marinId,
+                'rh_marin_id' => $this->marinId,
                 'type_note_id' => $this->typeNote,
                 'user_id' => auth()->id(),
             ]
@@ -120,13 +120,24 @@ class AddNoteForm extends Component
     }
 
     public function render()
-    {
-        $typesNotes = TypeNote::orderBy('libelle_court')->get();
-        $marin = Marin::with(['grade'])->find($this->marinId);
-       
-        return view('fcmcentral::filament.fcmcentral.livewire.add-note-form', [
-            'typesNotes' => $typesNotes,
-            'marin' => $marin
-        ]);
-    }
+{
+    $typesNotes = TypeNote::orderBy('libelle_court')->get();
+    $marin = Marin::with(['grade'])->find($this->marinId);
+
+    // Ajout : récupération des rédacteurs
+    $redacteurs = Marin::orderBy('nom')
+        ->get()
+        ->mapWithKeys(function ($marin) {
+            return [$marin->id => $marin->grade?->libelle_court . ' ' . $marin->prenom . ' ' . $marin->nom];
+        })
+        ->toArray();
+
+    return view('fcmcentral::filament.fcmcentral.livewire.add-note-form', [
+        'typesNotes' => $typesNotes,
+        'marin' => $marin,
+        'redacteurs' => $redacteurs, // ✅ Passe la variable à la vue
+    ]);
+}
+
+
 }
