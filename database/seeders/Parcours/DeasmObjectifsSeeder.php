@@ -172,13 +172,13 @@ $array = [
 
 
     [
-        'sf' => 'C2-SF2',
+        'sf' => 'C2-SF3',
         'competence' => 'C2',
         'code' => 'O1',
         'libelle_court' => "O1 - Identifier la mise en oeuvre du système d'arme MDCN.",
     ],
     [
-        'sf' => 'C2-SF2',
+        'sf' => 'C2-SF3',
         'competence' => 'C2',
         'code' => 'O2',
         'libelle_court' => "O2 - Adapter la conduite des systèmes d'armes de son bord en respectant la sécurité et les règles d'engagement.",

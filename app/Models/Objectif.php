@@ -21,6 +21,8 @@ class Objectif extends Model
 
     protected $fillable = [
         'competence_savoirfaire_id',
+        'uuid',
+        'code',
         'libelle_long',
         'libelle_court',
         'coeff',
