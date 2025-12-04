@@ -44,6 +44,11 @@
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
 
+    /* ✅ DARK MODE COMPATIBLE */
+    .dark .section-card:hover {
+        box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -1px rgba(255, 255, 255, 0.06);
+    }
+
     .progress-bar {
         transition: width 0.5s ease-in-out;
     }
@@ -72,6 +77,11 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
+    /* ✅ DARK MODE POUR NOTE CARD */
+    .dark .note-card:hover {
+        box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+    }
+
     .custom-scrollbar::-webkit-scrollbar {
         width: 8px;
     }
@@ -90,6 +100,82 @@
         background: #94a3b8;
     }
 
+    /* ✅ DARK MODE SCROLLBAR */
+    .dark .custom-scrollbar::-webkit-scrollbar-track {
+        background: #1e293b;
+    }
+
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #475569;
+    }
+
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+
+    /* ✅ AMÉLIORATION PROGRESSION SAVOIR-FAIRE EN DARK MODE */
+    .sf-item {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s;
+    }
+
+    .dark .sf-item {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .sf-item:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .dark .sf-item:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        background: #334155;
+    }
+
+    .sf-group-header {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .dark .sf-group-header {
+        background: #0f172a;
+        border-color: #1e293b;
+    }
+
+    /* ✅ AMÉLIORATION BARRE DE PROGRESSION */
+    .progress-bg {
+        background: #e5e7eb;
+    }
+
+    .dark .progress-bg {
+        background: #374151;
+    }
+
+    /* ✅ TEXTES LISIBLES EN DARK MODE */
+    .text-adaptive-gray {
+        color: #4b5563;
+    }
+
+    .dark .text-adaptive-gray {
+        color: #9ca3af;
+    }
+
+    .text-adaptive-dark {
+        color: #111827;
+    }
+
+    .dark .text-adaptive-dark {
+        color: #f9fafb;
+    }
+
     @media print {
         .no-print {
             display: none !important;
@@ -101,6 +187,7 @@
         }
     }
 </style>
+
 
 {{-- VÉRIFICATION MARIN --}}
 @if(!$this->marin)
@@ -163,51 +250,62 @@
         </x-filament::section>
     @else
 
-        {{-- STATISTIQUES (4 COLONNES) --}}
-        <div class="grid-sections-4 mb-6">
-            <x-filament::section class="text-center section-card">
-                <div class="p-4">
-                    <div class="text-3xl font-bold {{ $this->statistiques['pourcentage_global'] >= 80 ? 'text-success-800' : ($this->statistiques['pourcentage_global'] >= 50 ? 'text-warning-800' : 'text-danger-800') }}">
-                        {{ $this->statistiques['pourcentage_global'] }}%
-                    </div>
-                    <div class="text-sm text-gray-600 mt-1">Progression Globale</div>
-                    <div class="text-xs text-gray-500">Savoir-Faire</div>
-                </div>
-            </x-filament::section>
-
-            <x-filament::section class="text-center section-card">
-                <div class="p-4">
-                    <div class="text-3xl font-bold text-success-800">
-                       SF : {{ $this->statistiques['savoirfaires_valides'] }}
-                    </div>
-                    <div class="text-sm text-gray-600 mt-1">Validés</div>
-                    <div class="text-xs text-gray-500">/ {{ $this->statistiques['total_savoirfaires'] }} total</div>
-                </div>
-            </x-filament::section>
-
-            <x-filament::section class="text-center section-card">
-                <div class="p-4">
-                    <div class="text-3xl font-bold text-warning-800">
-                      SF :  {{ $this->statistiques['savoirfaires_en_cours'] }}
-                    </div>
-                    <div class="text-sm text-gray-600 mt-1">En Cours</div>
-                    <div class="text-xs text-gray-500">Partiellement complétés</div>
-                </div>
-            </x-filament::section>
-
-            <x-filament::section class="text-center section-card">
-                <div class="p-4">
-                    <div class="text-3xl font-bold text-danger-800">
-                      SF :  {{ $this->statistiques['savoirfaires_non_commences'] }}
-                    </div>
-                    <div class="text-sm text-gray-600 mt-1">Non Commencés</div>
-                    <div class="text-xs text-gray-500">0% de progression</div>
-                </div>
-            </x-filament::section>
+        {{-- STATISTIQUES (DYNAMIQUE : 2 à 4 COLONNES) --}}
+<div class="grid {{ $this->hasMultipleNonZeroStats() ? 'grid-sections-4' : 'grid-sections-2' }} mb-6">
+    <x-filament::section class="text-center section-card">
+        <div class="p-4">
+            <div class="text-3xl font-bold {{ $this->statistiques['pourcentage_global'] >= 80 ? 'text-success-800' : ($this->statistiques['pourcentage_global'] >= 50 ? 'text-warning-800' : 'text-danger-800') }}">
+                {{ $this->statistiques['pourcentage_global'] }}%
+            </div>
+            <div class="text-sm text-gray-600 mt-1">Progression Globale</div>
+            <div class="text-xs text-gray-500">
+                S:{{ $this->statistiques['stages_valides'] }}/{{ $this->statistiques['total_stages'] }} +
+                C:{{ $this->statistiques['compagnonnage_valides'] }}/{{ $this->statistiques['total_compagnonnage'] }} +
+                EAD:{{ $this->statistiques['ead_valides'] }}/{{ $this->statistiques['total_ead'] }}
+            </div>
         </div>
+    </x-filament::section>
+
+    @if($this->statistiques['savoirfaires_valides'] > 0)
+        <x-filament::section class="text-center section-card">
+            <div class="p-4">
+                <div class="text-3xl font-bold text-success-800">
+                    {{ $this->statistiques['savoirfaires_valides'] }}
+                </div>
+                <div class="text-sm text-gray-600 mt-1">SF Validés</div>
+                <div class="text-xs text-gray-500">/ {{ $this->statistiques['total_savoirfaires'] }} total</div>
+            </div>
+        </x-filament::section>
+    @endif
+
+    @if($this->statistiques['savoirfaires_en_cours'] > 0)
+        <x-filament::section class="text-center section-card">
+            <div class="p-4">
+                <div class="text-3xl font-bold text-warning-800">
+                    {{ $this->statistiques['savoirfaires_en_cours'] }}
+                </div>
+                <div class="text-sm text-gray-600 mt-1">SF En Cours</div>
+                <div class="text-xs text-gray-500">Partiellement complétés</div>
+            </div>
+        </x-filament::section>
+    @endif
+
+    @if($this->statistiques['savoirfaires_non_commences'] > 0)
+        <x-filament::section class="text-center section-card">
+            <div class="p-4">
+                <div class="text-3xl font-bold text-danger-800">
+                    {{ $this->statistiques['savoirfaires_non_commences'] }}
+                </div>
+                <div class="text-sm text-gray-600 mt-1">SF Non Commencés</div>
+                <div class="text-xs text-gray-500">0% de progression</div>
+            </div>
+        </x-filament::section>
+    @endif
+</div>
+
 
         {{-- SECTIONS PRINCIPALES (3 COLONNES) --}}
-        <div class="grid-sections-3 mb-6">
+        <div class="grid-sections-4 mb-6">
             
             {{-- PERSONNEL --}}
             <x-filament::section class="section-card">
@@ -257,71 +355,97 @@
             </x-filament::section>
 
             {{-- STATUT --}}
-            <x-filament::section class="section-card">
-                <x-slot name="heading">Historique</x-slot>
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between py-2 border-b">
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" {{ $this->marin->debut_sedimentation ? 'checked' : '' }} disabled class="rounded text-blue-600">
-                            <span class="text-sm font-medium">Début Sédimentation</span>
+            {{-- ✅ ÉTATS (BASÉ SUR LE MODÈLE ETAT) --}}
+<x-filament::section class="section-card">
+    <x-slot name="heading">État Actuel</x-slot>
+    <div class="space-y-3">
+        <div class="flex justify-between items-center border-b pb-2">
+            <span class="text-sm font-medium text-gray-700">Statut:</span>
+            <span class="text-sm font-semibold px-3 py-1 rounded-full {{ $this->getStatutBgColor() }} {{ $this->getStatutColor() }}">
+                {{ $this->getStatutLibelle() }}
+            </span>
+        </div>
+       
+        @if($this->getDateDebutEtat())
+            <div class="flex justify-between border-b pb-2">
+                <span class="text-sm font-medium text-gray-700">Date Début:</span>
+                <span class="text-sm text-gray-900">
+                    {{ $this->getDateDebutEtat() }}
+                </span>
+            </div>
+        @endif
+       
+        @if($this->getDateFinEtat())
+            <div class="flex justify-between border-b pb-2">
+                <span class="text-sm font-medium text-gray-700">Date Fin:</span>
+                <span class="text-sm text-gray-900">
+                    {{ $this->getDateFinEtat() }}
+                </span>
+            </div>
+        @endif
+       
+        @if($this->getDureeEtat() > 0)
+            <div class="flex justify-between pt-2">
+                <span class="text-sm font-medium text-gray-700">Durée:</span>
+                <span class="text-sm font-bold text-blue-600">
+                    {{ $this->getDureeEtat() }} jours
+                </span>
+            </div>
+        @endif
+       
+        @if($this->etatActuel?->date_fin)
+            <div class="mt-2 pt-2 border-t">
+                <span class="text-xs text-gray-500 italic">
+                    ✓ État terminé
+                </span>
+            </div>
+        @else
+            <div class="mt-2 pt-2 border-t">
+                <span class="text-xs text-green-600 font-medium">
+                    ● En cours
+                </span>
+            </div>
+        @endif
+    </div>
+</x-filament::section>
+
+{{-- HISTORIQUE DES ÉTATS --}}
+<x-filament::section class="section-card">
+    <x-slot name="heading">Historique des États</x-slot>
+    @if($this->historiqueEtats->isEmpty())
+        <div class="text-center py-4 text-gray-500 text-sm">
+            Aucun état enregistré
+        </div>
+    @else
+        <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+            @foreach($this->historiqueEtats as $etat)
+                <div class="border-l-4 {{ $etat->typeEtat->code === $this->marin->getDernierTypeEtatCode() ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50' }} pl-3 py-2 rounded-r">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-sm font-medium text-gray-900">
+                                {{ $etat->typeEtat->libelle_court }}
+                            </span>
+                            <div class="text-xs text-gray-600 mt-1">
+                                📅 Du {{ \Carbon\Carbon::parse($etat->date_debut)->format('d/m/Y') }}
+                                @if($etat->date_fin)
+                                    au {{ \Carbon\Carbon::parse($etat->date_fin)->format('d/m/Y') }}
+                                @else
+                                    <span class="text-green-600 font-medium">(en cours)</span>
+                                @endif
+                            </div>
                         </div>
-                        <span class="text-xs text-gray-500">
-                            {{ $this->marin->debut_sedimentation ? \Carbon\Carbon::parse($this->marin->debut_sedimentation)->format('d/m/Y') : '01/01/2024' }}
-                        </span>
+                        @if($etat->date_debut && ($etat->date_fin || !$etat->date_fin))
+                            <span class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700">
+                                {{ \Carbon\Carbon::parse($etat->date_debut)->diffInDays($etat->date_fin ? \Carbon\Carbon::parse($etat->date_fin) : now()) }} j
+                            </span>
+                        @endif
                     </div>
-                    <div class="flex items-center justify-between py-2 border-b">
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" {{ $this->marin->vert_sedimentation ? 'checked' : '' }} disabled class="rounded text-green-600">
-                            <span class="text-sm font-medium">Debut FCM</span>
-                        </div>
-                        <span class="text-xs text-gray-500">
-                            {{ $this->marin->vert_sedimentation ? \Carbon\Carbon::parse($this->marin->vert_sedimentation)->format('d/m/Y') : '01/01/2025' }}
-                        </span>
-                    </div>
-                    {{-- <div class="flex items-center justify-between py-2 border-b">
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" {{ $this->marin->vert_competence ? 'checked' : '' }} disabled class="rounded text-green-600">
-                            <span class="text-sm font-medium">Vert Compétence</span>
-                        </div>
-                        <span class="text-xs text-gray-500">
-                            {{ $this->marin->vert_competence ? \Carbon\Carbon::parse($this->marin->vert_competence)->format('d/m/Y') : 'N/A' }}
-                        </span>
-                    </div> --}}
-                    {{-- <div class="flex items-center justify-between py-2 border-b">
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" {{ $this->marin->selection_bs ? 'checked' : '' }} disabled class="rounded text-blue-600">
-                            <span class="text-sm font-medium">Sélection BS</span>
-                        </div>
-                        <span class="text-xs text-gray-500">
-                            {{ $this->marin->selection_bs ? \Carbon\Carbon::parse($this->marin->selection_bs)->format('d/m/Y') : 'N/A' }}
-                        </span>
-                    </div>
-                    <div class="flex items-center justify-between py-2">
-                        <div class="flex items-center space-x-2">
-                            <input type="checkbox" {{ $this->marin->validation_exa ? 'checked' : '' }} disabled class="rounded text-purple-600">
-                            <span class="text-sm font-medium">Validation EXA</span>
-                        </div>
-                        <span class="text-xs text-gray-500">
-                            {{ $this->marin->validation_exa ? \Carbon\Carbon::parse($this->marin->validation_exa)->format('d/m/Y') : 'N/A' }}
-                        </span>
-                    </div> --}}
                 </div>
-                <div class="mt-4 pt-4 border-t space-y-2">
-                    <div class="flex justify-between text-sm">
-                        <span class="font-medium text-gray-700">Durée sédimentation:</span>
-                        {{-- <span class="text-gray-900">{{ $this->calculerDureeSedimentation() }} jours</span> --}}
-                        <span class="text-gray-900">365 jours</span>
-                    </div>
-                    {{-- <div class="flex justify-between text-sm">
-                        <span class="font-medium text-gray-700">Durée du PPA:</span>
-                        <span class="text-gray-900">XX jours</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="font-medium text-gray-700">Durée Totale:</span>
-                        <span class="font-bold text-blue-600">{{ $this->calculerDureeTotale() }} jours</span>
-                    </div> --}}
-                </div>
-            </x-filament::section>
+            @endforeach
+        </div>
+    @endif
+</x-filament::section>
+
         </div>
 
         {{-- SECTIONS 2 COLONNES --}}
@@ -334,56 +458,56 @@
                 </x-slot>
                 <div class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
                     @forelse($this->savoirFaires->groupBy('affectation') as $affectation => $savoirFairesByAffectation)
-                        <div class="border rounded-lg p-4 bg-gray-50">
-                            <h4 class="font-semibold text-sm text-gray-800 mb-3 flex items-center">
+                        <div class="sf-group-header">
+                            <h4 class="font-semibold text-sm text-adaptive-dark flex items-center">
                                 <svg class="w-4 h-4 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
                                 </svg>
                                 {{ $affectation }}
                             </h4>
-                            @foreach($savoirFairesByAffectation as $savoirFaire)
-                                <div class="mb-3 pb-3 border-b border-gray-200 last:border-b-0 bg-white p-3 rounded">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div class="flex-1">
-                                            <h5 class="text-xs font-medium text-gray-900">
-                                                {{ $savoirFaire['libelle_court'] }}
-                                            </h5>
-                                            <p class="text-xs text-gray-500 mt-1">{{ $savoirFaire['competence'] }}</p>
-                                        </div>
-                                        <div class="flex items-center gap-2 ml-4">
-                                            @if($savoirFaire['etat_valid'])
-                                                <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                                </svg>
-                                            @endif
-                                            <span class="text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap {{ $savoirFaire['couleur_classe']['bg'] }} {{ $savoirFaire['couleur_classe']['text'] }}">
-                                                {{ $savoirFaire['pourcentage'] }}%
-                                            </span>
-                                        </div>
+                        </div>
+                        @foreach($savoirFairesByAffectation as $savoirFaire)
+                            <div class="sf-item">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex-1">
+                                        <h5 class="text-xs font-medium text-adaptive-dark">
+                                            {{ $savoirFaire['libelle_court'] }}
+                                        </h5>
+                                        <p class="text-xs text-adaptive-gray mt-1">{{ $savoirFaire['competence'] }}</p>
                                     </div>
-                                    <div class="mb-2">
-                                        <div class="w-full bg-gray-200 rounded-full h-2">
-                                            <div class="h-2 rounded-full progress-bar {{ str_replace('bg-', 'progress-', $savoirFaire['couleur_classe']['progress']) }}"
-                                                style="width: {{ $savoirFaire['pourcentage'] }}%">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex justify-between items-center text-xs text-gray-600">
-                                        <span>
-                                            <strong>{{ $savoirFaire['objectifs_valides'] }}</strong> / {{ $savoirFaire['total_objectifs'] }} objectifs
-                                        </span>
-                                        @if($savoirFaire['etat_valid'] && $savoirFaire['date_validation'])
-                                            <span class="text-green-600 font-medium">
-                                                ✓ {{ \Carbon\Carbon::parse($savoirFaire['date_validation'])->format('d/m/Y') }}
-                                            </span>
+                                    <div class="flex items-center gap-2 ml-4">
+                                        @if($savoirFaire['etat_valid'])
+                                            <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
                                         @endif
+                                        <span class="text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap {{ $savoirFaire['couleur_classe']['bg'] }} {{ $savoirFaire['couleur_classe']['text'] }}">
+                                            {{ $savoirFaire['pourcentage'] }}%
+                                        </span>
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
+                                <div class="mb-2">
+                                    <div class="w-full progress-bg rounded-full h-2">
+                                        <div class="h-2 rounded-full progress-bar {{ str_replace('bg-', 'progress-', $savoirFaire['couleur_classe']['progress']) }}"
+                                            style="width: {{ $savoirFaire['pourcentage'] }}%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-adaptive-gray">
+                                    <span>
+                                        <strong class="text-adaptive-dark">{{ $savoirFaire['objectifs_valides'] }}</strong> / {{ $savoirFaire['total_objectifs'] }} objectifs
+                                    </span>
+                                    @if($savoirFaire['etat_valid'] && $savoirFaire['date_validation'])
+                                        <span class="text-green-600 font-medium">
+                                            ✓ {{ \Carbon\Carbon::parse($savoirFaire['date_validation'])->format('d/m/Y') }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
                     @empty
-                        <div class="text-center py-8 text-gray-500">
-                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="text-center py-8 text-adaptive-gray">
+                            <svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path>
                             </svg>
                             <p>Aucun savoir-faire dans ce parcours</p>
@@ -391,7 +515,7 @@
                     @endforelse
                 </div>
             </x-filament::section>
-
+            
             {{-- NOTES --}}
            <x-filament::section class="section-card">
                 <x-slot name="heading">

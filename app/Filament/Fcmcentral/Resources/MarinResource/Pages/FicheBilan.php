@@ -91,7 +91,8 @@ class FicheBilan extends ViewRecord
             'specialite',
             'unite',
             'complementsFcm.cohorte',
-            'complementsFcm.mentor'
+            'complementsFcm.mentor',
+            'etats.typeEtat' 
         ])->find($this->marinId);
     }
 
@@ -221,27 +222,77 @@ class FicheBilan extends ViewRecord
     }
 
     #[Computed]
-    public function statistiques()
-    {
-        $savoirFaires = $this->savoirFaires;
-    
-        $savoirFairesValides = $savoirFaires->where('etat_valid', true)->count();
-        $totalSavoirFaires = $savoirFaires->count();
-    
-        return [
-            'total_savoirfaires' => $totalSavoirFaires,
-            'savoirfaires_valides' => $savoirFairesValides,
-            'pourcentage_global' => $totalSavoirFaires > 0
-                ? round(($savoirFairesValides / $totalSavoirFaires) * 100, 1)
-                : 0,
-            'savoirfaires_complets' => $savoirFaires->where('pourcentage', 100)->count(),
-            'savoirfaires_en_cours' => $savoirFaires->where('pourcentage', '>', 0)->where('pourcentage', '<', 100)->count(),
-            'savoirfaires_non_commences' => $savoirFaires->where('pourcentage', 0)->count(),
-        
-            'total_objectifs' => $savoirFaires->sum('total_objectifs'),
-            'objectifs_valides' => $savoirFaires->sum('objectifs_valides'),
-        ];
+public function statistiques()
+{
+    $savoirFaires = $this->savoirFaires;
+   
+    $savoirFairesValides = $savoirFaires->where('etat_valid', true)->count();
+    $totalSavoirFaires = $savoirFaires->count();
+   
+    // ✅ CALCUL PAR TYPE (S/C/EAD)
+    $stages = $this->getStatsByType('S');
+    $compagnonnage = $this->getStatsByType('C');
+    $ead = $this->getStatsByType('EAD');
+   
+    return [
+        'total_savoirfaires' => $totalSavoirFaires,
+        'savoirfaires_valides' => $savoirFairesValides,
+        'pourcentage_global' => $totalSavoirFaires > 0
+            ? round(($savoirFairesValides / $totalSavoirFaires) * 100, 1)
+            : 0,
+        'savoirfaires_complets' => $savoirFaires->where('pourcentage', 100)->count(),
+        'savoirfaires_en_cours' => $savoirFaires->where('pourcentage', '>', 0)->where('pourcentage', '<', 100)->count(),
+        'savoirfaires_non_commences' => $savoirFaires->where('pourcentage', 0)->count(),
+       
+        'total_objectifs' => $savoirFaires->sum('total_objectifs'),
+        'objectifs_valides' => $savoirFaires->sum('objectifs_valides'),
+       
+        // ✅ STATS PAR TYPE
+        'total_stages' => $stages['total'],
+        'stages_valides' => $stages['valides'],
+        'total_compagnonnage' => $compagnonnage['total'],
+        'compagnonnage_valides' => $compagnonnage['valides'],
+        'total_ead' => $ead['total'],
+        'ead_valides' => $ead['valides'],
+    ];
+}
+
+private function getStatsByType(string $typeCode): array
+{
+    if (!$this->parcours) {
+        return ['total' => 0, 'valides' => 0];
     }
+
+    $total = 0;
+    $valides = 0;
+
+    foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+        foreach ($affectation['competences'] ?? [] as $competence) {
+            foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                if (($csf['savoirfaire_type']['code'] ?? null) === $typeCode) {
+                    $total++;
+                    if ($csf['etat_valid'] ?? false) {
+                        $valides++;
+                    }
+                }
+            }
+        }
+    }
+
+    return ['total' => $total, 'valides' => $valides];
+}
+
+public function hasMultipleNonZeroStats(): bool
+{
+    $nonZeroCount = 0;
+   
+    if ($this->statistiques['savoirfaires_valides'] > 0) $nonZeroCount++;
+    if ($this->statistiques['savoirfaires_en_cours'] > 0) $nonZeroCount++;
+    if ($this->statistiques['savoirfaires_non_commences'] > 0) $nonZeroCount++;
+   
+    return $nonZeroCount >= 2;
+}
+
 
     #[Computed]
     public function activitesEnAttente()
@@ -294,8 +345,91 @@ class FicheBilan extends ViewRecord
     }
 
     // ============================================
-    // 📝 FORMULAIRE NOTE (POUR LE LIVEWIRE COMPONENT)
-    // ============================================
+// 🏷️ MÉTHODES POUR LA SECTION ÉTATS
+// ============================================
+
+#[Computed]
+public function etatActuel()
+{
+    return $this->marin->getDernierTypeEtat();
+}
+
+public function getStatutLibelle(): string
+{
+    return $this->marin->getDernierTypeEtatLibelle() ?? 'Non défini';
+}
+
+public function getStatutColor(): string
+{
+    $code = $this->marin->getDernierTypeEtatCode();
+   
+    return match($code) {
+        'FCM_ACT' => 'text-green-600',
+        'FCM_SED' => 'text-orange-600',
+        'FCM_PAU' => 'text-blue-600',
+        'FCM_FIN' => 'text-purple-600',
+        default => 'text-gray-600'
+    };
+}
+
+public function getStatutBgColor(): string
+{
+    $code = $this->marin->getDernierTypeEtatCode();
+   
+    return match($code) {
+        'FCM_ACT' => 'bg-green-50 border-green-200',
+        'FCM_SED' => 'bg-orange-50 border-orange-200',
+        'FCM_PAU' => 'bg-blue-50 border-blue-200',
+        'FCM_FIN' => 'bg-purple-50 border-purple-200',
+        default => 'bg-gray-50 border-gray-200'
+    };
+}
+
+public function getDureeEtat(): int
+{
+    $etat = $this->etatActuel;
+   
+    if (!$etat || !$etat->date_debut) {
+        return 0;
+    }
+   
+    $dateDebut = \Carbon\Carbon::parse($etat->date_debut);
+    $dateFin = $etat->date_fin ? \Carbon\Carbon::parse($etat->date_fin) : now();
+   
+    return $dateDebut->diffInDays($dateFin);
+}
+
+public function getDateDebutEtat(): ?string
+{
+    $etat = $this->etatActuel;
+   
+    if (!$etat || !$etat->date_debut) {
+        return null;
+    }
+   
+    return \Carbon\Carbon::parse($etat->date_debut)->format('d/m/Y');
+}
+
+public function getDateFinEtat(): ?string
+{
+    $etat = $this->etatActuel;
+   
+    if (!$etat || !$etat->date_fin) {
+        return null;
+    }
+   
+    return \Carbon\Carbon::parse($etat->date_fin)->format('d/m/Y');
+}
+
+#[Computed]
+public function historiqueEtats()
+{
+    return $this->marin->etats()
+        ->with('typeEtat')
+        ->orderBy('date_debut', 'desc')
+        ->get();
+}
+
 
  
 
