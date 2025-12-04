@@ -13,6 +13,7 @@ class AddNoteForm extends Component
     public $marinId;
     public $typeNote = '';
     public $libelle = '';
+    public $redacteurId = '';
     public $date;
     public $lienUrl = '';
     public $valide_bcf = false;
@@ -58,6 +59,7 @@ class AddNoteForm extends Component
             'rh_marin_id' => $this->marinId,
             'type_note_id' => $this->typeNote,
             'user_id' => auth()->id(),
+            'redacteur_id' => $this->redacteurId,
             'data' => [
                 'libelle' => $this->libelle,
                 'date' => $this->date,
@@ -72,7 +74,8 @@ class AddNoteForm extends Component
             'libelle' => trim($this->libelle),
             'date' => $this->date,
             'lien_url' => $this->lienUrl ?: null,
-            'redacteur_id' => auth()->id(),
+            //'redacteur_id' => auth()->id(),
+            'redacteur_id' => $this->redacteurId,
             'valide_bcf' => $this->valide_bcf,
         ]);
 
