@@ -20,7 +20,7 @@ class FcmCentralDatabaseSeeder extends Seeder
             DeasmMasterSeeder::class,
             PermissionsSeeder::class,
             RolesSeeder::class,
-            TestMarinsRolesSeeder::class,
+            //TestMarinsRolesSeeder::class, # ce seeder peut être utilisé par le développeur en ligne de commande.
             TypeEtatSeeder::class
         ]);
     }
