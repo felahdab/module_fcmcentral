@@ -3,6 +3,7 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
 
 use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 use Filament\Pages\Page;
 use Filament\Forms\Form;
@@ -39,6 +40,9 @@ class MonLivretDeFcm extends Page
         return $form->schema([
             Livewire::make(LivretFcm::class, [
                 "marin" => $this->marin,
+                "Marin" => Marin::class,
+                "UserGeneratedEvent" => UserGeneratedEvent::class,
+                "PermissionPrefix" => "fcmcentral"
             ]),
         ]);
     }

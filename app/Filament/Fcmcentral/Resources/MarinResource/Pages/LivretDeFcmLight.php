@@ -9,6 +9,9 @@ use Filament\Forms\Components\Livewire;
 
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
+
+use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
  
 class LivretDeFcmLight extends ViewRecord
 {
@@ -29,6 +32,9 @@ class LivretDeFcmLight extends ViewRecord
                 ->schema([    
                     Livewire::make(LivretFcm::class, [
                         "marin" => $this->record,
+                        "Marin" => Marin::class,
+                        "UserGeneratedEvent" => UserGeneratedEvent::class,
+                        "PermissionPrefix" => "fcmcentral"
                     ]),
                 ])
             ]);    
