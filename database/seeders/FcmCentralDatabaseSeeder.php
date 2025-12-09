@@ -2,7 +2,7 @@
 
 namespace Modules\FcmCentral\Database\Seeders;
 
-use Database\Seeders\TypeEtatSeeder;
+
 use Illuminate\Database\Seeder;
 use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
 
