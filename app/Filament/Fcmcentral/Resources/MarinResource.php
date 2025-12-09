@@ -21,6 +21,7 @@ use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\RH\Models\Specialite;
+use Modules\FcmCentral\Models\Role;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
@@ -459,101 +460,130 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
 
                    
                 // USERS
-        //         Tables\Actions\Action::make('associer_user')
-        //         ->icon(fn ($record) => $record->user ? 'heroicon-m-pencil-square' : 'heroicon-m-user-plus')
-        //         ->color(fn ($record) => $record->user ? 'warning' : 'success')
-        //         ->iconButton()
-        //         ->visible(fn ($record) =>
-        //             static::canAccessAnyPermission(['admin', 'permission.bcf'])
-        //         )
-        //         ->form(fn ($record) => $record->user
-        //             ? [
-        //                 Forms\Components\TextInput::make('password')
-        //                     ->label('Nouveau mot de passe')
-        //                     //->password()
-        //                     ->minLength(8)
-        //                     ->maxLength(100)
-        //                     //->dehydrateStateUsing(fn ($state) => $state ? bcrypt($state) : null)
-        //                     //->required(fn ($record) => !$record->user)
-        //                     ,
-        //                 Forms\Components\Select::make('roles')
-        //                     ->label('Rôles')
-        //                     ->multiple()
-        //                     ->options(
-        //                         \Spatie\Permission\Models\Role::query()
-        //                             ->where('guard_name','web')
-        //                             ->where('name', 'like', 'fcmcentral::%')
-        //                             ->pluck('name', 'name')
-        //                     )
-        //                     ->searchable()
-        //                     ->preload()
-        //                     ->default(fn ($record) => $record->user?->roles->pluck('id')->toArray()??[])
-        //                    // ->required(fn ($record) => !$record->user)
-        //                    ,
-        //             ]
-        //             : [
-        //                 Forms\Components\Placeholder::make('email')
-        //                     ->label('Email')
-        //                     ->content($record->email),
-        //                 Forms\Components\TextInput::make('password')
-        //                     ->label('Mot de passe')
-        //                     ->password()
-        //                     ->minLength(8)
-        //                     ->maxLength(100)
-        //                     //->dehydrateStateUsing(fn ($state) => $state ? bcrypt($state) : null)
-        //                     ->required(),
-        //                 Forms\Components\Select::make('roles')
-        //                     ->label('Rôles')
-        //                     ->multiple()
-        //                     ->options(
-        //                         \Spatie\Permission\Models\Role::query()
-        //                             ->where('guard_name','web')
-        //                             ->where('name', 'like', 'fcmcentral::%')
-        //                             ->pluck('name', 'id')
-        //                     )
-        //                     ->searchable()
-        //                     ->default(fn ($record) => $record->roles->pluck('name')->toArray())
-        //                     ->preload()
-        //                     ->required(),
-        //             ]
-        //         )
-        //         ->action(function ($record, array $data) {
-        //             $user = $record->user;
-                
-        //             if (!$user) {
-        //                 $user = \Modules\RH\Models\User::create([
-        //                     'email' => $record->email,
-        //                     'display_name' => $record->prenom . ' ' . $record->nom,
-        //                     'password' => $data['password'],
-        //                     'admin' => false,
-        //                 ]);
-        //                 $record->user_id = $user->id;
-        //                 $record->save();
-        //             } else {
-        //                 $user->update([
-        //                     'password' => $data['password'],
-        //                 ]);
-        //             }
-                
-        //             // Filtrer les rôles vides et assigner
-        //             if (!empty($data['roles'])) {
-                      
-        //                 //$user->syncRoles($data['roles']);
-        //             }
-                
-        //             \Filament\Notifications\Notification::make()
-        //                 ->title('Compte utilisateur mis à jour')
-        //                 ->body('Le compte utilisateur et les rôles ont été mis à jour.')
-        //                 ->success()
-        //                 ->send();
-        //         })
-                
-                
+                Tables\Actions\Action::make('associer_user')
+    ->icon(fn ($record) => $record->user ? 'heroicon-m-pencil-square' : 'heroicon-m-user-plus')
+    ->color(fn ($record) => $record->user ? 'warning' : 'success')
+    ->iconButton()
+    ->visible(fn ($record) =>
+        static::canAccessAnyPermission(['admin', 'permission.bcf'])
+    )
+    ->form(fn ($record) => $record->user
+        ? [
+            // Forms\Components\Placeholder::make('roles_info')
+            // ->label('Rôles Actuels')
+            // ->content(function ($record){
+            //     $roles = $record->user?->roles->pluck('name')->toArray() ?? [];
+            //     return empty($roles)
+            //     ? 'Aucun role assigné'
+            //     : implode(', ', array_map(fn($r) => str_replace('fcmcentral::','', $r), $roles));
+            // }),
             
+            
+            Forms\Components\TextInput::make('password')
+                ->label('Nouveau mot de passe')
+                ->password()
+                ->minLength(8)
+                ->maxLength(100)
+                ->helperText('Laissez vide pour conserver le mot de passe actuel')
+                ->dehydrated(fn ($state) => filled($state)), // ✅ Ne soumettre que si rempli
+            // Forms\Components\Select::make('roles')
+            //     ->label('Rôles')
+            //     ->multiple()
+            //     ->options(
+            //         \Spatie\Permission\Models\Role::query()
+            //             ->where('guard_name', 'web')
+            //             ->where('name', 'like', 'fcmcentral::%')
+            //             ->pluck('name', 'name') // ✅ name => name (pas id)
+            //     )
+            //     ->searchable()
+            //     ->preload()
+            //     ->default(fn ($record) => $record->user?->roles->pluck('name')->toArray() ?? []) // ✅ pluck('name')
+        ]
+        : [
+            Forms\Components\Placeholder::make('email')
+                ->label('Email')
+                ->content($record->email),
+            Forms\Components\TextInput::make('password')
+                ->label('Mot de passe')
+                ->password()
+                ->minLength(8)
+                ->maxLength(100)
+                ->required(),
+            // Forms\Components\Select::make('roles')
+            //     ->label('Rôles')
+            //     ->multiple()
+            //     ->options(
+            //         \Modules\FcmCentral\Models\Role::query()
+            //             ->where('guard_name', 'web')
+            //             ->where('name', 'like', 'fcmcentral::%')
+            //             ->pluck('name', 'name') // ✅ name => name
+            //     )
+            //     ->searchable()
+            //     ->preload()
+            //     ->required(),
+        ]
+    )
+    ->action(function ($record, array $data) {
+        $user = $record->user;
+       
+        if (!$user) {
+            // ✅ CRÉATION DU USER
+            $user = \Modules\RH\Models\User::create([
+                'email' => $record->email,
+                'display_name' => $record->prenom . ' ' . $record->nom,
+                'password' => $data['password'], // ✅ bcrypt() dans le mutateur
+                'admin' => false,
+                'uuid' => \Illuminate\Support\Str::uuid(), // ✅ Si nécessaire
+            ]);
+           
+            $record->user_id = $user->id;
+            $record->save();
+        } else {
+            // ✅ MISE À JOUR DU USER (uniquement si mot de passe fourni)
+            $updateData = [];
+           
+            if (!empty($data['password'])) {
+                $updateData['password'] = $data['password']; // ✅ bcrypt() dans le mutateur
+            }
+           
+            if (!empty($updateData)) {
+                $user->update($updateData);
+            }
+        }
+       
+        // ✅ SYNCHRONISATION DES RÔLES
+        // if (isset($data['roles']) && is_array($data['roles'])) {
+        //    // $user->syncRoles($data['roles'],'web');
+        //    $user->roles()->detach();
+        //    foreach ($data['roles'] as $roleName){
+        //     $user->assignRole($roleName);
+        //    }
+        // }
+        // if (isset($data['roles']) && is_array($data['roles'])) {
+        //     // Utilise le modèle Role de ton module
+        //     $user->roles()->detach();
         
-        // ->modalHeading(fn ($record) => $record->user ? 'Modifier le compte utilisateur' : 'Créer le compte utilisateur')
-        // ->modalSubmitActionLabel(fn ($record) => $record->user ? 'Mettre à jour' : 'Créer')
-        // ->modalCancelActionLabel('Annuler'),
+        //     foreach ($data['roles'] as $roleName) {
+        //         $role = \Modules\FcmCentral\Models\Role::where('name', $roleName)
+        //             ->where('guard_name', 'web')
+        //             ->first(); 
+        //         if ($role) {
+        //             $user->assignRole($role); // assignRole accepte un objet Role
+        //         }
+        //     }
+        // }
+        
+        
+       
+        \Filament\Notifications\Notification::make()
+            ->title('Compte utilisateur mis à jour')
+            ->body('Le compte utilisateur et les rôles ont été mis à jour.')
+            ->success()
+            ->send();
+    })
+    ->modalHeading(fn ($record) => $record->user ? 'Modifier le compte utilisateur' : 'Créer le compte utilisateur')
+    ->modalSubmitActionLabel(fn ($record) => $record->user ? 'Mettre à jour' : 'Créer')
+    ->modalCancelActionLabel('Annuler'),
 
                     
 

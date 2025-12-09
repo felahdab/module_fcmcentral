@@ -5,5 +5,6 @@ use \App\Models\User as BaseUser;
 
 class User extends BaseUser
 {
+    protected $guard_name ='web';
 
 }

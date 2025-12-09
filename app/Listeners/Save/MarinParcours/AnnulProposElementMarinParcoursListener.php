@@ -1,15 +1,9 @@
 <?php
-
 namespace Modules\FcmCentral\Listeners\Save\MarinParcours;
 
 use Filament\Notifications\Notification;
 use App\Models\User;
-use Modules\FcmCommun\Enums\Constants;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
-use Modules\FcmCommun\Services\CalculTauxParcoursService;
-use Modules\FcmCommun\Services\ReCalculEtatParcoursService;
-use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
 use Illuminate\Support\Facades\Log;
@@ -20,15 +14,15 @@ class AnnulProposElementMarinParcoursListener
 
     /**
      * Gère l'événement d'annulation de proposition.
+     * Efface uniquement la proposition, ne touche pas à la validation ni au parcours.
      */
     public function handle(UserGeneratedEvent $event): void
     {
-        if (!$event->isOfType(UserGeneratedEventTypes::ANNUL_PROPOS_ELMT_MARIN_PARCOURS)) {
+        if (!$event->isOfType(\Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes::ANNUL_PROPOS_ELMT_MARIN_PARCOURS)) {
             return;
         }
 
         $marin = Marin::where('uuid', $event->object_uuid)->first();
-        
         if (!$marin) {
             Log::error('Marin non trouvé avec UUID: ' . $event->object_uuid);
             return;
@@ -43,35 +37,20 @@ class AnnulProposElementMarinParcoursListener
             'ANNULEUR INCONNU';
 
         $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours;
-        
         if (!$donnees_du_parcours) {
             Log::error('Données du parcours non trouvées pour le marin: ' . $marin->uuid);
             return;
         }
 
         $parcoursMarin = $donnees_du_parcours->parcoursmarin;
-        
         if (!$parcoursMarin) {
             Log::error('Parcours marin non trouvé ou vide pour le marin: ' . $marin->uuid);
             return;
         }
 
-        $this->updateParcoursMarinItems(
-            $parcoursMarin,
-            $data['type_element'],
-            $data['uuid_element'],
-            $valideurName
-        );
+        $this->effacerProposition($parcoursMarin, $data['type_element'], $data['uuid_element']);
 
-        ReCalculEtatParcoursService::recalculerEtats($parcoursMarin);
-
-        // Recalcul des taux
-        $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
-        $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
-        $donnees_du_parcours->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
-        $donnees_du_parcours->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
-
-        // Sauvegarder les données
+        // Sauvegarder les données (pas de recalcul, pas de taux modifié)
         $donnees_du_parcours->parcoursmarin = $parcoursMarin;
         $donnees_du_parcours->save();
 
@@ -89,67 +68,45 @@ class AnnulProposElementMarinParcoursListener
     }
 
     /**
-     * ✅ MÉTHODE POUR NETTOYER LES COMMENTAIRES
+     * Efface la proposition sur l'élément ciblé (ne touche pas à la validation).
      */
-    protected function sanitizeComment(string $comment): string
+    protected function effacerProposition(&$parcoursMarin, $type_element, $uuid_element)
     {
-        if (empty($comment)) {
-            return '';
-        }
-        
-        $comment = strip_tags($comment);
-        $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
-        $comment = preg_replace('/\s+/', ' ', $comment);
-        $comment = addslashes(trim($comment));
-
-        return $comment;
-    }
-
-    /**
-     * ✅ METTRE À JOUR LES ÉLÉMENTS POUR ANNULATION DE PROPOSITION (nouvelle structure)
-     */
-    protected function updateParcoursMarinItems(&$parcoursMarin, $type_element, $uuid_element, $displayName)
-    {
-        Log::info("=== ANNULATION DE PROPOSITION ===");
-        Log::info("Type: {$type_element} / UUID: {$uuid_element}");
+        Log::info("=== ANNULATION DE PROPOSITION (effacement) ===");
         $found = false;
 
         foreach ($parcoursMarin['annees'] as &$annee) {
-            // --- TRAITEMENT DIRECT DES ANNÉES ---
+            // Année
             if ($type_element === 'annee' && $annee['uuid'] == $uuid_element) {
-                $this->updateElement($annee, $displayName);
-                Log::info("✅ Proposition d'année annulée: {$annee['uuid']}");
+                $this->clearProposition($annee);
+                Log::info("✅ Proposition d'année effacée: {$annee['uuid']}");
                 $found = true;
                 return;
             }
 
-            // --- TRAITEMENT DES SAVOIR-FAIRES ---
+            // Savoir-faire
             if (isset($annee['savoirfaires'])) {
                 foreach ($annee['savoirfaires'] as &$savoirFaire) {
                     if ($type_element === 'savoirfaire') {
                         $pivotUuid = $savoirFaire['uuid'] . '_' . ($savoirFaire['pivot']['uuid'] ?? $savoirFaire['pivot']['id'] ?? '');
-                        
                         if ($savoirFaire['uuid'] == $uuid_element || $pivotUuid == $uuid_element) {
-                            $this->updateElement($savoirFaire, $displayName);
-                            Log::info("✅ Proposition de savoir-faire annulée: {$savoirFaire['uuid']}");
+                            $this->clearProposition($savoirFaire);
+                            Log::info("✅ Proposition de savoir-faire effacée: {$savoirFaire['uuid']}");
                             $found = true;
                             return;
                         }
                     }
 
-                    // --- TRAITEMENT DES OBJECTIFS ---
+                    // Objectif
                     if (isset($savoirFaire['objectifs']) && is_array($savoirFaire['objectifs'])) {
                         foreach ($savoirFaire['objectifs'] as &$objectif) {
-                            if ($type_element === 'objectif') {
-                                $objUuidComposite = "obj_{$savoirFaire['pivot']['id']}_{$objectif['id']}";
-                                $objUuidSimple = $objectif['uuid'] ?? '';
-                                
-                                if ($objUuidSimple == $uuid_element || $objUuidComposite == $uuid_element) {
-                                    $this->updateElement($objectif, $displayName);
-                                    Log::info("✅ Proposition d'objectif annulée: {$objUuidSimple} / {$objUuidComposite}");
-                                    $found = true;
-                                    return;
-                                }
+                            $objUuidComposite = "obj_{$savoirFaire['pivot']['id']}_{$objectif['id']}";
+                            $objUuidSimple = $objectif['uuid'] ?? '';
+                            if ($type_element === 'objectif' && ($objUuidSimple == $uuid_element || $objUuidComposite == $uuid_element)) {
+                                $this->clearProposition($objectif);
+                                Log::info("✅ Proposition d'objectif effacée: {$objUuidSimple} / {$objUuidComposite}");
+                                $found = true;
+                                return;
                             }
                         }
                     }
@@ -163,14 +120,28 @@ class AnnulProposElementMarinParcoursListener
     }
 
     /**
-     * ✅ MÉTHODE HELPER POUR ANNULER UNE PROPOSITION
+     * Efface uniquement la proposition (ne touche pas à la validation).
      */
-    protected function updateElement(&$element, $displayName)
+    protected function clearProposition(&$element)
     {
-        $element['etat_valid'] = false;
-        $element['commentaire'] = "";
         $element['date_proposition'] = null;
-        
-        Log::info("Proposition annulée avec succès");
+        $element['commentaire'] = "";
+        // On ne touche pas à etat_valid, ni à date_validation, ni au taux
+        Log::info("Proposition effacée avec succès");
+    }
+
+    /**
+     * Nettoie le commentaire.
+     */
+    protected function sanitizeComment(string $comment): string
+    {
+        if (empty($comment)) {
+            return '';
+        }
+        $comment = strip_tags($comment);
+        $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
+        $comment = preg_replace('/\s+/', ' ', $comment);
+        $comment = addslashes(trim($comment));
+        return $comment;
     }
 }
