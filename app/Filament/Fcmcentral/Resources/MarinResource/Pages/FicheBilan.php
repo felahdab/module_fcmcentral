@@ -8,8 +8,11 @@ use Filament\Notifications\Notification;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
+use Modules\FcmCentral\Models\Etat;
+use Modules\FcmCentral\Models\TypeEtat;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Livewire\Attributes\Computed;
+use Modules\FcmCommun\Services\CalculHeuresParcoursService;
 
 class FicheBilan extends ViewRecord
 {
@@ -71,6 +74,17 @@ class FicheBilan extends ViewRecord
         ]);
     }
 
+    public function canCreateEtat(): bool
+    {
+        // ✅ SEULS BCF, BORD, FPS et ADMIN peuvent créer/modifier les etats
+        return MarinResource::canAccessAnyPermission([
+            'admin',
+            'permission.bcf',
+            'permission.fps',
+            'permission.bord'
+        ]);
+    }
+
     private function canValidateBCF(): bool
     {
         return MarinResource::canAccessAnyPermission([
@@ -124,7 +138,7 @@ class FicheBilan extends ViewRecord
                     $objectifsValides = $objectifs->where('etat_valid', true)->count();
                     
                     $pourcentage = $totalObjectifs > 0
-                        ? round(($objectifsValides / $totalObjectifs) * 100, 1)
+                        ? round(($objectifsValides / $totalObjectifs) * 100, 0)
                         : 0;
 
                     $couleurClasse = $this->getCouleurSavoirFaire($pourcentage);
@@ -140,6 +154,7 @@ class FicheBilan extends ViewRecord
                         'couleur_classe' => $couleurClasse,
                         'etat_valid' => $csf['etat_valid'] ?? false,
                         'date_validation' => $csf['date_validation'] ?? null,
+                        'commentaire' => $csf['commentaire'] ?? null,
                         'valideur' => $csf['valideur'] ?? null,
                         'affectation' => $affectation['libelle_court'] ?? '',
                         'competence' => $competence['libelle_court'] ?? '',
@@ -170,33 +185,19 @@ class FicheBilan extends ViewRecord
             ];
         } elseif ($pourcentage >= 60) {
             return [
-                'bg' => 'bg-yellow-100',
-                'text' => 'text-yellow-800',
-                'progress' => 'bg-yellow-500',
-                'border' => 'border-yellow-500'
+                'bg' => 'bg-purple-100',
+                'text' => 'text-purple-800',
+                'progress' => 'bg-purple-500',
+                'border' => 'border-purple-500'
             ];
-        } elseif ($pourcentage >= 40) {
+        } else  {
             return [
                 'bg' => 'bg-orange-100',
                 'text' => 'text-orange-800',
                 'progress' => 'bg-orange-500',
                 'border' => 'border-orange-500'
             ];
-        } elseif ($pourcentage > 0) {
-            return [
-                'bg' => 'bg-amber-100',
-                'text' => 'text-amber-800',
-                'progress' => 'bg-amber-500',
-                'border' => 'border-amber-500'
-            ];
-        } else {
-            return [
-                'bg' => 'bg-red-100',
-                'text' => 'text-red-800',
-                'progress' => 'bg-red-500',
-                'border' => 'border-red-500'
-            ];
-        }
+        } 
     }
 
     #[Computed]
@@ -221,10 +222,43 @@ class FicheBilan extends ViewRecord
         return $query->get();
     }
 
+    
+    public function ajouterEtat()
+    {
+        if (!$this->canCreateEtat()) {
+            Notification::make()
+                ->title('Accès refusé')
+                ->body('Vous n\'avez pas les droits pour créer un état')
+                ->warning()
+                ->send();
+            return;
+        }
+    
+        $this->dispatch('open-modal', id: 'ajouterEtat');
+    }
+
+
+    public function modifierEtat($etatId)
+{
+    if (!$this->canCreateEtat()) {
+        Notification::make()
+            ->title('Accès refusé')
+            ->body('Vous n\'avez pas les droits pour modifier un état')
+            ->warning()
+            ->send();
+        return;
+    }
+    $this->dispatch('loadEtatForEdit',  etatId: $etatId);
+    $this->dispatch('open-modal', id: 'ajouterEtat');
+}
+
+    
+
     #[Computed]
 public function statistiques()
 {
     $savoirFaires = $this->savoirFaires;
+    //dd( $savoirFaires);
    
     $savoirFairesValides = $savoirFaires->where('etat_valid', true)->count();
     $totalSavoirFaires = $savoirFaires->count();
@@ -233,13 +267,14 @@ public function statistiques()
     $stages = $this->getStatsByType('S');
     $compagnonnage = $this->getStatsByType('C');
     $ead = $this->getStatsByType('EAD');
+
+    $totalEtatValidParcours = new CalculHeuresParcoursService();
+    $pourcentageGlobal = $this->parcours ?  $totalEtatValidParcours->calculerPourcentageEtatValid($this->parcours) : 0 ; 
    
     return [
         'total_savoirfaires' => $totalSavoirFaires,
         'savoirfaires_valides' => $savoirFairesValides,
-        'pourcentage_global' => $totalSavoirFaires > 0
-            ? round(($savoirFairesValides / $totalSavoirFaires) * 100, 1)
-            : 0,
+        'pourcentage_global' => $pourcentageGlobal,
         'savoirfaires_complets' => $savoirFaires->where('pourcentage', 100)->count(),
         'savoirfaires_en_cours' => $savoirFaires->where('pourcentage', '>', 0)->where('pourcentage', '<', 100)->count(),
         'savoirfaires_non_commences' => $savoirFaires->where('pourcentage', 0)->count(),
@@ -365,8 +400,8 @@ public function getStatutColor(): string
    
     return match($code) {
         'FCM_ACT' => 'text-green-600',
-        'FCM_SED' => 'text-orange-600',
-        'FCM_PAU' => 'text-blue-600',
+        'FCM_SED' => 'text-blue-600',
+        'FCM_PAU' => 'text-orange-600',
         'FCM_FIN' => 'text-purple-600',
         default => 'text-gray-600'
     };
@@ -378,8 +413,8 @@ public function getStatutBgColor(): string
    
     return match($code) {
         'FCM_ACT' => 'bg-green-50 border-green-200',
-        'FCM_SED' => 'bg-orange-50 border-orange-200',
-        'FCM_PAU' => 'bg-blue-50 border-blue-200',
+        'FCM_SED' => 'bg-blue-50 border-blue-200',
+        'FCM_PAU' => 'bg-orange-50 border-orange-200',
         'FCM_FIN' => 'bg-purple-50 border-purple-200',
         default => 'bg-gray-50 border-gray-200'
     };
@@ -439,10 +474,17 @@ public function historiqueEtats()
 
     protected $listeners = [
         'note-added' => 'refreshNotes',
+        'etat-added' => 'refreshEtats',
         'notify' => 'handleNotification'
     ];
 
     public function refreshNotes()
+    {
+        //unset($this->cachedMountedProperties['notes']);
+        $this->dispatch('$refresh');
+    }
+
+    public function refreshEtats()
     {
         //unset($this->cachedMountedProperties['notes']);
         $this->dispatch('$refresh');
@@ -549,6 +591,36 @@ public function historiqueEtats()
                 foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
                     // ✅ Vérifier si c'est un stage
                     if (($csf['savoirfaire_type']['code'] ?? null) === 'S') {
+                        $totalStages++;
+                        
+                        if ($csf['etat_valid'] ?? false) {
+                            $stagesValides++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $totalStages > 0 
+            ? round(($stagesValides / $totalStages) * 100, 1)
+            : 0;
+    }
+
+    public function getPourcentageEad(): float
+    {
+        if (!$this->parcours) {
+            return 0;
+        }
+
+        // ✅ CALCUL BASÉ SUR savoirfaire_type.code = "S" (Stage)
+        $totalStages = 0;
+        $stagesValides = 0;
+
+        foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+            foreach ($affectation['competences'] ?? [] as $competence) {
+                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                    // ✅ Vérifier si c'est un stage
+                    if (($csf['savoirfaire_type']['code'] ?? null) === 'EAD') {
                         $totalStages++;
                         
                         if ($csf['etat_valid'] ?? false) {

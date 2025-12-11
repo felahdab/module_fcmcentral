@@ -68,7 +68,7 @@ class MarinProgressWidget extends Widget
             }
         }
 
-        $progress = $heuresTotal > 0 ? round(($heuresValidees / $heuresTotal) * 100) : 0;
+        $progress = \Modules\FcmCommun\Services\CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
 
         return [
             'progress' => $progress,

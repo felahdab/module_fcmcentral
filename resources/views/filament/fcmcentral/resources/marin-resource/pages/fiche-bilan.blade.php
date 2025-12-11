@@ -186,6 +186,94 @@
             page-break-inside: avoid;
         }
     }
+
+    /* Blanc */ 
+    .text-white { color: #rgb(255, 255, 255) }
+
+    /* Vert */
+.text-green-600 { color: #16a34a; }
+.text-green-800 { color: #166534; }
+.text-green-400 { color :#6be6bd;}
+.bg-green-50 { background-color: #f0fdf4; }
+.bg-green-100 { background-color: #dcfce7; }
+.border-green-200 { border-color: #bbf7d0; }
+.dark .text-green-600, .dark .text-green-800 { color: #bbf7d0; }
+.dark .bg-green-50, .dark .bg-green-100 { background-color: #052e16; }
+.dark .border-green-200 { border-color: #166534; }
+
+/* Bleu */
+.text-blue-600 { color: #2563eb; }
+.text-blue-800 { color: #1e40af; }
+.text-blue-400 { color: #4065df; }
+.bg-blue-50 { background-color: #eff6ff; }
+.bg-blue-100 { background-color: #dbeafe; }
+.border-blue-200 { border-color: #bfdbfe; }
+.dark .text-blue-600, .dark .text-blue-800 { color: #bfdbfe; }
+.dark .bg-blue-50, .dark .bg-blue-100 { background-color: #1e293b; }
+.dark .border-blue-200 { border-color: #1e40af; }
+
+/* Violet */
+.text-purple-600 { color: #9333ea; }
+.text-purple-800 { color: #581c87; }
+.text-purple-400 { color: #8f43ca; }
+.bg-purple-50 { background-color: #faf5ff; }
+.bg-purple-100 { background-color: #f3e8ff; }
+.border-purple-200 { border-color: #e9d5ff; }
+.dark .text-purple-600, .dark .text-purple-900 { color: #e9d5ff; }
+.dark .bg-purple-50, .dark .bg-purple-100 { background-color: #2e1065; }
+.dark .border-purple-200 { border-color: #7c3aed; }
+
+/* Orange */
+.text-orange-600 { color: #ea580c; }
+.text-orange-800 { color: #bb4b0f; }
+.text-orange-400 { color: #f0844a; }
+.bg-orange-50 { background-color: #fff7ed; }
+.bg-orange-100 { background-color: #ffedd5; }
+.border-orange-200 { border-color: #fed7aa; }
+.dark .text-orange-600 { color: #fed7aa; }
+.dark .bg-orange-50, .dark .bg-orange-100 { background-color: #7c2d12; }
+.dark .border-orange-200 { border-color: #ea580c; }
+
+/* Rouge */
+.text-red-600 { color: #dc2626; }
+.bg-red-100 { background-color: #fee2e2; }
+.border-red-500 { border-color: #ef4444; }
+.dark .text-red-600 { color: #fee2e2; }
+.dark .bg-red-100 { background-color: #7f1d1d; }
+.dark .border-red-500 { border-color: #fee2e2; }
+
+/* Bleu */
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+.dark .bg-gradient-blue {
+    background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+}
+
+/* Vert */
+.bg-gradient-green {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+.dark .bg-gradient-green {
+    background: linear-gradient(135deg, #052e16 0%, #22c55e 100%);
+}
+
+/* Violet */
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+}
+.dark .bg-gradient-purple {
+    background: linear-gradient(135deg, #2e1065 0%, #a78bfa 100%);
+}
+
+/* Orange */
+.bg-gradient-orange {
+    background: linear-gradient(135deg, #f1eacb 0%, #fa8211 100%);
+}
+.dark .bg-gradient-orange {
+    background: linear-gradient(135deg, #654010 0%, #f77d0b 100%);
+}
+
 </style>
 
 
@@ -206,22 +294,22 @@
 
     {{-- EN-TÊTE --}}
     <div class="mb-6">
-        <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg shadow-lg p-6">
+        <x-filament::section>
             <div class="flex justify-between items-start">
                 <div>
                     <h1 class="text-3xl font-bold mb-2">
                         {{ $this->marin->grade?->libelle_court }} {{ $this->marin->prenom }} {{ $this->marin->nom }}
                     </h1>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm opacity-90">
-                        <div><strong>NID:</strong> {{ $this->marin->nid }}</div>
-                        <div><strong>Spécialité:</strong> {{ $this->marin->specialite?->libelle_court ?? 'N/A' }}</div>
-                        <div><strong>Unité:</strong> {{ $this->marin->unite?->libelle_court ?? 'N/A' }}</div>
-                        <div><strong>Cohorte:</strong> {{ $this->marin->complementsFcm?->cohorte?->libelle_court ?? 'N/A' }}</div>
+                        <div><strong>Matricule:</strong> {{ $this->marin->matricule }}</div>
+                        <div><strong>Spécialité:</strong> {{ $this->marin->specialite?->libelle_long ?? 'N/A' }}</div>
+                        <div><strong>Unité:</strong> {{ $this->marin->unite?->libelle_long ?? 'N/A' }}</div>
+                        <div><strong>Cohorte:</strong> {{ $this->marin->complementsFcm?->cohorte?->libelle_long ?? 'N/A' }}</div>
                     </div>
                     @if($this->marin->complementsFcm?->mentor)
                         <div class="mt-2 text-sm opacity-90">
                             <strong>Mentor:</strong>
-                            {{ $this->marin->complementsFcm->mentor->grade?->libelle_court }}
+                            {{ $this->marin->complementsFcm->mentor->grade?->libelle_long }}
                             {{ $this->marin->complementsFcm->mentor->prenom }}
                             {{ $this->marin->complementsFcm->mentor->nom }}
                         </div>
@@ -230,9 +318,11 @@
                 <div class="text-right">
                     <div class="text-sm opacity-90">Fiche générée le</div>
                     <div class="text-lg font-semibold">{{ now()->format('d/m/Y à H:i') }}</div>
+                    <div class="text-sm opacity-90">Dernière MAJ FFAST</div>
+                    <div class="text-lg font-semibold">{{ $this->getDateDerniereMajFfast() }}</div>
                 </div>
             </div>
-        </div>
+        </x-filament::section>
     </div>
 
     {{-- VÉRIFICATION PARCOURS --}}
@@ -253,79 +343,150 @@
         {{-- STATISTIQUES (DYNAMIQUE : 2 à 4 COLONNES) --}}
 <div class="grid {{ $this->hasMultipleNonZeroStats() ? 'grid-sections-4' : 'grid-sections-2' }} mb-6">
     <x-filament::section class="text-center section-card">
+        <x-slot name="heading">Progression Globale</x-slot>
         <div class="p-4">
-            <div class="text-3xl font-bold {{ $this->statistiques['pourcentage_global'] >= 80 ? 'text-success-800' : ($this->statistiques['pourcentage_global'] >= 50 ? 'text-warning-800' : 'text-danger-800') }}">
+            <div class="text-3xl font-bold 
+            {{ $this->statistiques['pourcentage_global'] 
+            >= 80 ? 'text-vert-600' : ($this->statistiques['pourcentage_global'] 
+            >= 50 ? 'text-bleu-600' 
+            : 'text-orange-600') }}">
                 {{ $this->statistiques['pourcentage_global'] }}%
             </div>
-            <div class="text-sm text-gray-600 mt-1">Progression Globale</div>
-            <div class="text-xs text-gray-500">
-                S:{{ $this->statistiques['stages_valides'] }}/{{ $this->statistiques['total_stages'] }} +
-                C:{{ $this->statistiques['compagnonnage_valides'] }}/{{ $this->statistiques['total_compagnonnage'] }} +
-                EAD:{{ $this->statistiques['ead_valides'] }}/{{ $this->statistiques['total_ead'] }}
-            </div>
+           
+         
         </div>
     </x-filament::section>
 
     @if($this->statistiques['savoirfaires_valides'] > 0)
         <x-filament::section class="text-center section-card">
+            <x-slot name="heading">Savoir faire validés</x-slot>
             <div class="p-4">
-                <div class="text-3xl font-bold text-success-800">
-                    {{ $this->statistiques['savoirfaires_valides'] }}
+                <div class="text-3xl font-bold text-green-600">
+                    @php
+                        $total = $this->statistiques['total_savoirfaires'] ?? 0 ;
+                        $valide = $this->statistiques['savoirfaires_valides'] ?? 0 ;
+                        $pourcentage = $total > 0 ? round(($valide/$total)*100,0) : '' ;
+                    @endphp
+                    {{ $pourcentage }} %
                 </div>
-                <div class="text-sm text-gray-600 mt-1">SF Validés</div>
-                <div class="text-xs text-gray-500">/ {{ $this->statistiques['total_savoirfaires'] }} total</div>
+                <div class="text-xs text-gray-600 mt2">
+                
+                    {{ $this->statistiques['savoirfaires_valides'] }} / {{ $this->statistiques['total_savoirfaires'] }} total
+                </div>
+                
+                
+               
+            
             </div>
         </x-filament::section>
     @endif
 
     @if($this->statistiques['savoirfaires_en_cours'] > 0)
         <x-filament::section class="text-center section-card">
+            <x-slot name="heading">Savoir faire en cours</x-slot>
             <div class="p-4">
-                <div class="text-3xl font-bold text-warning-800">
-                    {{ $this->statistiques['savoirfaires_en_cours'] }}
+                <div class="text-3xl font-bold text-blue-600">
+                    @php
+                    $total = $this->statistiques['total_savoirfaires'] ?? 0 ;
+                    $enCours = $this->statistiques['savoirfaires_en_cours'] ?? 0 ;
+                    $pourcentage = $total > 0 ? round(($enCours/$total)*100,0) : '' ;
+                @endphp
+                {{ $pourcentage }} %  
                 </div>
-                <div class="text-sm text-gray-600 mt-1">SF En Cours</div>
-                <div class="text-xs text-gray-500">Partiellement complétés</div>
+                <div class="text-xs text-gray-600 mt2">
+                    
+                    {{ $this->statistiques['savoirfaires_en_cours'] }} / {{ $this->statistiques['total_savoirfaires'] }} total
+                </div>
+                
             </div>
         </x-filament::section>
     @endif
 
     @if($this->statistiques['savoirfaires_non_commences'] > 0)
         <x-filament::section class="text-center section-card">
+            <x-slot name="heading">Savoir faire Non Commencés</x-slot>
             <div class="p-4">
-                <div class="text-3xl font-bold text-danger-800">
+                <div class="text-3xl font-bold text-purple-600">
                     {{ $this->statistiques['savoirfaires_non_commences'] }}
                 </div>
-                <div class="text-sm text-gray-600 mt-1">SF Non Commencés</div>
-                <div class="text-xs text-gray-500">0% de progression</div>
+                <div class="text-sm text-gray-600 mt-2"></div>
+               
             </div>
         </x-filament::section>
     @endif
 </div>
 
+  {{-- INDICATEURS --}}
+  
+  <x-filament::section class="section-card">
+    <x-slot name="heading">Indicateurs Complémentaires</x-slot>
+    <div class="grid grid-cols-1 md:grid-cols-3  gap-6">
+        <div class="bg-gradient-blue p-4 rounded-lg border border-blue-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-blue-600 font-medium mb-1">Compagnonnage</div>
+                    <div class="text-lg font-bold text-blue-900">{{ $this->statistiques['compagnonnage_valides'] }} effectué
+                        @php $this->statistiques['compagnonnage_valides']>1?'s':'' @endphp / {{ $this->statistiques['total_compagnonnage'] }} total</div>
+                    <div class="text-lg font-bold text-blue-900">{{ $this->getPourcentageCompagnonnage() }}%</div>
+                </div>
+                <svg class="w-10 h-10 text-white opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="bg-gradient-purple p-4 rounded-lg border border-purple-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-purple-600 font-medium mb-1">Stages</div>
+                    <div class="text-lg font-bold text-purple-900">{{ $this->statistiques['stages_valides'] }} effectué
+                        @php $this->statistiques['compagnonnage_valides']>1?'s':'' @endphp  / {{ $this->statistiques['total_stages'] }} total</div>
+                    <div class="text-lg font-bold text-purple-900">{{ $this->getPourcentageStages() }}%</div>  
+                </div>
+                <svg class="w-10 h-10 text-white opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="bg-gradient-green p-4 rounded-lg border border-green-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-green-600 font-medium mb-1">Ecole a Distance</div>
+                    <div class="text-lg font-bold text-green-900">{{ $this->statistiques['ead_valides'] }} effectué
+                        @php $this->statistiques['compagnonnage_valides']>1?'s':'' @endphp  / {{ $this->statistiques['total_ead'] }} total</div>
+                    <div class="text-lg font-bold text-green-900">{{ $this->getPourcentageEad() }}%</div>
+                </div>
+                <svg class="w-10 h-10 text-white opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
+                </svg>
+            </div>
+        </div>
+       
+    </div>
+</x-filament::section>
+
 
         {{-- SECTIONS PRINCIPALES (3 COLONNES) --}}
-        <div class="grid-sections-4 mb-6">
+        <div class="grid-sections-3 mb-6">
             
             {{-- PERSONNEL --}}
             <x-filament::section class="section-card">
                 <x-slot name="heading">Personnel</x-slot>
                 <div class="space-y-3">
                     <div class="flex justify-between border-b pb-2">
-                        <span class="text-sm font-medium text-gray-700">NID:</span>
-                        <span class="text-sm text-gray-900">{{ $this->marin->nid }}</span>
+                        <span class="text-sm font-medium text-gray-700">Matricule:</span>
+                        <span class="text-sm text-gray-900">{{ $this->marin->matricule }}</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
                         <span class="text-sm font-medium text-gray-700">Grade:</span>
-                        <span class="text-sm text-gray-900">{{ $this->marin->grade?->libelle_court ?? 'N/A' }}</span>
+                        <span class="text-sm text-gray-900">{{ $this->marin->grade?->libelle_long ?? 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
                         <span class="text-sm font-medium text-gray-700">Spécialité:</span>
-                        <span class="text-sm text-gray-900">{{ $this->marin->specialite?->libelle_court ?? 'N/A' }}</span>
+                        <span class="text-sm text-gray-900">{{ $this->marin->specialite?->libelle_long ?? 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
                         <span class="text-sm font-medium text-gray-700">Unité:</span>
-                        <span class="text-sm text-gray-900">{{ $this->marin->unite?->libelle_court ?? 'N/A' }}</span>
+                        <span class="text-sm text-gray-900">{{ $this->marin->unite?->libelle_long ?? 'N/A' }}</span>
                     </div>
                 </div>
             </x-filament::section>
@@ -337,14 +498,14 @@
                     <div class="flex justify-between border-b pb-2">
                         <span class="text-sm font-medium text-gray-700">Cohorte:</span>
                         <span class="text-sm text-gray-900">
-                            {{ $this->marin->complementsFcm?->cohorte?->libelle_court ?? 'N/A' }}
+                            {{ $this->marin->complementsFcm?->cohorte?->libelle_long ?? 'N/A' }}
                         </span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
                         <span class="text-sm font-medium text-gray-700">Mentor:</span>
                         <span class="text-sm text-gray-900">
                             @if($this->marin->complementsFcm?->mentor)
-                                {{ $this->marin->complementsFcm->mentor->grade?->libelle_court }}
+                                {{ $this->marin->complementsFcm->mentor->grade?->libelle_long }}
                                 {{ $this->marin->complementsFcm->mentor->nom }}
                             @else
                                 N/A
@@ -356,8 +517,8 @@
 
             {{-- STATUT --}}
             {{-- ✅ ÉTATS (BASÉ SUR LE MODÈLE ETAT) --}}
-<x-filament::section class="section-card">
-    <x-slot name="heading">État Actuel</x-slot>
+{{-- <x-filament::section class="section-card">
+    <x-slot name="heading">Statut & Jalons</x-slot>
     <div class="space-y-3">
         <div class="flex justify-between items-center border-b pb-2">
             <span class="text-sm font-medium text-gray-700">Statut:</span>
@@ -388,7 +549,7 @@
             <div class="flex justify-between pt-2">
                 <span class="text-sm font-medium text-gray-700">Durée:</span>
                 <span class="text-sm font-bold text-blue-600">
-                    {{ $this->getDureeEtat() }} jours
+                    {{ round($this->getDureeEtat()) }} jours
                 </span>
             </div>
         @endif
@@ -407,25 +568,39 @@
             </div>
         @endif
     </div>
-</x-filament::section>
+</x-filament::section> --}}
 
 {{-- HISTORIQUE DES ÉTATS --}}
 <x-filament::section class="section-card">
-    <x-slot name="heading">Historique des États</x-slot>
+    <x-slot name="heading">
+        <div class="flex items-center justify-between">
+            <span>Statut & Jalons</span>
+            @if($this->canCreateEtat())
+                <x-filament::icon-button
+                    icon="heroicon-o-plus-circle"
+                    size="md"
+                    color="primary"
+                    tooltip="Ajouter un Statut/Jalon"
+                    wire:click="ajouterEtat"
+                />
+            @endif
+        </div>
+    </x-slot>
+   
     @if($this->historiqueEtats->isEmpty())
         <div class="text-center py-4 text-gray-500 text-sm">
-            Aucun état enregistré
+            Aucun jalon enregistré
         </div>
     @else
         <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
             @foreach($this->historiqueEtats as $etat)
-                <div class="border-l-4 {{ $etat->typeEtat->code === $this->marin->getDernierTypeEtatCode() ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50' }} pl-3 py-2 rounded-r">
+                <div class="border-l-4 pl-3 py-2 rounded-r  transition-colors">
                     <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-sm font-medium text-gray-900">
+                        <div class="flex-1">
+                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 {{ $etat->typeEtat->libelle_court }}
                             </span>
-                            <div class="text-xs text-gray-600 mt-1">
+                            <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
                                 📅 Du {{ \Carbon\Carbon::parse($etat->date_debut)->format('d/m/Y') }}
                                 @if($etat->date_fin)
                                     au {{ \Carbon\Carbon::parse($etat->date_fin)->format('d/m/Y') }}
@@ -434,17 +609,32 @@
                                 @endif
                             </div>
                         </div>
-                        @if($etat->date_debut && ($etat->date_fin || !$etat->date_fin))
-                            <span class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700">
-                                {{ \Carbon\Carbon::parse($etat->date_debut)->diffInDays($etat->date_fin ? \Carbon\Carbon::parse($etat->date_fin) : now()) }} j
-                            </span>
-                        @endif
+                       
+                        <div class="flex items-center gap-2">
+                            @if($etat->date_debut && ($etat->date_fin || !$etat->date_fin))
+                                <span class="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-700  ">
+                                    {{ round(\Carbon\Carbon::parse($etat->date_debut)->diffInDays($etat->date_fin ? \Carbon\Carbon::parse($etat->date_fin) : now())) }} j
+                                </span>
+                            @endif
+                           
+                            {{-- ✅ BOUTON MODIFIER --}}
+                            @if($this->canCreateEtat())
+                                <x-filament::icon-button
+                                    icon="heroicon-o-pencil"
+                                    size="sm"
+                                    color="warning"
+                                    tooltip="Modifier cet état"
+                                    wire:click="modifierEtat({{ $etat->id }})"
+                                />
+                            @endif
+                        </div>
                     </div>
                 </div>
             @endforeach
         </div>
     @endif
 </x-filament::section>
+
 
         </div>
 
@@ -498,9 +688,11 @@
                                         <strong class="text-adaptive-dark">{{ $savoirFaire['objectifs_valides'] }}</strong> / {{ $savoirFaire['total_objectifs'] }} objectifs
                                     </span>
                                     @if($savoirFaire['etat_valid'] && $savoirFaire['date_validation'])
-                                        <span class="text-green-600 font-medium">
-                                            ✓ {{ \Carbon\Carbon::parse($savoirFaire['date_validation'])->format('d/m/Y') }}
+                                        <span class=" font-medium">
+                                           <b class="text-green-600"> ✓ {{ \Carbon\Carbon::parse($savoirFaire['date_validation'])->format('d/m/Y') }}</b><br/>
+                                            {{ $savoirFaire['commentaire'] }} par  {{$savoirFaire['valideur'] }}
                                         </span>
+                                       
                                     @endif
                                 </div>
                             </div>
@@ -520,13 +712,13 @@
            <x-filament::section class="section-card">
                 <x-slot name="heading">
                     <div class="flex items-center justify-between">
-                        <span>Notes et Observations ({{ $this->notes->count() }})</span>
+                        <span>Commentaires et Observations ({{ $this->notes->count() }})</span>
                         @if($this->canCreateNote())
                             <x-filament::icon-button
                                 icon="heroicon-o-plus-circle"
                                 size="md"
                                 color="primary"
-                                tooltip="Ajouter une note"
+                                tooltip="Ajouter un commentaire"
                                 wire:click="ajouterNote"
                             />
                         @endif
@@ -537,21 +729,21 @@
                         <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
                         </svg>
-                        <p class="text-sm">Aucune note enregistrée</p>
+                        <p class="text-sm">Aucun commentaire enregistré</p>
                         @if($this->canCreateNote())
                             <button wire:click="ajouterNote" class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                Ajouter la première note
+                                Ajouter un commentaire
                             </button>
                         @endif
                     </div>
                 @else
                     <div class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
                         @foreach($this->notes as $note)
-                            <div class="border-l-4 {{ $note->valide_bcf ? 'border-green-500 bg-green-50' : 'border-blue-500 bg-blue-50' }} pl-4 py-3 rounded-r note-card">
+                            <div class="border-l-4 {{ $note->valide_bcf ? 'border-green-200 bg-green-200' : 'border-blue-500 bg-blue-50' }} p-4 rounded-r note-card">
                                 <div class="flex justify-between items-start mb-2">
                                     <div class="flex-1">
                                         <h5 class="font-medium text-sm text-gray-900">
-                                            {{ $note->typeNote?->libelle_court ?? 'Note' }}
+                                            {{ $note->typeNote?->libelle_court ?? 'Commentaire' }}
                                         </h5>
                                         @if($note->date)
                                             <p class="text-xs text-gray-500 mt-1">
@@ -625,45 +817,7 @@
             </x-filament::section>
         @endif
 
-        {{-- INDICATEURS --}}
-        <x-filament::section class="section-card">
-            <x-slot name="heading">Indicateurs Complémentaires</x-slot>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-xs text-blue-600 font-medium mb-1">Dernière MAJ FFAST</div>
-                            <div class="text-lg font-bold text-blue-900">{{ $this->getDateDerniereMajFfast() }}</div>
-                        </div>
-                        <svg class="w-10 h-10 text-blue-400 opacity-50" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-xs text-purple-600 font-medium mb-1">% Compagnonnage</div>
-                            <div class="text-lg font-bold text-purple-900">{{ $this->getPourcentageCompagnonnage() }}%</div>
-                        </div>
-                        <svg class="w-10 h-10 text-purple-400 opacity-50" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <div class="text-xs text-green-600 font-medium mb-1">% Stages</div>
-                            <div class="text-lg font-bold text-green-900">{{ $this->getPourcentageStages() }}%</div>
-                        </div>
-                        <svg class="w-10 h-10 text-green-400 opacity-50" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </x-filament::section>
+      
 
     @endif
 @endif
@@ -681,5 +835,29 @@
 
     @livewire('Modules\FcmCentral\Http\Livewire\AddNoteForm', ['marinId' => $marinId], key('add-note-' . $marinId))
 </x-filament::modal>
+
+
+{{-- MODAL ETAT --}}
+<x-filament::modal
+    id="ajouterEtat"
+    width="2xl"
+    :close-by-clicking-away="false"
+>
+    <x-slot name="heading">
+        <div class="flex items-center">
+            <svg class="w-6 h-6 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
+            </svg>
+            <span>Jalon/Statut FCM</span>
+        </div>
+    </x-slot>
+
+    @livewire('Modules\FcmCentral\Http\Livewire\AddEtatForm', ['marinId' => $marinId], key('add-etat-form-' . $marinId))
+</x-filament::modal>
+
+
+
+
+
 
 </x-filament-panels::page>

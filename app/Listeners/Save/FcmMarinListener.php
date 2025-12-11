@@ -40,13 +40,14 @@ class FcmMarinListener
         // === RETRAIT DU SUIVI FCM ===
         if ($event->isOfType(UserGeneratedEventTypes::MARIN_PAS_FCM) && $marin->suivi_en_fcm) {
 
+            // Met a jour dans RH Marin statut enfcm false (methode dans FcmCommun)
             $marin->suivi_en_fcm = false;
             // $marin->lignes_dans_fcm_marin()->delete(); // Désactivé, on garde l'historique
 
             // Historiser l'état "Fin FCM"
             $fcmMarin = $marin->complementsFcm;
-            if ($fcmMarin) {
-                $fcmMarin->historiserEtat('FCM_fin');
+            if ($fcmMarin && $fcmMarin->donnees_du_parcours) {
+                $marin->historiserEtat('FCM_FIN');
             }
 
             Log::info('Le marin a été retiré du suivi FCM', [
@@ -66,13 +67,20 @@ class FcmMarinListener
         // === AJOUT AU SUIVI FCM ===
         if ($event->isOfType(UserGeneratedEventTypes::MARIN_EN_FCM) && !$marin->suivi_en_fcm) {
 
+            // Met a jour dans RH Marin statut enfcm true (methode dans FcmCommun)
+            $marin->suivi_en_fcm = true;
+
             // Si pas encore FcmMarin : création + état "En Sedimentation"
             if (!$marin->complementsFcm) {
                 $fcmMarin = FcmMarin::create(["rh_marin_id" => $marin->id]);
-                $fcmMarin->historiserEtat('FCM_sed');
+                if($fcmMarin->donnees_du_parcours){
+                $marin->historiserEtat('FCM_SED');
+                }
             } else {
                 // Si déjà FcmMarin : état "En FCM Actif"
-                $marin->complementsFcm->historiserEtat('FCM_act');
+                if($fcmMarin->donnees_du_parcours){
+                $marin->historiserEtat('FCM_ACT');
+                }
             }
 
             Log::info('Le marin a été ajouté au suivi FCM', [

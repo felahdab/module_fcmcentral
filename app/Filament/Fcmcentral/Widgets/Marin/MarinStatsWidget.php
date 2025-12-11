@@ -117,15 +117,15 @@ class MarinStatsWidget extends BaseWidget
         }
 
         // ✅ Taux global (basé sur les heures)
-        $tauxGlobal = $heuresTotal > 0 ? round(($heuresValidees / $heuresTotal) * 100) : 0;
+        $tauxGlobal = \Modules\FcmCommun\Services\CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
 
         return [
             'affectations' => $nbAffectations,
-            'heures_total' => round($heuresTotal, 2),
-            'heures_validees' => round($heuresValidees, 2),
-            'heures_stage' => round($heuresStage, 2),
-            'heures_compagnonnage' => round($heuresCompagnonnage, 2),
-            'heures_ead' => round($heuresEad, 2),
+            'heures_total' => round($heuresTotal, 0),
+            'heures_validees' => round($heuresValidees, 0),
+            'heures_stage' => round($heuresStage, 0),
+            'heures_compagnonnage' => round($heuresCompagnonnage, 0),
+            'heures_ead' => round($heuresEad, 0),
             'taux_global' => $tauxGlobal,
             'derniere_validation' => $derniereValidation ? $derniereValidation->diffForHumans() : 'Aucune',
         ];
