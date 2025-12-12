@@ -69,40 +69,43 @@ class ObjectifResource extends Resource
                     }
                 }),
 
-            Forms\Components\Select::make('competence_savoirfaire_id')
+                Forms\Components\Select::make('competence_savoirfaire_id')
                 ->label('Nouveau savoir-faire')
                 ->options(function (callable $get, $record) {
                     $competenceId = $get('temp_competence_id');
-                    
+                   
                     // Si pas de compétence sélectionnée et enregistrement existant
                     if (!$competenceId && $record?->competenceSavoirfaire) {
-                        return CompetenceSavoirfaire::with(['competence', 'savoirfaire'])
+                        return CompetenceSavoirfaire::with(['competence', 'savoirfaire', 'savoirfaireType'])
                             ->where('competence_id', $record->competenceSavoirfaire->competence_id)
+                            ->whereHas('savoirfaireType', fn($q) => $q->where('code', 'C'))
                             ->get()
                             ->mapWithKeys(fn($item) => [
                                 $item->id => "{$item->competence->code} - {$item->savoirfaire->code}"
                             ])
                             ->toArray();
                     }
-
+            
                     // Si pas de compétence sélectionnée
                     if (!$competenceId) {
                         return [];
                     }
-
-                    // Liste des savoir-faire de la compétence sélectionnée
-                    return CompetenceSavoirfaire::with(['competence', 'savoirfaire'])
+            
+                    // Liste des savoir-faire de type C de la compétence sélectionnée
+                    return CompetenceSavoirfaire::with(['competence', 'savoirfaire', 'savoirfaireType'])
                         ->where('competence_id', $competenceId)
+                        ->whereHas('savoirfaireType', fn($q) => $q->where('code', 'C'))
                         ->get()
                         ->mapWithKeys(fn($item) => [
                             $item->id => "{$item->competence->code} - {$item->savoirfaire->code}"
                         ])
                         ->toArray();
                 })
-                ->helperText('Veuillez sélectionner le savoir-faire')
+                ->helperText('Seuls les savoir-faire de type Compagnonnage (C) sont disponibles')
                 ->reactive()
                 ->searchable()
                 ->required(),
+            
         ]);
     }
 

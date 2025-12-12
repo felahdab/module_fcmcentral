@@ -326,6 +326,13 @@ $competenceSavoirfaires = DB::table('fcmcentral_competence_savoirfaires')->get()
     return $item->savoirfaire_id . '-' . $item->competence_id;
 });
 
+// On récupère les types de savoir-faire (id => code)
+$savoirfaireTypes = DB::table('fcmcentral_savoirfaire_types')->pluck('code', 'id');
+
+
+$data = [];
+$i = 1;
+
 foreach ($array as $item) {
     $sf_id = $savoirfaires[$item['sf']] ?? null;
     $competence_id = $competences[$item['competence']] ?? null;
@@ -335,13 +342,22 @@ foreach ($array as $item) {
     if ($sf_id && $competence_id) {
         $key = $sf_id . '-' . $competence_id;
         $code = $item['sf'] . '-' . $item['competence'] . '-' . $objectif; // code lisible
-        $pivot_id = isset($competenceSavoirfaires[$key]) ? $competenceSavoirfaires[$key]->id : null;
+        $pivot = $competenceSavoirfaires[$key] ?? null;
+        $pivot_id = $pivot?->id ?? null;
+
+        // Vérifie le type du savoir-faire via la table pivot
+        if ($pivot && isset($pivot->savoirfaire_type_id)) {
+            $typeCode = $savoirfaireTypes[$pivot->savoirfaire_type_id] ?? null;
+            if ($typeCode !== 'C') {
+                continue; // On saute si ce n'est pas du compagnonnage
+            }
+        } else {
+            continue; // Pas de pivot ou pas de type, on saute
+        }
     }
 
     if ($pivot_id) {
-        $i=1;
-       $data[]=
-       [
+        $data[] = [
             'uuid' => Str::uuid()->toString(),
             'code' => $code,
             'competence_savoirfaire_id' => $pivot_id,
@@ -354,6 +370,7 @@ foreach ($array as $item) {
         ];
     }
 }
+
 
 
 // Insertion en batch
