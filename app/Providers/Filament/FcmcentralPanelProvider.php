@@ -434,29 +434,9 @@ class FcmcentralPanelProvider extends PanelProvider
         return null;
     }
 
-    $heuresTotal = 0.0;
-    $heuresValidees = 0.0;
+    
 
-    foreach ($parcours['affectations'] as $affectation) {
-        foreach ($affectation['competences'] ?? [] as $competence) {
-            foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
-                $heures = 0.0;
-                if (isset($csf['heures']) && is_numeric($csf['heures'])) {
-                    $heures = (float) $csf['heures'];
-                } elseif (isset($csf['jours']) && is_numeric($csf['jours'])) {
-                    $heures = (float) $csf['jours'] * 7;
-                }
-
-                $heuresTotal += $heures;
-
-                if (!empty($csf['etat_valid'])) {
-                    $heuresValidees += $heures;
-                }
-            }
-        }
-    }
-
-    $progress = $heuresTotal > 0 ? round(($heuresValidees / $heuresTotal) * 100) : 0;
+    $progress = \Modules\FcmCommun\Services\CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
 
     return $progress . '%';
 }

@@ -47,6 +47,17 @@ class MarinResource extends Resource
         return false;
     }
 
+    // Creer fonction pour RH Creation MArin pour ne pas envoyer fcmcentral::
+    public static function canAccessAdminMenus() : bool
+    {
+        static:: canAccessAnyPermission([
+            'permission.mentor',
+            'permission.bcf',
+            'permission.fps'
+        ]);
+    }
+
+
     /**
      * Badge de navigation avec comptage selon les droits
      */
@@ -272,7 +283,7 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
     'FCM_FIN' => 'heroicon-o-minus-circle',
     default => 'heroicon-o-minus-circle',
 })
-->placeholder('—')
+->placeholder('Non assigné')
 ->tooltip('Cliquer pour modifier')
 ->action(
     Tables\Actions\Action::make('modifier_type_etat')
@@ -288,6 +299,12 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
                 )
                 ->required()
                 ->default(fn ($record) => $record->getDernierTypeEtatId()),
+
+                Forms\Components\DatePicker::make('date_debut')
+                ->label('Date de début')
+                ->helperText('La date ci dessus sera la date de fin de l\'etat en cours')
+                ->required()
+                ->default(now()),
         ])
         ->action(function ($record, array $data) {
             // Historiser chaque changement dans la table etat
@@ -297,10 +314,14 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
                // $etatActuel = $fcmMarin->etats()->latest('date_debut')->first();
                $etatActuel = $record->etats()->latest('date_debut')->first();
                 if ($etatActuel && !$etatActuel->date_fin){
-                    $etatActuel->update(['date_fin'=>now()]);
+                    //$etatActuel->update(['date_fin'=>now()]);
+                    $dateFin = \Carbon\Carbon::parse($data['date_debut']);
+                    $etatActuel->update(['date_fin'=>$dateFin]);
                 }
                 $typeEtat = \Modules\FcmCentral\Models\TypeEtat::find($data['type_etat_id']);
-                $record->historiserEtat($typeEtat->code);
+               // $record->historiserEtat($typeEtat->code);
+               $dateDebut = \Carbon\Carbon::parse($data['date_debut']);
+               $record->historiserEtat($typeEtat->code, $dateDebut);
             //}
         })
         ->visible(fn ($record) =>
@@ -348,6 +369,7 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
                         'Non assigné'
                     )
                     ->searchable()
+                    ->placeholder('Non assigné')
                     ->badge()
                     ->color(fn ($record) => $record->getMentor() ? 'success' : 'gray')
                     ->icon(fn ($record) => $record->getMentor() ? 'heroicon-s-user-circle' : 'heroicon-o-user-circle')
@@ -396,7 +418,8 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
                     )
                     ->badge()
                     ->color(fn ($record) => $record->complements_fcm?->donnees_du_parcours ? 'success' : 'gray')
-                    ->icon(fn ($record) => $record->complements_fcm?->donnees_du_parcours ? 'heroicon-s-book-open' : 'heroicon-o-book-open')
+                    ->icon(fn ($record) => $record->complements_fcm?->donnees_du_parcours ? 'heroicon-s-book-open' : 'heroicon-s-plus')
+                    ->placeholder('Non assigné')
                     ->action(
                         Tables\Actions\Action::make('gerer_parcours')
                             ->modalHeading('Gestion du parcours')
@@ -424,7 +447,9 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
                 Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
                     ->label('Taux')
                     ->sortable()
-                    ->suffix('%'),
+                    ->suffix('%')
+                    ->formatStateUsing(fn ($state) => intval(round($state)))
+                    ->placeholder('0'),
 
                 // 🔔 ACTIVITÉS EN ATTENTE
                 Tables\Columns\TextColumn::make('activites_en_attente')
@@ -861,12 +886,13 @@ Tables\Actions\Action::make('create-note')
 
             foreach ($parcours['affectations'] ?? [] as $affectation) {
                 foreach ($affectation['competences'] ?? [] as $competence) {
-                    foreach ($competence['competencesSavoirfaires'] ?? [] as $savoirfaire) {
+                    foreach ($competence['competenceSavoirfaires'] ?? [] as $savoirfaire) {
                         // Vérifier si le savoir-faire est proposé
                         $sfPropose = !empty($savoirfaire['date_proposition']);
                         $sfValide = ($savoirfaire['etat_valid'] ?? false) === true;
                         
                         if ($sfPropose && !$sfValide) {
+                        
                             $pendingCount++;
                         }
 
@@ -876,6 +902,7 @@ Tables\Actions\Action::make('create-note')
                             $objValide = ($objectif['etat_valid'] ?? false) === true;
                             
                             if ($objPropose && !$objValide) {
+                                //if ($objPropose ) {
                                 $pendingCount++;
                             }
                         }

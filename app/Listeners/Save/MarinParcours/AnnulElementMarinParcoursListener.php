@@ -81,7 +81,8 @@ class AnnulElementMarinParcoursListener
         CalculHeuresParcoursService::mettreAJourHeures($parcoursMarin);
 
         // Sauvegarde
-        $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
+        //$donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
+        $donnees_du_parcours->taux_global = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcoursMarin) ?? 0;
         $donnees_du_parcours->parcoursmarin = $parcoursMarin;
         $donnees_du_parcours->save();
 
