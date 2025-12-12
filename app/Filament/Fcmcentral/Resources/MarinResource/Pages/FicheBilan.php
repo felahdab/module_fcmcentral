@@ -136,13 +136,22 @@ class FicheBilan extends ViewRecord
                     $objectifs = collect($csf['objectifs'] ?? []);
                     $totalObjectifs = $objectifs->count();
                     $objectifsValides = $objectifs->where('etat_valid', true)->count();
-                    
-                    $pourcentage = $totalObjectifs > 0
-                        ? round(($objectifsValides / $totalObjectifs) * 100, 0)
-                        : 0;
-
-                    $couleurClasse = $this->getCouleurSavoirFaire($pourcentage);
-
+                
+                    // Récupère le type de savoir-faire
+                    $typeCode = $csf['savoirfaire']['savoirfaire_type']['code'] ?? 'C';
+                
+                    if ($typeCode === 'C') {
+                        $pourcentage = $totalObjectifs > 0
+                            ? round(($objectifsValides / $totalObjectifs) * 100, 0)
+                            : 0;
+                    } elseif ($typeCode === 'S' || $typeCode === 'EAD') {
+                        $pourcentage = ($csf['etat_valid'] ?? false) ? 100 : 0;
+                    } else {
+                        $pourcentage = 0;
+                    }
+                
+                    $couleurClasse = $this->getCouleurSavoirFaire($pourcentage, $csf['etat_valid'] ?? false);
+                
                     $savoirFairesArray[] = [
                         'id' => $csf['savoirfaire']['id'] ?? $csf['id'],
                         'uuid' => $csf['savoirfaire']['uuid'] ?? $csf['uuid'] ?? '',
@@ -161,44 +170,43 @@ class FicheBilan extends ViewRecord
                         'objectifs' => $objectifs->toArray()
                     ];
                 }
+                
             }
         }
 
         return collect($savoirFairesArray);
     }
 
-    private function getCouleurSavoirFaire(float $pourcentage): array
+    private function getCouleurSavoirFaire(float $pourcentage, bool $etatValid = false): array
     {
-        if ($pourcentage == 100) {
+        if ($etatValid && $pourcentage == 100) {
+            // Validé
             return [
-                'bg' => 'bg-green-100',
-                'text' => 'text-green-800',
-                'progress' => 'bg-green-500',
-                'border' => 'border-green-500'
+                'bg' => 'bg-green-100 dark:bg-green-900',
+                'text' => 'text-green-800 dark:text-green-200',
+                'progress' => 'bg-green-500 dark:bg-green-400',
+                'border' => 'border-green-500 dark:border-green-400'
             ];
-        } elseif ($pourcentage >= 80) {
+        } elseif ($pourcentage > 0 && $pourcentage < 100) {
+            // En cours
             return [
-                'bg' => 'bg-blue-100',
-                'text' => 'text-blue-800',
-                'progress' => 'bg-blue-500',
-                'border' => 'border-blue-500'
+                'bg' => 'bg-blue-100 dark:bg-blue-900',
+                'text' => 'text-blue-800 dark:text-blue-200',
+                'progress' => 'bg-blue-500 dark:bg-blue-400',
+                'border' => 'border-blue-500 dark:border-blue-400'
             ];
-        } elseif ($pourcentage >= 60) {
+        } else {
+            // Non commencé
             return [
-                'bg' => 'bg-purple-100',
-                'text' => 'text-purple-800',
-                'progress' => 'bg-purple-500',
-                'border' => 'border-purple-500'
+                'bg' => 'bg-gray-100 dark:bg-gray-800',
+                'text' => 'text-gray-800 dark:text-gray-200',
+                'progress' => 'bg-gray-500 dark:bg-gray-400',
+                'border' => 'border-gray-500 dark:border-gray-400'
             ];
-        } else  {
-            return [
-                'bg' => 'bg-orange-100',
-                'text' => 'text-orange-800',
-                'progress' => 'bg-orange-500',
-                'border' => 'border-orange-500'
-            ];
-        } 
+        }
     }
+    
+    
 
     #[Computed]
     public function notes()

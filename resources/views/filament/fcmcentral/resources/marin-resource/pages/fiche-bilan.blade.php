@@ -189,6 +189,8 @@
 
     /* Blanc */ 
     .text-white { color: #rgb(255, 255, 255) }
+    .text-dark { color: #rgb(0, 0, 0) }
+    .text-gray { color:#94a3b8;) }
 
     /* Vert */
 .text-green-600 { color: #16a34a; }
@@ -657,7 +659,7 @@
                             </h4>
                         </div>
                         @foreach($savoirFairesByAffectation as $savoirFaire)
-                            <div class="sf-item">
+                            <div class="sf-item {{ $savoirFaire['couleur_classe']['bg'] }}">
                                 <div class="flex justify-between items-start mb-2">
                                     <div class="flex-1">
                                         <h5 class="text-xs font-medium text-adaptive-dark">
