@@ -665,6 +665,10 @@
                                         <h5 class="text-xs font-medium text-adaptive-dark">
                                             {{ $savoirFaire['libelle_court'] }}
                                         </h5>
+                                        
+                                            @if(($savoirFaire['savoirfaire_type']!='C')&&$savoirFaire['intitule'])
+                                            <h6 class="text-xs font-medium text-adaptive-dark">{{$savoirFaire['intitule']}}</h6>
+                                                @endif
                                         <p class="text-xs text-adaptive-gray mt-1">{{ $savoirFaire['competence'] }}</p>
                                     </div>
                                     <div class="flex items-center gap-2 ml-4">
@@ -686,9 +690,12 @@
                                     </div>
                                 </div>
                                 <div class="flex justify-between items-center text-xs text-adaptive-gray">
+                                    <span> {{ $savoirFaire['savoirfaire_type_libelle'] }} </span>
+                                    @if($savoirFaire['savoirfaire_type']=='C')
                                     <span>
                                         <strong class="text-adaptive-dark">{{ $savoirFaire['objectifs_valides'] }}</strong> / {{ $savoirFaire['total_objectifs'] }} objectifs
                                     </span>
+                                    @endif
                                     @if($savoirFaire['etat_valid'] && $savoirFaire['date_validation'])
                                         <span class=" font-medium">
                                            <b class="text-green-600"> ✓ {{ \Carbon\Carbon::parse($savoirFaire['date_validation'])->format('d/m/Y') }}</b><br/>

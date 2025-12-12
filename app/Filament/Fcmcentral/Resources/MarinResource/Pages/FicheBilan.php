@@ -136,9 +136,9 @@ class FicheBilan extends ViewRecord
                     $objectifs = collect($csf['objectifs'] ?? []);
                     $totalObjectifs = $objectifs->count();
                     $objectifsValides = $objectifs->where('etat_valid', true)->count();
-                
+                   //dd($csf);
                     // Récupère le type de savoir-faire
-                    $typeCode = $csf['savoirfaire']['savoirfaire_type']['code'] ?? 'C';
+                    $typeCode = $csf['savoirfaire_type']['code'] ?? 'C';
                 
                     if ($typeCode === 'C') {
                         $pourcentage = $totalObjectifs > 0
@@ -167,6 +167,9 @@ class FicheBilan extends ViewRecord
                         'valideur' => $csf['valideur'] ?? null,
                         'affectation' => $affectation['libelle_court'] ?? '',
                         'competence' => $competence['libelle_court'] ?? '',
+                        'savoirfaire_type' => $csf['savoirfaire_type']['code'],
+                        'savoirfaire_type_libelle' => $csf['savoirfaire_type']['libelle_court'],
+                        'intitule' => $csf['libelle_court'],
                         'objectifs' => $objectifs->toArray()
                     ];
                 }
