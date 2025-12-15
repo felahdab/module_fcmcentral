@@ -14,11 +14,18 @@ class DeasmAffectationsSeeder extends Seeder
         // Désactiver les contraintes de clés étrangères
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-       
+        $uuids = [
+          'A1' => 'deasm1b1-1234-5678-affe-11aa11z000a1',
+          'A2' => 'deasm1b1-1234-5678-affe-11aa11z000a2',
+          
+        ];
+          
+      
         
         $data = [
           [
-            'uuid' => Str::uuid()->toString(),
+            //'uuid' => Str::uuid()->toString(),
+            'uuid' => $uuids['A1'],
             'code' => 'A1',
             'libelle_court' => 'AFFECTATION 1',
             'libelle_long' => 'Affectation 1',
@@ -29,7 +36,7 @@ class DeasmAffectationsSeeder extends Seeder
             'updated_at' => now(),
           ],
           [
-            'uuid' => Str::uuid()->toString(),
+            'uuid' => $uuids['A2'],
             'code' => 'A2',
             'libelle_court' => 'AFFECTATION 2',
             'libelle_long' => 'Affectation 2',
@@ -39,50 +46,7 @@ class DeasmAffectationsSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
           ],
-          // [
-          //   'uuid' => Str::uuid()->toString(),
-          //   'code' => 'A3',
-          //   'libelle_court' => 'ANNEE 3',
-          //   'libelle_long' => 'Année 3',
-          //   'ordre' => 3,
-          //   'color' => 'warning',
-          //   'nombre' => 3,
-          //   'created_at' => now(),
-          //   'updated_at' => now(),
-          // ],
-          // [
-          //   'uuid' => Str::uuid()->toString(),
-          //   'code' => 'A4',
-          //   'libelle_court' => 'ANNEE 4',
-          //   'libelle_long' => 'Année 4',
-          //   'ordre' => 4,
-          //   'color' => 'danger',
-          //   'nombre' => 4,
-          //   'created_at' => now(),
-          //   'updated_at' => now(),
-          // ],
-          // [
-          //   'uuid' => Str::uuid()->toString(),
-          //   'code' => 'A5',
-          //   'libelle_court' => 'ANNEE 5',
-          //   'libelle_long' => 'Année 5',
-          //   'ordre' => 5,
-          //   'color' => 'success',
-          //   'nombre' => 5,
-          //   'created_at' => now(),
-          //   'updated_at' => now(),
-          // ],
-          // [
-          //   'uuid' => Str::uuid()->toString(),
-          //   'code' => 'A6',
-          //   'libelle_court' => 'ANNEE 6',
-          //   'libelle_long' => 'Année 6',
-          //   'ordre' => 6,
-          //   'color' => 'danger',
-          //   'nombre' => 6,
-          //   'created_at' => now(),
-          //   'updated_at' => now(),
-          // ],
+          
           
 ];
         

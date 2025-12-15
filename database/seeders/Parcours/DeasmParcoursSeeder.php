@@ -18,7 +18,8 @@ class DeasmParcoursSeeder extends Seeder
         
         $data = [
             [ 
-              'uuid' => Str::uuid()->toString(),
+              //'uuid' => Str::uuid()->toString(),
+              'uuid' => 'deasm1b1-1234-5678-parc-11aa11z000p1',
               'code'=>'DEASM1',
               'libelle_long' => 'DEASM (DDC NIVEAU 1, 2 et 3) - (ETR 101856)',
               'libelle_court' => 'DEASM',
