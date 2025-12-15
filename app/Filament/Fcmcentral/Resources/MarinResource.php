@@ -25,6 +25,12 @@ use Modules\FcmCentral\Models\Role;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
+
+//use Modules\FcmCentral\Filament\Fcmcentral\Exports\MarinBcfExporter;
+//use Filament\Tables\Actions\ExportAction;
+//use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Tables\Actions\Action;
+
 class MarinResource extends Resource
 {
     use FilamentPermissionTrait, FcmPermissionTrait;
@@ -50,13 +56,15 @@ class MarinResource extends Resource
     // Creer fonction pour RH Creation MArin pour ne pas envoyer fcmcentral::
     public static function canAccessAdminMenus() : bool
     {
-        static:: canAccessAnyPermission([
+        return static:: canAccessAnyPermission([
             'permission.mentor',
             'permission.bcf',
             'permission.fps'
         ]);
     }
 
+
+     
 
     /**
      * Badge de navigation avec comptage selon les droits
@@ -87,6 +95,10 @@ class MarinResource extends Resource
         
         return null;
     }
+
+
+   
+
 
     /**
      * Filtrage automatique selon les droits
@@ -127,6 +139,7 @@ class MarinResource extends Resource
     }
 
 
+    
 
     public static function form(Form $form): Form
     {
@@ -149,6 +162,105 @@ class MarinResource extends Resource
         return $table
             ->defaultSort('nom', 'asc')
             ->headerActions([
+
+                    // Cette methode ne fait que telecahrger sur le serveur (app/storage) , on veut telecahrger en direct
+                    // ExportAction::make('export')
+                    // ->label('Exporter les marins')
+                    // ->exporter(MarinBcfExporter::class)
+                    // ->color('primary')
+                    // ->formats([ExportFormat::Csv])
+                    // ->icon('heroicon-o-arrow-down-tray')
+                    // ->fileName('marins-fcm.csv')
+                    // ->visible(fn() => static::canAccessAnyPermission(['admin',  'permission.bcf']))
+                    // ,
+               
+                   /** Telechargement CSV */
+                   Action::make('downloadCsv')
+                   ->label('Exporter les marins')
+                   ->icon('heroicon-o-arrow-down-tray')
+                   ->color('primary')
+                   ->action(function () {
+                       $marins = \Modules\FcmCentral\Models\Marin::with([
+                           'grade', 
+                           'specialite', 
+                           'unite', 
+                           'complementsFcm.cohorte',
+                           'etats.typeEtat'
+                       ])->get();
+           
+                       $csvHeader = [
+                           'GRADE', 'NOM', 'PRENOM', 'SPECIALITE', 'AFFECTATION', 'COHORTE',
+                           'GEL FCM', 'VERT PPA DEPUIS LE', 'TEMPS DANS LE PPA', 
+                           'PROGRESSION GLOBALE', 'STAGE MANQUANTS'
+                       ];
+                       
+                       $callback = function() use ($csvHeader, $marins) {
+                           $file = fopen('php://output', 'w');
+                           fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
+                           fputcsv($file, $csvHeader, ';');
+                           
+                           foreach ($marins as $marin) {
+                               // GEL FCM
+                               $gelFcm = $marin->etats()
+                                   ->whereHas('typeEtat', fn($q) => $q->where('code', 'FCM_ENP'))
+                                   ->orderBy('date_debut')
+                                   ->first()?->date_debut;
+                               
+                               // VERT PPA
+                               $vertPpa = $marin->etats()
+                                   ->whereHas('typeEtat', fn($q) => $q->where('code', 'FCM_ACT'))
+                                   ->orderBy('date_debut')
+                                   ->first()?->date_debut;
+                               
+                               // TEMPS PPA
+                               $dateDebut = $marin->etats()->orderBy('date_debut')->first()?->date_debut;
+                               $tempsPpa = $dateDebut ? \Carbon\Carbon::parse($dateDebut)->diffInDays(now()) : '0';
+                               $tempsPpa =  round($tempsPpa,0);
+                               
+                               // PROGRESSION
+                               $parcours = $marin->complementsFcm?->donnees_du_parcours?->parcoursmarin;
+                               $progression = $parcours ? (new \Modules\FcmCommun\Services\CalculHeuresParcoursService())->calculerPourcentageEtatValid($parcours) : null;
+                               
+                               // STAGES MANQUANTS
+                               $stagesManquants = 0;
+                               if ($parcours) {
+                                   foreach ($parcours['affectations'] ?? [] as $affectation) {
+                                       foreach ($affectation['competences'] ?? [] as $competence) {
+                                           foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                                               if (($csf['savoirfaire_type']['code'] ?? null) === 'S' && empty($csf['etat_valid'])) {
+                                                   $stagesManquants++;
+                                               }
+                                           }
+                                       }
+                                   }
+                               }
+                               
+                               fputcsv($file, [
+                                   $marin->grade?->libelle_court ?? '',
+                                   $marin->nom ?? '',
+                                   $marin->prenom ?? '',
+                                   $marin->specialite?->libelle_long ?? '',
+                                   $marin->unite?->libelle_long ?? '',
+                                   $marin->complementsFcm?->cohorte?->libelle_long ?? '',
+                                   $gelFcm ? \Carbon\Carbon::parse($gelFcm)->format('d/m/Y') : 'Non renseigné',
+                                   $vertPpa ? \Carbon\Carbon::parse($vertPpa)->format('d/m/Y') : 'Non renseigné',
+                                   $tempsPpa ?? '',
+                                   $progression ?? '',
+                                   $stagesManquants,
+                               ], ';');
+                           }
+                           fclose($file);
+                       };
+           
+                       return \Illuminate\Support\Facades\Response::stream($callback, 200, [
+                           "Content-Type" => "text/csv; charset=UTF-8",
+                           "Content-Disposition" => "attachment; filename=marins-fcm.csv",
+                       ]);
+                   })
+                   ->visible(fn() => static::canAccessAnyPermission(['admin', 'permission.bcf'])),
+           
+                   /** Fin Telechargment */
+                
                 Tables\Actions\Action::make('recherche-annuaire')
                     ->label('Ajouter un marin')
                     ->icon('heroicon-o-user-plus')
@@ -866,6 +978,9 @@ Tables\Actions\Action::make('create-note')
                     
             ]);
     }
+
+
+   
 
     /**
      * Compte les activités en attente de validation (objectifs + savoir-faires)
