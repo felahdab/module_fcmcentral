@@ -490,7 +490,7 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
     ->color(fn ($record) => $record->user ? 'warning' : 'success')
     ->iconButton()
     ->visible(fn ($record) =>
-        static::canAccessAnyPermission(['admin', 'permission.bcf'])
+        static::canAccessAnyPermission(['admin'])
     )
     ->form(fn ($record) => $record->user
         ? [
