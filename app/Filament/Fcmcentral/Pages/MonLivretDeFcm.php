@@ -11,8 +11,6 @@ use Filament\Forms\Components\Livewire;
 use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight as LivretDeFcm;
-
 
 class MonLivretDeFcm extends Page
 {
@@ -39,7 +37,7 @@ class MonLivretDeFcm extends Page
     {
         return $form->schema([
             Livewire::make(LivretFcm::class, [
-                "marin" => $this->marin,
+                "marinId" => $this->marin->id,
                 "Marin" => Marin::class,
                 "UserGeneratedEvent" => UserGeneratedEvent::class,
                 "PermissionPrefix" => "fcmcentral"

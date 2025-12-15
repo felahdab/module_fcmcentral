@@ -3,6 +3,7 @@
 namespace Modules\FcmCentral\Database\Seeders\Parcours;
  
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
  
 class DeasmMasterSeeder extends Seeder
 {
@@ -16,6 +17,26 @@ class DeasmMasterSeeder extends Seeder
      */
     public function run()
     {
+        
+        $this->command->info('🚀 Truncate Table du parcours Deasm...');
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        DB::table('fcmcentral_objectifs')->truncate();
+        DB::table('fcmcentral_competence_savoirfaires')->truncate();
+        DB::table('fcmcentral_affectation_parcours')->truncate();
+        DB::table('fcmcentral_parcours')->truncate();
+        DB::table('fcmcentral_savoirfaires')->truncate();
+        DB::table('fcmcentral_competences')->truncate();
+        DB::table('fcmcentral_affectations')->truncate();
+        DB::table('fcmcentral_parcours_types')->truncate();
+        DB::table('fcmcentral_domaines')->truncate();
+        DB::table('fcmcentral_savoirfaire_types')->truncate();
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+
+        
         $this->command->info('🚀 Import du parcours Deasm...');
        
 
