@@ -39,7 +39,7 @@ class MonLivretDeFcm extends Page
     {
         return $form->schema([
             Livewire::make(LivretFcm::class, [
-                "marin" => $this->marin,
+                "marinId" => $this->marin->id,
                 "Marin" => Marin::class,
                 "UserGeneratedEvent" => UserGeneratedEvent::class,
                 "PermissionPrefix" => "fcmcentral"

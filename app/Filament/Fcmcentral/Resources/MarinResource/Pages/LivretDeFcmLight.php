@@ -31,7 +31,7 @@ class LivretDeFcmLight extends ViewRecord
             Section::make(fn() => 'Livret de ' . ($this->record->nom.' '. $this->record->prenom) )
                 ->schema([    
                     Livewire::make(LivretFcm::class, [
-                        "marin" => $this->record,
+                        "marinId" => $this->record->id,
                         "Marin" => Marin::class,
                         "UserGeneratedEvent" => UserGeneratedEvent::class,
                         "PermissionPrefix" => "fcmcentral"
