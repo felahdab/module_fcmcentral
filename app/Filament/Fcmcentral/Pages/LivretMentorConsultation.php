@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Components\Livewire;
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
 use Modules\FcmCentral\Traits\FcmPermissionTrait;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 
  
@@ -68,6 +69,9 @@ class LivretMentorConsultation extends Page
             Livewire::make(LivretFcm::class, [
                 "marin" => $this->marin,
                 //"canValidate" => static::canValidateElements(),
+                "Marin" => Marin::class,
+                "UserGeneratedEvent" => UserGeneratedEvent::class,
+                "PermissionPrefix" => "fcmcentral"
             ]),
         ]);
     }
