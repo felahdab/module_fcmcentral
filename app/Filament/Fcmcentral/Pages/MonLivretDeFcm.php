@@ -11,8 +11,6 @@ use Filament\Forms\Components\Livewire;
 use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight as LivretDeFcm;
-
 
 class MonLivretDeFcm extends Page
 {
