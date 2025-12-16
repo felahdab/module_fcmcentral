@@ -276,6 +276,14 @@
     background: linear-gradient(135deg, #654010 0%, #f77d0b 100%);
 }
 
+.text-5xl{
+    font-size: 40px;
+}
+
+.text-3xl{
+    font-size: 30px;
+}
+
 </style>
 
 
@@ -347,7 +355,7 @@
     <x-filament::section class="text-center section-card">
         <x-slot name="heading">Progression Globale</x-slot>
         <div class="p-4">
-            <div class="text-3xl font-bold 
+            <div class="text-5xl font-bold 
             {{ $this->statistiques['pourcentage_global'] 
             >= 80 ? 'text-vert-600' : ($this->statistiques['pourcentage_global'] 
             >= 50 ? 'text-bleu-600' 
@@ -363,7 +371,7 @@
         <x-filament::section class="text-center section-card">
             <x-slot name="heading">Savoir faire validés</x-slot>
             <div class="p-4">
-                <div class="text-3xl font-bold text-green-600">
+                <div class="text-5xl font-bold text-green-600">
                     @php
                         $total = $this->statistiques['total_savoirfaires'] ?? 0 ;
                         $valide = $this->statistiques['savoirfaires_valides'] ?? 0 ;
@@ -387,7 +395,7 @@
         <x-filament::section class="text-center section-card">
             <x-slot name="heading">Savoir faire en cours</x-slot>
             <div class="p-4">
-                <div class="text-3xl font-bold text-blue-600">
+                <div class="text-5xl font-bold text-blue-600">
                     @php
                     $total = $this->statistiques['total_savoirfaires'] ?? 0 ;
                     $enCours = $this->statistiques['savoirfaires_en_cours'] ?? 0 ;
@@ -408,7 +416,7 @@
         <x-filament::section class="text-center section-card">
             <x-slot name="heading">Savoir faire Non Commencés</x-slot>
             <div class="p-4">
-                <div class="text-3xl font-bold text-purple-600">
+                <div class="text-5xl font-bold text-purple-600">
                     {{ $this->statistiques['savoirfaires_non_commences'] }}
                 </div>
                 <div class="text-sm text-gray-600 mt-2"></div>
@@ -419,8 +427,38 @@
 </div>
 
   {{-- INDICATEURS --}}
-  
-  <x-filament::section class="section-card">
+  <div class="grid grid-sections-3 mb-6">
+
+    <x-filament::section class="text-center section-card">
+            <x-slot name="heading">Compagnonnage</x-slot>
+            <div class="p-4">
+                <div class="text-lg font-bold ">{{ $this->statistiques['compagnonnage_valides'] }} effectué
+                    @php $this->statistiques['compagnonnage_valides']>1?'s':'' @endphp / {{ $this->statistiques['total_compagnonnage'] }} total</div>
+                <div class="text-3xl font-bold ">{{ $this->getPourcentageCompagnonnage() }}%</div>
+            </div>
+        </x-filament::section>
+
+        <x-filament::section class="text-center section-card">
+            <x-slot name="heading">Stage</x-slot>
+            <div class="p-4">
+                <div class="text-lg font-bold ">{{ $this->statistiques['stages_valides'] }} effectué
+                    @php $this->statistiques['compagnonnage_valides']>1?'s':'' @endphp  / {{ $this->statistiques['total_stages'] }} total</div>
+                <div class="text-3xl font-bold ">{{ $this->getPourcentageStages() }}%</div>  
+            </div>
+        </x-filament::section>
+
+        <x-filament::section class="text-center section-card">
+            <x-slot name="heading">Ecole a Distance</x-slot>
+            <div class="p-4">
+                <div class="text-lg font-bold ">{{ $this->statistiques['ead_valides'] }} effectué
+                    @php $this->statistiques['compagnonnage_valides']>1?'s':'' @endphp  / {{ $this->statistiques['total_ead'] }} total</div>
+                <div class="text-3xl font-bold ">{{ $this->getPourcentageEad() }}%</div>
+            </div>
+        </x-filament::section>
+
+  </div>  
+
+  {{-- <x-filament::section class="section-card">
     <x-slot name="heading">Indicateurs Complémentaires</x-slot>
     <div class="grid grid-cols-1 md:grid-cols-3  gap-6">
         <div class="bg-gradient-blue p-4 rounded-lg border border-blue-200">
@@ -464,7 +502,7 @@
         </div>
        
     </div>
-</x-filament::section>
+</x-filament::section> --}}
 
 
         {{-- SECTIONS PRINCIPALES (3 COLONNES) --}}
