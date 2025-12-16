@@ -24,14 +24,14 @@ class DeasmCompetencesSeeder extends Seeder
         $affectations = DB::table('fcmcentral_affectations')->pluck('id','code');
 
         $uuids = [
-          'C1' => 'deasm1b1-1234-5678-comp-11aa11z000c1',
-          'C2' => 'deasm1b1-1234-5678-comp-11aa11z000c2',
-          'C3' => 'deasm1b1-1234-5678-comp-11aa11z000c3',
-          'C4' => 'deasm1b1-1234-5678-comp-11aa11z000c4',
-          'C5' => 'deasm1b1-1234-5678-comp-11aa11z000c5',
-          'C6' => 'deasm1b1-1234-5678-comp-11aa11z000c6',
-          'C7' => 'deasm1b1-1234-5678-comp-11aa11z000c7',
-          'C8' => 'deasm1b1-1234-5678-comp-11aa11z000c8',
+          'C1' => 'deasm1b1-1234-5678-comp-11aa11z0c01',
+          'C2' => 'deasm1b1-1234-5678-comp-11aa11z0c02',
+          'C3' => 'deasm1b1-1234-5678-comp-11aa11z0c03',
+          'C4' => 'deasm1b1-1234-5678-comp-11aa11z0c04',
+          'C5' => 'deasm1b1-1234-5678-comp-11aa11z0c05',
+          'C6' => 'deasm1b1-1234-5678-comp-11aa11z0c06',
+          'C7' => 'deasm1b1-1234-5678-comp-11aa11z0c07',
+          'C8' => 'deasm1b1-1234-5678-comp-11aa11z0c08',
           
         ];
 
