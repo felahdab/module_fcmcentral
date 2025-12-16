@@ -15,8 +15,8 @@ class DeasmAffectationsSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         $uuids = [
-          'A1' => 'deasm1b1-1234-5678-affe-11aa11z000a1',
-          'A2' => 'deasm1b1-1234-5678-affe-11aa11z000a2',
+          'A1' => 'deasm1b1-1234-5678-affe-11aa11z00a01',
+          'A2' => 'deasm1b1-1234-5678-affe-11aa11z00a02',
           
         ];
           
