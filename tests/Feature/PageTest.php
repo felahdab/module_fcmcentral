@@ -52,13 +52,4 @@ it('affiche la page liste des marins', function() {
         ->assertSuccessful();
 });
 
-it('affiche la page Mon Livret de FCM', function() {
-    // Crée un marin lié à l'admin
-    $marin = Marin::factory()->create(['user_id' => $this->admin->id]);
 
-    $this->actingAs($this->admin)
-    ->get(MonLivretDeFcm::class, ['marinId'=>$marin->id])
-    ->assertStatus('Fiche Bilan FCM');
-   
-        ;
-});

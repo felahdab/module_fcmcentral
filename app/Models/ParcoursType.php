@@ -4,15 +4,17 @@ namespace Modules\FcmCentral\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\FcmCentral\Traits\HasTablePrefix;
+use Modules\FcmCentral\Database\Factories\ParcoursTypeFactory;
 
 
 
 class ParcoursType extends Model
 {
 
-	use HasTablePrefix;
+	use HasFactory;
+    use HasTablePrefix;
 
 	protected $fillable = [
         'code',
@@ -21,7 +23,12 @@ class ParcoursType extends Model
         'ordre',
         'color',
 	];
-	
+    
+    // Factory
+    protected static function newFactory(): ParcoursTypeFactory
+    {
+        return ParcoursTypeFactory::new();
+    }
 
 	    /**
      * Relation avec les savoir-faire

@@ -3,8 +3,8 @@
 namespace Modules\FcmCentral\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\FcmCentral\Database\Factories\CompetenceSavoirfaireFactory;
 
 use Modules\FcmCentral\Traits\HasTablePrefix;
 
@@ -13,6 +13,7 @@ use Modules\FcmCentral\Traits\HasTablePrefix;
 class CompetenceSavoirfaire extends Model
 {
     
+    use HasFactory; 
     use HasTablePrefix;
 
     protected $fillable = [
@@ -26,6 +27,11 @@ class CompetenceSavoirfaire extends Model
         'libelle_court',
         'ordre',
     ];
+
+    protected static function newFactory(): competenceSavoirFaireFactory
+    {
+        return CompetenceSavoirfaireFactory::new();
+    }
 
     public function competence()
     {
