@@ -363,48 +363,105 @@ it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi e
 // ========================================
 
 
-it('affiche le livret FCM ', function(){
-    $this->assertTrue(Models\Marin::all()->count() == 0);
+it('affiche le livret FCM', function () {
+    // ✅ Vérification initiale
+    expect(Models\Marin::count())->toBe(0);
+   
+    // ✅ Création du marin avec FCM activé
     $marin = Models\Marin::factory()->create();
-    $marin = Models\Marin::find($marin->id);
-    $marin->suivi_en_fcm = true;
-    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
-    $this->assertTrue(Models\Marin::all()->count() == 1);
+   
+    Models\FcmMarin::create(['rh_marin_id' => $marin->id]);
+   
+    expect(Models\Marin::count())->toBe(1);
+    //expect($marin->estEnFcm())->toBeTrue();
 
+    // ✅ Création du parcours avec affectations et compétences
     $parcours = Models\Parcours::factory()->create();
-    
-    // ✅ CORRECTION: Utiliser la nouvelle structure
-    $annee = Models\Affectation::factory()->create();
-    $parcours->annees()->attach($annee);
+   
+    $affectation = Models\Affectation::factory()->create([
+        'ordre' => 1,
+    ]);
+   
+    // ✅ Attacher l'affectation au parcours avec ordre
+    $parcours->affectations()->attach($affectation->id, ['ordre' => 1]);
+   
+    $competence = Models\Competence::factory()->create([
+        'affectation_id' => $affectation->id,
+        'ordre' => 1,
+    ]);
 
-    $savoirfaire = Models\Savoirfaire::factory()->create();
-    $annee->savoirfaires()->attach($savoirfaire);
+    // ✅ Création d'un savoir-faire avec objectifs
+    $savoirFaire = Models\SavoirFaire::factory()->create();
+    // Doit creer la factory savoirfaire Type
+    $savoirFaireType = Models\SavoirFaireType::factory()->create(['code' => 'C']);
+   
+    $csf = Models\CompetenceSavoirfaire::create([
+        'competence_id' => $competence->id,
+        'savoirfaire_id' => $savoirFaire->id,
+        'savoirfaire_type_id' => $savoirFaireType->id,
+        'ordre' => 1,
+    ]);
 
+    // ✅ Création d'objectifs
+    $objectif1 = Models\Objectif::factory()->create(['ordre' => 1]);
+    $objectif2 = Models\Objectif::factory()->create(['ordre' => 2]);
+   
+    $csf->objectifs()->attach([
+        $objectif1->id => ['ordre' => 1],
+        $objectif2->id => ['ordre' => 2],
+    ]);
+
+    // ✅ Sérialisation du parcours
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
-        user_uuid : $this->admin->uuid,
+        user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::PARCOURS,
-        object_uuid : $parcours->uuid,
+        object_uuid: $parcours->uuid,
         detail: [
-            "version" => 1,
-            "date_de_debut"=> Carbon::tomorrow(),
+            'version' => 1,
+            'date_de_debut' => Carbon::tomorrow()->toDateString(),
         ]
-        );
+    );
     event($event);
 
+    // ✅ Vérifier que la sérialisation a créé un ParcoursSerialise
+    expect($parcours->parcoursSerialise()->count())->toBeGreaterThan(0);
+   
+    $parcoursSerialise = $parcours->parcoursSerialise()->latest('version')->first();
+    expect($parcoursSerialise)->not->toBeNull();
+    expect($parcoursSerialise->version)->toBe(1);
+
+    // ✅ Attribution du parcours au marin
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('attributs-fcm', $marin, data: [
-            "cohorte_id" => null,
-            "mentor_id" => null,
-            "parcours_id" => $parcours->uuid
+        ->callTableAction('toggle_fcm', $marin, data: [
+            'cohorte_id' => null,
+            'mentor_id' => null,
+            'parcours_id' => $parcours->uuid,
         ])
         ->assertHasNoActionErrors();
 
+    // ✅ Rafraîchir le marin pour obtenir les données à jour
+    $marin->refresh();
+   
+    // ✅ Vérifier que le parcours a été attribué
+    expect($marin->complementsFcm)->not->toBeNull();
+    expect($marin->complementsFcm->donnees_du_parcours)->not->toBeNull();
+    expect($marin->complementsFcm->donnees_du_parcours->parcours_serialise_id)->not->toBeNull();
+
+    // ✅ Test de l'affichage du livret
     Livewire::actingAs($this->admin)
-            ->test(Resources\MarinResource\Pages\LivretDeFcm::class, ["record" => $marin->id])
-            ->assertSee("Livret du marin");
+        ->test(Resources\MarinResource\Pages\LivretDeFcmLight::class, ['record' => $marin->id])
+        ->assertSuccessful()
+        ->assertSee('Livret du marin')
+        ->assertSee($marin->nom)
+        ->assertSee($marin->prenom)
+        ->assertSee($affectation->libelle_court)
+        ->assertSee($competence->libelle_court)
+        ->assertSee($savoirFaire->libelle_court);
 })->skip('affiche le livret FCM');
+
+
 
 
 
@@ -728,14 +785,13 @@ it('met a jour le parcours en cas de validation d une proposition', function(){
         );
     event($event);
 
-    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d';
+    $savoirfaire_uuid = 'deasm1b1-1234-5678-cosf-11aa1c1c1sf1';
 
     // ✅ CORRECTION: Utiliser les UUIDs des objectifs
     $objectifs = [
-        '06a569b8-23a7-4c3f-b57a-51ca841894a7',
-        '97750a5e-abd4-4c16-89a6-65a2695ab692',
-        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',
-        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'
+        'deasm1b1-1234-5678-obje-11aa1c1sf1o1',
+        'deasm1b1-1234-5678-obje-11aa1c1sf1o2',
+        'deasm1b1-1234-5678-obje-11aa1c1sf1o3',
     ];
 
     // On propose le premier objectif
@@ -771,20 +827,22 @@ it('met a jour le parcours en cas de validation d une proposition', function(){
     $marin->refresh();
 
     // ✅ CORRECTION: Adapter la vérification pour la nouvelle structure
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["annees"] as $annee)
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["affectations"] as $affectation)
     {
-        if (!isset($annee["savoirfaires"])) continue;
+        if (!isset($affectation["competences"])) continue;
         
-        foreach($annee["savoirfaires"] as $savoirfaire)
+        foreach($affectation["competences"] as $competence)
         {
-            if ($savoirfaire["uuid"] == $savoirfaire_uuid)
+
+                foreach ($competence["competenceSavoirfaires"] ?? [] as $csf) {
+            if ($csf["uuid"] == $savoirfaire_uuid)
             {
-                if (isset($savoirfaire["objectifs"]) && is_array($savoirfaire["objectifs"])) {
-                    foreach($savoirfaire["objectifs"] as $objectif)
+                if (isset($csf["objectifs"]) && is_array($csf["objectifs"])) {
+                    foreach($csf["objectifs"] as $objectif)
                     {
                         // Construire l'UUID composite pour comparer
-                        $pivotId = $savoirfaire['pivot']['id'] ?? null;
-                        $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
+                        $pivotId = $csf['pivot']['id'] ?? null;
+                    $objUuidComposite = $pivotId ? "obj_{$pivotId}_{$objectif['id']}" : null;
                         
                         if ($objectif['uuid'] == $objectifs[0] || $objUuidComposite == $objectifs[0]){
                             $this->assertTrue($objectif["date_proposition"] == null);
@@ -792,10 +850,11 @@ it('met a jour le parcours en cas de validation d une proposition', function(){
                         }
                     }
                 }
+                }
             }
         }
     }
-})->skip('proposition-validation');
+});
 
 it('met a jour le parcours en cas de refus d une proposition', function(){
     $this->assertTrue(Models\Marin::all()->count() == 0);
@@ -832,14 +891,14 @@ it('met a jour le parcours en cas de refus d une proposition', function(){
         );
     event($event);
 
-    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d';
+    $savoirfaire_uuid = 'deasm1b1-1234-5678-cosf-11aa1c1c1sf1';
+
 
     // ✅ CORRECTION: Utiliser les UUIDs des objectifs
     $objectifs = [
-        '06a569b8-23a7-4c3f-b57a-51ca841894a7',
-        '97750a5e-abd4-4c16-89a6-65a2695ab692',
-        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',
-        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906'
+        'deasm1b1-1234-5678-obje-11aa1c1sf1o1',
+        'deasm1b1-1234-5678-obje-11aa1c1sf1o2',
+        'deasm1b1-1234-5678-obje-11aa1c1sf1o3',
     ];
 
     // On propose le premier objectif
@@ -875,20 +934,22 @@ it('met a jour le parcours en cas de refus d une proposition', function(){
     $marin->refresh();
 
     // ✅ CORRECTION: Adapter la vérification pour la nouvelle structure
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["annees"] as $annee)
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["affectations"] as $affectation)
     {
-        if (!isset($annee["savoirfaires"])) continue;
+        if (!isset($affectation["competences"])) continue;
         
-        foreach($annee["savoirfaires"] as $savoirfaire)
+        foreach($affectation["competences"] as $competence)
         {
-            if ($savoirfaire["uuid"] == $savoirfaire_uuid)
+
+                foreach ($competence["competenceSavoirfaires"] ?? [] as $csf) {
+            if ($csf["uuid"] == $savoirfaire_uuid)
             {
-                if (isset($savoirfaire["objectifs"]) && is_array($savoirfaire["objectifs"])) {
-                    foreach($savoirfaire["objectifs"] as $objectif)
+                if (isset($csf["objectifs"]) && is_array($csf["objectifs"])) {
+                    foreach($csf["objectifs"] as $objectif)
                     {
                         // Construire l'UUID composite pour comparer
-                        $pivotId = $savoirfaire['pivot']['id'] ?? null;
-                        $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
+                        $pivotId = $csf['pivot']['id'] ?? null;
+                    $objUuidComposite = $pivotId ? "obj_{$pivotId}_{$objectif['id']}" : null;
                         
                         if ($objectif['uuid'] == $objectifs[0] || $objUuidComposite == $objectifs[0]){
                             $this->assertTrue($objectif["date_proposition"] == null);
@@ -897,9 +958,10 @@ it('met a jour le parcours en cas de refus d une proposition', function(){
                     }
                 }
             }
+            }
         }
     }
-})->skip('refus proposition');
+});
 
 it('valide automatiquement tous les objectifs quand on valide un savoirfaire', function(){
     $this->assertTrue(Models\Marin::all()->count() == 0);
@@ -938,37 +1000,37 @@ it('valide automatiquement tous les objectifs quand on valide un savoirfaire', f
         );
     event($event);
 
-    $savoirfaire_uuid = 'c64fcc6a-9e48-427f-9097-da13f2ddbf2d';
+    $savoirfaire_uuid = 'deasm1b1-1234-5678-cosf-11aa1c1c1sf1';
+
 
     // ✅ CORRECTION: Utiliser les UUIDs des objectifs
     $objectifs = [
-        '06a569b8-23a7-4c3f-b57a-51ca841894a7',
-        '97750a5e-abd4-4c16-89a6-65a2695ab692',
-        '6920df9c-4edc-4c4c-a1c9-f069ffa25976',
-        '6ac6fa71-bc34-4165-bf2b-53a85ebb6906',
-        'ed1fa3e7-22cf-442b-b9c0-3d72a9ec984b'   // Objectif hors catégorie
+        'deasm1b1-1234-5678-obje-11aa1c1sf1o1',
+        'deasm1b1-1234-5678-obje-11aa1c1sf1o2',
+        'deasm1b1-1234-5678-obje-11aa1c1sf1o3',
     ];
 
     // ✅ CORRECTION: Helper adapté pour la nouvelle structure
     $getObjectifsDuSavoirfaire = function($parcoursMarin, $savoirfaire_uuid) {
         $objectifs_du_savoirfaire = [];
 
-        foreach($parcoursMarin["annees"] as $annee) {
-            if (!isset($annee['savoirfaires'])) continue;
-
-            foreach($annee['savoirfaires'] as $savoirfaire) {
-                if ($savoirfaire['uuid'] === $savoirfaire_uuid) {
-                    if (isset($savoirfaire['objectifs']) && is_array($savoirfaire['objectifs'])) {
-                        foreach($savoirfaire['objectifs'] as $objectif) {
+        foreach($parcoursMarin["affectations"] as $affectation) {
+            if (!isset($affectation['competences'])) continue;
+            foreach($affectation['competences'] as $competence) {
+            foreach($competence['competenceSavoirfaires'] as $csf) {
+                if ($csf['uuid'] === $savoirfaire_uuid) {
+                    if (isset($csf['objectifs']) && is_array($csf['objectifs'])) {
+                        foreach($csf['objectifs'] as $objectif) {
                             // Ajouter à la fois l'UUID simple et composite
                             $objectifs_du_savoirfaire[] = $objectif['uuid'] ?? '';
                             
-                            $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                            $pivotId = $csf['pivot']['id'] ?? null;
                             if ($pivotId) {
                                 $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
                                 $objectifs_du_savoirfaire[] = $objUuidComposite;
                             }
                         }
+                    }
                     }
                     return $objectifs_du_savoirfaire;
                 }
@@ -1041,19 +1103,20 @@ it('valide automatiquement tous les objectifs quand on valide un savoirfaire', f
     $marin->refresh();
 
     // ✅ VÉRIFICATION: État des objectifs dans le parcours (nouvelle structure)
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["annees"] as $annee) {
-        if (!isset($annee['savoirfaires'])) continue;
+    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["affectations"] as $affectation) {
+        if (!isset($affectation['competences'])) continue;
         
-        foreach($annee['savoirfaires'] as $savoirfaire) {
-            if ($savoirfaire["uuid"] == $savoirfaire_uuid) {
+        foreach($affectation['competences'] as $competence) {
+            foreach($competence['competenceSavoirfaires'] as $csf) {
+            if ($csf["uuid"] == $savoirfaire_uuid) {
                 // Tous les objectifs du savoir-faire doivent être validés
-                if (isset($savoirfaire["objectifs"]) && is_array($savoirfaire["objectifs"])) {
-                    foreach($savoirfaire["objectifs"] as $objectif) {
+                if (isset($csf["objectifs"]) && is_array($csf["objectifs"])) {
+                    foreach($csf["objectifs"] as $objectif) {
                         $this->assertTrue($objectif["etat_valid"] == true,
                             "L'objectif {$objectif['uuid']} devrait être validé");
 
                         // Vérifier les commentaires selon l'origine de la validation
-                        $pivotId = $savoirfaire['pivot']['id'] ?? null;
+                        $pivotId = $csf['pivot']['id'] ?? null;
                         $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
                         
                         if ($objectif['uuid'] === $objectifs[0] || $objUuidComposite === $objectifs[0]) {
@@ -1066,12 +1129,13 @@ it('valide automatiquement tous les objectifs quand on valide un savoirfaire', f
                                 "L'objectif auto-validé devrait avoir le commentaire du savoir-faire");
                         }
                     }
+                    }
                 }
                 
                 // Le savoir-faire lui-même doit être validé
-                $this->assertTrue($savoirfaire["etat_valid"] == true,
+                $this->assertTrue($csf["etat_valid"] == true,
                     "Le savoir-faire devrait être validé");
             }
         }
     }
-})->skip('validation');
+})->skip('Dernier bug');

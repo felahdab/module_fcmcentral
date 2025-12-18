@@ -63,6 +63,8 @@ class MarinResource extends Resource
         ]);
     }
 
+    
+
 
      
 
@@ -97,7 +99,45 @@ class MarinResource extends Resource
     }
 
 
-   
+   /**
+ * Vérifie si l'utilisateur connecté est le mentor du marin donné
+ */
+public static function isMentorOfMarin(Marin $marin): bool
+{
+    try {
+        $currentMarin = Marin::fromCurrentUser();
+       
+        if (!$currentMarin) {
+            \Log::warning('isMentorOfMarin: utilisateur sans compte marin', [
+                'user_id' => auth()->id(),
+            ]);
+            return false;
+        }
+
+        // Vérifier si le currentMarin est mentor du marin passé en paramètre
+        $isMentor = FcmMarin::where('mentor_id', $currentMarin->id)
+            ->where('rh_marin_id', $marin->id)
+            ->exists();
+       
+        \Log::info('Vérification mentor', [
+            'current_marin_id' => $currentMarin->id,
+            'target_marin_id' => $marin->id,
+            'is_mentor' => $isMentor,
+        ]);
+       
+        return $isMentor;
+       
+    } catch (\Exception $e) {
+        \Log::error('Erreur lors de la vérification du mentor', [
+            'message' => $e->getMessage(),
+            'marin_id' => $marin->id ?? null,
+            'user_id' => auth()->id(),
+        ]);
+        return false;
+    }
+}
+
+
 
 
     /**
