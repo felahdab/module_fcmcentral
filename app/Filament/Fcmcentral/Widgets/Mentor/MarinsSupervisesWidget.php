@@ -58,20 +58,12 @@ class MarinsSupervisesWidget extends BaseWidget
                     ->badge()
                     ->color('info'),
 
-                Tables\Columns\TextColumn::make('progression')
-                    ->label('Progression')
-                    ->state(function (Marin $record): string {
-                        $progression = $this->calculateProgression($record);
-                        return $progression['completed'] . '/' . $progression['total'] . ' (' . $progression['progress'] . '%)';
-                    })
-                    ->badge()
-                    ->color(function (Marin $record): string {
-                        $progression = $this->calculateProgression($record);
-                        $progress = $progression['progress'];
-                        if ($progress >= 80) return 'success';
-                        if ($progress >= 50) return 'warning';
-                        return 'danger';
-                    }),
+                    Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
+                    ->label('Taux')
+                    ->sortable()
+                    ->suffix('%')
+                    ->formatStateUsing(fn ($state) => intval(round($state)))
+                    ->placeholder('0'),
 
                 Tables\Columns\TextColumn::make('activites_en_attente')
                     ->label('En attente')
@@ -98,20 +90,20 @@ class MarinsSupervisesWidget extends BaseWidget
                             ? \Modules\FcmCentral\Filament\Fcmcentral\Pages\LivretMentorConsultation::getUrl(['marinId' => $record->id])
                             : '#'
                     )
-                    ->openUrlInNewTab()
+                    //->openUrlInNewTab()
                     ->visible(fn (Marin $record) => $this->hasParcours($record)),
 
-                Tables\Actions\Action::make('valider_activites')
-                    ->label('Valider')
-                    ->icon('heroicon-m-check-circle')
-                    ->color('success')
-                    ->visible(fn (Marin $record): bool =>
-                        $this->calculateEnAttente($record) > 0 && $this->hasParcours($record)
-                    )
-                    ->url(fn (Marin $record): string =>
-                        \Modules\FcmCentral\Filament\Fcmcentral\Pages\LivretMentorConsultation::getUrl(['marinId' => $record->id])
-                    )
-                    ->openUrlInNewTab(),
+                // Tables\Actions\Action::make('valider_activites')
+                //     ->label('Valider')
+                //     ->icon('heroicon-m-check-circle')
+                //     ->color('success')
+                //     ->visible(fn (Marin $record): bool =>
+                //         $this->calculateEnAttente($record) > 0 && $this->hasParcours($record)
+                //     )
+                //     ->url(fn (Marin $record): string =>
+                //         \Modules\FcmCentral\Filament\Fcmcentral\Pages\LivretMentorConsultation::getUrl(['marinId' => $record->id])
+                //     )
+                //     ->openUrlInNewTab(),
             ])
             ->defaultSort('nom')
             ->striped()

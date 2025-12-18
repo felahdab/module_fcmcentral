@@ -265,23 +265,25 @@ class FicheBilan extends ViewRecord
 
     
 
-    #[Computed]
+#[Computed]
 public function statistiques()
 {
     $savoirFaires = $this->savoirFaires;
-    //dd( $savoirFaires);
-   
+    
     $savoirFairesValides = $savoirFaires->where('etat_valid', true)->count();
     $totalSavoirFaires = $savoirFaires->count();
-   
-    // ✅ CALCUL PAR TYPE (S/C/EAD)
+    
+    // ✅ CALCUL PAR TYPE (S/C/EAD) - SAVOIR-FAIRE
     $stages = $this->getStatsByType('S');
     $compagnonnage = $this->getStatsByType('C');
     $ead = $this->getStatsByType('EAD');
 
+    // ✅ CALCUL PAR TYPE (S/C/EAD) - COMPÉTENCES
+    $competencesStats = $this->getCompetencesStatsByType();
+
     $totalEtatValidParcours = new CalculHeuresParcoursService();
-    $pourcentageGlobal = $this->parcours ?  $totalEtatValidParcours->calculerPourcentageEtatValid($this->parcours) : 0 ; 
-   
+    $pourcentageGlobal = $this->parcours ? $totalEtatValidParcours->calculerPourcentageEtatValid($this->parcours) : 0;
+    
     return [
         'total_savoirfaires' => $totalSavoirFaires,
         'savoirfaires_valides' => $savoirFairesValides,
@@ -289,88 +291,213 @@ public function statistiques()
         'savoirfaires_complets' => $savoirFaires->where('pourcentage', 100)->count(),
         'savoirfaires_en_cours' => $savoirFaires->where('pourcentage', '>', 0)->where('pourcentage', '<', 100)->count(),
         'savoirfaires_non_commences' => $savoirFaires->where('pourcentage', 0)->count(),
-       
+        
         'total_objectifs' => $savoirFaires->sum('total_objectifs'),
         'objectifs_valides' => $savoirFaires->sum('objectifs_valides'),
-       
-        // ✅ STATS PAR TYPE
+        
+        // ✅ STATS PAR TYPE - SAVOIR-FAIRE
         'total_stages' => $stages['total'],
         'stages_valides' => $stages['valides'],
+        'stages_en_cours' => $stages['en_cours'],
+        'stages_non_valides' => $stages['non_valides'],
+        
         'total_compagnonnage' => $compagnonnage['total'],
         'compagnonnage_valides' => $compagnonnage['valides'],
+        'compagnonnage_en_cours' => $compagnonnage['en_cours'],
+        'compagnonnage_non_valides' => $compagnonnage['non_valides'],
+        
         'total_ead' => $ead['total'],
         'ead_valides' => $ead['valides'],
+        'ead_en_cours' => $ead['en_cours'],
+        'ead_non_valides' => $ead['non_valides'],
+
+        // ✅ STATS PAR TYPE - COMPÉTENCES
+        'competences_stages_total' => $competencesStats['S']['total'],
+        'competences_stages_valides' => $competencesStats['S']['valides'],
+        'competences_stages_en_cours' => $competencesStats['S']['en_cours'],
+        'competences_stages_non_valides' => $competencesStats['S']['non_valides'],
+        
+        'competences_compagnonnage_total' => $competencesStats['C']['total'],
+        'competences_compagnonnage_valides' => $competencesStats['C']['valides'],
+        'competences_compagnonnage_en_cours' => $competencesStats['C']['en_cours'],
+        'competences_compagnonnage_non_valides' => $competencesStats['C']['non_valides'],
+        
+        'competences_ead_total' => $competencesStats['EAD']['total'],
+        'competences_ead_valides' => $competencesStats['EAD']['valides'],
+        'competences_ead_en_cours' => $competencesStats['EAD']['en_cours'],
+        'competences_ead_non_valides' => $competencesStats['EAD']['non_valides'],
     ];
 }
 
+/**
+ * Calcul des stats par type de savoir-faire (S/C/EAD)
+ * Total = nombre de savoir-faire de ce type
+ */
 private function getStatsByType(string $typeCode): array
 {
     if (!$this->parcours) {
-        return ['total' => 0, 'valides' => 0];
+        return ['total' => 0, 'valides' => 0, 'en_cours' => 0, 'non_valides' => 0];
     }
 
     $total = 0;
     $valides = 0;
+    $enCours = 0;
+    $nonValides = 0;
 
     foreach ($this->parcours['affectations'] ?? [] as $affectation) {
         foreach ($affectation['competences'] ?? [] as $competence) {
             foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
                 if (($csf['savoirfaire_type']['code'] ?? null) === $typeCode) {
-                    $total++;
-                    if ($csf['etat_valid'] ?? false) {
+                    $total++; // ✅ Total = nombre de savoir-faire
+                    
+                    $etatValid = $csf['etat_valid'] ?? false;
+                    $totalObjectifs = count($csf['objectifs'] ?? []);
+                    $objectifsValides = collect($csf['objectifs'] ?? [])
+                        ->where('etat_valid', true)
+                        ->count();
+
+                    if ($etatValid) {
                         $valides++;
+                    } elseif ($objectifsValides > 0 && $objectifsValides < $totalObjectifs) {
+                        $enCours++;
+                    } else {
+                        $nonValides++;
                     }
                 }
             }
         }
     }
 
-    return ['total' => $total, 'valides' => $valides];
+    return [
+        'total' => $total,
+        'valides' => $valides,
+        'en_cours' => $enCours,
+        'non_valides' => $nonValides
+    ];
+}
+
+/**
+ * Calcul des stats par compétence, pour chaque type (S/C/EAD)
+ * Total = nombre de compétences contenant au moins 1 savoir-faire de ce type
+ */
+private function getCompetencesStatsByType(): array
+{
+    if (!$this->parcours) {
+        return [
+            'S' => ['total' => 0, 'valides' => 0, 'en_cours' => 0, 'non_valides' => 0],
+            'C' => ['total' => 0, 'valides' => 0, 'en_cours' => 0, 'non_valides' => 0],
+            'EAD' => ['total' => 0, 'valides' => 0, 'en_cours' => 0, 'non_valides' => 0],
+        ];
+    }
+
+    $stats = [
+        'S' => ['total' => 0, 'valides' => 0, 'en_cours' => 0, 'non_valides' => 0],
+        'C' => ['total' => 0, 'valides' => 0, 'en_cours' => 0, 'non_valides' => 0],
+        'EAD' => ['total' => 0, 'valides' => 0, 'en_cours' => 0, 'non_valides' => 0],
+    ];
+
+    foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+        foreach ($affectation['competences'] ?? [] as $competence) {
+            $competenceStats = [
+                'S' => ['total' => 0, 'valides' => 0],
+                'C' => ['total' => 0, 'valides' => 0],
+                'EAD' => ['total' => 0, 'valides' => 0],
+            ];
+
+            // Compter les savoir-faire par type dans cette compétence
+            foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                $typeCode = $csf['savoirfaire_type']['code'] ?? null;
+                
+                if (!isset($competenceStats[$typeCode])) {
+                    continue;
+                }
+
+                $competenceStats[$typeCode]['total']++;
+                if ($csf['etat_valid'] ?? false) {
+                    $competenceStats[$typeCode]['valides']++;
+                }
+            }
+
+            // Déterminer le statut de la compétence pour chaque type
+            foreach (['S', 'C', 'EAD'] as $type) {
+                if ($competenceStats[$type]['total'] > 0) {
+                    $stats[$type]['total']++; // ✅ Total = nombre de compétences ayant ce type
+                    
+                    if ($competenceStats[$type]['valides'] === $competenceStats[$type]['total']) {
+                        $stats[$type]['valides']++;
+                    } elseif ($competenceStats[$type]['valides'] > 0) {
+                        $stats[$type]['en_cours']++;
+                    } else {
+                        $stats[$type]['non_valides']++;
+                    }
+                }
+            }
+        }
+    }
+
+    return $stats;
 }
 
 public function hasMultipleNonZeroStats(): bool
 {
     $nonZeroCount = 0;
-   
+    
     if ($this->statistiques['savoirfaires_valides'] > 0) $nonZeroCount++;
     if ($this->statistiques['savoirfaires_en_cours'] > 0) $nonZeroCount++;
     if ($this->statistiques['savoirfaires_non_commences'] > 0) $nonZeroCount++;
-   
+    
     return $nonZeroCount >= 2;
 }
 
+#[Computed]
+public function activitesEnAttente()
+{
+    if (!$this->parcours) {
+        return collect([]);
+    }
 
-    #[Computed]
-    public function activitesEnAttente()
-    {
-        if (!$this->parcours) {
-            return collect([]);
-        }
+    $activitesEnAttente = [];
 
-        $objectifsEnAttente = [];
+    foreach ($this->parcours['affectations'] ?? [] as $affectation) {
+        foreach ($affectation['competences'] ?? [] as $competence) {
+            foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                // ✅ Vérifier aussi les savoir-faire proposés
+                $csfEstPropose = !empty($csf['date_proposition']);
+                $csfEstValide = ($csf['etat_valid'] ?? false) === true;
+                
+                if ($csfEstPropose && !$csfEstValide) {
+                    $activitesEnAttente[] = [
+                        'type' => 'savoirfaire',
+                        'element' => $csf,
+                        'savoirfaire' => $csf['savoirfaire']['libelle_court'] ?? '',
+                        'competence' => $competence['libelle_court'] ?? '',
+                        'affectation' => $affectation['libelle_court'] ?? ''
+                    ];
+                }
 
-        foreach ($this->parcours['affectations'] ?? [] as $affectation) {
-            foreach ($affectation['competences'] ?? [] as $competence) {
-                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
-                    foreach ($csf['objectifs'] ?? [] as $objectif) {
-                        $estPropose = !empty($objectif['date_proposition']);
-                        $estValide = ($objectif['etat_valid'] ?? false) === true;
-                        
-                        if ($estPropose && !$estValide) {
-                            $objectifsEnAttente[] = [
-                                'objectif' => $objectif,
-                                'savoirfaire' => $csf['savoirfaire']['libelle_court'] ?? '',
-                                'competence' => $competence['libelle_court'] ?? '',
-                                'affectation' => $affectation['libelle_court'] ?? ''
-                            ];
-                        }
+                // ✅ Vérifier les objectifs proposés
+                foreach ($csf['objectifs'] ?? [] as $objectif) {
+                    $objEstPropose = !empty($objectif['date_proposition']);
+                    $objEstValide = ($objectif['etat_valid'] ?? false) === true;
+                    
+                    if ($objEstPropose && !$objEstValide) {
+                        $activitesEnAttente[] = [
+                            'type' => 'objectif',
+                            'element' => $objectif,
+                            'savoirfaire' => $csf['savoirfaire']['libelle_court'] ?? '',
+                            'competence' => $competence['libelle_court'] ?? '',
+                            'affectation' => $affectation['libelle_court'] ?? ''
+                        ];
                     }
                 }
             }
         }
-
-        return collect($objectifsEnAttente);
     }
+
+    return collect($activitesEnAttente);
+}
+
+
 
     // ============================================
     // 🎬 ACTION PUBLIQUE POUR LE BOUTON
