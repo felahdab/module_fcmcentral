@@ -6,6 +6,7 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
 use Modules\FcmCentral\Models\Etat;
@@ -43,25 +44,66 @@ class FicheBilan extends ViewRecord
     // ============================================
 
     private function canAccessMarin(): bool
-    {
+{
+    try {
         // Admin a tous les droits
         if (MarinResource::canAccessAnyPermission(['admin'])) {
             return true;
         }
-        
-        // Mentor du marin
-        if (MarinResource::canAccessAnyPermission(['permission.mentor'])) {
-            $marin = $this->marin;
-            return $marin ? MarinResource::isMentorOfMarin($marin) : false;
-        }
-        
-        // BCF / FPS / Bord peuvent voir les fiches
-        if (MarinResource::canAccessAnyPermission(['permission.bcf', 'permission.fps', 'permission.bord'])) {
+       
+        // BCF / FPS peuvent voir toutes les fiches
+        if (MarinResource::canAccessAnyPermission(['permission.bcf', 'permission.fps'])) {
             return true;
         }
-        
+       
+        // Bord peut voir les fiches
+        if (MarinResource::canAccessAnyPermission(['permission.bord'])) {
+            return true;
+        }
+       
+        // Mentor du marin
+        if (MarinResource::canAccessAnyPermission(['permission.mentor'])) {
+            $currentMarin = Marin::fromCurrentUser();
+           
+            if (!$currentMarin) {
+                \Log::warning('Mentor sans compte marin', [
+                    'user_id' => auth()->id(),
+                ]);
+                return false;
+            }
+           
+            // Vérifier si c'est le mentor de CE marin
+            $isMentor = FcmMarin::where('mentor_id', $currentMarin->id)
+                ->where('rh_marin_id', $this->marinId)
+                ->exists();
+           
+            if (!$isMentor) {
+                \Log::warning('Mentor tentant d\'accéder à un marin qui n\'est pas le sien', [
+                    'mentor_id' => $currentMarin->id,
+                    'marin_id' => $this->marinId,
+                ]);
+            }
+           
+            return $isMentor;
+        }
+       
+        \Log::warning('Accès refusé - Aucune permission valide', [
+            'user_id' => auth()->id(),
+            'marin_id' => $this->marinId,
+        ]);
+       
+        return false;
+       
+    } catch (\Exception $e) {
+        \Log::error('Erreur lors de la vérification d\'accès', [
+            'message' => $e->getMessage(),
+            'marin_id' => $this->marinId,
+            'user_id' => auth()->id(),
+        ]);
         return false;
     }
+}
+
 
     public function canCreateNote(): bool
     {

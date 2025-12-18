@@ -1,16 +1,18 @@
 <?php
+
 namespace Modules\FcmCentral\Listeners\Save\MarinParcours;
 
 use Filament\Notifications\Notification;
 use App\Models\User;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
 use Illuminate\Support\Facades\Log;
 
 class AnnulProposElementMarinParcoursListener
 {
-    public $comment;
+    public string $comment = '';
 
     /**
      * Gère l'événement d'annulation de proposition.
@@ -18,7 +20,7 @@ class AnnulProposElementMarinParcoursListener
      */
     public function handle(UserGeneratedEvent $event): void
     {
-        if (!$event->isOfType(\Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes::ANNUL_PROPOS_ELMT_MARIN_PARCOURS)) {
+        if (!$event->isOfType(UserGeneratedEventTypes::ANNUL_PROPOS_ELMT_MARIN_PARCOURS)) {
             return;
         }
 
@@ -28,33 +30,47 @@ class AnnulProposElementMarinParcoursListener
             return;
         }
 
-        $data = $event->detail;
+        $data = $event->detail ?? [];
         $this->comment = $this->sanitizeComment($data['commentaire'] ?? '');
 
-        $valideur = User::where('uuid', $event->user_uuid)->first();
-        $valideurName = $valideur ?
-            ($valideur->display_name ?? $valideur->nom . ' ' . $valideur->prenom) :
-            'ANNULEUR INCONNU';
+        $annuleur = User::where('uuid', $event->user_uuid)->first();
+        $annuleurName = $annuleur
+            ? ($annuleur->display_name ?? trim($annuleur->nom . ' ' . $annuleur->prenom))
+            : 'ANNULEUR INCONNU';
 
-        $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours;
+        $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours ?? null;
         if (!$donnees_du_parcours) {
             Log::error('Données du parcours non trouvées pour le marin: ' . $marin->uuid);
             return;
         }
 
-        $parcoursMarin = $donnees_du_parcours->parcoursmarin;
-        if (!$parcoursMarin) {
-            Log::error('Parcours marin non trouvé ou vide pour le marin: ' . $marin->uuid);
+        $parcoursMarin = $donnees_du_parcours->parcoursmarin ?? null;
+        if (!is_array($parcoursMarin)) {
+            Log::error('Parcours marin non trouvé ou invalide: ' . $marin->uuid);
             return;
         }
 
-        $this->effacerProposition($parcoursMarin, $data['type_element'], $data['uuid_element']);
+        $type = $data['type_element'] ?? null;
+        $uuid = $data['uuid_element'] ?? null;
 
-        // Sauvegarder les données (pas de recalcul, pas de taux modifié)
+        if (!$type || !$uuid) {
+            Log::error('Payload invalide pour annulation de proposition: ' . json_encode($data));
+            return;
+        }
+
+        Log::info("=== ANNULATION PROPOSITION === type={$type} uuid={$uuid} marin={$marin->uuid}");
+
+        $updated = $this->effacerProposition($parcoursMarin, $type, $uuid);
+
+        if (!$updated) {
+            Log::error("❌ ÉLÉMENT NON TROUVÉ POUR ANNULATION PROPOSITION: {$type} / {$uuid}");
+        }
+
+        // Sauvegarder (pas de recalcul de taux ni d'état)
         $donnees_du_parcours->parcoursmarin = $parcoursMarin;
         $donnees_du_parcours->save();
 
-        // Notification de succès
+        // Notification
         $notification = UserGeneratedEventNotifications::getMess(
             UserGeneratedEventNotifications::ANNUL_PROPOS_ELMT_MARIN_PARCOURS,
             $marin->nom
@@ -68,66 +84,171 @@ class AnnulProposElementMarinParcoursListener
     }
 
     /**
-     * Efface la proposition sur l'élément ciblé (ne touche pas à la validation).
+     * Efface la proposition sur l'élément ciblé selon le type
      */
-    protected function effacerProposition(&$parcoursMarin, $type_element, $uuid_element)
+    protected function effacerProposition(array &$parcoursMarin, string $type, string $uuid): bool
     {
-        Log::info("=== ANNULATION DE PROPOSITION (effacement) ===");
-        $found = false;
+        switch ($type) {
+            case 'affectation':
+                return $this->clearPropositionAffectation($parcoursMarin, $uuid);
+            
+            case 'competence':
+                return $this->clearPropositionCompetence($parcoursMarin, $uuid);
+            
+            case 'savoirfaire':
+                return $this->clearPropositionSavoirFaire($parcoursMarin, $uuid);
+            
+            case 'objectif':
+                return $this->clearPropositionObjectif($parcoursMarin, $uuid);
+            
+            default:
+                Log::warning("Type inconnu pour annulation proposition: {$type}");
+                return false;
+        }
+    }
 
-        foreach ($parcoursMarin['annees'] as &$annee) {
-            // Année
-            if ($type_element === 'annee' && $annee['uuid'] == $uuid_element) {
-                $this->clearProposition($annee);
-                Log::info("✅ Proposition d'année effacée: {$annee['uuid']}");
-                $found = true;
-                return;
+    protected function clearPropositionAffectation(array &$parcoursMarin, string $uuid): bool
+    {
+        if (empty($parcoursMarin['affectations']) || !is_array($parcoursMarin['affectations'])) {
+            return false;
+        }
+
+        foreach ($parcoursMarin['affectations'] as &$affectation) {
+            if (($affectation['uuid'] ?? null) === $uuid) {
+                $this->clearProposition($affectation);
+                Log::info("✅ Proposition d'affectation effacée: {$uuid}");
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function clearPropositionCompetence(array &$parcoursMarin, string $uuid): bool
+    {
+        if (empty($parcoursMarin['affectations']) || !is_array($parcoursMarin['affectations'])) {
+            return false;
+        }
+
+        foreach ($parcoursMarin['affectations'] as &$affectation) {
+            if (empty($affectation['competences']) || !is_array($affectation['competences'])) {
+                continue;
             }
 
-            // Savoir-faire
-            if (isset($annee['savoirfaires'])) {
-                foreach ($annee['savoirfaires'] as &$savoirFaire) {
-                    if ($type_element === 'savoirfaire') {
-                        $pivotUuid = $savoirFaire['uuid'] . '_' . ($savoirFaire['pivot']['uuid'] ?? $savoirFaire['pivot']['id'] ?? '');
-                        if ($savoirFaire['uuid'] == $uuid_element || $pivotUuid == $uuid_element) {
-                            $this->clearProposition($savoirFaire);
-                            Log::info("✅ Proposition de savoir-faire effacée: {$savoirFaire['uuid']}");
-                            $found = true;
-                            return;
-                        }
+            foreach ($affectation['competences'] as &$competence) {
+                if (($competence['uuid'] ?? null) === $uuid) {
+                    $this->clearProposition($competence);
+                    Log::info("✅ Proposition de compétence effacée: {$uuid}");
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected function clearPropositionSavoirFaire(array &$parcoursMarin, string $uuid): bool
+    {
+        if (empty($parcoursMarin['affectations']) || !is_array($parcoursMarin['affectations'])) {
+            return false;
+        }
+
+        foreach ($parcoursMarin['affectations'] as &$affectation) {
+            if (empty($affectation['competences']) || !is_array($affectation['competences'])) {
+                continue;
+            }
+
+            foreach ($affectation['competences'] as &$competence) {
+                if (empty($competence['competenceSavoirfaires']) || !is_array($competence['competenceSavoirfaires'])) {
+                    continue;
+                }
+
+                foreach ($competence['competenceSavoirfaires'] as &$csf) {
+                    $pivotUuid = $this->buildCsfPivotUuid($csf);
+                    
+                    if (($csf['uuid'] ?? null) === $uuid || $pivotUuid === $uuid) {
+                        $this->clearProposition($csf);
+                        Log::info("✅ Proposition de savoir-faire effacée: {$uuid}");
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected function clearPropositionObjectif(array &$parcoursMarin, string $uuid): bool
+    {
+        if (empty($parcoursMarin['affectations']) || !is_array($parcoursMarin['affectations'])) {
+            return false;
+        }
+
+        foreach ($parcoursMarin['affectations'] as &$affectation) {
+            if (empty($affectation['competences']) || !is_array($affectation['competences'])) {
+                continue;
+            }
+
+            foreach ($affectation['competences'] as &$competence) {
+                if (empty($competence['competenceSavoirfaires']) || !is_array($competence['competenceSavoirfaires'])) {
+                    continue;
+                }
+
+                foreach ($competence['competenceSavoirfaires'] as &$csf) {
+                    if (empty($csf['objectifs']) || !is_array($csf['objectifs'])) {
+                        continue;
                     }
 
-                    // Objectif
-                    if (isset($savoirFaire['objectifs']) && is_array($savoirFaire['objectifs'])) {
-                        foreach ($savoirFaire['objectifs'] as &$objectif) {
-                            $objUuidComposite = "obj_{$savoirFaire['pivot']['id']}_{$objectif['id']}";
-                            $objUuidSimple = $objectif['uuid'] ?? '';
-                            if ($type_element === 'objectif' && ($objUuidSimple == $uuid_element || $objUuidComposite == $uuid_element)) {
-                                $this->clearProposition($objectif);
-                                Log::info("✅ Proposition d'objectif effacée: {$objUuidSimple} / {$objUuidComposite}");
-                                $found = true;
-                                return;
-                            }
+                    foreach ($csf['objectifs'] as &$objectif) {
+                        $objUuid = $objectif['uuid'] ?? ("obj_{$csf['id']}_{$objectif['id']}" ?? null);
+                        
+                        if ($objUuid === $uuid || ($objectif['uuid'] ?? null) === $uuid) {
+                            $this->clearProposition($objectif);
+                            Log::info("✅ Proposition d'objectif effacée: {$uuid}");
+                            return true;
                         }
                     }
                 }
             }
         }
 
-        if (!$found) {
-            Log::error("❌ ÉLÉMENT NON TROUVÉ POUR ANNULATION DE PROPOSITION: {$type_element} / {$uuid_element}");
+        return false;
+    }
+
+    protected function buildCsfPivotUuid(array $csf): ?string
+    {
+        $pivot = $csf['pivot'] ?? null;
+        
+        if ($pivot) {
+            $pivotPart = $pivot['uuid'] ?? ($pivot['id'] ?? null);
+            if ($pivotPart && !empty($csf['uuid'])) {
+                return $csf['uuid'] . '_' . $pivotPart;
+            }
+            return $csf['uuid'] ?? null;
         }
+
+        // Legacy: csf avec savoirfaire['uuid'] + id
+        if (!empty($csf['savoirfaire']['uuid']) && isset($csf['id'])) {
+            return $csf['savoirfaire']['uuid'] . '_' . $csf['id'];
+        }
+
+        return $csf['uuid'] ?? null;
     }
 
     /**
      * Efface uniquement la proposition (ne touche pas à la validation).
      */
-    protected function clearProposition(&$element)
+    protected function clearProposition(array &$element): void
     {
         $element['date_proposition'] = null;
-        $element['commentaire'] = "";
-        // On ne touche pas à etat_valid, ni à date_validation, ni au taux
-        Log::info("Proposition effacée avec succès");
+        $element['commentaire'] = $this->comment;
+        // ✅ On ne touche PAS à :
+        // - etat_valid
+        // - date_validation
+        // - valideur
+        // - taux
+
+        Log::debug('Proposition effacée avec succès');
     }
 
     /**
@@ -138,10 +259,12 @@ class AnnulProposElementMarinParcoursListener
         if (empty($comment)) {
             return '';
         }
+
         $comment = strip_tags($comment);
         $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
         $comment = preg_replace('/\s+/', ' ', $comment);
-        $comment = addslashes(trim($comment));
+        $comment = trim($comment);
+
         return $comment;
     }
 }
