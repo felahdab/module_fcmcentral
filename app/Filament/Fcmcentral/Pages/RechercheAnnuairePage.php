@@ -2,7 +2,7 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
 
-use Illuminate\support\Arr;
+use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Blade;
 

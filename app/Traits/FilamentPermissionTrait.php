@@ -3,8 +3,6 @@ namespace Modules\FcmCentral\Traits;
 
 trait FilamentPermissionTrait
 {
-    //protected static array $permissions = [];
-
     protected static function hasAnyPermission(): bool
     {
         $user = auth()->user();

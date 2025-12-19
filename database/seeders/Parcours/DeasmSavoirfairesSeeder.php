@@ -50,7 +50,6 @@ class DeasmSavoirfairesSeeder extends Seeder
             'C3-SF3' => 'deasm1b1-1234-5678-savf-11aa11zc3sf3',
             'C3-SF4' => 'deasm1b1-1234-5678-savf-11aa11zc3sf4',
             'C3-SF5' => 'deasm1b1-1234-5678-savf-11aa11zc3sf5',
-            'C3-SF5' => 'deasm1b1-1234-5678-savf-11aa11zc3sf5',
             'C4-SF1' => 'deasm1b1-1234-5678-savf-11aa11zc4sf1',
             'C4-SF2' => 'deasm1b1-1234-5678-savf-11aa11zc4sf2',
             'C4-SF3' => 'deasm1b1-1234-5678-savf-11aa11zc4sf3',

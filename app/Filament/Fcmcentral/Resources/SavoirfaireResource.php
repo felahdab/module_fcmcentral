@@ -3,7 +3,6 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\RelationManagers;
 use Modules\FcmCentral\Models\Savoirfaire;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -20,7 +19,6 @@ use Modules\FcmCentral\Models\Competence;
 use Filament\Tables\Filters\SelectFilter;
 
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\ActivitesRelationManager;
 use Modules\FcmCentral\Helpers\OutilsHelper;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
@@ -183,7 +181,7 @@ class SavoirfaireResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //ActivitesRelationManager::class
+            
         ];
     }
 
