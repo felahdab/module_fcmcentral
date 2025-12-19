@@ -22,6 +22,7 @@ use App\Filament\PanelRegistry\ModuleDefinedPreferedPagesRegistry;
 
 use Modules\FcmCentral\Models;
 use Modules\FcmCentral\Policies;
+use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
@@ -87,17 +88,25 @@ class FcmCentralServiceProvider extends ServiceProvider
             $this->registerPolicies();
         });
 
-       // $this->registerDirectMenuItems();
+        $this->registerDirectMenuItems();
         $this->registerPreferedPagesItems();
     }
 
     public function registerDirectMenuItems()
     {
-       
         app(ModuleDefinedMenusRegistry::class)->registerDirectMenuItems([
             DirectMenuItem::make()
                 ->name('FCM central')
-               
+                ->children([
+                    DirectMenuItem::make()
+                        ->name('Gestion des marins')
+                        ->url(fn() => ListMarins::getUrl(panel: "FCM Central"))
+                        ->visible(fn() => ListMarins::canAccess()),
+                    DirectMenuItem::make()
+                        ->name("Mon livret de FCM")
+                        ->url(fn() => MonLivretDeFcm::getUrl(panel: "FCM Central"))
+                        ->visible(fn() => MonLivretDeFcm::canAccess())
+                ])
         ]);
    
     }
@@ -112,21 +121,13 @@ class FcmCentralServiceProvider extends ServiceProvider
         app(ModuleDefinedPreferedPagesRegistry::class)->registerPreferedPagesItems(
             [
             PreferedPageItem::make()
-                ->name('FCM central: liste des marins')
-                ->visible(fn() => auth()->check() && auth()->user()->can('fcmcentral::marin.index'))
+                ->name('FCM central: Gestion des marins')
+                ->visible(fn() => auth()->check() && ListMarins::canAccess())
                 ->routeName(fn() => ListMarins::getRouteName(panel: 'FCM Central')),
             PreferedPageItem::make()
-                ->name('FCM central: liste des parcours')
-                ->visible(fn() => auth()->check()  && auth()->user()->can('fcmcentral::parcours.index'))
-                ->routeName(fn() => ListParcours::getRouteName(panel: 'FCM Central')),
-            PreferedPageItem::make()
-                ->name('FCM central: recherche dans l\' annuaire')
-                ->visible(fn() => auth()->check() && RechercheAnnuairePage::canAccess())
-                ->routeName(fn() => RechercheAnnuairePage::getRouteName(panel: 'FCM Central')),
-            // PreferedPageItem::make()
-            //     ->name('FCM central: Mon livret de FCM')
-            //     ->visible(fn() => auth()->check() && MonLivretDeFcm::canAccess())
-            //     ->routeName(fn() => MonLivretDeFcm::getRouteName(panel: 'FCM Central'))
+                ->name('FCM central: Mon livret de FCM')
+                ->visible(fn() => auth()->check() && MonLivretDeFcm::canAccess())
+                ->routeName(fn() => MonLivretDeFcm::getRouteName(panel: 'FCM Central'))
             ]
         );
     }
