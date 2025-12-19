@@ -189,7 +189,7 @@ class ParcoursResource extends Resource
     {
         $previous = ParcoursSerialise::where('uuid', $parcours->uuid)
             ->orderBy('version')
-            ->get()
+            //->get()
             ->last();
 
         if ($previous) {

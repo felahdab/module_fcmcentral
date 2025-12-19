@@ -47,7 +47,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeNoteResource;
@@ -283,7 +283,7 @@ class FcmcentralPanelProvider extends PanelProvider
                 NavigationItem::make('Savoir Faire')
                     ->icon('heroicon-o-wrench-screwdriver')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'savoir-faire'))
-                    ->url(fn (): string => SavoirFaireResource::getUrl('index'))
+                    ->url(fn (): string => SavoirfaireResource::getUrl('index'))
                     ->visible(fn (): bool => 
                     $this->canAccessAnyPermission(['savoirfaire.index']))
                     ,

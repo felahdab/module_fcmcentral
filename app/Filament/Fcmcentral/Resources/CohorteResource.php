@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Fcmcentral\Filament\Fcmcentral\Resources;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Filament\Forms\Form;
 use Filament\Resources\Resource;

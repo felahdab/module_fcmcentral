@@ -6,8 +6,6 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Filament\Actions;
-use Modules\FcmCentral\Filament\fcmcentral\Resources\ParcoursResource\RelationManagers\MarinsRelationManager; 
-
 
 class ViewParcoursSerialise extends ViewRecord
 {

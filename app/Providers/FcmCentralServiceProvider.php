@@ -160,8 +160,7 @@ class FcmCentralServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         $this->commands([
-                    TestParcoursArchitecture::class,
-                    TestAttributionParcoursAUser::class,
+
                 ]);
     }
 

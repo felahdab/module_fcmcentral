@@ -3,6 +3,7 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
+use Modules\FcmCentral\Models\Marin;
 use Filament\Resources\Pages\Page;
 
 class MarinDashboard extends Page
