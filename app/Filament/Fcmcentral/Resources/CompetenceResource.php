@@ -128,18 +128,14 @@ class CompetenceResource extends Resource
                 //     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->headerActions([
-                Action::make('downloadCsv')
-        ->label('Télécharger Data CSV')
-        ->url(fn () => route('fcmcentral.competences.export_csv'))
-        ->openUrlInNewTab()
-       ,
+              
 
                 // ExportAction::make()
                 //     ->exporter(CompetenceExporter::class)
                 //     ->label('Exportation data'),
-                    ImportAction::make()
-                    ->importer(CompetenceImporter::class)
-                    ->label('Importation data'),
+                    // ImportAction::make()
+                    // ->importer(CompetenceImporter::class)
+                    // ->label('Importation data'),
                     
             ])
     
