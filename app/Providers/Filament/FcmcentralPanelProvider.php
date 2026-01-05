@@ -35,6 +35,7 @@ use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 
 use App\Filament\Pages\UserPreferences;
 use Filament\Support\Assets\Theme;
+
 use Modules\FcmCentral\Traits\FcmPermissionTrait;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
@@ -59,6 +60,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource;
 
 // Import des Pages
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
+use Modules\FcmCentral\Filament\Fcmcentral\Pages\Configuration;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
 use Modules\FcmCentral\Models\ParcoursType;
 
@@ -158,7 +160,7 @@ class FcmcentralPanelProvider extends PanelProvider
             ]),
 
         // Groupe Administration
-        NavigationGroup::make('Administration')
+        NavigationGroup::make('Gestion')
             // ->icon('heroicon-o-cog-6-tooth')
             // ->collapsible()
             // ->collapsed()
@@ -313,13 +315,13 @@ class FcmcentralPanelProvider extends PanelProvider
         
 
             // Groupe Outils
-        NavigationGroup::make('Gestion')
+        NavigationGroup::make('Administration')
         
         ->items([
             NavigationItem::make('Configuration module')
                 ->icon('heroicon-o-cog-6-tooth')
                 ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.configuration'))
-                ->url(fn (): string => '#') // TODO: Remplacer par votre URL
+                ->url(fn (): string => Configuration::getUrl()) // TODO: Remplacer par votre URL
                 ->visible(fn (): bool => 
                     $this->canAccessAnyPermission(['permission.bcf','admin']))
                     ,
