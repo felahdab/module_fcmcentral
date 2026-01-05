@@ -21,10 +21,6 @@ use Modules\FcmCentral\Http\Controllers\ExportController;
 
 Route::group([], function () {
     //Route::resource('fcmcentral', FcmCentralController::class)->names('fcmcentral');
-    Route::get('/fcmcentral/competences/export-csv', [ExportController::class, 'exportCompetencesCsv'])
-    ->name('fcmcentral.competences.export_csv');
-
-Route::get('/fcmcentral/annees/export-csv', [ExportController::class, 'exportAnneesCsv'])
-    ->name('fcmcentral.annees.export_csv');
+   
 
 });
