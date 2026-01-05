@@ -87,7 +87,7 @@ class MarinsSupervisesWidget extends BaseWidget
                     ->icon('heroicon-m-eye')
                     ->url(fn (Marin $record): string =>
                         $this->hasParcours($record)
-                            ? \Modules\FcmCentral\Filament\Fcmcentral\Pages\LivretMentorConsultation::getUrl(['marinId' => $record->id])
+                            ? \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(['marinId' => $record->id])
                             : '#'
                     )
                     //->openUrlInNewTab()
@@ -101,7 +101,7 @@ class MarinsSupervisesWidget extends BaseWidget
                 //         $this->calculateEnAttente($record) > 0 && $this->hasParcours($record)
                 //     )
                 //     ->url(fn (Marin $record): string =>
-                //         \Modules\FcmCentral\Filament\Fcmcentral\Pages\LivretMentorConsultation::getUrl(['marinId' => $record->id])
+                //         \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(['marinId' => $record->id])
                 //     )
                 //     ->openUrlInNewTab(),
             ])
