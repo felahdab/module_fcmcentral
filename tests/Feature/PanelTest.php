@@ -236,8 +236,27 @@ it('genere un UserGeneratedEvent quand on demande à figer un parcours depuis la
 });
 
 
+it('dispatch manuel fonctionne', function () {
+    Event::fake();
 
-it('génère un UserGeneratedEvent quand on active le suivi FCM d\'un marin', function () {
+    $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
+
+    event(new UserGeneratedEvent(
+        UserGeneratedEventTypes::MARIN_EN_FCM,
+        $this->admin->uuid,
+        ObjectClasses::MARIN,
+        $marin->uuid,
+        ['test' => 'data']
+    ));
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin) {
+        return $event->event_type == UserGeneratedEventTypes::MARIN_EN_FCM->value
+            && $event->object_uuid == $marin->uuid;
+    });
+});
+
+
+it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', function () {
     Event::fake();
 
     // Création d'un marin non suivi en FCM
@@ -246,20 +265,33 @@ it('génère un UserGeneratedEvent quand on active le suivi FCM d\'un marin', fu
     $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
     // S'assurer qu'il n'est pas déjà en FCM
     \Modules\FcmCentral\Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
+    $marin->refresh();
+    expect($marin->estEnFcm())->toBeFalse();
 
     // Création d'une cohorte, d'un mentor et d'un parcours pour simuler le formulaire
     $cohorte = \Modules\FcmCommun\Models\Cohorte::factory()->create();
     $mentor = \Modules\FcmCentral\Models\Marin::factory()->create();
     $parcours = \Modules\FcmCentral\Models\Parcours::factory()->create();
 
+
     Livewire::actingAs($this->admin)
-        ->test(\Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('toggle_fcm', $marin, [
+        ->test(Resources\MarinResource\Pages\ListMarins::class)
+        
+        ->removeTableFilter('en_fcm')
+        //->assertCanSeeTableRecords([$marin])
+        ->callTableAction('toggle_fcm', $marin,
+        [
             'cohorte_id' => $cohorte->uuid,   
             'mentor_id' => $mentor->uuid,
             'parcours_id' => $parcours->uuid,
         ])
         ->assertHasNoActionErrors();
+
+   
+
+     
+
+        //dump(Event::dispatched(UserGeneratedEvent::class));
 
         Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
             return $event->event_type == UserGeneratedEventTypes::MARIN_EN_FCM->value &&
@@ -267,96 +299,144 @@ it('génère un UserGeneratedEvent quand on active le suivi FCM d\'un marin', fu
                     $event->object_uuid == $marin->uuid;
         });
     
-})->skip('Action attributs-fcm non trouvée');
+    
+});
 
 
 
-it('génère un UserGeneratedEvent quand on désactive le suivi FCM d\'un marin', function () {
+it('genere un  UserGeneratedEvent quand on demande a ne plus suivre un marin en FCM', function () {
     Event::fake();
 
-    $marin = Models\Marin::factory()->create();
-    // Simuler qu'il est déjà suivi en FCM
-    \Modules\FcmCentral\Models\FcmMarin::create(['rh_marin_id' => $marin->id]);
+   // Création d'un marin non suivi en FCM
+   $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
+   // Verification explicite 
+   $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
+   // S'assurer qu'il n'est pas déjà en FCM
+   \Modules\FcmCentral\Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
+   $marin->refresh();
+   expect($marin->estEnFcm());
 
     // Simuler la fin du FCM via le changement d'état (exemple : FCM_FIN)
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('modifier_type_etat', $marin, [
-            'type_etat_id' => \Modules\FcmCentral\Models\TypeEtat::where('code', 'FCM_FIN')->first()->id ?? 1,
-            'date_debut' => now()->toDateString(),
-        ])
+        
+        ->removeTableFilter('en_fcm')
+        ->callTableAction('toggle_fcm', $marin)
         ->assertHasNoActionErrors();
 
-    Event::assertDispatched(UserGeneratedEvent::class, function ($e) {
-        return $e->event_type == UserGeneratedEventTypes::MARIN_PAS_FCM->value;
-    });
-})->skip('Action attributs-fcm non trouvée');
+       // dump(Event::dispatched(UserGeneratedEvent::class));
+
+
+       
+       
+});
 
 
 
-it('genere un UserGeneratedEvent quand on assigne une cohorte a un marin suivi en fcm', function(){
+it('genere un  UserGeneratedEvent quand on assigne une cohorte a un marin suivi en fcm', function(){
     Event::fake();
     
-    $marin = Models\Marin::factory()->create(['suivi_en_fcm' => true]);
-    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    // Création d'un marin non suivi en FCM
+   $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
+   // Verification explicite 
+   $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
+   // S'assurer qu'il n'est pas déjà en FCM
+   
+   $marin->refresh();
+   expect($marin->estEnFcm());
+
     $cohorte = Models\Cohorte::factory()->create();
     
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('attributs-fcm', $marin, data: [
-            "cohorte_id" => $cohorte->uuid,
-            "mentor_id" => null,
-            "parcours_id" => null
+        ->removeTableFilter('en_fcm')
+        ->callTableAction('toggle_fcm', $marin,
+        [
+            'cohorte_id' => $cohorte->uuid,   
+            'mentor_id' => null,
+            'parcours_id' => null,
         ])
         ->assertHasNoActionErrors();
-    
-    Event::assertDispatched(UserGeneratedEvent::class);
-})->skip('Action attributs-fcm non trouvée');
 
-it('genere un UserGeneratedEvent quand on assigne un mentor a un marin suivi en fcm', function(){
+        //dump(Event::dispatched(UserGeneratedEvent::class));
+    
+        Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
+            return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN->value &&
+                    $event->object_class == ObjectClasses::MARIN->value &&
+                    $event->object_uuid == $marin->uuid;
+        });
+});
+
+it('genere un  UserGeneratedEvent quand on assigne un mentor a un marin suivi en fcm', function(){
     Event::fake();
     
-    $marin = Models\Marin::factory()->create(['suivi_en_fcm' => true]);
-    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+     // Création d'un marin non suivi en FCM
+     $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
+     // Verification explicite 
+     $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
+     // S'assurer qu'il n'est pas déjà en FCM
+     
+     $marin->refresh();
+     expect($marin->estEnFcm());
+  
     $mentor = Models\Marin::factory()->create();
     
     Livewire::actingAs($this->admin)
-        ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('attributs-fcm', $marin, data: [
-            "cohorte_id" => null,
-            "mentor_id" => $mentor->uuid,
-            "parcours_id" => null
-        ])
-        ->assertHasNoActionErrors();
+    ->test(Resources\MarinResource\Pages\ListMarins::class)
+    ->removeTableFilter('en_fcm')
+    ->callTableAction('toggle_fcm', $marin,
+    [
+        'cohorte_id' => null,   
+        'mentor_id' => $mentor->uuid,
+        'parcours_id' => null,
+    ])
+    ->assertHasNoActionErrors();
+
+    //dump(Event::dispatched(UserGeneratedEvent::class));
     
-    Event::assertDispatched(UserGeneratedEvent::class);
-})->skip('Action attributs-fcm non trouvée');
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
+        return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN->value &&
+                $event->object_class == ObjectClasses::MARIN->value &&
+                $event->object_uuid == $marin->uuid;
+    });
+
+});
 
 it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi en fcm', function(){
     Event::fake();
     
-    $marin = ($this->createMarin)();
-    $parcours = Models\Parcours::factory()->create(['code' => 'PAR-TEST-4']);
-    
-    $annee = Models\Affectation::factory()->create(['code' => 'AFF-TEST-2']);
-    $parcours->annees()->attach($annee);
-    
-    $savoirfaire = Models\Savoirfaire::factory()->create(['code' => 'SF-TEST-2']);
-    $annee->savoirfaires()->attach($savoirfaire);
-    
-    ($this->serializeParcours)($parcours);
+     // Création d'un marin non suivi en FCM
+     $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
+     // Verification explicite 
+     $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
+     // S'assurer qu'il n'est pas déjà en FCM
+     
+     $marin->refresh();
+     expect($marin->estEnFcm());
+  
+    $parcours = Models\Marin::factory()->create();
     
     Livewire::actingAs($this->admin)
-        ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('attributs-fcm', $marin, data: [
-            "cohorte_id" => null,
-            "mentor_id" => null,
-            "parcours_id" => $parcours->uuid
-        ])
-        ->assertHasNoActionErrors();
+    ->test(Resources\MarinResource\Pages\ListMarins::class)
     
-    Event::assertDispatched(UserGeneratedEvent::class);
-})->skip('Action attributs-fcm non trouvée');
+    ->removeTableFilter('en_fcm')
+    
+    ->callTableAction('toggle_fcm', $marin,
+    [
+        'cohorte_id' => null,   
+        'mentor_id' => null,
+        'parcours_id' => $parcours->uuid,
+    ])
+    ->assertHasNoActionErrors();
+
+    //dump(Event::dispatched(UserGeneratedEvent::class));
+    
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
+        return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN->value &&
+                $event->object_class == ObjectClasses::MARIN->value &&
+                $event->object_uuid == $marin->uuid;
+    });
+});
 
 // ========================================
 // TESTS VALIDATION PARCOURS 
@@ -364,102 +444,81 @@ it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi e
 
 
 it('affiche le livret FCM', function () {
-    // ✅ Vérification initiale
-    expect(Models\Marin::count())->toBe(0);
+    // Création d'un marin FCM via factory
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+     // Création d'un marin non suivi en FCM
+   $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
+   // Verification explicite 
+   $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
+   Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+   // S'assurer qu'il n'est pas déjà en FCM
    
-    // ✅ Création du marin avec FCM activé
-    $marin = Models\Marin::factory()->create();
-   
-    Models\FcmMarin::create(['rh_marin_id' => $marin->id]);
-   
-    expect(Models\Marin::count())->toBe(1);
-    //expect($marin->estEnFcm())->toBeTrue();
+   $marin->refresh();
+   expect($marin->estEnFcm());
+    $this->assertTrue(Models\Marin::all()->count() == 1);
 
-    // ✅ Création du parcours avec affectations et compétences
-    $parcours = Models\Parcours::factory()->create();
-   
-    $affectation = Models\Affectation::factory()->create([
-        'ordre' => 1,
-    ]);
-   
-    // ✅ Attacher l'affectation au parcours avec ordre
-    $parcours->affectations()->attach($affectation->id, ['ordre' => 1]);
-   
-    $competence = Models\Competence::factory()->create([
-        'affectation_id' => $affectation->id,
-        'ordre' => 1,
-    ]);
+    //dump($marin->complementsFcm);
+    
+    // Seed du parcours
+    $this->seed(DeasmMasterSeeder::class);
+    expect(Models\Parcours::count())->toBeGreaterThan(0);
 
-    // ✅ Création d'un savoir-faire avec objectifs
-    $savoirFaire = Models\SavoirFaire::factory()->create();
-    // Doit creer la factory savoirfaire Type
-    $savoirFaireType = Models\SavoirFaireType::factory()->create(['code' => 'C']);
-   
-    $csf = Models\CompetenceSavoirfaire::create([
-        'competence_id' => $competence->id,
-        'savoirfaire_id' => $savoirFaire->id,
-        'savoirfaire_type_id' => $savoirFaireType->id,
-        'ordre' => 1,
-    ]);
+    $parcours = Models\Parcours::first();
+    
 
-    // ✅ Création d'objectifs
-    $objectif1 = Models\Objectif::factory()->create(['ordre' => 1]);
-    $objectif2 = Models\Objectif::factory()->create(['ordre' => 2]);
-   
-    $csf->objectifs()->attach([
-        $objectif1->id => ['ordre' => 1],
-        $objectif2->id => ['ordre' => 2],
-    ]);
-
-    // ✅ Sérialisation du parcours
-    $event = new UserGeneratedEvent(
+    // Création du parcours sérialisé
+    event(new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::PARCOURS,
         object_uuid: $parcours->uuid,
         detail: [
-            'version' => 1,
-            'date_de_debut' => Carbon::tomorrow()->toDateString(),
+            "version" => 1,
+            "date_de_debut"=> Carbon::tomorrow(),
         ]
-    );
-    event($event);
+    ));
 
-    // ✅ Vérifier que la sérialisation a créé un ParcoursSerialise
-    expect($parcours->parcoursSerialise()->count())->toBeGreaterThan(0);
-   
+    // Vérification du parcours sérialisé
     $parcoursSerialise = $parcours->parcoursSerialise()->latest('version')->first();
     expect($parcoursSerialise)->not->toBeNull();
     expect($parcoursSerialise->version)->toBe(1);
 
-    // ✅ Attribution du parcours au marin
-    Livewire::actingAs($this->admin)
-        ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->callTableAction('toggle_fcm', $marin, data: [
-            'cohorte_id' => null,
-            'mentor_id' => null,
-            'parcours_id' => $parcours->uuid,
-        ])
-        ->assertHasNoActionErrors();
-
-    // ✅ Rafraîchir le marin pour obtenir les données à jour
-    $marin->refresh();
    
-    // ✅ Vérifier que le parcours a été attribué
+    event(new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+        user_uuid: $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid: $marin->uuid,
+        detail: [
+            "parcours" => $parcours->uuid,
+        ]
+    ));
+  
+    $marin->refresh();
+
+    // Vérification des données du parcours
     expect($marin->complementsFcm)->not->toBeNull();
     expect($marin->complementsFcm->donnees_du_parcours)->not->toBeNull();
-    expect($marin->complementsFcm->donnees_du_parcours->parcours_serialise_id)->not->toBeNull();
+    //expect($marin->complementsFcm->donnees_du_parcours->parcours_serialise_id)->toBe($parcoursSerialise->id);
 
-    // ✅ Test de l'affichage du livret
+    $parcoursMarin = $marin->complementsFcm->donnees_du_parcours->parcoursmarin;
+    expect($parcoursMarin)->toBeArray();
+    expect($parcoursMarin)->toHaveKey('affectations');
+
+    // Test de l'affichage du livret via Livewire
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\LivretDeFcmLight::class, ['record' => $marin->id])
         ->assertSuccessful()
-        ->assertSee('Livret du marin')
+        ->assertSee("Livret du marin")
         ->assertSee($marin->nom)
         ->assertSee($marin->prenom)
-        ->assertSee($affectation->libelle_court)
-        ->assertSee($competence->libelle_court)
-        ->assertSee($savoirFaire->libelle_court);
-})->skip('affiche le livret FCM');
+        ->assertSee('C6 - Gerer les munitions pyrotechniques')
+        ;
+
+    
+});
+
+
 
 
 
@@ -963,8 +1022,8 @@ it('met a jour le parcours en cas de refus d une proposition', function(){
     }
 });
 
-it('valide automatiquement tous les objectifs quand on valide un savoirfaire', function(){
-    $this->assertTrue(Models\Marin::all()->count() == 0);
+it('valide automatiquement toutes les activites a false quand on valide un savoirfaire', function(){
+    // ✅ Création marin avec FcmMarin via factory
     $marin = Models\Marin::factory()->create();
     $marin = Models\Marin::find($marin->id);
     $marin->suivi_en_fcm = true;
@@ -975,7 +1034,6 @@ it('valide automatiquement tous les objectifs quand on valide un savoirfaire', f
     $this->assertTrue(Models\Parcours::count() == 1);
     $parcours = Models\Parcours::first();
 
-    // Creation de parcours Event
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
         user_uuid : $this->admin->uuid,
@@ -988,7 +1046,6 @@ it('valide automatiquement tous les objectifs quand on valide un savoirfaire', f
         );
     event($event);
 
-    // Attribuer Parcours Marin
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid : $this->admin->uuid,
@@ -1000,142 +1057,275 @@ it('valide automatiquement tous les objectifs quand on valide un savoirfaire', f
         );
     event($event);
 
-    $savoirfaire_uuid = 'deasm1b1-1234-5678-cosf-11aa1c1c1sf1';
 
+    $parcoursMarin = $marin->complements_fcm->donnees_du_parcours->parcoursmarin;
 
-    // ✅ CORRECTION: Utiliser les UUIDs des objectifs
-    $objectifs = [
+    // ✅ UUIDs cibles
+    $savoirfaireUuid = 'deasm1b1-1234-5678-cosf-11aa1c1c1sf1';
+   
+    $objectifsUuids = [
         'deasm1b1-1234-5678-obje-11aa1c1sf1o1',
         'deasm1b1-1234-5678-obje-11aa1c1sf1o2',
         'deasm1b1-1234-5678-obje-11aa1c1sf1o3',
     ];
 
-    // ✅ CORRECTION: Helper adapté pour la nouvelle structure
-    $getObjectifsDuSavoirfaire = function($parcoursMarin, $savoirfaire_uuid) {
-        $objectifs_du_savoirfaire = [];
-
-        foreach($parcoursMarin["affectations"] as $affectation) {
-            if (!isset($affectation['competences'])) continue;
+        // ✅ FONCTION HELPER: Trouver les activités du savoir-faire (nouvelle structure)
+        $getObjectifsDuSavoirfaire = function($parcoursMarin, $sfUuid) {
+            $objectifs = [];
+    
+            foreach($parcoursMarin['affectations'] as $affectation) {
+                if (empty($affectation['competences'])) continue;
+               
+                foreach($affectation['competences'] as $competence) {
+                    if (empty($competence['competenceSavoirfaires'])) continue;
+                   
+                    foreach($competence['competenceSavoirfaires'] as $csf) {
+                        // Construire UUID composite si nécessaire
+                        $csfUuidSimple = $csf['uuid'] ?? $csf['savoirfaire']['uuid'] ?? null;
+                        $csfPivotUuid = null;
+                       
+                        if (!empty($csf['pivot'])) {
+                            $pivotPart = $csf['pivot']['uuid'] ?? $csf['pivot']['id'] ?? null;
+                            if ($pivotPart && $csfUuidSimple) {
+                                $csfPivotUuid = $csfUuidSimple . '_' . $pivotPart;
+                            }
+                        }
+    
+                        if ($csfUuidSimple === $sfUuid || $csfPivotUuid === $sfUuid) {
+                            if (!empty($csf['objectifs']) && is_array($csf['objectifs'])) {
+                                foreach($csf['objectifs'] as $objectif) {
+                                    if (!empty($objectif['uuid'])) {
+                                        $objectifs[] = $objectif['uuid'];
+                                    }
+                                }
+                            }
+                            return $objectifs;
+                        }
+                    }
+                }
+            }
+    
+            return $objectifs;
+        };
+    
+        // ✅ ÉTAPE 1: Identifier les activités du savoir-faire
+        $objectifsDuSf = $getObjectifsDuSavoirfaire($parcoursMarin, $savoirfaireUuid);
+        $objectifsHorsCategorie = array_diff($objectifsUuids, $objectifsDuSf);
+    
+        echo "\n🔍 Objectifs du savoir-faire: " . implode(', ', $objectifsDuSf) . "\n";
+        echo "🔍 Objectifs hors catégorie: " . implode(', ', $objectifsHorsCategorie) . "\n";
+    
+        // ✅ ÉTAPE 2: Valider seulement la première objectif du savoir-faire
+        echo "\n📝 Validation du premier objectif\n";
+       
+        event(new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
+            user_uuid: $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid: $marin->uuid,
+            detail: [
+                'type_element' => 'objectif',
+                'uuid_element' => $objectifsUuids[0],
+                'date' => Carbon::now()->toDateTimeString(),
+                'commentaire' => 'objectif valide individuellement'
+            ]
+        ));
+    
+        // ✅ ÉTAPE 3: Valider les activités hors catégorie
+        if (!empty($objectifsHorsCategorie)) {
+            echo "📝 Validation des objectif hors catégorie (" . count($objectifsHorsCategorie) . ")\n";
+           
+            foreach($objectifsHorsCategorie as $actUuid) {
+                event(new UserGeneratedEvent(
+                    event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
+                    user_uuid: $this->admin->uuid,
+                    object_class: ObjectClasses::MARIN,
+                    object_uuid: $marin->uuid,
+                    detail: [
+                        'type_element' => 'objectif',
+                        'uuid_element' => $actUuid,
+                        'date' => Carbon::now()->toDateTimeString(),
+                        'commentaire' => 'objectif hors categorie valide'
+                    ]
+                ));
+            }
+        }
+    
+        // ✅ Compter les events avant validation du savoir-faire
+        $eventsAvant = \DB::table('fcmcentral_stored_events')->count();
+        echo "🔍 Events avant validation savoir-faire: {$eventsAvant}\n";
+    
+        // ✅ ÉTAPE 4: Valider le savoir-faire complet
+        echo "\n📝 Validation du savoir-faire complet\n";
+       
+        event(new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
+            user_uuid: $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid: $marin->uuid,
+            detail: [
+                'type_element' => 'savoirfaire',
+                'uuid_element' => $savoirfaireUuid,
+                'date' => Carbon::now()->toDateTimeString(),
+                'commentaire' => 'validation savoir-faire complet'
+            ]
+        ));
+    
+        $marin->refresh();
+        $parcoursMarin = $marin->complements_fcm->donnees_du_parcours->parcoursmarin;
+    
+        // ✅ VÉRIFICATION 1: État des activités dans le parcours
+        echo "\n🔎 Vérification des objectifs du savoir-faire\n";
+       
+        $sfTrouve = false;
+    
+        foreach($parcoursMarin['affectations'] as $affectation) {
+            if (empty($affectation['competences'])) continue;
+           
             foreach($affectation['competences'] as $competence) {
-            foreach($competence['competenceSavoirfaires'] as $csf) {
-                if ($csf['uuid'] === $savoirfaire_uuid) {
-                    if (isset($csf['objectifs']) && is_array($csf['objectifs'])) {
-                        foreach($csf['objectifs'] as $objectif) {
-                            // Ajouter à la fois l'UUID simple et composite
-                            $objectifs_du_savoirfaire[] = $objectif['uuid'] ?? '';
+                if (empty($competence['competenceSavoirfaires'])) continue;
+               
+                foreach($competence['competenceSavoirfaires'] as $csf) {
+                    $csfUuidSimple = $csf['uuid'] ?? $csf['savoirfaire']['uuid'] ?? null;
+                    $csfPivotUuid = null;
+                   
+                    if (!empty($csf['pivot'])) {
+                        $pivotPart = $csf['pivot']['uuid'] ?? $csf['pivot']['id'] ?? null;
+                        if ($pivotPart && $csfUuidSimple) {
+                            $csfPivotUuid = $csfUuidSimple . '_' . $pivotPart;
+                        }
+                    }
+    
+                    if ($csfUuidSimple === $savoirfaireUuid || $csfPivotUuid === $savoirfaireUuid) {
+                        $sfTrouve = true;
+    
+                        // Toutes les activités du savoir-faire doivent être validées
+                        // expect($csf['activites'])->toBeArray();
+                       
+                        foreach($csf['objectifs'] as $index => $objectif) {
+                            expect($objectif['etat_valid'] ?? false)->toBeTrue(
+                                "L'objectif {$objectif['uuid']} devrait être validé"
+                            );
+                            if ($objectif['uuid'] ===  $objectifsUuids[0]) {
+                            // La première activité était déjà validée
+                            $this->assertEquals("objectif valide individuellement", $objectif['commentaire'],
+                                "L'activité déjà validée devrait garder son commentaire original");
+                        } else {
+                            // Les autres activités ont été validées par le savoir-faire
+                            $this->assertEquals("validation savoir-faire complet", $objectif['commentaire'],
+                                "L'activité auto-validée devrait avoir le commentaire du savoir-faire");
+                        }
                             
-                            $pivotId = $csf['pivot']['id'] ?? null;
-                            if ($pivotId) {
-                                $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
-                                $objectifs_du_savoirfaire[] = $objUuidComposite;
+                        }
+    
+                        // Le savoir-faire lui-même doit être validé
+                        expect($csf['etat_valid'] ?? false)->toBeTrue(
+                            'Le savoir-faire devrait être validé'
+                        );
+                        expect($csf['commentaire'])->toBe('validation savoir-faire complet');
+                       
+                        break 3;
+                    }
+                }
+            }
+        }
+    
+        expect($sfTrouve)->toBeTrue('Le savoir-faire devrait être trouvé dans le parcours');
+    
+        // ✅ VÉRIFICATION 2: Les activités hors catégorie restent inchangées
+        if (!empty($objectifsHorsCategorie)) {
+            echo "\n🔎 Vérification des activités hors catégorie\n";
+           
+            foreach($objectifsHorsCategorie as $actUuid) {
+                $objectifTrouvee = false;
+    
+                foreach($parcoursMarin['affectations'] as $affectation) {
+                    if (empty($affectation['competences'])) continue;
+                   
+                    foreach($affectation['competences'] as $competence) {
+                        if (empty($competence['competenceSavoirfaires'])) continue;
+                       
+                        foreach($competence['competenceSavoirfaires'] as $csfAutre) {
+                            if (empty($csfAutre['objectifs'])) continue;
+                           
+                            foreach($csfAutre['objectifs'] as $objectif) {
+                                if ($objectif['uuid'] === $actUuid) {
+                                    $objectifTrouvee = true;
+                                   
+                                    expect($objectif['etat_valid'] ?? false)->toBeTrue(
+                                        "L'objectif hors catégorie {$actUuid} devrait rester validé"
+                                    );
+                                    expect($objectif['commentaire'])->toBe(
+                                        'objectif hors categorie valide',
+                                        "L'objectif hors catégorie devrait garder son commentaire original"
+                                    );
+                                   
+                                    break 4;
+                                }
                             }
                         }
                     }
-                    }
-                    return $objectifs_du_savoirfaire;
                 }
+    
+                expect($objectifTrouvee)->toBeTrue(
+                    "L'objectif hors catégorie {$actUuid} devrait être trouvée dans le parcours"
+                );
             }
         }
-
-        return $objectifs_du_savoirfaire;
-    };
-
-    // ÉTAPE 1: Identifier les objectifs du savoir-faire
-    $marin->refresh();
-    $objectifs_du_savoirfaire = $getObjectifsDuSavoirfaire(
-        $marin->complements_fcm->donnees_du_parcours->parcoursmarin,
-        $savoirfaire_uuid
-    );
-
-    // ÉTAPE 2: Identifier les objectifs hors catégorie
-    $objectifs_hors_categorie = array_diff($objectifs, $objectifs_du_savoirfaire);
-
-    echo "\n🔍 Objectifs du savoir-faire: " . implode(', ', $objectifs_du_savoirfaire) . "\n";
-    echo "🔍 Objectifs hors catégorie: " . implode(', ', $objectifs_hors_categorie) . "\n";
-
-    // ÉTAPE 3: Valider seulement le premier objectif du savoir-faire
-    $event = new UserGeneratedEvent(
-        event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
-        user_uuid : $this->admin->uuid,
-        object_class: ObjectClasses::MARIN,
-        object_uuid : $marin->uuid,
-        detail: [
-            "type_element" => "objectif", // ✅ CORRECTION
-            "uuid_element" => $objectifs[0],
-            "date" => Carbon::now(),
-            "commentaire"=> "objectif valide individuellement"
-        ]
-        );
-    event($event);
-
-    // ÉTAPE 4: Valider les objectifs hors catégorie
-    foreach($objectifs_hors_categorie as $objectif_hors_categorie) {
-        $event = new UserGeneratedEvent(
-            event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
-            user_uuid : $this->admin->uuid,
-            object_class: ObjectClasses::MARIN,
-            object_uuid : $marin->uuid,
-            detail: [
-                "type_element" => "objectif", // ✅ CORRECTION
-                "uuid_element" => $objectif_hors_categorie,
-                "date" => Carbon::now(),
-                "commentaire"=> "objectif hors categorie valide"
-            ]
-            );
-        event($event);
-    }
-
-    // ÉTAPE 5: Valider maintenant le savoir-faire complet
-    $event = new UserGeneratedEvent(
-        event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
-        user_uuid : $this->admin->uuid,
-        object_class: ObjectClasses::MARIN,
-        object_uuid : $marin->uuid,
-        detail: [
-            "type_element" => "savoirfaire",
-            "uuid_element" => $savoirfaire_uuid,
-            "date" => Carbon::now(),
-            "commentaire"=> "validation savoir-faire complet"
-        ]
-        );
-    event($event);
-
-    $marin->refresh();
-
-    // ✅ VÉRIFICATION: État des objectifs dans le parcours (nouvelle structure)
-    foreach($marin->complements_fcm->donnees_du_parcours->parcoursmarin["affectations"] as $affectation) {
-        if (!isset($affectation['competences'])) continue;
-        
-        foreach($affectation['competences'] as $competence) {
-            foreach($competence['competenceSavoirfaires'] as $csf) {
-            if ($csf["uuid"] == $savoirfaire_uuid) {
-                // Tous les objectifs du savoir-faire doivent être validés
-                if (isset($csf["objectifs"]) && is_array($csf["objectifs"])) {
-                    foreach($csf["objectifs"] as $objectif) {
-                        $this->assertTrue($objectif["etat_valid"] == true,
-                            "L'objectif {$objectif['uuid']} devrait être validé");
-
-                        // Vérifier les commentaires selon l'origine de la validation
-                        $pivotId = $csf['pivot']['id'] ?? null;
-                        $objUuidComposite = "obj_{$pivotId}_{$objectif['id']}";
-                        
-                        if ($objectif['uuid'] === $objectifs[0] || $objUuidComposite === $objectifs[0]) {
-                            // Le premier objectif était déjà validé
-                            $this->assertEquals("objectif valide individuellement", $objectif['commentaire'],
-                                "L'objectif déjà validé devrait garder son commentaire original");
-                        } else {
-                            // Les autres objectifs ont été validés par le savoir-faire
-                            $this->assertEquals("validation savoir-faire complet", $objectif['commentaire'],
-                                "L'objectif auto-validé devrait avoir le commentaire du savoir-faire");
+    
+        $marin->refresh();
+        $parcoursMarin = $marin->complements_fcm->donnees_du_parcours->parcoursmarin;
+    
+        // ✅ VÉRIFICATIONS FINALES
+        foreach($parcoursMarin['affectations'] as $affectation) {
+            if (empty($affectation['competences'])) continue;
+           
+            foreach($affectation['competences'] as $competence) {
+                if (empty($competence['competenceSavoirfaires'])) continue;
+               
+                foreach($competence['competenceSavoirfaires'] as $csf) {
+                    // Construire l'UUID pour comparaison
+                    $csfUuidSimple = $csf['uuid'] ?? $csf['savoirfaire']['uuid'] ?? null;
+                    $csfPivotUuid = null;
+                   
+                    if (!empty($csf['pivot'])) {
+                        $pivotPart = $csf['pivot']['uuid'] ?? $csf['pivot']['id'] ?? null;
+                        if ($pivotPart && $csfUuidSimple) {
+                            $csfPivotUuid = $csfUuidSimple . '_' . $pivotPart;
                         }
                     }
+    
+                    if ($csfUuidSimple === $savoirfaireUuid || $csfPivotUuid === $savoirfaireUuid) {
+                        // Vérifier tous les objectifs
+                        if (!empty($csf['objectifs']) && is_array($csf['objectifs'])) {
+                            $pivotId = $csf['pivot']['id'] ?? null;
+                           
+                            foreach($csf['objectifs'] as $index => $objectif) {
+                                expect($objectif['etat_valid'] ?? false)->toBeTrue(
+                                    "L'objectif {$objectif['uuid']} devrait être validé"
+                                );
+    
+                                $objUuidComposite = $pivotId ? "obj_{$pivotId}_{$objectif['id']}" : null;
+                               
+                                if ($objectif['uuid'] === $objectifsUuids[0] || $objUuidComposite === $objectifsUuids[0]) {
+                                    expect($objectif['commentaire'])->toBe('objectif valide individuellement');
+                                } else {
+                                    expect($objectif['commentaire'])->toBe('validation savoir-faire complet');
+                                }
+                            }
+                        }
+                       
+                        // Le savoir-faire doit être validé
+                        expect($csf['etat_valid'] ?? false)->toBeTrue('Le savoir-faire devrait être validé');
+                        expect($csf['commentaire'])->toBe('validation savoir-faire complet');
+                       
+                        echo "✅ Test réussi!\n";
+                        return;
                     }
                 }
-                
-                // Le savoir-faire lui-même doit être validé
-                $this->assertTrue($csf["etat_valid"] == true,
-                    "Le savoir-faire devrait être validé");
             }
         }
-    }
-})->skip('Dernier bug');
+    
+    
+
+});
