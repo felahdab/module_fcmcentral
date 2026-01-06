@@ -21,8 +21,12 @@ class Parcours extends Model
      */
     protected $fillable = [
         'uuid',
+        'code',
         'libelle_long',
-        'libelle_cours',
+        'libelle_court',
+        'parcours_type_id',
+        'ordre',
+        'color',
     ];
 
     // protected $casts = [
@@ -34,22 +38,38 @@ class Parcours extends Model
         return ParcoursFactory::new();
     }
 
-    protected $with = ['fonctions.competences.savoirfaires.activites'];
+   
+
+   
+
+
+
+    ////////////////////
+    /// Parcours      //
+    ////////////////////
 
     /**
-     * Les fonctions qui constituent un parcours
+     * Les affectations qui constituent un parcours
      */
-    public function fonctions(): BelongsToMany
+    public function affectations(): BelongsToMany
     {
-        return $this->belongsToMany(Fonction::class, 'fcmcentral_fonction_parcours', 'parcours_id', 'fonction_id')
+        return $this->belongsToMany(Affectation::class, 
+        'fcmcentral_affectation_parcours', 'parcours_id', 'affectation_id')
             ->withPivot('ordre')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->orderBy('fcmcentral_affectation_parcours.ordre'); 
     }
+
+
+    ////////////////////
+    /// Serialisation //
+    ////////////////////
 
     public function parcoursSerialise()
 	{
 		return $this->hasMany(ParcoursSerialise::class, 'parcours_id', 'id');
 	}
+
 
     public function getLatestSerializedVersion()
     {
@@ -60,6 +80,15 @@ class Parcours extends Model
         }
         return $last_version->version;
     }
+
+    //  Fonction pour serialise
+    public function parcoursType() {
+        return $this->belongsTo(ParcoursType::class,'parcours_type_id');
+    }
+
+    protected $with = [
+        'affectations.competences.competenceSavoirfaires.objectifs' 
+    ];
     
     
 }

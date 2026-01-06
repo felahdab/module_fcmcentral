@@ -6,6 +6,7 @@ use Modules\FcmCommun\Models\MarinParcours as BaseModel;
 use Modules\FcmCentral\Traits\HasTablePrefix;
 
 use Modules\FcmCentral\Models\FcmMarin;
+use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 
 class MarinParcours extends BaseModel
@@ -27,6 +28,26 @@ class MarinParcours extends BaseModel
     public function parcours_serialise()
     {
         return $this->belongsTo(ParcoursSerialise::class, "parcoursserialise_id");
+    }
+
+    public function fcmMarin()
+    {
+        return $this->belongsTo(FcmMarin::class, 'fcmmarin_id');
+    }
+
+    public function marin()
+    {
+        return $this->hasOneThrough(
+            Marin::class,
+            FcmMarin::class,
+            'id',                   // Clef locale FcmMarin
+            'id',                   // Clef locale Marin
+            'fcmmarin_id',          // Clef locale MarinPArcours
+            'rh_marin_id',          // Clef locale FcmMarin
+
+
+
+        );
     }
 
    

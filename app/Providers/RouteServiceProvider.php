@@ -36,7 +36,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         Route::middleware('web')
             ->prefix(config('skeletor.prefixe_instance'))
-            ->group(module_path('FcmCentral', '/routes/web.php'));
+            ->group(module_path('FcmCentral', 'routes/web.php'));
     }
 
     /**

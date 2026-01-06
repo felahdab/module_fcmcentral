@@ -1,246 +1,352 @@
 <?php
- 
+
 namespace Modules\FcmCentral\Listeners\Save\MarinParcours;
- 
+
 use Filament\Notifications\Notification;
 use App\Models\User;
-use Modules\FcmCommun\Enums\Constants;
+use Carbon\Carbon;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
-use Modules\FcmCommun\Services\CalculTauxParcoursService;
-use Modules\FcmCommun\Services\ReCalculEtatParcoursService; 
-use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\Services\CalculHeuresParcoursService;
+use Modules\FcmCommun\Services\RefaireEtatParcoursService;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
 use Illuminate\Support\Facades\Log;
- 
+
 class ValidElementMarinParcoursListener
 {
-    public $comment;
-    public $selectedItems;
- 
-    /**
-     * Gère l'événement.
-     *
-     * @param UserGeneratedEvent $event
-     * @return void
-     */
+    public string $comment = '';
+
     public function handle(UserGeneratedEvent $event): void
     {
-        // Vérifier si l'événement est du bon type
         if (!$event->isOfType(UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS)) {
             return;
         }
- 
-        // Récupérer le marin et les données
+
         $marin = Marin::where('uuid', $event->object_uuid)->first();
-        
         if (!$marin) {
-            Log::error('Marin non trouvé avec UUID: ' . $event->object_uuid);
+            Log::error('Marin non trouvé: ' . $event->object_uuid);
             return;
         }
- 
-        $data = $event->detail;
 
-        // array:4 [▼ // vendor/spatie/laravel-ignition/src/helpers.php:14
-        // "type_element" => "activite"
-        // "uuid_element" => "eb48b9df-c466-37a5-a6b4-3251761f371f"
-        // "date" => Carbon\Carbon @1753288270 {#2989 ▶}
-        // "commentaire" => "dfg"
-        // ]
-        //dd( $data);
-        //  RÉCUPÉRER TOUS LES ÉLÉMENTS DEPUIS selectedItems_full
+        $data = $event->detail ?? [];
         $this->comment = $this->sanitizeComment($data['commentaire'] ?? '');
-        
-        $valideur = User::where('uuid', $event->user_uuid)->first();
-        $valideurName = $valideur ? 
-            ($valideur->display_name ?? $valideur->nom . ' ' . $valideur->prenom) : 
-            'VALIDEUR INCONNU';
 
-        $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours;
-        
+        $valideur = User::where('uuid', $event->user_uuid)->first();
+        $valideurName = $valideur 
+            ? ($valideur->display_name ?? trim($valideur->nom . ' ' . $valideur->prenom))
+            : 'VALIDEUR INCONNU';
+
+        $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours ?? null;
         if (!$donnees_du_parcours) {
             Log::error('Données du parcours non trouvées pour le marin: ' . $marin->uuid);
             return;
         }
- 
-        $parcoursMarin = $donnees_du_parcours->parcoursmarin;
-        
-        if (!$parcoursMarin) {
-            Log::error('Parcours marin non trouvé ou vide pour le marin: ' . $marin->uuid);
+
+        $parcoursMarin = $donnees_du_parcours->parcoursmarin ?? null;
+        if (!is_array($parcoursMarin)) {
+            Log::error('Parcours marin non trouvé ou invalide: ' . $marin->uuid);
             return;
         }
 
-         //  GESTION SPÉCIALE POUR LES SAVOIR-FAIRES AVEC AUTO-VALIDATION
-         if ($data['type_element'] === 'savoirfaire' ) {
-            $this->updateSavoirfaireParcoursMarinItems(
-                $parcoursMarin, 
-                $data['uuid_element'],
-                $valideurName
-            );
-        } else {
-            //  GESTION CLASSIQUE POUR LES AUTRES ÉLÉMENTS
-            $this->updateParcoursMarinItems(
-                $parcoursMarin, 
-                $data['type_element'], 
-                $data['uuid_element'],
-                $valideurName
-            );
+        $type = $data['type_element'] ?? null;
+        $uuid = $data['uuid_element'] ?? null;
+        
+        if (!$type || !$uuid) {
+            Log::error('Payload invalide pour validation: ' . json_encode($data));
+            return;
         }
 
-        // JULIEN:
-        // Insérer ici un recalcul de l'état du parcours en fonction de l'état de validation des activités
-        // Je pense que tu dois avoir le code quelque part
-        // Une fois ce listener modifié, le test "recalcule l'état du parcours apres l'exécution d'une modification" doit passer correctement.
- 
-        //  RECALCULER LES ÉTATS DE VALIDATION HIÉRARCHIQUES
-    
-        ReCalculEtatParcoursService::recalculerEtats($parcoursMarin);
+        Log::info("=== VALIDATION === type={$type} uuid={$uuid} marin={$marin->uuid}");
+
+        $updated = $this->dispatchValidation($parcoursMarin, $type, $uuid, $valideurName);
+
+        if (!$updated) {
+            Log::error("❌ ÉLÉMENT NON TROUVÉ: {$type} / {$uuid}");
+        }
+
+        // Recalcul automatique des états parents (bottom-up)
+        //$this->recalculateParentStates($parcoursMarin);
+
+        // Refonte Parcours
+        //Log::info("AVANT RefaireEtatParcoursService", ['parcours' => $parcoursMarin]);
+RefaireEtatParcoursService::refonte($parcoursMarin);
+//Log::info("APRÈS RefaireEtatParcoursService", ['parcours' => $parcoursMarin]);
 
 
-        // Recalcul des taux
-        $resultatCalcul = CalculTauxParcoursService::mettreAJourTaux($parcoursMarin);
-        $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
-        $donnees_du_parcours->taux_stage = $parcoursMarin['taux_stage'] ?? 0;
-        $donnees_du_parcours->taux_activite = $parcoursMarin['taux_activite'] ?? 0;
- 
-        // Sauvegarder les données
+
+
+
+
+        // Recalcul des heures
+        CalculHeuresParcoursService::mettreAJourHeures($parcoursMarin);
+        //Log::info("APRÈS CalculHeuresParcoursService", ['parcours' => $parcoursMarin]);
+
+        // Sauvegarde
+        $donnees_du_parcours->taux_global = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcoursMarin) ?? 0;
         $donnees_du_parcours->parcoursmarin = $parcoursMarin;
         $donnees_du_parcours->save();
- 
-        // Notification de succès
+
+        // Notification
         $notification = UserGeneratedEventNotifications::getMess(
             UserGeneratedEventNotifications::VALID_ELMT_MARIN_PARCOURS,
             $marin->nom
         );
- 
+
         Notification::make()
             ->title($notification['title'])
             ->success()
             ->body($notification['message'])
             ->send();
     }
- 
-    
- 
-    /**
-     * MÉTHODE POUR NETTOYER LES COMMENTAIRES
-     */
+
     protected function sanitizeComment(string $comment): string
     {
-        if (empty($comment)) {
+        if (trim($comment) === '') {
             return '';
         }
         
         $comment = strip_tags($comment);
         $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
         $comment = preg_replace('/\s+/', ' ', $comment);
-        $comment = addslashes(trim($comment));
- 
-        return $comment;
+        return addslashes(trim($comment));
     }
-    
 
-
-    /**
-     *  METHODE POUR VALIDERS SAVOIRS FAIRES ET SES ACTIVITES  
-     */
-    protected function updateSavoirfaireParcoursMarinItems(&$parcoursMarin, $savoirfaire_uuid, $displayName)
-        {
-            $activites_validees = 0;
+    protected function dispatchValidation(array &$parcoursMarin, string $type, string $uuid, string $displayName): bool
+    {
+        switch ($type) {
+            case 'affectation':
+                return $this->validateAffectation($parcoursMarin, $uuid, $displayName);
             
-            foreach ($parcoursMarin['fonctions'] as &$fonction) {
-                if (!isset($fonction['competences'])) continue;
-                
-                foreach ($fonction['competences'] as &$competence) {
-                    if (!isset($competence['savoirfaires'])) continue;
-                    
-                    foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                        if ($savoirFaire['uuid'] === $savoirfaire_uuid) {
-                            //  VALIDER LE SAVOIR-FAIRE
-                            $this->updateElement($savoirFaire, $displayName);
-                            Log::info("Savoir-faire validé: {$savoirFaire['uuid']}");
-                            
-                            //  VALIDER TOUTES SES ACTIVITÉS NON VALIDÉES
-                            if (isset($savoirFaire['activites'])) {
-                                foreach ($savoirFaire['activites'] as &$activite) {
-                                    // Seulement si pas déjà validée
-                                    if (!isset($activite['etat_valid']) || !$activite['etat_valid']) {
-                                        $this->updateElement($activite, $displayName);
-                                        $activites_validees++;
-                                        Log::info("Activité auto-validée: {$activite['uuid']}");
-                                    }
-                                }
-                            }
-                            
-                            Log::info("Savoir-faire {$savoirfaire_uuid} validé avec {$activites_validees} activités");
-                            return; // Sortir une fois trouvé
-                        }
-                    }
-                }
-            }
-        }
-    
-
-    /**
-     *  METTRE À JOUR LES ÉLÉMENTS 
-     */
-    protected function updateParcoursMarinItems(&$parcoursMarin, $type_element, $uuid_element, $displayName)
-    { 
-        Log::info("On doit valider  : {$type_element} / {$uuid_element}");
-        foreach ($parcoursMarin['fonctions'] as &$fonction) {
-            Log::info("Mise a jour de fontion: {$fonction["uuid"]}");
-            // --- TRAITEMENT DIRECT DES FONCTIONS ---
-            if ($type_element === 'fonction' && $fonction['uuid'] == $uuid_element) {
-                $this->updateElement($fonction, $displayName);
-                Log::info("Fonction mise à jour: {$fonction['uuid']}");
-            }
- 
-            // --- TRAITEMENT DES COMPÉTENCES ---
-            if (isset($fonction['competences'])) {
-                foreach ($fonction['competences'] as &$competence) {
-                    Log::info("Mise a jour de competence: {$competence["uuid"]}");
-                    if ($type_element === 'competence' && $competence['uuid'] == $uuid_element) {
-                        $this->updateElement($competence, $displayName);
-                        Log::info("Compétence mise à jour: {$competence['uuid']}");
-                    }
- 
-                    // --- TRAITEMENT DES SAVOIR-FAIRES ---
-                    if (isset($competence['savoirfaires'])) {
-                        foreach ($competence['savoirfaires'] as &$savoirFaire) {
-                            Log::info("Mise a jour de savoir-faire: {$savoirFaire["uuid"]}");
-                            if ($type_element === 'savoirfaire' && $savoirFaire['uuid'] == $uuid_element) {
-                                $this->updateElement($savoirFaire, $displayName);
-                                Log::info("Savoir-faire mis à jour: {$savoirFaire['uuid']}");
-                            }
- 
-                            // --- TRAITEMENT DES ACTIVITÉS ---
-                            if (isset($savoirFaire['activites'])) {
-                                foreach ($savoirFaire['activites'] as &$activite) {
-                                    Log::info("Mise a jour de activite: {$activite["uuid"]}");
-                                    if ($type_element === 'activite' && $activite['uuid'] == $uuid_element) {
-                                        $this->updateElement($activite, $displayName);
-                                        Log::info("Activité mise à jour: {$activite['uuid']}");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            case 'competence':
+                return $this->validateCompetence($parcoursMarin, $uuid, $displayName);
+            
+            case 'savoirfaire':
+                return $this->validateSavoirFaire($parcoursMarin, $uuid, $displayName);
+            
+            case 'objectif':
+                return $this->validateObjectif($parcoursMarin, $uuid, $displayName);
+            
+            default:
+                Log::warning("Type inconnu pour validation: {$type}");
+                return false;
         }
     }
- 
-    /**
-     *  MÉTHODE HELPER POUR METTRE À JOUR UN ÉLÉMENT
-     */
-    protected function updateElement(&$element, $displayName)
+
+    protected function validateAffectation(array &$parcoursMarin, string $uuid, string $displayName): bool
+    {
+        if (empty($parcoursMarin['affectations']) || !is_array($parcoursMarin['affectations'])) {
+            return false;
+        }
+
+        foreach ($parcoursMarin['affectations'] as &$affectation) {
+            if (($affectation['uuid'] ?? null) === $uuid) {
+                $this->updateElement($affectation, $displayName);
+                Log::info("✅ Affectation validée: {$uuid}");
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    protected function validateCompetence(array &$parcoursMarin, string $uuid, string $displayName): bool
+    {
+        if (empty($parcoursMarin['affectations']) || !is_array($parcoursMarin['affectations'])) {
+            return false;
+        }
+
+        foreach ($parcoursMarin['affectations'] as &$affectation) {
+            if (empty($affectation['competences']) || !is_array($affectation['competences'])) {
+                continue;
+            }
+
+            foreach ($affectation['competences'] as &$competence) {
+                if (($competence['uuid'] ?? null) === $uuid) {
+                    $this->updateElement($competence, $displayName);
+                    Log::info("✅ Compétence validée: {$uuid}");
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    protected function validateSavoirFaire(array &$parcoursMarin, string $uuid, string $displayName): bool
+    {
+        if (empty($parcoursMarin['affectations']) || !is_array($parcoursMarin['affectations'])) {
+            return false;
+        }
+
+        foreach ($parcoursMarin['affectations'] as &$affectation) {
+            if (empty($affectation['competences']) || !is_array($affectation['competences'])) {
+                continue;
+            }
+
+            foreach ($affectation['competences'] as &$competence) {
+                if (empty($competence['competenceSavoirfaires']) || !is_array($competence['competenceSavoirfaires'])) {
+                    continue;
+                }
+
+                foreach ($competence['competenceSavoirfaires'] as &$csf) {
+                    $pivotUuid = $this->buildCsfPivotUuid($csf);
+                    
+                    if (($csf['uuid'] ?? null) === $uuid || $pivotUuid === $uuid) {
+                        $this->updateElement($csf, $displayName);
+                        Log::info("✅ Savoir-faire validé: {$uuid}");
+
+                        // Auto-validation des objectifs si type compagnonnage
+                        if (($csf['savoirfaire_type']['code'] ?? null) === 'C') {
+                            if (!empty($csf['objectifs']) && is_array($csf['objectifs'])) {
+                                foreach ($csf['objectifs'] as &$objectif) {
+                                    if (!($objectif['etat_valid'] ?? false)) {
+                                        $this->updateElement($objectif, $displayName);
+                                        Log::info("  ✅ Objectif auto-validé: " . ($objectif['uuid'] ?? 'n/a'));
+                                    }
+                                }
+                            }
+                        }
+                        
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    protected function validateObjectif(array &$parcoursMarin, string $uuid, string $displayName): bool
+    {
+        if (empty($parcoursMarin['affectations']) || !is_array($parcoursMarin['affectations'])) {
+            return false;
+        }
+
+        foreach ($parcoursMarin['affectations'] as &$affectation) {
+            if (empty($affectation['competences']) || !is_array($affectation['competences'])) {
+                continue;
+            }
+
+            foreach ($affectation['competences'] as &$competence) {
+                if (empty($competence['competenceSavoirfaires']) || !is_array($competence['competenceSavoirfaires'])) {
+                    continue;
+                }
+
+                foreach ($competence['competenceSavoirfaires'] as &$csf) {
+                    if (empty($csf['objectifs']) || !is_array($csf['objectifs'])) {
+                        continue;
+                    }
+
+                    foreach ($csf['objectifs'] as &$objectif) {
+                        $objUuid = $objectif['uuid'] ?? ("obj_{$csf['id']}_{$objectif['id']}" ?? null);
+                        
+                        if ($objUuid === $uuid || ($objectif['uuid'] ?? null) === $uuid) {
+                            $this->updateElement($objectif, $displayName);
+                            Log::info("✅ Objectif validé: {$uuid}");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    protected function buildCsfPivotUuid(array $csf): ?string
+    {
+        $pivot = $csf['pivot'] ?? null;
+        
+        if ($pivot) {
+            $pivotPart = $pivot['uuid'] ?? ($pivot['id'] ?? null);
+            if ($pivotPart && !empty($csf['uuid'])) {
+                return $csf['uuid'] . '_' . $pivotPart;
+            }
+            return $csf['uuid'] ?? null;
+        }
+
+        // Legacy: csf avec savoirfaire['uuid'] + id
+        if (!empty($csf['savoirfaire']['uuid']) && isset($csf['id'])) {
+            return $csf['savoirfaire']['uuid'] . '_' . $csf['id'];
+        }
+
+        return $csf['uuid'] ?? null;
+    }
+
+    protected function recalculateParentStates(array &$parcoursMarin): void
+    {
+        Log::info("=== RECALCUL ÉTATS PARENTS ===");
+
+        if (empty($parcoursMarin['affectations']) || !is_array($parcoursMarin['affectations'])) {
+            Log::info("Aucune affectation pour recalcul");
+            return;
+        }
+
+        foreach ($parcoursMarin['affectations'] as &$affectation) {
+            if (empty($affectation['competences']) || !is_array($affectation['competences'])) {
+                $affectation['etat_valid'] = false;
+                continue;
+            }
+
+            foreach ($affectation['competences'] as &$competence) {
+                if (empty($competence['competenceSavoirfaires']) || !is_array($competence['competenceSavoirfaires'])) {
+                    $competence['etat_valid'] = false;
+                    continue;
+                }
+
+                // Recalcul savoir-faire basé sur objectifs
+                foreach ($competence['competenceSavoirfaires'] as &$csf) {
+                    if (!empty($csf['objectifs']) && is_array($csf['objectifs']) && count($csf['objectifs']) > 0) {
+                        $allValid = true;
+                        foreach ($csf['objectifs'] as $obj) {
+                            if (!($obj['etat_valid'] ?? false)) {
+                                $allValid = false;
+                                break;
+                            }
+                        }
+                        $csf['etat_valid'] = $allValid;
+                    }
+                }
+
+                // Recalcul compétence basé sur savoir-faire
+                $allCsfValid = true;
+                foreach ($competence['competenceSavoirfaires'] as $csf) {
+                    if (!($csf['etat_valid'] ?? false)) {
+                        $allCsfValid = false;
+                        break;
+                    }
+                }
+                $competence['etat_valid'] = $allCsfValid;
+            }
+
+            // Recalcul affectation basé sur compétences
+            $allCompValid = true;
+            foreach ($affectation['competences'] as $comp) {
+                if (!($comp['etat_valid'] ?? false)) {
+                    $allCompValid = false;
+                    break;
+                }
+            }
+            $affectation['etat_valid'] = $allCompValid;
+        }
+
+        Log::info("✅ Recalcul terminé");
+    }
+
+    protected function updateElement(array &$element, string $displayName): void
     {
         $element['etat_valid'] = true;
         $element['commentaire'] = $this->comment;
-        $element['date_validation'] = \Carbon\Carbon::now()->toDateTimeString();
+        $element['date_validation'] = Carbon::now()->toDateTimeString();
         $element['valideur'] = $displayName;
-
-        $element["date_proposition"] = null; // On retire la mention d'une éventuelle proposition antérieure.
+        $element['date_proposition'] = null;
+        
+        Log::debug('Élément validé avec succès');
     }
 }
+
+
+
+
+

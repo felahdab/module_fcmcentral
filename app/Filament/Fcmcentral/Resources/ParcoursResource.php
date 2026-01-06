@@ -12,26 +12,34 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Select;
 
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCentral\Services\ParcoursService;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\FonctionsRelationManager;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\AffectationsRelationManager;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\Parcours;
+use Modules\FcmCentral\Models\ParcoursType;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+use Modules\FcmCentral\Services\ParcoursService;
 
 class ParcoursResource extends Resource
 {
+    
+    use FilamentPermissionTrait;
+   
     protected static ?string $model = Parcours::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 11;
 
-    protected static ?string $navigationGroup = 'Parcours';
-    protected static ?string $navigationLabel = 'Parcours';
+    protected static array $permissions = [
+        'fcmcentral::parcours.index',
+        'fcmcentral::admin',
+        'fcmcentral::permission.bcf',
+        'fcmcentral::permission.fps',
+    ];
 
     public static function form(Form $form): Form
     {
@@ -41,33 +49,65 @@ class ParcoursResource extends Resource
                     ->required()
                     ->label('Libellé court')
                     ->maxLength(150),
+                    
                 TextInput::make('libelle_long')
                     ->required()
                     ->label('Libellé long')
                     ->maxLength(1500),
+                    TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),    
+                    Select::make('parcours_type_id')
+                    ->label('Type de Parcours')
+                    ->required()
+                    ->searchable()
+                    ->options(ParcoursType::all()->pluck('libelle_court','id')),    
+
             ]);
     }
 
     public static function table(Table $table): Table
     {
+       
         $parcours_service = new ParcoursService();
 
         return $table
-            ->defaultSort('libelle_court','asc')
+            ->defaultSort('ordre','asc')
+            ->reorderable('ordre')
             ->columns([
                TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('libelle_court')
-                    ->searchable()
+                    ->label('Libellé')
+                    ->limit(50)
                     ->sortable()
-                    ->label('Libellé court'),
-                TextColumn::make('libelle_long')
                     ->searchable()
-                    ->label('Libellé long')
-                    ->sortable()
+                    ->description(fn ($record) => substr($record->libelle_long,0,40).'...'),
+                    TextColumn::make('code')
+                    ->label('Code')
                     ->toggleable(isToggledHiddenByDefault: true),
+                    TextColumn::make('parcoursType.libelle_court')
+                    ->label('Parcours Type')
+                    ->badge()
+                    //->color('danger') 
+                    ->color(fn($record)=>$record->parcoursType->color ?? 'info')  ,  
+                    TextColumn::make('affectations.libelle_court')
+                    ->label('Affectations')
+                    ->badge()
+                    ->listWithLineBreaks()
+                    ->color(fn($state, $record) =>
+                        $record->affectations->pluck('color')->map(fn($color) => $color ?? 'info')->first()
+                    ),    
+                  
+                TextColumn::make('affections.competences.code')
+                    ->label('Competences')
+                    ->badge(),
+                    TextColumn::make('affections.competences.savoirfaires.code')
+                    ->label('Competences')
+                    ->badge(),    
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -86,14 +126,14 @@ class ParcoursResource extends Resource
                     ->extraAttributes([
                         'title' => 'Modifier',
                         'class' => 'btn-modif',
-                        ]), 
+                    ]),
                 Tables\Actions\ViewAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-queue-list')
                     ->extraAttributes([
                         'title' => 'Parcours détaillé',
                         'class' => 'btn-livret',
-                        ]),                    
+                    ]),                    
                 Action::make('serializeParcours')
                     ->label('Figer')
                     ->button()
@@ -110,7 +150,7 @@ class ParcoursResource extends Resource
                         DatePicker::make('date de debut')
                             ->label('Date')
                             ->required()
-                            ->minDate(fn ($record) => Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($record))),
+                            //->minDate(fn ($record) => Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($record))),
                     ])
                     ->fillForm(function ($record) use ($parcours_service){
                         return 
@@ -119,7 +159,7 @@ class ParcoursResource extends Resource
                             'version' => $record->getLatestSerializedVersion() + 1,
                         ];
                     })
-                    ->action(function ($record, $data){
+                    ->action(function ($record, $data) {
                         $event = new UserGeneratedEvent(
                             UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
                             auth()->user()->uuid,
@@ -133,18 +173,36 @@ class ParcoursResource extends Resource
 
                         event($event);
                     })
-                ])
-                ->bulkActions([
-                    Tables\Actions\BulkActionGroup::make([
-                        Tables\Actions\DeleteBulkAction::make(),
-                    ]),
-                ]);
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                   // Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    
+    /**
+     * Obtenir la première date possible pour une nouvelle version
+     */
+    protected static function getFirstPossibleNewVersionDate(Parcours $parcours): Carbon
+    {
+        $previous = ParcoursSerialise::where('uuid', $parcours->uuid)
+            ->orderBy('version')
+            //->get()
+            ->last();
+
+        if ($previous) {
+            return (new Carbon($previous->date_debut))->addDay()->startOfDay();
+        } else {
+            return Carbon::now()->addDay()->startOfDay();
+        }
     }
 
     public static function getRelations(): array
     {
         return [
-            FonctionsRelationManager::class
+            AffectationsRelationManager::class
         ];
     }
 
@@ -155,7 +213,6 @@ class ParcoursResource extends Resource
             'create' => Pages\CreateParcours::route('/create'),
             'view' => Pages\ViewParcours::route('/{record}/view'),
             'edit' => Pages\EditParcours::route('/{record}/edit'),
-            
         ];
     }
 }

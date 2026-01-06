@@ -32,21 +32,18 @@ class SavoirfairesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('libelle_court')
-            ->defaultSort('libelle_court','asc')
+            ->defaultSort('ordre','asc')
+            ->defaultPaginationPageOption(25)
             ->columns([
                 Tables\Columns\TextColumn::make('libelle_court')
                     ->label('Libellé court')
+                    ->words(8)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('pivot.mod_acquis')
-                    ->label('Mode acq.'),
-                Tables\Columns\TextColumn::make('pivot.an_acquis')
-                    ->label('Année acq.'),
-                Tables\Columns\TextColumn::make('pivot.ordre')
-                    ->label('Ordre'),
-                Tables\Columns\TextColumn::make('pivot.coeff')
-                    ->label('Coefficient'),
-                Tables\Columns\TextColumn::make('pivot.duree')
-                    ->label('Durée(h)'),
+                Tables\Columns\TextColumn::make('competence.code')
+                    ->label('Competences'),
+                    Tables\Columns\TextColumn::make('competence.parcoursType.code')
+                    ->label('Type de Parcours'),    
+                
 
             ])
             ->filters([

@@ -1,152 +1,165 @@
 
+    <div class="space-y-4">
+        <div class="tree-view">
+            @if ($parcours)
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold yellow mt1 mb1">{{ $parcours['libelle_long'] }}</h1>
+                </div>
 
-<div class="space-y-4">
-    <div class="tree-view">
-        @if ($parcours)
-            <div class="flex items-center">
-                <h1 class="text-2xl font-bold yellow mt1 mb1">
-                    {{-- Parcours :  --}}
-                    {{ $parcours['libelle_long'] }}
-                </h1>
-            </div>
-            <ul>
-                <li>
-                @if ($parcours['fonctions'] )
-                    <ul >
-                    @foreach ($parcours['fonctions']  as $fonction)
-                        <li>
-                            <div class="flex items-center mt1 mb1">
-                                <div class="flex items-center space-x-2">
-                                    <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
-                                </div>        
-                                <strong class="vert">&nbsp;&nbsp;
-                                    {{-- Fonction :  --}}
-                                    {{ $fonction['libelle_long']}}
-                                </strong>                               
-                            </div>
-                            @if ($fonction['competences'])
-                                <ul class="collapsible">
-                                @foreach ($fonction['competences'] as $competence)
+                <ul>
+                    <li>
+                        @if (!empty($parcours['affectations']))
+                            <ul>
+                                @foreach ($parcours['affectations'] as $affectation)
                                     <li>
+                                        {{-- header affectation --}}
                                         <div class="flex items-center mt1 mb1">
                                             <div class="flex items-center space-x-2">
-                                                <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
+                                                <button type="button" class="toggle-btn" aria-expanded="false">[+]</button>
                                             </div>
-                                            <strong class="bleu">
-                                                {{-- Compétence :  --}}
-                                                {{ $competence['libelle_long'] }}
+                                            <strong class="vert" style="color: {{ $affectation['color'] ?? '#389D60' }}">&nbsp;&nbsp;
+                                                {{ $affectation['libelle_long'] }}
+                                                <span class="badge-count">({{ count($affectation['competences'] ?? []) }} C)</span>
                                             </strong>
                                         </div>
-                                        @if ($competence['savoirfaires'])
-                                            <ul class="collapsible">
-                                            @foreach ($competence['savoirfaires'] as $savoirFaire)
-                                                <li>
-                                                    <div class="flex items-center mt1 mb1">
-                                                        <div class="flex items-center space-x-2">
-                                                            <button type="button" class="toggle-btn" onclick="toggleCollapse(this)">[+]</button>
-                                                        </div>            
-                                                        <strong class="orange">
-                                                            {{-- Savoir-faire :  --}}
-                                                            {{ $savoirFaire['libelle_long'] }}
-                                                        </strong>
-                                                    </div>
-                                                    @if ($savoirFaire['activites'])
-                                                        <ul class="collapsible">
-                                                        @foreach ($savoirFaire['activites'] as $activite)
-                                                            <li>
-                                                                <div class="flex items-center mt1 mb1">
-                                                                    {{-- Activite :  --}}
-                                                                    {{ $activite['libelle_long'] }}
-                                                                </div>
-                                                            </li>
-                                                        @endforeach
+
+                                        {{-- collapsible competences --}}
+                                        <ul class="collapsible" style="display:none;">
+                                            @if (!empty($affectation['competences']))
+                                                @foreach ($affectation['competences'] as $competence)
+                                                    <li>
+                                                        {{-- header competence --}}
+                                                        <div class="flex items-center mt1 mb1">
+                                                            <div class="flex items-center space-x-2">
+                                                                <button type="button" class="toggle-btn" aria-expanded="false">[+]</button>
+                                                            </div>
+                                                            <strong class="vert" style="color: {{ $competence['color'] ?? '#2b6cb0' }}">&nbsp;&nbsp;
+                                                                {{ $competence['code'] ?? '' }} - {{ $competence['libelle_long'] ?? $competence['libelle_court'] ?? '' }}
+                                                                <span class="badge-count">({{ count($competence['competenceSavoirfaires'] ?? []) }} SF)</span>
+                                                            </strong>
+                                                        </div>
+
+                                                        {{-- collapsible competenceSavoirfaires --}}
+                                                        <ul class="collapsible" style="display:none;">
+                                                            @if (!empty($competence['competenceSavoirfaires']))
+                                                                @foreach ($competence['competenceSavoirfaires'] as $csf)
+                                                                    <li>
+                                                                        {{-- header csf --}}
+                                                                        <div class="flex items-center mt1 mb1">
+                                                                            <div class="flex items-center space-x-2">
+                                                                                {{-- only show toggle if there are objectifs --}}
+                                                                                @if (!empty($csf['objectifs']))
+                                                                                    <button type="button" class="toggle-btn" aria-expanded="false">[+]</button>
+                                                                                @else
+                                                                                    <span class="toggle-placeholder">&nbsp;&nbsp;&nbsp;</span>
+                                                                                @endif
+                                                                            </div>
+
+                                                                            <strong class="bleu" style="color: {{ $csf['savoirfaire']['color'] ?? '#6AADE8' }}">&nbsp;&nbsp;
+                                                                                {{ $csf['savoirfaire']['code'] ?? '' }} - {{ $csf['savoirfaire']['libelle_long'] ?? $csf['savoirfaire']['libelle_court'] ?? '' }}
+                                                                                @if(!empty($csf['libelle_court']))
+                                                                                    <em>({{ $csf['libelle_court'] }})</em>
+                                                                                @endif
+                                                                                @if(!empty($csf['savoirfaire_type']['libelle_court']))
+                                                                                    <span class="type-badge">{{ $csf['savoirfaire_type']['libelle_court'] }}</span>
+                                                                                @elseif(!empty($csf['savoirfaire_type']))
+                                                                                    <span class="type-badge">{{ $csf['savoirfaire_type'] }}</span>
+                                                                                @endif
+                                                                            </strong>
+
+                                                                            <div class="sf-details">
+                                                                                @if(!empty($csf['heures']))
+                                                                                    <span class="detail-item">{{ $csf['heures'] }}h</span>
+                                                                                @endif
+                                                                                @if(!empty($csf['jours']))
+                                                                                    <span class="detail-item">{{ $csf['jours'] }}j</span>
+                                                                                @endif
+                                                                                @if(!empty($csf['savoirfaire']['competence_code']))
+                                                                                    <span class="detail-item">{{ $csf['savoirfaire']['competence_code'] }}</span>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {{-- collapsible objectifs --}}
+                                                                        <ul class="collapsible" style="display:none;">
+                                                                            @if (!empty($csf['objectifs']))
+                                                                                @foreach ($csf['objectifs'] as $objectif)
+                                                                                    <li>
+                                                                                        <div class="flex items-center mt1 mb1">
+                                                                                            <strong class="orange">&nbsp;&nbsp;📎 {{ $objectif['code'] ?? '' }} - {{ $objectif['libelle_court'] ?? '' }}</strong>
+                                                                                            @if(!empty($objectif['description']))
+                                                                                                <div class="objectif-description">{{ \Illuminate\Support\Str::limit($objectif['description'], 100) }}</div>
+                                                                                            @endif
+                                                                                        </div>
+                                                                                    </li>
+                                                                                @endforeach
+                                                                            @else
+                                                                                <li><div class="text-xs text-gray-500 italic ml-8">Aucun objectif</div></li>
+                                                                            @endif
+                                                                        </ul>
+                                                                    </li>
+                                                                @endforeach
+                                                            @else
+                                                                <li><div class="text-xs text-gray-500 italic ml-8">Aucune liaison savoir faire pour cette compétence</div></li>
+                                                            @endif
                                                         </ul>
-                                                    @endif
-                                                </li>
-                                            @endforeach
-                                            </ul>
-                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            @else
+                                                <li><div class="text-xs text-gray-500 italic ml-8">Aucune compétence attachée</div></li>
+                                            @endif
+                                        </ul>
                                     </li>
                                 @endforeach
-                                </ul>
-                            @endif
-                        </li>
-                    @endforeach
-                    </ul>
-                @endif
-                </li>
-            </ul>
-        @else
-            <p>Aucun parcours trouvé.</p>
-        @endif
+                            </ul>
+                        @endif
+                    </li>
+                </ul>
+            @else
+                <p>Aucun parcours trouvé.</p>
+            @endif
+        </div>
     </div>
-    
+
     <style>
-        .tree-view ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-        }
-    
-        .tree-view ul ul {
-            margin-left: 20px;
-            border-left: 1px solid #ccc;
-            padding-left: 10px;
-        }
-    
-        .tree-view li {
-            margin: 5px 0;
-        }
-    
-        .tree-view strong {
-           /* color:darkgrey; */
-        }
-
-        .bleu{
-            color:#6AADE8;
-        }
-        .vert{
-            color:#389D60;
-        }
-        .orange{
-            color:#e67b47;
-        }    
-        .tree-view .collapsible {
-            display: none; /* Par défaut, les sous-éléments sont cachés */
-        }
-    
-        .tree-view .toggle-btn {
-            background: none;
-            border: none;
-            color: #D81B60;
-            cursor: pointer;
-            font-size: 14px;
-        }
-    
-        .tree-view .toggle-btn:focus {
-            outline: none;
-        }
-
-        .mt1{margin-top:15px;}
-        .mb1{margin-bottom:15px;}
-        .mr1{margin-right:15px;}
-        .ml1{margin-left:15px;}
-
+        .tree-view ul { list-style-type: none; margin: 0; padding: 0; }
+        .tree-view ul ul { margin-left: 20px; border-left: 1px solid #ccc; padding-left: 10px; }
+        .badge-count { font-size: 0.8em; color: #666; font-weight: normal; margin-left: 8px; }
+        .type-badge { display:inline-block; background:#f3f4f6; color:#374151; padding:2px 6px; border-radius:4px; font-size:0.75em; margin-left:8px; }
+        .sf-details { margin-left: 20px; margin-top: 5px; }
+        .detail-item { display:inline-block; background:#e5e7eb; color:#4b5563; padding:2px 6px; margin-right:8px; border-radius:3px; font-size:0.8em; }
+        .objectif-description { font-size:0.9em; color:#6b7280; margin-top:4px; font-style:italic; margin-left:20px; }
+        .toggle-placeholder { width:20px; display:inline-block; }
+        .tree-view .collapsible { display: none; }
+        .tree-view .toggle-btn { background:none; border:none; color:#D81B60; cursor:pointer; font-size:14px; width:20px; padding:0; }
+        .mt1{ margin-top:15px } .mb1{ margin-bottom:15px } .ml-8{ margin-left:2rem }
     </style>
-    
+
     <script>
-        function toggleCollapse(button) {
-            const collapsible = button.parentElement.parentElement.nextElementSibling;
-    
-            if (collapsible && collapsible.classList.contains('collapsible')) {
-                if (collapsible.style.display === 'none' || collapsible.style.display === '') {
-                    collapsible.style.display = 'block';
-                    button.textContent = '[-]'; // Change le bouton pour indiquer "Réduire"
-                } else {
-                    collapsible.style.display = 'none';
-                    button.textContent = '[+]'; // Change le bouton pour indiquer "Développer"
+        document.addEventListener('DOMContentLoaded', function () {
+            function toggleHandler(e) {
+                const btn = e.currentTarget;
+                // header container is the button's grandparent in our markup
+                let header = btn.closest('div');
+                // find the next sibling that is a collapsible (we ensured collapsible follows header)
+                let next = header.nextElementSibling;
+                // if not collapsible directly, try a couple of parent levels
+                let attempts = 0;
+                while (next && !next.classList.contains('collapsible') && attempts < 6) {
+                    header = header.parentElement;
+                    next = header ? header.nextElementSibling : null;
+                    attempts++;
                 }
+                if (!next || !next.classList.contains('collapsible')) return;
+                const isHidden = !next.style.display || next.style.display === 'none';
+                next.style.display = isHidden ? 'block' : 'none';
+                btn.textContent = isHidden ? '[-]' : '[+]';
+                btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
             }
-        }
+
+            document.querySelectorAll('.toggle-btn').forEach(function (b) {
+                b.addEventListener('click', toggleHandler);
+            });
+        });
     </script>
-</div>
+

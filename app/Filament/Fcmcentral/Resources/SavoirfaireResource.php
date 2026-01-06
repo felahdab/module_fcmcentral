@@ -3,7 +3,6 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\RelationManagers;
 use Modules\FcmCentral\Models\Savoirfaire;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -16,21 +15,32 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Modules\FcmCentral\Models\Domaine;
+use Modules\FcmCentral\Models\Competence;
 use Filament\Tables\Filters\SelectFilter;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirFaireResource\RelationManagers\ActivitesRelationManager;
 
+use Modules\FcmCentral\Helpers\OutilsHelper;
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 class SavoirfaireResource extends Resource
 {
+    
+    
+    use FilamentPermissionTrait;
+    
     protected static ?string $model = Savoirfaire::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 14;
+   
 
-    protected static ?string $navigationGroup = 'Parcours';
-    protected static ?string $navigationLabel = 'Savoir-faire';
+    // Permissions marche avec le Trait
+    protected static array $permissions = [
+        'fcmcentral::savoirfaire.index',
+        'fcmcentral::admin',
+        'fcmcentral::permission.fps',
+        'fcmcentral::permission.bcf',
+    ];
 
     public static function form(Form $form): Form
     {
@@ -44,53 +54,81 @@ class SavoirfaireResource extends Resource
                     ->required()
                     ->label('Libellé long')
                     ->maxLength(1500),
+                TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),        
                 Select::make('domaine_id')
                     ->label('Domaine')
                     ->required()
                     ->searchable()
-                    ->options(Domaine::all()->pluck('libelle_court','id')),                    
-                TextInput::make('url')
-                    ->label('URL')
-                    ->maxLength(1000), 
+                    ->options(Domaine::all()->pluck('libelle_court','id')), 
+                Select::make('competence_id')
+                    ->label('Competence')
+                    ->required()
+                    ->searchable()
+                    ->options(Competence::all()->pluck('libelle_court','id')),                       
+                // TextInput::make('url')
+                //     ->label('URL')
+                //     ->maxLength(1000), 
+                TextInput::make('same')
+                    ->label('same')
+                    ->maxLength(255), 
                 TextInput::make('code_sicomp')
                     ->label('Code OCTAVE')
-                    ->maxLength(255),  
+                    ->maxLength(255), 
+                Select::make('color')
+                    ->options(OutilsHelper::selectColors())
+                    ->label('Couleur du Badge'),             
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('libelle_court','asc')
+            ->defaultSort('ordre','asc')
+            ->reorderable('ordre') 
+            ->defaultPaginationPageOption(25)
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('domaine.libelle_court')
-                    ->label('Domaine'),
+                
+                    TextColumn::make('code')
+                    ->label('Code')
+                    ->sortable()
+                    ->searchable()
+                    ->badge()
+                    ->color(fn($record)=>$record->color ??  $record->competence->color ?? 'info') 
+                    ,  
+                   
                 TextColumn::make('libelle_court')
+                    ->label('Libellé court')
+                    ->limit(50)
+                    ->sortable()
+                    ->searchable()
+                    ->description(fn ($record) => substr($record->libelle_long,0,40).'...')
+                    ,   
+                    TextColumn::make('domaine.libelle_court')
+                    ->label('Domaine')
+                    ->badge()
+                    //->color('danger') 
+                    ->color(fn($record)=>$record->domaine->color ?? 'info')
+                    ,     
+                    TextColumn::make('competence.code')
+                    ->label('Competence')
+                    ->badge()
+                    ->color(fn($record)=>$record->competence->color ?? 'info')
+                    ,
+                TextColumn::make('competence.parcoursType.libelle_court')
+                    ->label('Type Parcours')
                     ->searchable()
                     ->sortable()
-                    ->label('Libellé court'),
-                TextColumn::make('libelle_long')
-                    ->searchable()
-                    ->label('Libellé long')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('url')
-                    ->formatStateUsing(function ($state) {
-                        return strlen($state) > 20 ? substr($state, 0, 20) . '...' : $state;
-                    })
-                    ->tooltip(fn ($state) => $state)                
-                    ->label('URL'),
+                    ->badge()
+                    ->color(fn($record)=>$record->competence->parcoursType->color ?? 'info')
+                    ,
+                TextColumn::make('ordre')
 
             ])
             ->filters([
@@ -98,6 +136,23 @@ class SavoirfaireResource extends Resource
                 SelectFilter::make('domaine_id')
                     ->label('Domaine')
                     ->options(Domaine::query()->pluck('libelle_court','id')->toArray()),
+
+                   SelectFilter::make('parcours_type_id')
+                    ->label('Type de parcours')
+                    ->options( \Modules\FcmCentral\Models\ParcoursType::all()->pluck('libelle_court', 'id'))
+                    ->query(function ($query, $state) {
+                      
+                        if ($state['value'] ===null) {
+                            //dd($state);
+                             // Afichage quand aucun filtre selectionne
+                             return $query;
+                           
+                        }
+
+                        $query->whereHas('competence.parcoursType', function ($q) use ($state) {
+                            $q->where('id', $state['value']);
+                        });
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
@@ -126,7 +181,7 @@ class SavoirfaireResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ActivitesRelationManager::class
+            
         ];
     }
 

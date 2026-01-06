@@ -41,7 +41,7 @@ class EditParcours extends EditRecord
         $parcours_service = new ParcoursService();
 
         return [
-            Actions\DeleteAction::make(),
+           // Actions\DeleteAction::make(),
             Action::make('figer')
                 ->requiresConfirmation()
                 ->visible($this->authorizeUser())

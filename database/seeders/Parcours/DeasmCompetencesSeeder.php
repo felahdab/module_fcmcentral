@@ -4,86 +4,170 @@ namespace Modules\FcmCentral\Database\Seeders\Parcours;
  
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
  
 class DeasmCompetencesSeeder extends Seeder
 {
-    /**
-     * Seeder généré automatiquement pour fcmcentral_competences
-     * Parcours ID: 104
-     * Généré le: {\Carbon\Carbon::now()->format('Y-m-d H:i:s')}
-     */
+    
+  // Bug Alpine Livewire dans le parcours, j'enleve les caracateres speciaux et accents  pour les seeders
+    private  function cleanString($string) {
+      return preg_replace('/[^A-Za-z0-9 \-]/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $string));
+  }
+
     public function run()
     {
         // Désactiver les contraintes de clés étrangères
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        
-        $data = array (
-  0 => 
-  array (
-    'id' => 495,
-    'uuid' => 'df4fdb01-94e9-4d71-949d-79beedad4bb6',
-    'libelle_long' => 'C1 - Caractériser le spectre de la menace selon les vecteurs présents sur le théâtre d\'opérations',
-    'libelle_court' => 'C1 - Caractériser le spectre de la menace',
-    'url' => NULL,
-    //'same' => NULL,
-    'ordre' => 0,
-    'created_at' => '2025-05-20 08:23:21',
-    'updated_at' => '2025-05-20 08:23:21',
-  ),
-  1 => 
-  array (
-    'id' => 497,
-    'uuid' => '19a7e7f5-992a-4138-b912-24a2c63a138f',
-    'libelle_long' => 'C9 - Partager les données tactiques avec les unités participantes en contexte opérationnel interarmées ou interallié',
-    'libelle_court' => 'C9 - Partager les données tactiques',
-    'url' => NULL,
-    //'same' => NULL,
-    'ordre' => 0,
-    'created_at' => '2025-05-20 08:23:22',
-    'updated_at' => '2025-05-20 08:23:22',
-  ),
-  2 => 
-  array (
-    'id' => 498,
-    'uuid' => '93a83156-e606-45a4-ba00-5e34e0703547',
-    'libelle_long' => 'C6 - Elaborer une classification technique en fonction de l’environnement et en optimisant l’utilisation des senseurs A.S.M. disponibles',
-    'libelle_court' => 'C6 - Elaborer une classification technique',
-    'url' => NULL,
-    //'same' => NULL,
-    'ordre' => 0,
-    'created_at' => '2025-05-20 08:23:22',
-    'updated_at' => '2025-05-20 08:23:22',
-  ),
-  3 => 
-  array (
-    'id' => 499,
-    'uuid' => '06df8696-861f-4f12-b9de-f202878ff6b5',
-    'libelle_long' => 'C13 - Superviser la mise en œuvre des armes et leurres A.S.M.',
-    'libelle_court' => 'C13 - Superviser la mise en œuvre des armes et leurres A.S.M.',
-    'url' => NULL,
-    //'same' => NULL,
-    'ordre' => 0,
-    'created_at' => '2025-05-20 08:23:22',
-    'updated_at' => '2025-05-20 08:23:22',
-  ),
-  4 => 
-  array (
-    'id' => 503,
-    'uuid' => 'a5bf734c-d3a9-47cc-8f3e-d60beb3d2e64',
-    'libelle_long' => 'C4 - Appliquer les concepts de lutte dans les domaines de lutte au-dessus de la surface',
-    'libelle_court' => 'C4 - Appliquer les concepts de lutte dans les domaines de lutte au-dessus de la surface',
-    'url' => NULL,
-    //'same' => NULL,
-    'ordre' => 0,
-    'created_at' => '2025-05-20 08:23:22',
-    'updated_at' => '2025-05-20 08:23:22',
-  ),
-);
+
+        // Classement par PArcours
+        $parcoursTypes = DB::table('fcmcentral_parcours_types')->pluck('id','code');
+        $affectations = DB::table('fcmcentral_affectations')->pluck('id','code');
+
+        $uuids = [
+          'C1' => 'deasm1b1-1234-5678-comp-11aa11z0c01',
+          'C2' => 'deasm1b1-1234-5678-comp-11aa11z0c02',
+          'C3' => 'deasm1b1-1234-5678-comp-11aa11z0c03',
+          'C4' => 'deasm1b1-1234-5678-comp-11aa11z0c04',
+          'C5' => 'deasm1b1-1234-5678-comp-11aa11z0c05',
+          'C6' => 'deasm1b1-1234-5678-comp-11aa11z0c06',
+          'C7' => 'deasm1b1-1234-5678-comp-11aa11z0c07',
+          'C8' => 'deasm1b1-1234-5678-comp-11aa11z0c08',
+          
+        ];
+
+       
+      
+        $i=1;
+        $data = [
+          // [
+          //   'uuid' => Str::uuid()->toString(),
+          //   'code' => 'C0',
+          //   'libelle_court' => '/ - Sédimentation - période d\'apprentrissage post BAT',
+          //   'libelle_long' => 'Sédimentation - période d\'apprentrissage post BAT',
+          //   'ordre' => $i++,
+          //   'color' => 'gray',
+          //   'parcours_type_id' =>  $parcoursTypes['DEASM'],
+          //   'affectation_id' =>  $affectations['A1'],
+          //   'created_at' => now(),
+          //   'updated_at' => now(),
+          // ],
+          [
+            //'uuid' => Str::uuid()->toString(),
+            'uuid' => $uuids['C1'],
+            'code' => 'C1',
+            'libelle_court' => $this->cleanString("C1 - Identifier son rôle dans la chaîne de commandement et des opérations"),
+            'libelle_long' => $this->cleanString("Identifier son rôle dans la chaîne de commandement et des opérations"),
+            'ordre' => $i++,
+            'color' => 'success',
+            'parcours_type_id' =>  $parcoursTypes['DEASM'],
+            'affectation_id' =>  $affectations['A1'],
+            'created_at' => now(),
+            'updated_at' => now(),
+          ],
+          [
+            'uuid' => $uuids['C2'],
+            'code' => 'C2',
+            'libelle_court' => $this->cleanString("C2 - Identifier le spectre de la menace selon les vecteurs présents sur la zone"),
+            'libelle_long' => $this->cleanString("Identifier le spectre de la menace selon les vecteurs présents sur la zone"),
+            'ordre' => $i++,
+            'color' => 'success',
+            'parcours_type_id' =>  $parcoursTypes['DEASM'],
+            'affectation_id' =>  $affectations['A2'],
+            'created_at' => now(),
+            'updated_at' => now(),
+          ],
+          [
+            'uuid' => $uuids['C3'],
+            'code' => 'C3',
+            'libelle_court' => $this->cleanString("C3 - Concevoir une classification technique en fonction de l'environnement et des senseurs ASM"),
+            'libelle_long' => $this->cleanString("Concevoir une classification technique en fonction de l'environnement et des senseurs ASM"),
+            'ordre' => $i++,
+            'color' => 'info',
+            'parcours_type_id' =>  $parcoursTypes['DEASM'],
+            'affectation_id' =>  $affectations['A1'],
+            'created_at' => now(),
+            'updated_at' => now(),
+          ],
+          [
+            'uuid' => $uuids['C4'],
+            'code' => 'C4',
+            'libelle_court' => $this->cleanString("C4 - Exploiter le tâches ASM suivant le contexte opérationnel"),
+            'libelle_long' => $this->cleanString("Exploiter le tâches ASM suivant le contexte opérationnel"),
+            'ordre' => $i++,
+            'color' => 'info',
+            'parcours_type_id' =>  $parcoursTypes['DEASM'],
+            'affectation_id' =>  $affectations['A2'],
+            'created_at' => now(),
+            'updated_at' => now(),
+          ],
+          [
+            'uuid' => $uuids['C5'],
+            'code' => 'C5',
+            'libelle_court' => $this->cleanString("C5 - Exploiter les données tactiques en contexte opérationnel interarmées ou interallié"),
+            'libelle_long' => $this->cleanString("Exploiter les données tactiques en contexte opérationnel interarmées ou interallié"),
+            'ordre' => $i++,
+            'color' => 'purple',
+            'parcours_type_id' =>  $parcoursTypes['DEASM'],
+            'affectation_id' =>  $affectations['A1'],
+            'created_at' => now(),
+            'updated_at' => now(),
+          ],
+          [
+            'uuid' => $uuids['C6'],
+            'code' => 'C6',
+            'libelle_court' => $this->cleanString("C6 - Gérer les munitions pyrotechniques"),
+            'libelle_long' => $this->cleanString("Gérer les munitions pyrotechniques"),
+            'ordre' => $i++,
+            'color' => 'brown',
+            'parcours_type_id' =>  $parcoursTypes['DEASM'],
+            'affectation_id' =>  $affectations['A2'],
+            'created_at' => now(),
+            'updated_at' => now(),
+          ],
+          [
+            'uuid' => $uuids['C7'],
+            'code' => 'C7',
+            'libelle_court' => $this->cleanString("C7 - Exploiter les armes et leurres A.S.M."),
+            'libelle_long' => $this->cleanString("Exploiter les armes et leurres A.S.M."),
+            'ordre' => $i++,
+            'color' => 'success',
+            'parcours_type_id' =>  $parcoursTypes['DEASM'],
+            'affectation_id' =>  $affectations['A2'],
+            'created_at' => now(),
+            'updated_at' => now(),
+          ],
+          [
+            'uuid' => $uuids['C8'],
+            'code' => 'C8',
+            'libelle_court' => $this->cleanString("C8 - Réaliser des maintenances préventives et correctives des senseurs et des équipements associés"),
+            'libelle_long' => $this->cleanString("Réaliser des maintenances préventives et correctives des senseurs et des équipements associés"),
+            'ordre' => $i++,
+            'color' => 'info',
+            'parcours_type_id' =>  $parcoursTypes['DEASM'],
+            'affectation_id' =>  $affectations['A2'],
+            'created_at' => now(),
+            'updated_at' => now(),
+          ],
+          // [
+          //   'uuid' => Str::uuid()->toString(),
+          //   'code' => 'C9',
+          //   'libelle_court' => "C9 - EXA TC",
+          //   'libelle_long' => "EXA TC",
+          //   'ordre' => $i++,
+          //   'color' => 'danger',
+          //   'parcours_type_id' =>  $parcoursTypes['DEASM'],
+          //   'affectation_id' =>  $affectations['A2'],
+          //   'created_at' => now(),
+          //   'updated_at' => now(),
+          // ],
+];
         
         // Utiliser insertOrIgnore pour éviter les doublons
-        collect($data)->chunk(50)->each(function ($chunk) {
-            DB::table('fcmcentral_competences')->insertOrIgnore($chunk->toArray());
-        });
+        // collect($data)->chunk(50)->each(function ($chunk) {
+        //     DB::table('fcmcentral_fonctions')->insertOrIgnore($chunk->toArray());
+        // });
+
+        DB::table('fcmcentral_competences')->insertOrIgnore($data);
         
         // Réactiver les contraintes
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');

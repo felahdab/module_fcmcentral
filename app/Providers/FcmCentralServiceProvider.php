@@ -22,14 +22,17 @@ use App\Filament\PanelRegistry\ModuleDefinedPreferedPagesRegistry;
 
 use Modules\FcmCentral\Models;
 use Modules\FcmCentral\Policies;
+use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
-use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
+
 
 
 class FcmCentralServiceProvider extends ServiceProvider
 {
+
+    
     protected string $moduleName = 'FcmCentral';
 
     protected string $moduleNameLower = 'fcmcentral';
@@ -42,12 +45,21 @@ class FcmCentralServiceProvider extends ServiceProvider
     protected $policies = [
         Models\Parcours::class => Policies\ParcoursPolicy::class,
         Models\ParcoursSerialise::class => Policies\ParcoursSerialisePolicy::class,
-        Models\Fonction::class => Policies\FonctionPolicy::class,
+        Models\Affectation::class => Policies\AffectationPolicy::class,
         Models\Competence::class => Policies\CompetencePolicy::class,
         Models\Savoirfaire::class => Policies\SavoirfairePolicy::class,
-        Models\Activite::class => Policies\ActivitePolicy::class,
+        Models\Objectif::class => Policies\ObjectifPolicy::class,
         Models\Marin::class => Policies\MarinPolicy::class,
-        Models\Cohorte::class => Policies\CohortePolicy::class
+        Models\Domaine::class => Policies\DomainePolicy::class,
+        Models\Cohorte::class => Policies\CohortePolicy::class,
+        Models\Etat::class => Policies\EtatPolicy::class,
+        Models\CompetenceSavoirfaire::class => Policies\CompetenceSavoirfairePolicy::class,
+        Models\Note::class => Policies\NotePolicy::class,
+        Models\ParcoursType::class => Policies\ParcoursTypePolicy::class,
+        Models\SavoirfaireType::class => Policies\SavoirfaireTypePolicy::class,
+        Models\TypeEtat::class => Policies\TypeEtatPolicy::class,
+        Models\TypeNote::class => Policies\TypeNotePolicy::class
+
     ];
 
     /**
@@ -87,34 +99,31 @@ class FcmCentralServiceProvider extends ServiceProvider
                 ->name('FCM central')
                 ->children([
                     DirectMenuItem::make()
-                        ->name('Mon livret de FCM')
-                        ->visible(fn() => auth()->check() && Models\Marin::fromCurrentUser()?->hasLivret())
-                        ->url(fn() => MonLivretDeFcm::getUrl(panel: 'FCM Central')),
+                        ->name('Gestion des marins')
+                        ->url(fn() => ListMarins::getUrl(panel: "FCM Central"))
+                        ->visible(fn() => ListMarins::canAccess()),
                     DirectMenuItem::make()
-                        ->name('Liste des marins')
-                        ->visible(fn() => auth()->check() && auth()->user()->can('fcmcentral::marin.index'))
-                        ->url(fn() => ListMarins::getUrl(panel: 'FCM Central')),
-                        
+                        ->name("Mon livret de FCM")
+                        ->url(fn() => MonLivretDeFcm::getUrl(panel: "FCM Central"))
+                        ->visible(fn() => MonLivretDeFcm::canAccess())
                 ])
         ]);
+   
     }
 
+    
+
+
+
+    /// PAge Preferée
     public function registerPreferedPagesItems()
     {
         app(ModuleDefinedPreferedPagesRegistry::class)->registerPreferedPagesItems(
             [
             PreferedPageItem::make()
-                ->name('FCM central: liste des marins')
-                ->visible(fn() => auth()->check() && auth()->user()->can('fcmcentral::marin.index'))
+                ->name('FCM central: Gestion des marins')
+                ->visible(fn() => auth()->check() && ListMarins::canAccess())
                 ->routeName(fn() => ListMarins::getRouteName(panel: 'FCM Central')),
-            PreferedPageItem::make()
-                ->name('FCM central: liste des parcours')
-                ->visible(fn() => auth()->check()  && auth()->user()->can('fcmcentral::parcours.index'))
-                ->routeName(fn() => ListParcours::getRouteName(panel: 'FCM Central')),
-            PreferedPageItem::make()
-                ->name('FCM central: recherche dans l\' annuaire')
-                ->visible(fn() => auth()->check() && RechercheAnnuairePage::canAccess())
-                ->routeName(fn() => RechercheAnnuairePage::getRouteName(panel: 'FCM Central')),
             PreferedPageItem::make()
                 ->name('FCM central: Mon livret de FCM')
                 ->visible(fn() => auth()->check() && MonLivretDeFcm::canAccess())
@@ -151,8 +160,7 @@ class FcmCentralServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         $this->commands([
-                    TestParcoursArchitecture::class,
-                    TestAttributionParcoursAUser::class,
+
                 ]);
     }
 

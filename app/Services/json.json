@@ -1,0 +1,2098 @@
+{
+    "id": 1,
+    "uuid": "259c05fe-bbf7-45e5-a673-8292b4ed5047",
+    "code": "DEASM1",
+    "libelle_court": "DEASM",
+    "libelle_long": "DEASM (DDC NIVEAU 1, 2 et 3) - (ETR 101856)",
+    "parcours_type_id": 1,
+    "color": null,
+    "affectations": [
+        {
+            "id": 1,
+            "uuid": "d199e947-7b55-4305-8689-3737533fe10d",
+            "libelle_court": "AFFECTATION 1",
+            "libelle_long": "Affectation 1",
+            "color": "gray",
+            "pivot": {
+                "ordre": 1
+            },
+            "competences": [
+                {
+                    "id": 1,
+                    "uuid": "543986b7-eaf1-47d7-b153-2df698bf9627",
+                    "code": "C1",
+                    "libelle_court": "C1 - Identifier son r\u00f4le dans la cha\u00eene de commandement et des op\u00e9rations",
+                    "libelle_long": "Identifier son r\u00f4le dans la cha\u00eene de commandement et des op\u00e9rations",
+                    "color": "success",
+                    "ordre": 1,
+                    "competenceSavoirfaires": [
+                        {
+                            "id": 1,
+                            "uuid": "85dd9ab8-e6fd-46b0-b958-f7f0a00e11e6",
+                            "ordre": 1,
+                            "heures": "19.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 1,
+                                "uuid": "e7f23598-527a-4fff-86d5-070e2a57b6a0",
+                                "code": "C1-SF1",
+                                "libelle_court": "C1-SF1 - Assurer ses fonctions de quart BS au CO en interagissant avec les autres modules (AIR, GE, SURF,LSM,ARM).",
+                                "libelle_long": "Assurer ses fonctions de quart BS au CO en interagissant avec les autres modules (AIR, GE, SURF,LSM,ARM).",
+                                "competence_id": 1,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 1,
+                                    "uuid": "982647d7-f500-475a-9ad4-2a339225400b",
+                                    "libelle_court": "O1 - Assurer le quart au central op\u00e9ration en interagissant avec les autres modules du CO.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C1-SF1-C1-O1",
+                                    "commentaire": "test",
+                                    "etat_valid": true,
+                                    "valideur": "Admin Admin",
+                                    "date_validation": "2025-11-26 09:42:46",
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 2,
+                                    "uuid": "ff21fbfe-01b6-4a83-9d5d-863eecf37b01",
+                                    "libelle_court": "O2 -  Distinguer les commandements op\u00e9rationnels sous lesquels l'unit\u00e9 peut \u00e9voluer et l'impact sur la conduite des op\u00e9rations.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C1-SF1-C1-O2",
+                                    "commentaire": "test",
+                                    "etat_valid": true,
+                                    "valideur": "Admin Admin",
+                                    "date_validation": "2025-11-26 09:42:46",
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 3,
+                                    "uuid": "fb22462d-57e0-4f66-8b9a-df8d782f8597",
+                                    "libelle_court": "O3 - Analyser le PIM de l'unit\u00e9 et les r\u00e9glementations associ\u00e9es aux zones maritimes travers\u00e9es.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C1-SF1-C1-O3",
+                                    "commentaire": "test",
+                                    "etat_valid": true,
+                                    "valideur": "Admin Admin",
+                                    "date_validation": "2025-11-26 09:42:46",
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": "test",
+                            "etat_valid": true,
+                            "valideur": "Admin Admin",
+                            "date_validation": "2025-11-26 09:42:46",
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 2,
+                            "uuid": "62a50349-e3cb-425a-87f2-3bfb1dca645a",
+                            "ordre": 2,
+                            "heures": "8.50",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 2,
+                                "uuid": "09dc754c-a1e2-4422-a443-6f8a63b0d07e",
+                                "code": "C1-SF2",
+                                "libelle_court": "C1-SF2 - Identifier les informations cl\u00e9s (activit\u00e9s du b\u00e2timent, LOG, SIC, RENS...) du briefing OPS pouvant impacter les op\u00e9rations de son domaine de lutte.",
+                                "libelle_long": "Identifier les informations cl\u00e9s (activit\u00e9s du b\u00e2timent, LOG, SIC, RENS...) du briefing OPS pouvant impacter les op\u00e9rations de son domaine de lutte.",
+                                "competence_id": 1,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 4,
+                                    "uuid": "0631b3af-d118-4069-9305-42c3c5b78be5",
+                                    "libelle_court": "O1 - Identifier le contenu sp\u00e9cifique de chaque diapositive (N0 \u00e0 N7) d'un BFG OPS.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C1-SF2-C1-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 5,
+                                    "uuid": "94c5032d-e657-4e57-a186-accc58dbc044",
+                                    "libelle_court": "O2 - Assurer la supervision et la pr\u00e9sentation d'un BFG OPS (N0 \u00e0 N7) devant le bord.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C1-SF2-C1-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 3,
+                            "uuid": "41a26080-6f13-4534-8bcb-80dc22e049ec",
+                            "ordre": 3,
+                            "heures": "4.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 3,
+                                "uuid": "9ab63ad6-55cf-4064-bd35-3a27d075258e",
+                                "code": "C1-SF3",
+                                "libelle_court": "C1-SF3 - Exploiter les messages op\u00e9rationnels li\u00e9s aux diff\u00e9rents domaines de lutte.",
+                                "libelle_long": "Exploiter les messages op\u00e9rationnels li\u00e9s aux diff\u00e9rents domaines de lutte.",
+                                "competence_id": 1,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 6,
+                                    "uuid": "4d86d3b2-38a6-4560-865d-e123a4ec0a4c",
+                                    "libelle_court": "O1 - Ma\u00eetriser l'\u00e9cosyst\u00e8me d'une CMI et le traitement des diff\u00e9rents messages.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C1-SF3-C1-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 7,
+                                    "uuid": "bc58a8ea-d574-4ef0-8cae-a8e8c29c8dac",
+                                    "libelle_court": "O2 - Exploiter un OPSGEN, un OPTASK et un FLOORPLAN.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C1-SF3-C1-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        }
+                    ],
+                    "commentaire": null,
+                    "etat_valid": false,
+                    "valideur": null,
+                    "date_validation": null,
+                    "commentaire_proposition": null,
+                    "date_proposition": null
+                },
+                {
+                    "id": 3,
+                    "uuid": "ba018225-248d-45d1-925b-0250a497a3fe",
+                    "code": "C3",
+                    "libelle_court": "C3 - Concevoir une classification technique en fonction de l'environnement et des senseurs ASM",
+                    "libelle_long": "Concevoir une classification technique en fonction de l'environnement et des senseurs ASM",
+                    "color": "info",
+                    "ordre": 3,
+                    "competenceSavoirfaires": [
+                        {
+                            "id": 9,
+                            "uuid": "c83afe0a-113e-41ab-aa02-c7f26288966f",
+                            "ordre": 9,
+                            "heures": "16.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 9,
+                                "uuid": "65f72619-da64-46bd-8cad-2dcf388f9a66",
+                                "code": "C3-SF1",
+                                "libelle_court": "C3-SF1 - Garantir les r\u00e8gles de s\u00e9curit\u00e9 en exercice.",
+                                "libelle_long": "Garantir les r\u00e8gles de s\u00e9curit\u00e9 en exercice.",
+                                "competence_id": 3,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 8,
+                                    "uuid": "259d2e1b-9409-479e-9aeb-b890f1bbca4f",
+                                    "libelle_court": "O1 - G\u00e9rer les r\u00e8gles de s\u00e9curit\u00e9 lors d'un exercice ASM ou de la mise en \u0153uvre d'une arme ASM.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C3-SF1-C3-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 9,
+                                    "uuid": "d3b26bb4-12f2-465b-80ce-e11ebcab70aa",
+                                    "libelle_court": "O2 - Diriger le module ASM lors d'une reprise de vue ou durant la lutte anti sous-marin.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C3-SF1-C3-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 10,
+                                    "uuid": "6870a127-5da4-4e4d-a2ae-40de113db166",
+                                    "libelle_court": "O3 - Conduire l'action ASM dans le respect de la r\u00e9glementation ZONEX.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C3-SF1-C3-O3",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 10,
+                            "uuid": "43f14f1e-5a8c-4923-9897-cd5cb8a04a61",
+                            "ordre": 10,
+                            "heures": "10.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 10,
+                                "uuid": "663015da-14ea-4f24-80bf-ab88181aac09",
+                                "code": "C3-SF2",
+                                "libelle_court": "C3-SF2 - \u00c9valuer l'influence de l'environnement par la r\u00e9alisation de pr\u00e9dictions de port\u00e9es sur les performances des senseurs et des syst\u00e8mes d'armes LSM.",
+                                "libelle_long": "\u00c9valuer l'influence de l'environnement par la r\u00e9alisation de pr\u00e9dictions de port\u00e9es sur les performances des senseurs et des syst\u00e8mes d'armes LSM.",
+                                "competence_id": 3,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 11,
+                                    "uuid": "f87a39f1-ab15-44e8-ae5f-994cd0c703d8",
+                                    "libelle_court": "O1 - Distinguer les diff\u00e9rents aspects de la propagation acoustique ainsi que les facteurs externes ou porteur pouvant l'influencer.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C3-SF2-C3-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 12,
+                                    "uuid": "8d7c2874-9033-4bbf-8959-cf8bdf3be63c",
+                                    "libelle_court": "O2 - Conduire l'ensemble du processus de r\u00e9alisation de pr\u00e9dictions de port\u00e9es jusqu'\u00e0 la diffusion des messages ASM associ\u00e9s.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C3-SF2-C3-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 13,
+                                    "uuid": "48b31d90-62b9-457a-9bca-b9ad32f00d5d",
+                                    "libelle_court": "O3 - D\u00e9duire les \u00e9l\u00e9ments tactiques des \u00e9l\u00e9ments environnementaux.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C3-SF2-C3-O3",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 11,
+                            "uuid": "a3828778-b44a-490c-b444-6135d345ff63",
+                            "ordre": 11,
+                            "heures": "4.75",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 11,
+                                "uuid": "3f8c2943-52a6-4b2e-a7d3-8557ee1749db",
+                                "code": "C3-SF3",
+                                "libelle_court": "C3-SF3 - \u00c9laborer des \u00e9l\u00e9ments buts en bande large et bande \u00e9troite en tant que CASM.",
+                                "libelle_long": "\u00c9laborer des \u00e9l\u00e9ments buts en bande large et bande \u00e9troite en tant que CASM.",
+                                "competence_id": 3,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 14,
+                                    "uuid": "0a119598-5897-4017-936b-cc6f5c6a64c8",
+                                    "libelle_court": "O1 - Employer les diff\u00e9rentes formules de calcul et la reconnaissance des points remarquables n\u00e9cessaires \u00e0 l'\u00e9laboration des \u00e9l\u00e9ments but.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C3-SF3-C3-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 15,
+                                    "uuid": "53ab6c93-1f2c-458f-a77a-09d50089d8aa",
+                                    "libelle_court": "O2 - R\u00e9soudre des ELB.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C3-SF3-C3-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 12,
+                            "uuid": "ef5cf36b-3bfb-429d-89db-ac215124856f",
+                            "ordre": 12,
+                            "heures": "2.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 12,
+                                "uuid": "43ec78b2-e70b-42bc-8bd3-b19444d388bd",
+                                "code": "C3-SF4",
+                                "libelle_court": "C3-SF4 - Identifier les caract\u00e9ristiques des diff\u00e9rents types de menaces",
+                                "libelle_long": "Identifier les caract\u00e9ristiques des diff\u00e9rents types de menaces",
+                                "competence_id": 3,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 16,
+                                    "uuid": "61588a54-b872-440a-b641-5314b164a7ce",
+                                    "libelle_court": "O1 -  D\u00e9terminer les caract\u00e9ristiques d'un sous-marin et ses actions\/r\u00e9actions face \u00e0 une menace ATBF.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C3-SF4-C3-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 13,
+                            "uuid": "3eeed316-605d-4031-8790-b248f9e10bbb",
+                            "ordre": 13,
+                            "heures": "70.00",
+                            "jours": "10.00",
+                            "libelle_court": "FCM\/LSM NIVEAU 2 + ELAB + ENVIRO + MENACE SOUM",
+                            "savoirfaire": {
+                                "id": 13,
+                                "uuid": "978478f9-26bf-4d8e-aabd-ad62404ba3d8",
+                                "code": "C3-SF5",
+                                "libelle_court": "C3-SF5 - Identifier le r\u00e9f\u00e9rentiel tactique et technique d'un CASM.",
+                                "libelle_long": "Identifier le r\u00e9f\u00e9rentiel tactique et technique d'un CASM.",
+                                "competence_id": 3,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        }
+                    ],
+                    "commentaire": null,
+                    "etat_valid": false,
+                    "valideur": null,
+                    "date_validation": null,
+                    "commentaire_proposition": null,
+                    "date_proposition": null
+                },
+                {
+                    "id": 5,
+                    "uuid": "a9a26877-58cc-481e-aa34-7238aa84e561",
+                    "code": "C5",
+                    "libelle_court": "C5 - Exploiter les donn\u00e9es tactiques en contexte op\u00e9rationnel interarm\u00e9es ou interalli\u00e9",
+                    "libelle_long": "Exploiter les donn\u00e9es tactiques en contexte op\u00e9rationnel interarm\u00e9es ou interalli\u00e9",
+                    "color": "purple",
+                    "ordre": 5,
+                    "competenceSavoirfaires": [
+                        {
+                            "id": 23,
+                            "uuid": "4736a99e-717e-450f-8140-6c71c020b5ee",
+                            "ordre": 23,
+                            "heures": "35.00",
+                            "jours": "5.00",
+                            "libelle_court": "FCM\/SDC-LDT",
+                            "savoirfaire": {
+                                "id": 21,
+                                "uuid": "98979a7f-6835-4b03-b014-cdfbe68de93f",
+                                "code": "C5-SF1",
+                                "libelle_court": "C5-SF1 - G\u00e9rer l'activit\u00e9 op\u00e9rationnelle en maitrisant l'information (partie SDC et LDT)",
+                                "libelle_long": "G\u00e9rer l'activit\u00e9 op\u00e9rationnelle en maitrisant l'information (partie SDC et LDT)",
+                                "competence_id": 5,
+                                "color": "purple"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 24,
+                            "uuid": "920b82c4-0da3-41a8-9ad9-65efbe2a08fb",
+                            "ordre": 24,
+                            "heures": "35.00",
+                            "jours": "5.00",
+                            "libelle_court": "FCM\/ANGLAIS NIVEAU 2",
+                            "savoirfaire": {
+                                "id": 22,
+                                "uuid": "074e97a2-cb67-45d2-a865-27911d8faa0b",
+                                "code": "C5-SF2",
+                                "libelle_court": "C5-SF2 - Employer la proc\u00e9dure OTAN dans le cadre de la conduite des op\u00e9rations",
+                                "libelle_long": "Employer la proc\u00e9dure OTAN dans le cadre de la conduite des op\u00e9rations",
+                                "competence_id": 5,
+                                "color": "purple"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 25,
+                            "uuid": "990077d4-8bc3-4b68-b0ac-5117613175d1",
+                            "ordre": 25,
+                            "heures": "35.00",
+                            "jours": "5.00",
+                            "libelle_court": "FCM\/ANGLAIS NIVEAU 3",
+                            "savoirfaire": {
+                                "id": 23,
+                                "uuid": "094ad2d6-da90-45ad-9bd3-b3db28710c80",
+                                "code": "C5-SF3",
+                                "libelle_court": "C5-SF3 - Pr\u00e9parer en anglais un exercice combin\u00e9 de lutte anti-sous-marine (CASEX).",
+                                "libelle_long": "Pr\u00e9parer en anglais un exercice combin\u00e9 de lutte anti-sous-marine (CASEX).",
+                                "competence_id": 5,
+                                "color": "purple"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        }
+                    ],
+                    "commentaire": null,
+                    "etat_valid": false,
+                    "valideur": null,
+                    "date_validation": null,
+                    "commentaire_proposition": null,
+                    "date_proposition": null
+                }
+            ],
+            "commentaire": null,
+            "etat_valid": false,
+            "valideur": null,
+            "date_validation": null,
+            "commentaire_proposition": null,
+            "date_proposition": null
+        },
+        {
+            "id": 2,
+            "uuid": "9ebbbcd5-44cc-488e-ae93-b9a6cfc73223",
+            "libelle_court": "AFFECTATION 2",
+            "libelle_long": "Affectation 2",
+            "color": "info",
+            "pivot": {
+                "ordre": 2
+            },
+            "competences": [
+                {
+                    "id": 2,
+                    "uuid": "66775cd0-2179-4908-b615-82f77979a7ab",
+                    "code": "C2",
+                    "libelle_court": "C2 - Identifier le spectre de la menace selon les vecteurs pr\u00e9sents sur la zone",
+                    "libelle_long": "Identifier le spectre de la menace selon les vecteurs pr\u00e9sents sur la zone",
+                    "color": "success",
+                    "ordre": 2,
+                    "competenceSavoirfaires": [
+                        {
+                            "id": 4,
+                            "uuid": "fac1ddbf-3e9d-452d-9883-252874583906",
+                            "ordre": 4,
+                            "heures": "42.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 4,
+                                "uuid": "87128c5d-e90c-461a-ab38-9b87c134ee52",
+                                "code": "C2-SF1",
+                                "libelle_court": "C2-SF1 - Conduire les op\u00e9rations dans les domaines de luttes au-dessus de la surface (LAN, LAA)",
+                                "libelle_long": "Conduire les op\u00e9rations dans les domaines de luttes au-dessus de la surface (LAN, LAA)",
+                                "competence_id": 2,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 17,
+                                    "uuid": "bd8241b7-68b0-4212-aa84-7d42d858d323",
+                                    "libelle_court": "O1 - Employer les moyens AERO suivant les op\u00e9rations en cours.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF1-C2-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 18,
+                                    "uuid": "72745159-69bf-424e-bb46-ea749819ef03",
+                                    "libelle_court": "O2 - Adapter la guerre \u00e9lectronique au diff\u00e9rents domaines de luttes.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF1-C2-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 19,
+                                    "uuid": "73f8cece-36a7-4384-8574-35c179841fde",
+                                    "libelle_court": "O3 - Conduire les op\u00e9rations en LAN.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF1-C2-O3",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 20,
+                                    "uuid": "559dfe6f-befa-4b18-b926-2473d3ec5dea",
+                                    "libelle_court": "O4 - Conduire les op\u00e9rations en LAA.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF1-C2-O4",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 5,
+                            "uuid": "30cb6417-0729-47e7-9cb2-65b90ebdeea1",
+                            "ordre": 5,
+                            "heures": "25.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 5,
+                                "uuid": "00d4c573-ed8a-4b13-bb38-fc30c8543140",
+                                "code": "C2-SF2",
+                                "libelle_court": "C2-SF2 - Mettre en oeuvre les t\u00e2ches des diff\u00e9rents domaines de luttes suivant le contexte op\u00e9rationnel (EXERCICES, ESCORT, INTERDICTION DE ZONE, TRANSIT..)",
+                                "libelle_long": "Mettre en \u0153uvre les t\u00e2ches des diff\u00e9rents domaines de luttes suivant le contexte op\u00e9rationnel (EXERCICES, ESCORT, INTERDICTION DE ZONE, TRANSIT..)",
+                                "competence_id": 2,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 21,
+                                    "uuid": "c395cfd4-8815-40bd-8aa4-e707861a2c95",
+                                    "libelle_court": "O2 - Adapter la guerre \u00e9lectronique au diff\u00e9rents domaines de luttes.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF2-C2-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 22,
+                                    "uuid": "412b9b3e-0855-4a82-957d-7d19473acdf7",
+                                    "libelle_court": "O3 - Conduire les op\u00e9rations en LAN.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF2-C2-O3",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 23,
+                                    "uuid": "c0813712-c2ce-4d6f-b27c-1de85ceef939",
+                                    "libelle_court": "O4 - Conduire les op\u00e9rations en LAA.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF2-C2-O4",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 24,
+                                    "uuid": "481e9da1-2dc1-4255-b9db-511659290562",
+                                    "libelle_court": "O5 - Conduire les op\u00e9rations en LSM.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF2-C2-O5",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 25,
+                                    "uuid": "f3dc0287-c488-45fb-9d26-3eed785e2a44",
+                                    "libelle_court": "O1 - Identifier la mise en oeuvre du syst\u00e8me d'arme MDCN.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF2-C2-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 26,
+                                    "uuid": "e5f0d26a-fa33-49ca-8327-692a2c8b4b9f",
+                                    "libelle_court": "O2 - Adapter la conduite des syst\u00e8mes d'armes de son bord en respectant la s\u00e9curit\u00e9 et les r\u00e8gles d'engagement.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF2-C2-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 6,
+                            "uuid": "a0a3e932-d72b-45ca-b2bb-ff599a9227a0",
+                            "ordre": 6,
+                            "heures": "6.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 6,
+                                "uuid": "484a9741-219c-423f-a4d1-d2e4f3775ef8",
+                                "code": "C2-SF3",
+                                "libelle_court": "C2-SF3 - Adapter la mise en \u0153uvre des armes \u00e0 une situation tactique donn\u00e9e",
+                                "libelle_long": "Adapter la mise en oeuvre des armes \u00e0 une situation tactique donn\u00e9e",
+                                "competence_id": 2,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 7,
+                            "uuid": "2eed98e6-2397-44f4-9f40-85621e9e5755",
+                            "ordre": 7,
+                            "heures": "15.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 7,
+                                "uuid": "955c9e7b-846c-442f-805b-b0af21972dbb",
+                                "code": "C2-SF4",
+                                "libelle_court": "C2-SF4 - Corr\u00e9ler la gestion des menaces et des communications dans les domaines de lutte au-dessus de la surface (EMCON, dispositif, emploi des moyens, ZIPPO\u2026)",
+                                "libelle_long": "Corr\u00e9ler la gestion des menaces et des communications dans les domaines de lutte au-dessus de la surface (EMCON, dispositif, emploi des moyens, ZIPPO\u2026)",
+                                "competence_id": 2,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 43,
+                                    "uuid": "5e8b0249-26bb-4ca1-ba98-ac5304f033b1",
+                                    "libelle_court": "O1 -  Adapter le plan EMCON et les mesures ZIPPO suivant la menace.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF4-C2-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 44,
+                                    "uuid": "24e4af3e-fb7f-4510-844b-dc1b7bfd0046",
+                                    "libelle_court": "O2 -  G\u00e9rer la menace en LAA.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF4-C2-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 45,
+                                    "uuid": "9a533b7f-b4d8-4fb3-9b8a-3084a54993e2",
+                                    "libelle_court": "O3 -  G\u00e9rer la menace et l'engagement en LAN.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF4-C2-O3",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 46,
+                                    "uuid": "bf773909-29cd-4653-90a1-a92f0ac5b5d1",
+                                    "libelle_court": "O4 - Identifier la documentation et syst\u00e8mes n\u00e9cessaires \u00e0 la r\u00e9alisation des op\u00e9rations dans tous les domaines de lutte.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C2-SF4-C2-O4",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 8,
+                            "uuid": "e1055422-0c9d-4690-beb1-34f2f08ed331",
+                            "ordre": 8,
+                            "heures": "35.00",
+                            "jours": "5.00",
+                            "libelle_court": "FCM\/THEORIE LAS NIVEAU 3",
+                            "savoirfaire": {
+                                "id": 8,
+                                "uuid": "4e59e300-049a-42da-9a15-d6cbdc227163",
+                                "code": "C2-SF5",
+                                "libelle_court": "C2-SF5 - Op\u00e9rer l'action de surface en tant qu'officier de quart op\u00e9ration sur petit b\u00e2timent",
+                                "libelle_long": "Op\u00e9rer l'action de surface en tant qu'officier de quart op\u00e9ration sur petit b\u00e2timent",
+                                "competence_id": 2,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        }
+                    ],
+                    "commentaire": null,
+                    "etat_valid": false,
+                    "valideur": null,
+                    "date_validation": null,
+                    "commentaire_proposition": null,
+                    "date_proposition": null
+                },
+                {
+                    "id": 4,
+                    "uuid": "20d2ac60-33ef-4c8e-8ce1-50fbc418d334",
+                    "code": "C4",
+                    "libelle_court": "C4 - Exploiter le t\u00e2ches ASM suivant le contexte op\u00e9rationnel",
+                    "libelle_long": "Exploiter le t\u00e2ches ASM suivant le contexte op\u00e9rationnel",
+                    "color": "info",
+                    "ordre": 4,
+                    "competenceSavoirfaires": [
+                        {
+                            "id": 14,
+                            "uuid": "e2fd2e59-7a7e-4774-8687-620787ed71ee",
+                            "ordre": 14,
+                            "heures": "10.00",
+                            "jours": "0.00",
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 14,
+                                "uuid": "2a6bf7f5-769b-4cce-a5f5-1b8042b9f2ce",
+                                "code": "C4-SF1",
+                                "libelle_court": "C4-SF1 - Identifier les t\u00e2ches ASM (TASM).",
+                                "libelle_long": "Identifier les t\u00e2ches ASM (TASM).",
+                                "competence_id": 4,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 27,
+                                    "uuid": "53113661-fd64-4633-8333-11c47c5efbda",
+                                    "libelle_court": "O1 - Adapter le comportement acoustique en fonction de l'environnement et des op\u00e9rations",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF1-C4-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 15,
+                            "uuid": "41b64ea7-17ba-4ce8-91be-82cce0c3cbc4",
+                            "ordre": 15,
+                            "heures": "5.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 15,
+                                "uuid": "13877c06-a35d-4f86-9b54-08c55f177246",
+                                "code": "C4-SF2",
+                                "libelle_court": "C4-SF2 - Identifier les opportunit\u00e9s de d\u00e9tection TECHNIQUE (emploi et efficacit\u00e9 des codes sonar) et TACTIQUE (comportement de la menace)",
+                                "libelle_long": "Identifier les opportunit\u00e9s de d\u00e9tection TECHNIQUE (emploi et efficacit\u00e9 des codes sonar) et TACTIQUE (comportement de la menace)",
+                                "competence_id": 4,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 28,
+                                    "uuid": "2129a8c0-df47-479f-b72d-3b4fed0d89ca",
+                                    "libelle_court": "O1 - Corr\u00e9ler l'emploi des codes sonar aux r\u00e9actions d'un sous-marin dans le RETEX de CASEX.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF2-C4-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 29,
+                                    "uuid": "c69d689f-f729-4f96-afc6-145dc662050e",
+                                    "libelle_court": "O2 - Adapter les r\u00e9glages sonar \u00e0 une t\u00e2che ordonn\u00e9e.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF2-C4-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 30,
+                                    "uuid": "dfe87a2b-9f99-4d00-880c-18bdb9e7e2b2",
+                                    "libelle_court": "O3 - G\u00e9rer une proc\u00e9dure de traitement d'intrus et une demande d'indentification.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF2-C4-O3",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 16,
+                            "uuid": "0e30bb23-aa8c-4a5d-b6fd-9ca5a4cad074",
+                            "ordre": 16,
+                            "heures": "20.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 16,
+                                "uuid": "456b9a27-d9d7-4418-95e6-4cb0ff712998",
+                                "code": "C4-SF3",
+                                "libelle_court": "C4-SF3 - Identifier le r\u00e9f\u00e9rentiel tactique et technique d'un CASM.",
+                                "libelle_long": "Identifier le r\u00e9f\u00e9rentiel tactique et technique d'un CASM.",
+                                "competence_id": 4,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 17,
+                            "uuid": "70293b33-522f-4007-941a-1f4629fc1cfb",
+                            "ordre": 17,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "FCM\/LSM NIVEAU 3",
+                            "savoirfaire": {
+                                "id": 16,
+                                "uuid": "456b9a27-d9d7-4418-95e6-4cb0ff712998",
+                                "code": "C4-SF3",
+                                "libelle_court": "C4-SF3 - Identifier le r\u00e9f\u00e9rentiel tactique et technique d'un CASM.",
+                                "libelle_long": "Identifier le r\u00e9f\u00e9rentiel tactique et technique d'un CASM.",
+                                "competence_id": 4,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 31,
+                                    "uuid": "ae5efb2e-0f1e-4aa3-bb3a-b4451eecb248",
+                                    "libelle_court": "O1 - Diff\u00e9rencier les principes et messages OPS entre la WSM et PMI.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF3-C4-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 32,
+                                    "uuid": "26b74037-f408-4a87-8fcd-65d5f754c6f2",
+                                    "libelle_court": "O2 -  Conduire les op\u00e9rations en fonction des zones SM.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF3-C4-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 33,
+                                    "uuid": "aa0a1438-38c3-4322-b8db-c917b0db17d3",
+                                    "libelle_court": "O3 - R\u00e9aliser un briefing NAVSOUM \/ZONEX SM.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF3-C4-O3",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 34,
+                                    "uuid": "9121464b-902e-4647-a3da-171d355e9c74",
+                                    "libelle_court": "O4 - Conduire l'action op\u00e9rationnelle en s\u00e9curit\u00e9",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF3-C4-O4",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 18,
+                            "uuid": "de8d4948-e9cf-49cc-82f6-9fb45861123a",
+                            "ordre": 18,
+                            "heures": "6.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 17,
+                                "uuid": "93193a83-65df-422b-b385-01bb7f6223b0",
+                                "code": "C4-SF4",
+                                "libelle_court": "C4-SF4 - Analyser les \u00e9l\u00e9ments issus de la d\u00e9tection multistatique en faisant le lien avec la SITAC.",
+                                "libelle_long": "Analyser les \u00e9l\u00e9ments issus de la d\u00e9tection multistatique en faisant le lien avec la SITAC.",
+                                "competence_id": 4,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 38,
+                                    "uuid": "8a5718c6-c6e2-49b0-902d-4255eb00ed91",
+                                    "libelle_court": "O1 - Distinguer les diff\u00e9rents syst\u00e8mes de d\u00e9tection (radar, optique, optronique\u2026) et leurs performances pour aider \u00e0 la classification des contacts.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF4-C4-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 39,
+                                    "uuid": "55d48812-18a7-454a-ac87-ce745a53f789",
+                                    "libelle_court": "O2 - Identifier les avantages et inconv\u00e9nients de la d\u00e9tection multistatique ainsi que la notion de multistatisme subit.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF4-C4-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 19,
+                            "uuid": "b303a6dc-5690-454e-8a0d-4bd7cba761f4",
+                            "ordre": 19,
+                            "heures": "9.00",
+                            "jours": "0.00",
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 18,
+                                "uuid": "a5483766-d170-47a3-8c5f-37e77b6a99ed",
+                                "code": "C4-SF5",
+                                "libelle_court": "C4-SF5 - Discriminer les sources d'indiscr\u00e9tion acoustique et les moyens de lutter contre les bruits rayonn\u00e9s.",
+                                "libelle_long": "Discriminer les sources d'indiscr\u00e9tion acoustique et les moyens de lutter contre les bruits rayonn\u00e9s.",
+                                "competence_id": 4,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 40,
+                                    "uuid": "c7749794-20fb-456f-b06b-8c5c641a711e",
+                                    "libelle_court": "O1 - R\u00e9aliser le suivi de la signature acoustique de son b\u00e2timent.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF5-C4-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 41,
+                                    "uuid": "280191f7-a214-4b7e-adb7-671133ed609a",
+                                    "libelle_court": "O2 - \u00c9valuer la situation acoustique de son unit\u00e9 afin de l\u2019adapter en fonction des op\u00e9rations.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF5-C4-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 20,
+                            "uuid": "3fe4d79c-2b7a-4194-b0f3-64d210ae1e16",
+                            "ordre": 20,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "FCM\/LSM NIVEAU 3",
+                            "savoirfaire": {
+                                "id": 19,
+                                "uuid": "bf8707d6-27ef-4581-a22b-b1f0618e121b",
+                                "code": "C4-SF6",
+                                "libelle_court": "C4-SF6 - \u00c9laborer des \u00e9l\u00e9ments buts en bande large et bande \u00e9troite en tant que CASM.",
+                                "libelle_long": "\u00c9laborer des \u00e9l\u00e9ments buts en bande large et bande \u00e9troite en tant que CASM.",
+                                "competence_id": 4,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 21,
+                            "uuid": "8029e943-117c-4aeb-8ee8-05b0e9b73ed3",
+                            "ordre": 21,
+                            "heures": "4.00",
+                            "jours": "0.50",
+                            "libelle_court": "\u00c9valuation bord CASM",
+                            "savoirfaire": {
+                                "id": 20,
+                                "uuid": "f5ed90a0-aa9d-4c7a-8165-3d6f8dfd49be",
+                                "code": "C4-SF7",
+                                "libelle_court": "C4-SF7 - Garantir les r\u00e8gles de s\u00e9curit\u00e9 dans les op\u00e9rations au-dessus et au-dessous de la surface (SECU SOUM, ENGAGEMENT GABARI DE SECURITE..)",
+                                "libelle_long": "Garantir les r\u00e8gles de s\u00e9curit\u00e9 dans les op\u00e9rations au-dessus et au-dessous de la surface (SECU SOUM, ENGAGEMENT GABARI DE SECURITE..)",
+                                "competence_id": 4,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 22,
+                            "uuid": "00a05e7c-699a-4ad7-97be-6ba93a2620b6",
+                            "ordre": 22,
+                            "heures": "7.00",
+                            "jours": "1.00",
+                            "libelle_court": "TP DIVENT",
+                            "savoirfaire": {
+                                "id": 20,
+                                "uuid": "f5ed90a0-aa9d-4c7a-8165-3d6f8dfd49be",
+                                "code": "C4-SF7",
+                                "libelle_court": "C4-SF7 - Garantir les r\u00e8gles de s\u00e9curit\u00e9 dans les op\u00e9rations au-dessus et au-dessous de la surface (SECU SOUM, ENGAGEMENT GABARI DE SECURITE..)",
+                                "libelle_long": "Garantir les r\u00e8gles de s\u00e9curit\u00e9 dans les op\u00e9rations au-dessus et au-dessous de la surface (SECU SOUM, ENGAGEMENT GABARI DE SECURITE..)",
+                                "competence_id": 4,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 42,
+                                    "uuid": "f697b69a-6332-409b-96ad-10048d4b04cf",
+                                    "libelle_court": "O1 - Diriger le module ASM en tant que CASM.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C4-SF7-C4-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        }
+                    ],
+                    "commentaire": null,
+                    "etat_valid": false,
+                    "valideur": null,
+                    "date_validation": null,
+                    "commentaire_proposition": null,
+                    "date_proposition": null
+                },
+                {
+                    "id": 6,
+                    "uuid": "cfc7fb61-d562-4c3e-b8f1-950abc623134",
+                    "code": "C6",
+                    "libelle_court": "C6 - G\u00e9rer les munitions pyrotechniques",
+                    "libelle_long": "G\u00e9rer les munitions pyrotechniques",
+                    "color": "brown",
+                    "ordre": 6,
+                    "competenceSavoirfaires": [
+                        {
+                            "id": 26,
+                            "uuid": "097d34ed-6063-420e-a6f5-c299346d9f6e",
+                            "ordre": 26,
+                            "heures": "10.00",
+                            "jours": null,
+                            "libelle_court": "EAD LOG",
+                            "savoirfaire": {
+                                "id": 24,
+                                "uuid": "035fb238-fa84-438b-9725-19f24c0e9966",
+                                "code": "C6-SF1",
+                                "libelle_court": "C6-SF1 - Organiser une logistique efficace au service des activit\u00e9s par la connaissance pr\u00e9cise du statut logistique des biens",
+                                "libelle_long": "Organiser une logistique efficace au service des activit\u00e9s par la connaissance pr\u00e9cise du statut logistique des biens",
+                                "competence_id": 6,
+                                "color": "brown"
+                            },
+                            "savoirfaire_type": {
+                                "id": 3,
+                                "code": "EAD",
+                                "libelle_court": "Ecole a Distance"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 27,
+                            "uuid": "b2c37547-43aa-41f8-a70f-da05f4a11fbb",
+                            "ordre": 27,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 25,
+                                "uuid": "3e05c2b3-daf5-4bb9-b7c6-ca53f2ab511e",
+                                "code": "C6-SF2",
+                                "libelle_court": "C6-SF2 - Contr\u00f4ler la conservation des biens et pr\u00e9venir tout d\u00e9tournement ou dilapidation",
+                                "libelle_long": "Contr\u00f4ler la conservation des biens et pr\u00e9venir tout d\u00e9tournement ou dilapidation",
+                                "competence_id": 6,
+                                "color": "brown"
+                            },
+                            "savoirfaire_type": {
+                                "id": 3,
+                                "code": "EAD",
+                                "libelle_court": "Ecole a Distance"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 28,
+                            "uuid": "974ae599-4bba-4647-b3fb-c1ac62a0774b",
+                            "ordre": 28,
+                            "heures": "16.00",
+                            "jours": null,
+                            "libelle_court": "FCM GESTION DE MUNITIONS",
+                            "savoirfaire": {
+                                "id": 26,
+                                "uuid": "2ef9e59c-ed4b-4d84-b41b-6c9be02f0cec",
+                                "code": "C6-SF3",
+                                "libelle_court": "C6-SF3 - Distinguer les principes g\u00e9n\u00e9raux  de fonctionnement et de mise en oeuvre des munitions pour leur bon usage.",
+                                "libelle_long": "Distinguer les principes g\u00e9n\u00e9raux  de fonctionnement et de mise en oeuvre des munitions pour leur bon usage.",
+                                "competence_id": 6,
+                                "color": "brown"
+                            },
+                            "savoirfaire_type": {
+                                "id": 3,
+                                "code": "EAD",
+                                "libelle_court": "Ecole a Distance"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 29,
+                            "uuid": "0436f2ae-fc7f-42d3-a14e-8d00eff00a2b",
+                            "ordre": 29,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "FCM GESTION DE MUNITIONS",
+                            "savoirfaire": {
+                                "id": 27,
+                                "uuid": "fc63203f-2350-4936-afdb-91c2fe83cad1",
+                                "code": "C6-SF4",
+                                "libelle_court": "C6-SF4 - Contr\u00f4ler la s\u00e9curit\u00e9 des r\u00e8gles de stockage et de compatibilit\u00e9 applicables aux munitions et artifices.",
+                                "libelle_long": "Contr\u00f4ler la s\u00e9curit\u00e9 des r\u00e8gles de stockage et de compatibilit\u00e9 applicables aux munitions et artifices.",
+                                "competence_id": 6,
+                                "color": "brown"
+                            },
+                            "savoirfaire_type": {
+                                "id": 3,
+                                "code": "EAD",
+                                "libelle_court": "Ecole a Distance"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 30,
+                            "uuid": "a75d8a39-bb03-4674-a921-d71b3508c648",
+                            "ordre": 30,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "FCM\/LOG NIVEAU 3 (+ SIGLE EMB)",
+                            "savoirfaire": {
+                                "id": 28,
+                                "uuid": "4a2210b0-8818-472b-9684-e2c049d1d508",
+                                "code": "C6-SF5",
+                                "libelle_court": "C6-SF5 - Organiser une logistique efficace au service des activit\u00e9s par la connaissance pr\u00e9cise du statut logistique des biens",
+                                "libelle_long": "Organiser une logistique efficace au service des activit\u00e9s par la connaissance pr\u00e9cise du statut logistique des biens",
+                                "competence_id": 6,
+                                "color": "brown"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 31,
+                            "uuid": "7d0c96bb-798d-4845-81b2-3037d1712e1b",
+                            "ordre": 31,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "FCM\/LOG NIVEAU 3 (+ SIGLE EMB)",
+                            "savoirfaire": {
+                                "id": 29,
+                                "uuid": "380cbbc7-2c5b-43a6-8db7-b2d692258d32",
+                                "code": "C6-SF6",
+                                "libelle_court": "C6-SF6 - Contr\u00f4ler la conservation des biens et pr\u00e9venir tout d\u00e9tournement ou dilapidation",
+                                "libelle_long": "Contr\u00f4ler la conservation des biens et pr\u00e9venir tout d\u00e9tournement ou dilapidation",
+                                "competence_id": 6,
+                                "color": "brown"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        }
+                    ],
+                    "commentaire": null,
+                    "etat_valid": false,
+                    "valideur": null,
+                    "date_validation": null,
+                    "commentaire_proposition": null,
+                    "date_proposition": null
+                },
+                {
+                    "id": 7,
+                    "uuid": "c044fde3-8216-4a52-8b2c-a266a9a62aef",
+                    "code": "C7",
+                    "libelle_court": "C7 - Exploiter les armes et leurres A.S.M.",
+                    "libelle_long": "Exploiter les armes et leurres A.S.M.",
+                    "color": "success",
+                    "ordre": 7,
+                    "competenceSavoirfaires": [
+                        {
+                            "id": 32,
+                            "uuid": "b5357228-8f9e-4c42-8efb-3f47480ceb31",
+                            "ordre": 32,
+                            "heures": "4.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 30,
+                                "uuid": "7d7bef9e-97c6-47d5-98e2-0fbac7521415",
+                                "code": "C7-SF1",
+                                "libelle_court": "C7-SF1 - Adapter les r\u00e9glages torpilles aux differents types de menaces",
+                                "libelle_long": "Adapter les r\u00e9glages torpilles aux differents types de menaces",
+                                "competence_id": 7,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 35,
+                                    "uuid": "06e6bba6-b7e4-4964-9345-3744a63adf96",
+                                    "libelle_court": "O1 - Adapter le type de cible aux t\u00e9l\u00e9r\u00e9glages de la MU 90",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C7-SF1-C7-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 33,
+                            "uuid": "9bafb294-5ca2-49fb-9c34-a32cfcaf822d",
+                            "ordre": 33,
+                            "heures": "15.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 31,
+                                "uuid": "fce4417c-4002-402d-84d8-4050b1117343",
+                                "code": "C7-SF2",
+                                "libelle_court": "C7-SF2 - Adapter les r\u00e9glages des IHM selon les situations de tirs d\u2019armes et munitions ASM ou de leurres",
+                                "libelle_long": "Adapter les r\u00e9glages des IHM selon les situations de tirs d\u2019armes et munitions ASM ou de leurres",
+                                "competence_id": 7,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 1,
+                                "code": "C",
+                                "libelle_court": "Compagnonnage"
+                            },
+                            "objectifs": [
+                                {
+                                    "id": 36,
+                                    "uuid": "6f01e0d8-9fe6-4e1b-b0e5-8d7707d037b4",
+                                    "libelle_court": "O1 -  D\u00e9terminer le type d'attaque torpille suivant les zones de r\u00e9actions et les manoeuvre anti-torpille.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C7-SF2-C7-O1",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                },
+                                {
+                                    "id": 37,
+                                    "uuid": "0e318846-a30d-4fb7-9bf2-ed943fb930bd",
+                                    "libelle_court": "O2 - Conduire un tir torpille et le lancement de contre-mesures.",
+                                    "description": "",
+                                    "ordre": 1,
+                                    "code": "C7-SF2-C7-O2",
+                                    "commentaire": null,
+                                    "etat_valid": false,
+                                    "valideur": null,
+                                    "date_validation": null,
+                                    "commentaire_proposition": null,
+                                    "date_proposition": null
+                                }
+                            ],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 34,
+                            "uuid": "59013faa-36bd-494e-be92-002974029e34",
+                            "ordre": 34,
+                            "heures": "70.00",
+                            "jours": "10.00",
+                            "libelle_court": "STAGE FCM\/LSM NIVEAU 3",
+                            "savoirfaire": {
+                                "id": 32,
+                                "uuid": "466d179b-c1b6-4f1a-b0ab-48b5f1244dc5",
+                                "code": "C7-SF3",
+                                "libelle_court": "C7-SF3 - Mettre en oeuvre l\u2019action op\u00e9rationnelle en tant que CASM",
+                                "libelle_long": "Mettre en oeuvre l\u2019action op\u00e9rationnelle en tant que CASM",
+                                "competence_id": 7,
+                                "color": "success"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        }
+                    ],
+                    "commentaire": null,
+                    "etat_valid": false,
+                    "valideur": null,
+                    "date_validation": null,
+                    "commentaire_proposition": null,
+                    "date_proposition": null
+                },
+                {
+                    "id": 8,
+                    "uuid": "2e588b5e-45f4-47dc-9d04-660dee84bb44",
+                    "code": "C8",
+                    "libelle_court": "C8 - R\u00e9aliser des maintenances pr\u00e9ventives et correctives des senseurs et des \u00e9quipements associ\u00e9s",
+                    "libelle_long": "R\u00e9aliser des maintenances pr\u00e9ventives et correctives des senseurs et des \u00e9quipements associ\u00e9s",
+                    "color": "info",
+                    "ordre": 8,
+                    "competenceSavoirfaires": [
+                        {
+                            "id": 35,
+                            "uuid": "4977c416-42a2-4ba1-8c53-46312cb3fc85",
+                            "ordre": 35,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "EAD LOG",
+                            "savoirfaire": {
+                                "id": 33,
+                                "uuid": "ef5af5bf-b73a-4814-abd2-5a0fbb563f2d",
+                                "code": "C8-SF1",
+                                "libelle_court": "C8-SF1 - Planifier les proc\u00e9dures logistiques en vigueur dans la marine dans le cadre de la maintenance pr\u00e9ventive ou corrective des syst\u00e8mes de d\u00e9tection ou de combat",
+                                "libelle_long": "Planifier les proc\u00e9dures logistiques en vigueur dans la marine dans le cadre de la maintenance pr\u00e9ventive ou corrective des syst\u00e8mes de d\u00e9tection ou de combat",
+                                "competence_id": 8,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 3,
+                                "code": "EAD",
+                                "libelle_court": "Ecole a Distance"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 36,
+                            "uuid": "59df21e0-1a9c-4889-9a20-e0566ae49d0f",
+                            "ordre": 36,
+                            "heures": "35.00",
+                            "jours": "5.00",
+                            "libelle_court": "ATRIUM",
+                            "savoirfaire": {
+                                "id": 34,
+                                "uuid": "6943af55-b600-4666-a406-f0dda966d847",
+                                "code": "C8-SF2",
+                                "libelle_court": "C8-SF2 - Distinguer les diff\u00e9rentes r\u00e8gles de base en \u00e9lectricit\u00e9 et en \u00e9lectronique en vue de leur application sur les syst\u00e8mes de d\u00e9tection ou de combat",
+                                "libelle_long": "Distinguer les diff\u00e9rentes r\u00e8gles de base en \u00e9lectricit\u00e9 et en \u00e9lectronique en vue de leur application sur les syst\u00e8mes de d\u00e9tection ou de combat",
+                                "competence_id": 8,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 3,
+                                "code": "EAD",
+                                "libelle_court": "Ecole a Distance"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 37,
+                            "uuid": "4a6edf24-4b50-43d6-a7f2-52fa95e74d46",
+                            "ordre": 37,
+                            "heures": "35.00",
+                            "jours": "5.00",
+                            "libelle_court": "FCM\/MCO ELECTRONIQUE NIVEAU2",
+                            "savoirfaire": {
+                                "id": 34,
+                                "uuid": "6943af55-b600-4666-a406-f0dda966d847",
+                                "code": "C8-SF2",
+                                "libelle_court": "C8-SF2 - Distinguer les diff\u00e9rentes r\u00e8gles de base en \u00e9lectricit\u00e9 et en \u00e9lectronique en vue de leur application sur les syst\u00e8mes de d\u00e9tection ou de combat",
+                                "libelle_long": "Distinguer les diff\u00e9rentes r\u00e8gles de base en \u00e9lectricit\u00e9 et en \u00e9lectronique en vue de leur application sur les syst\u00e8mes de d\u00e9tection ou de combat",
+                                "competence_id": 8,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 38,
+                            "uuid": "dbe6edfa-70b2-4322-a957-1242e86d6086",
+                            "ordre": 38,
+                            "heures": "34.00",
+                            "jours": "5.00",
+                            "libelle_court": "FCM\/LOG NIVEAU 3 (+ SIGLE EMB)",
+                            "savoirfaire": {
+                                "id": 35,
+                                "uuid": "9e9472ba-a6d3-42d8-9f7a-22530a5d2f51",
+                                "code": "C8-SF3",
+                                "libelle_court": "C8-SF3 - Panifier les proc\u00e9dures logistiques en vigueur dans la marine dans le cadre de la maintenance pr\u00e9ventive ou corrective des syst\u00e8mes de d\u00e9tection ou de combat",
+                                "libelle_long": "Panifier les proc\u00e9dures logistiques en vigueur dans la marine dans le cadre de la maintenance pr\u00e9ventive ou corrective des syst\u00e8mes de d\u00e9tection ou de combat",
+                                "competence_id": 8,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 39,
+                            "uuid": "7ca2c82c-5819-42f3-8133-8b981b53732b",
+                            "ordre": 39,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "FCM\/LOG NIVEAU 3 (+ SIGLE EMB)",
+                            "savoirfaire": {
+                                "id": 36,
+                                "uuid": "e0829ef2-0724-421c-8bd9-fa224851226c",
+                                "code": "C8-SF4",
+                                "libelle_court": "C8-SF4 - Utiliser des outils de r\u00e9solutions de probl\u00e8me dans le cadre de la maintenance.",
+                                "libelle_long": "Utiliser des outils de r\u00e9solutions de probl\u00e8me dans le cadre de la maintenance.",
+                                "competence_id": 8,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 40,
+                            "uuid": "ff410367-e5c1-465c-af6d-0d0cd29e37b8",
+                            "ordre": 40,
+                            "heures": "28.00",
+                            "jours": "4.00",
+                            "libelle_court": "FCM\/INFOR + FIBRES + LINUX NIVEAU 3",
+                            "savoirfaire": {
+                                "id": 37,
+                                "uuid": "8454f7c8-5459-497d-bb33-3039cb5aa53b",
+                                "code": "C8-SF5",
+                                "libelle_court": "C8-SF5 - Identifier les notions \u00e9l\u00e9mentaires sur la fibre optique et les techniques de nettoyage et d'inspection pour l'entretien et le d\u00e9pannage du mat\u00e9riel",
+                                "libelle_long": "Identifier les notions \u00e9l\u00e9mentaires sur la fibre optique et les techniques de nettoyage et d'inspection pour l'entretien et le d\u00e9pannage du mat\u00e9riel",
+                                "competence_id": 8,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 41,
+                            "uuid": "db03c2a0-0c09-457b-9054-69f0a75c96b8",
+                            "ordre": 41,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "FCM\/INFOR + FIBRES + LINUX NIVEAU 3",
+                            "savoirfaire": {
+                                "id": 38,
+                                "uuid": "7d502cd4-541e-413c-a958-a56b53e96e0e",
+                                "code": "C8-SF6",
+                                "libelle_court": "C8-SF6 - Diff\u00e9rencier les diff\u00e9rents types de langages de programmation machine (commandes types Unix).",
+                                "libelle_long": "Diff\u00e9rencier les diff\u00e9rents types de langages de programmation machine (commandes types Unix).",
+                                "competence_id": 8,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 42,
+                            "uuid": "cc7cafa1-666b-49c8-867b-5d557877a455",
+                            "ordre": 42,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 39,
+                                "uuid": "9c0e73c5-35c9-430b-a09e-c4a62a6b24ae",
+                                "code": "C8-SF7",
+                                "libelle_court": "C8-SF7 - Identifier l'interconnectivit\u00e9 entre les \u00e9quipements et les abonn\u00e9s d'un r\u00e9seau.",
+                                "libelle_long": "Identifier l'interconnectivit\u00e9 entre les \u00e9quipements et les abonn\u00e9s d'un r\u00e9seau.",
+                                "competence_id": 8,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        },
+                        {
+                            "id": 43,
+                            "uuid": "0965a55b-5b94-4342-8ffe-4702ee9792ad",
+                            "ordre": 43,
+                            "heures": "0.00",
+                            "jours": null,
+                            "libelle_court": "",
+                            "savoirfaire": {
+                                "id": 40,
+                                "uuid": "f3111c59-83e3-4252-bc3d-9cb08d963929",
+                                "code": "C8-SF8",
+                                "libelle_court": "C8-SF8 - Distinguer la contribution des automates dans les fonctionnalit\u00e9s des \u00e9quipements connect\u00e9s au r\u00e9seau informatique",
+                                "libelle_long": "Distinguer la contribution des automates dans les fonctionnalit\u00e9s des \u00e9quipements connect\u00e9s au r\u00e9seau informatique",
+                                "competence_id": 8,
+                                "color": "info"
+                            },
+                            "savoirfaire_type": {
+                                "id": 2,
+                                "code": "S",
+                                "libelle_court": "Stage"
+                            },
+                            "objectifs": [],
+                            "commentaire": null,
+                            "etat_valid": false,
+                            "valideur": null,
+                            "date_validation": null,
+                            "commentaire_proposition": null,
+                            "date_proposition": null
+                        }
+                    ],
+                    "commentaire": null,
+                    "etat_valid": false,
+                    "valideur": null,
+                    "date_validation": null,
+                    "commentaire_proposition": null,
+                    "date_proposition": null
+                }
+            ],
+            "commentaire": null,
+            "etat_valid": false,
+            "valideur": null,
+            "date_validation": null,
+            "commentaire_proposition": null,
+            "date_proposition": null
+        }
+    ],
+    "commentaire": null,
+    "etat_valid": false,
+    "valideur": null,
+    "date_validation": null,
+    "commentaire_proposition": null,
+    "date_proposition": null
+}

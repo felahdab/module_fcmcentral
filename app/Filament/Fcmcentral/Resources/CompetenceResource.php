@@ -2,6 +2,7 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Actions\Exports\Enums\Contracts\ExportFormat;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\RelationManagers;
 use Modules\FcmCentral\Models\Competence;
@@ -11,24 +12,48 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+
+use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
 
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\RelationManagers\SavoirfairesRelationManager;
+use Modules\FcmCentral\Helpers\OutilsHelper;
+
+// Import/ Export
+use Modules\FcmCentral\Filament\Fcmcentral\Exports\CompetenceExporter;
+use Modules\FcmCentral\Filament\Fcmcentral\Imports\CompetenceImporter;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ImportAction;
+use Filament\Tables\Actions\ExportBulkAction;
+use Filament\Tables\Actions\Action;
+// Fin Import / Export
 
 class CompetenceResource extends Resource
 {
+
+    use FilamentPermissionTrait;
+    
     protected static ?string $model = Competence::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 13;
 
-    protected static ?string $navigationGroup = 'Parcours';
-    protected static ?string $navigationLabel = 'Compétences';
+
+
+    // Permissions marche avec le Trait
+    protected static array $permissions = [
+        'fcmcentral::competence.index',
+        'fcmcentral::admin',
+        'fcmcentral::permission.bcf',
+        'fcmcentral::permission.fps',
+    ];
+
+
 
     public static function form(Form $form): Form
     {
@@ -42,46 +67,78 @@ class CompetenceResource extends Resource
                     ->required()
                     ->label('Libellé long')
                     ->maxLength(1500),
-                TextInput::make('url')
-                    ->label('URL')
-                    ->maxLength(1000), 
+                TextInput::make('code')
+                    ->required()
+                    ->label('Code')
+                    ->maxLength(150),    
+                Select::make('parcours_type_id')
+                    ->relationship(name: 'parcoursType', titleAttribute: 'libelle_court')
+                    ->label('Type de Parcours')
+                    ->required(),    
+                Select::make('color')
+                    ->options(OutilsHelper::selectColors())
+                    ->label('Couleur du Badge'),        
+               
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('libelle_court','asc')    
+            ->defaultSort('ordre','asc')  
+            ->reorderable('ordre') 
+            ->defaultPaginationPageOption(25) 
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('code')
+                    ->label('Code')
+                    ->sortable()
+                    ->badge()
+                    ->color(fn($record)=>$record->color ?? 'info')
+                    ->searchable(),       
                 TextColumn::make('libelle_court')
                     ->label('Libellé court')
+                    ->limit(50)
                     ->sortable()
-                    ->searchable(),   
-                TextColumn::make('libelle_long')
-                    ->label('Libellé long') 
                     ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('url')
+                    ->description(fn ($record) => substr($record->libelle_long,0,40).'...')
+                    ,   
+               
+                    TextColumn::make('savoirfaires.code')
+                    ->label('Savoir Faire')
+                    ->badge()
+                    ->color(fn($record)=>$record->savoirfaires->first()->color ?? $record->color ?? 'info'),    
+                TextColumn::make('parcoursType.libelle_court')
+                    ->label('Type Parcours')
                     ->searchable()
-                    ->formatStateUsing(function ($state) {
-                        return strlen($state) > 20 ? substr($state, 0, 20) . '...' : $state;
-                    })
-                    ->tooltip(fn ($state) => $state)                
-                    ->label('URL'),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
+                TextColumn::make('ordre')
+                
+                   ,    
+                // TextColumn::make('created_at')
+                //     ->date()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+                // TextColumn::make('updated_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->headerActions([
+              
+
+                // ExportAction::make()
+                //     ->exporter(CompetenceExporter::class)
+                //     ->label('Exportation data'),
+                    // ImportAction::make()
+                    // ->importer(CompetenceImporter::class)
+                    // ->label('Importation data'),
+                    
+            ])
+    
             ->filters([
                 //
             ])
@@ -104,16 +161,25 @@ class CompetenceResource extends Resource
 
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                 Tables\Actions\BulkActionGroup::make([
+                     Tables\Actions\DeleteBulkAction::make(),
+                 ]),
+               
+              
+
+
             ]);
+    }
+
+    public static function getEloquentQuery() : Builder
+    {
+        return parent::getEloquentQuery()->withCount('savoirfaires');
     }
 
     public static function getRelations(): array
     {
         return [
-            SavoirfairesRelationManager::class,
+            //SavoirfairesRelationManager::class,
         ];
     }
 

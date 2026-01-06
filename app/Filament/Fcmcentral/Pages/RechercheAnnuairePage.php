@@ -2,7 +2,7 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
 
-use Illuminate\support\Arr;
+use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Blade;
 
@@ -31,8 +31,11 @@ use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuaireForms\RechercheAnnuaireForm;
 
 
+
 class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
 {
+    
+    
     protected static ?string $navigationGroup = 'Marins';
     protected static ?string $navigationLabel = 'Recherche Annudef';
 
@@ -49,9 +52,9 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
     {
         return [
             Action::make('create-local-user-or-marin')
-            ->visible(function(){
-                return auth()->check();
-            })
+            // ->visible(function(){
+            //     return auth()->check() && (static::canAccessAdminMenus() || static::canAccessMentorFeatures());
+            // })
             ->iconButton()
             ->icon('heroicon-m-user-plus')
             ->extraAttributes([
@@ -197,9 +200,10 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
     {
         return [
             BulkAction::make('create-local-user')
-                ->visible(function(){
-                    return auth()->check() && auth()->user()->can('users.store');
-                })
+                // ->visible(function(){
+                //     return auth()->check() && 
+                //     (auth()->user()->can('users.store')|| static::canAccessMentorFeatures());
+                // })
                 ->icon('heroicon-m-user-plus')
                 ->label("Créé l'utilisateur local")
                 ->requiresConfirmation()
