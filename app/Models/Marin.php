@@ -137,6 +137,9 @@ class Marin extends BaseMarin
         return $this->complementsFcm()->exists();
     }
 
+ 
+
+
     /**
      * Vérifie si ce marin est un mentor (supervise d'autres marins)
      * 

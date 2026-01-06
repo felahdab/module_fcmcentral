@@ -331,7 +331,15 @@ Tables\Columns\IconColumn::make('fcm_actif')
         ->requiresConfirmation()
         ->form(function ($record) {
             if ($record->estEnFcm() && $record->getDernierTypeEtatCode() !== 'FCM_FIN') {
-                return []; // Pas de formulaire si déjà actif et pas en FCM_FIN
+               // return []; // Pas de formulaire si déjà actif et pas en FCM_FIN
+               $event = new UserGeneratedEvent(
+                UserGeneratedEventTypes::MARIN_PAS_FCM,
+                auth()->user()->uuid,
+                ObjectClasses::MARIN,
+                $record->uuid,
+                []
+            );
+            event($event);
             }
             return [
                 Forms\Components\Select::make('cohorte_id')
@@ -363,6 +371,7 @@ Tables\Columns\IconColumn::make('fcm_actif')
             ];
         })
         ->action(function ($record, $data) {
+            
             if ($record->estEnFcm() && $record->getDernierTypeEtatCode() !== 'FCM_FIN') {
                 \Filament\Notifications\Notification::make()
                     ->title('Marin déjà en FCM')
@@ -370,6 +379,7 @@ Tables\Columns\IconColumn::make('fcm_actif')
                     ->send();
                 return;
             }
+            
             // Activation FCM + historisation état FCM_sed
             event(new UserGeneratedEvent(
                 UserGeneratedEventTypes::MARIN_EN_FCM,
