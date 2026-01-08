@@ -725,7 +725,18 @@
 <x-filament::section class="section-card">
     <x-slot name="heading">
         <div class="flex items-center justify-between">
-            <span>Statut & Jalons</span>
+            <span>Jalons FCM</span>
+            @if($this->canEditJalons())
+                <x-filament::icon-button
+                    icon="heroicon-o-pencil"
+                    size="md"
+                    color="warning"
+                    tooltip="Modifier les jalons"
+                    wire:click="ouvrirJalonModal"
+                />
+            @endif
+
+            {{-- <span>Statut & Jalons</span>
             @if($this->canCreateEtat())
                 <x-filament::icon-button
                     icon="heroicon-o-plus-circle"
@@ -734,9 +745,45 @@
                     tooltip="Ajouter un Statut/Jalon"
                     wire:click="ajouterEtat"
                 />
-            @endif
+            @endif --}}
         </div>
     </x-slot>
+
+    <div class="space-y-3">
+        {{-- DÉBUT SÉDIMENTATION --}}
+        <div class="flex items-center justify-between p-2 rounded bg-blue-50 border border-blue-200">
+            <div class="flex items-center gap-2">
+                <x-filament::icon icon="heroicon-o-arrow-path" class="w-5 h-5 text-blue-600" />
+                <span class="text-sm font-medium text-gray-900">Début Sédimentation</span>
+            </div>
+            <span class="text-sm text-gray-700">
+                {{ $this->getDateSedimentationFormatee() }}
+            </span>
+        </div>
+
+        {{-- VERT FCM --}}
+        <div class="flex items-center justify-between p-2 rounded bg-green-50 border border-green-200">
+            <div class="flex items-center gap-2">
+                <x-filament::icon icon="heroicon-o-check-circle" class="w-5 h-5 text-green-600" />
+                <span class="text-sm font-medium text-gray-900">Vert FCM</span>
+            </div>
+            <span class="text-sm text-gray-700">
+                {{ $this->getDateFcmFormatee() }}
+            </span>
+        </div>
+
+        {{-- VERT COMPÉTENCE --}}
+        <div class="flex items-center justify-between p-2 rounded bg-purple-50 border border-purple-200">
+            <div class="flex items-center gap-2">
+                <x-filament::icon icon="heroicon-o-academic-cap" class="w-5 h-5 text-purple-600" />
+                <span class="text-sm font-medium text-gray-900">Vert Compétence</span>
+            </div>
+            <span class="text-sm text-gray-700">
+                {{ $this->getDateCompetenceFormatee() }}
+            </span>
+        </div>
+    </div>
+
    
     @if($this->historiqueEtats->isEmpty())
         <div class="text-center py-4 text-gray-500 text-sm">
@@ -785,6 +832,10 @@
         </div>
     @endif
 </x-filament::section>
+
+
+
+
 
 
         </div>
@@ -1015,6 +1066,54 @@
 
 
 
+{{-- MODAL MODIFICATION JALONS --}}
+<x-filament::modal 
+    id="jalon-modal" 
+    :visible="$showJalonModal"
+    wire:model="showJalonModal"
+>
+    <x-slot name="heading">
+        Modifier les jalons FCM
+    </x-slot>
+
+    <div class="space-y-4">
+        <div>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Date Sédimentation</label>
+            <input 
+                type="date" 
+                wire:model="jalonForm.date_sedimentation"
+                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600"
+            />
+        </div>
+
+        <div>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Date FCM</label>
+            <input 
+                type="date" 
+                wire:model="jalonForm.date_fcm"
+                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600"
+            />
+        </div>
+
+        <div>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Date Compétence</label>
+            <input 
+                type="date" 
+                wire:model="jalonForm.date_competence"
+                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-600"
+            />
+        </div>
+    </div>
+
+    <x-slot name="footerActions">
+        <x-filament::button wire:click="sauvegarderJalons" color="primary">
+            Enregistrer
+        </x-filament::button>
+        <x-filament::button wire:click="$set('showJalonModal', false)" color="gray">
+            Annuler
+        </x-filament::button>
+    </x-slot>
+</x-filament::modal>
 
 
 

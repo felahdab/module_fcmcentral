@@ -93,7 +93,7 @@ class FcmcentralPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: module_path($this->module, 'app/Filament/Fcmcentral/Widgets'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Widgets")
-            ->widgets($this->getConditionalWidgets())
+            
             ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
                 return $this->buildConditionalNavigation($builder);
             })
@@ -119,7 +119,8 @@ class FcmcentralPanelProvider extends PanelProvider
             ])
             ->topNavigation()
             ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')))
-            ->userMenuItems($this->getConditionalUserMenuItems());
+            ->userMenuItems($this->getConditionalUserMenuItems())
+            ;
 
         return $panel;
     }
@@ -356,34 +357,7 @@ class FcmcentralPanelProvider extends PanelProvider
 
    
 
-    /**
-     * Widgets conditionnels selon les droits
-     */
-    private function getConditionalWidgets(): array
-    {
-        $widgets = [];
-
-       
-           
-                $widgets = array_merge($widgets, [
-
-                    
-
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorStatsWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MarinsSupervisesWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorProgressionWidget::class,
-                
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinProgressWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinStatsWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinEvolutionWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinRepartitionWidget::class,
-                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\TestMarinRolesPermissionsWidget::class,
-                ]);
-           
-       
-
-        return $widgets;
-    }
+    
 
     /**
      * Menu utilisateur conditionnel (MEnu Avatar)

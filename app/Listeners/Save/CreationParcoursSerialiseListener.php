@@ -4,7 +4,7 @@ namespace Modules\FcmCentral\Listeners\Save;
 
 use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
-use Modules\FcmCommun\Enums\Constants;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\Traits\LoadsModelsDynamically;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
@@ -134,7 +134,7 @@ class CreationParcoursSerialiseListener
             
             // Fin partie ancienne
 
-            $notification = Constants::getMess(Constants::PARCOURS, $parcours->libelle_court);
+            $notification = UserGeneratedEventNotifications::getMess(UserGeneratedEventNotifications::PARCOURS, $parcours->libelle_court);
 
             Notification::make()
                 ->title($notification['title'] ?? 'Parcours sérialisé')

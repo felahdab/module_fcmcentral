@@ -14,6 +14,9 @@ use Modules\FcmCentral\Models\TypeEtat;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Livewire\Attributes\Computed;
 use Modules\FcmCommun\Services\CalculHeuresParcoursService;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 
 class FicheBilan extends ViewRecord
 {
@@ -23,6 +26,20 @@ class FicheBilan extends ViewRecord
     protected static ?string $title = 'Fiche Bilan';
 
     public ?int $marinId = null;
+
+    public $showJalonModal = false;
+    public $jalonForm = [
+        'date_sedimentation' => null,
+        'date_fcm' => null,
+        'date_competence' => null,
+    ];
+  
+    protected $listeners = [
+        'note-added' => 'refreshNotes',
+        'etat-added' => 'refreshEtats',
+        'notify' => 'handleNotification',
+        'openJalonModal' => 'ouvrirJalonModal'
+    ];
 
     // ============================================
     // 🔧 LIFECYCLE METHODS
@@ -579,10 +596,10 @@ public function getStatutColor(): string
     $code = $this->marin->getDernierTypeEtatCode();
    
     return match($code) {
-        'FCM_ACT' => 'text-green-600',
-        'FCM_SED' => 'text-blue-600',
-        'FCM_PAU' => 'text-orange-600',
-        'FCM_FIN' => 'text-purple-600',
+        'FCM' => 'text-green-600',
+        'SED' => 'text-blue-600',
+        'GEL' => 'text-orange-600',
+        'FIN' => 'text-purple-600',
         default => 'text-gray-600'
     };
 }
@@ -592,10 +609,10 @@ public function getStatutBgColor(): string
     $code = $this->marin->getDernierTypeEtatCode();
    
     return match($code) {
-        'FCM_ACT' => 'bg-green-50 border-green-200',
-        'FCM_SED' => 'bg-blue-50 border-blue-200',
-        'FCM_PAU' => 'bg-orange-50 border-orange-200',
-        'FCM_FIN' => 'bg-purple-50 border-purple-200',
+        'FCM' => 'bg-green-50 border-green-200',
+        'SED' => 'bg-blue-50 border-blue-200',
+        'GEL' => 'bg-orange-50 border-orange-200',
+        'FIN' => 'bg-purple-50 border-purple-200',
         default => 'bg-gray-50 border-gray-200'
     };
 }
@@ -645,6 +662,104 @@ public function historiqueEtats()
         ->get();
 }
 
+public function ouvrirJalonModal()
+{
+    $fcmMarin = $this->marin->complementsFcm;
+    
+    $this->jalonForm = [
+        'date_sedimentation' => $fcmMarin?->date_sedimentation 
+            ? \Carbon\Carbon::parse($fcmMarin->date_sedimentation)->format('Y-m-d')
+            : null,
+        'date_fcm' => $fcmMarin?->date_fcm 
+            ? \Carbon\Carbon::parse($fcmMarin->date_fcm)->format('Y-m-d')
+            : null,
+        'date_competence' => $fcmMarin?->date_competence 
+            ? \Carbon\Carbon::parse($fcmMarin->date_competence)->format('Y-m-d')
+            : null,
+    ];
+    
+    $this->showJalonModal = true;
+    $this->dispatch('open-modal', id: 'jalon-modal');
+}
+
+
+
+
+public function sauvegarderJalons()
+{
+    $fcmMarin = $this->marin->complementsFcm;
+    
+    if ($fcmMarin) {
+        if (!empty($this->jalonForm['date_sedimentation'])) {
+           // $fcmMarin->date_sedimentation = \Carbon\Carbon::parse($this->jalonForm['date_sedimentation']);
+           event(new UserGeneratedEvent(
+            UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+            auth()->user()->uuid,
+            ObjectClasses::MARIN,
+            $this->marin->uuid,
+            ["date_sedimentation" => $this->jalonForm['date_sedimentation']]
+        ));
+        }
+        if (!empty($this->jalonForm['date_fcm'])) {
+            /// $fcmMarin->date_fcm = \Carbon\Carbon::parse($this->jalonForm['date_fcm']);
+            event(new UserGeneratedEvent(
+                UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+                auth()->user()->uuid,
+                ObjectClasses::MARIN,
+                $this->marin->uuid,
+                ["date_fcm" => $this->jalonForm['date_fcm']]
+            ));
+        }
+        if (!empty($this->jalonForm['date_competence'])) {
+           // $fcmMarin->date_competence = \Carbon\Carbon::parse($this->jalonForm['date_competence']);
+           event(new UserGeneratedEvent(
+            UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+            auth()->user()->uuid,
+            ObjectClasses::MARIN,
+            $this->marin->uuid,
+            ["date_competence" => $this->jalonForm['date_competence']]
+        ));
+        }
+        
+        // $fcmMarin->save();
+        
+        // \Filament\Notifications\Notification::make()
+        //     ->title('Jalons mis à jour')
+        //     ->success()
+        //     ->send();
+    }
+    
+    $this->showJalonModal = false;
+}
+
+public function canEditJalons(): bool
+{
+    return auth()->user()->can('fcmcentral::admin') 
+    || auth()->user()->can('admin') 
+        || auth()->user()->can('fcmcentral::permission.bcf')
+        || auth()->user()->can('fcmcentral::permission.fps');
+}
+
+public function getDateSedimentationFormatee(): string
+{
+    $date = $this->marin->complementsFcm?->date_sedimentation;
+    return $date ? \Carbon\Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
+}
+
+public function getDateFcmFormatee(): string
+{
+    $date = $this->marin->complementsFcm?->date_fcm;
+    return $date ? \Carbon\Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
+}
+
+public function getDateCompetenceFormatee(): string
+{
+    $date = $this->marin->complementsFcm?->date_competence;
+    return $date ? \Carbon\Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
+}
+
+
+
 
  
 
@@ -652,11 +767,7 @@ public function historiqueEtats()
     // 🔄 LIVEWIRE LISTENERS
     // ============================================
 
-    protected $listeners = [
-        'note-added' => 'refreshNotes',
-        'etat-added' => 'refreshEtats',
-        'notify' => 'handleNotification'
-    ];
+    
 
     public function refreshNotes()
     {

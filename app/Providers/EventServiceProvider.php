@@ -5,20 +5,10 @@ namespace Modules\FcmCentral\Providers;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCentral\Events\SaveFcmMarinEvent;
-use Modules\FcmCentral\Events\SuivreMarinFcmEvent;
-use Modules\FcmCentral\Events\AssignerMarinParcoursEvent;
-use Modules\FcmCentral\Events\SerializeParcoursEvent;
-use Modules\FcmCentral\Listeners\ParcoursAttribueListener;
-use Modules\FcmCentral\Listeners\ParcoursRetireListener;
 
-use Modules\FcmCentral\Listeners\ValideActiviteListener;
-use Modules\FcmCentral\Listeners\ValideSavoirFaireListener;
-use Modules\FcmCentral\Listeners\AttribuerCohorteMarinListener;
 
 
 use Modules\FcmCentral\Listeners\StoreUserGeneratedEventListener;
-use Modules\FcmCentral\Listeners\SaveUserGeneratedEventListener;
 use Modules\FcmCentral\Listeners\TransmitUserGeneratedEventListener;
 
 use Modules\FcmCentral\Listeners\Save\FcmMarinListener;
@@ -26,15 +16,13 @@ use Modules\FcmCentral\Listeners\Save\CohorteMarinListener;
 use Modules\FcmCentral\Listeners\Save\MentorMarinListener;
 use Modules\FcmCentral\Listeners\Save\CreationParcoursSerialiseListener;
 use Modules\FcmCentral\Listeners\Save\ParcoursSerialiseMarinListener;
+use Modules\FcmCentral\Listeners\Save\DefinirJalonFcmListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\ValidElementMarinParcoursListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\AnnulElementMarinParcoursListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\ProposElementMarinParcoursListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\AnnulProposElementMarinParcoursListener;
 
-use Modules\FcmCentral\Listeners\Save\SaveFcmMarinListener;
-use Modules\FcmCommun\Listeners\Save\SaveSuivreMarinFcmListener;
-use Modules\FcmCommun\Listeners\Save\SaveAssignerMarinParcoursListener;
-use Modules\FcmCommun\Listeners\Save\SaveSerializeParcoursListener;
+
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -50,6 +38,7 @@ class EventServiceProvider extends ServiceProvider
             AnnulElementMarinParcoursListener::class,
             ProposElementMarinParcoursListener::class,
             AnnulProposElementMarinParcoursListener::class,
+            DefinirJalonFcmListener::class,
             //TransmitUserGeneratedEventListener::class,
         ],
 

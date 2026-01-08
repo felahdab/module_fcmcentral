@@ -12,6 +12,7 @@ use Modules\FcmCommun\Models\Marin as BaseMarin;
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCentral\Models\FcmMarin;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean;
 
 /**
 * Modèle Marin pour le module FCM Central
@@ -715,6 +716,13 @@ class Marin extends BaseMarin
             'date_debut' => $dateDebut ?? now(),
             'date_fin' => $dateFin,
         ]);
+    }
+
+    public function getEnGelAttribute(): bool
+    {
+        // Faire la requete sur la table des gels/degels pour déterminer si la dernière entrée est un gel ou un degel
+        // On peut mettre en cache le résultat.
+        return false;
     }
       
 

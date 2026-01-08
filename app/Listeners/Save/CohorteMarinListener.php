@@ -9,7 +9,7 @@ use Filament\Notifications\Notification;
 
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
-use Modules\FcmCommun\Enums\Constants;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
@@ -54,7 +54,7 @@ class CohorteMarinListener
                 ],
             );
                         
-            $notification = Constants::getMess(Constants::COHORTE, $marin->nom);
+            $notification = UserGeneratedEventNotifications::getMess(UserGeneratedEventNotifications::COHORTE, $marin->nom);
             
             // Notification Filament
             Notification::make()
