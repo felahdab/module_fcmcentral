@@ -9,17 +9,9 @@ class TypeEtatSeeder extends Seeder
 {
     public function run(): void
     {
-        TypeEtat::updateOrCreate(['code' => 'FCM_ACT'], [
-            'libelle_court' => 'En FCM',
-        ]);
-        TypeEtat::updateOrCreate(['code' => 'FCM_SED'], [
-            'libelle_court' => 'En Sedimentation',
-        ]);
-        TypeEtat::updateOrCreate(['code' => 'FCM_PAU'], [
+        TypeEtat::updateOrCreate(['code' => 'GEL_PAU'], [
             'libelle_court' => 'En Pause',
         ]);
-        TypeEtat::updateOrCreate(['code' => 'FCM_FIN'], [
-            'libelle_court' => 'Fin FCM',
-        ]);
+        
     }
 }

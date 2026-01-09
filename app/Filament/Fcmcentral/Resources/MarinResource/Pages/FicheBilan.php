@@ -728,8 +728,10 @@ public function sauvegarderJalons()
         //     ->success()
         //     ->send();
     }
-    
-    $this->showJalonModal = false;
+    $this->marin->refresh();
+   // $this->showJalonModal = false;
+   $this->dispatch('close-modal', id: 'jalon-modal');
+    $this->dispatch('$refresh');
 }
 
 public function canEditJalons(): bool

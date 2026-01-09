@@ -725,7 +725,7 @@
 <x-filament::section class="section-card">
     <x-slot name="heading">
         <div class="flex items-center justify-between">
-            <span>Jalons FCM</span>
+            <span>Jalons et Gel FCM</span>
             @if($this->canEditJalons())
                 <x-filament::icon-button
                     icon="heroicon-o-pencil"
@@ -736,24 +736,24 @@
                 />
             @endif
 
-            {{-- <span>Statut & Jalons</span>
+          
             @if($this->canCreateEtat())
                 <x-filament::icon-button
                     icon="heroicon-o-plus-circle"
                     size="md"
                     color="primary"
-                    tooltip="Ajouter un Statut/Jalon"
+                    tooltip="Ajouter un Gel"
                     wire:click="ajouterEtat"
                 />
-            @endif --}}
+            @endif
         </div>
     </x-slot>
 
     <div class="space-y-3">
         {{-- DÉBUT SÉDIMENTATION --}}
-        <div class="flex items-center justify-between p-2 rounded bg-blue-50 border border-blue-200">
+        <div class="flex items-center justify-between p-2 ">
             <div class="flex items-center gap-2">
-                <x-filament::icon icon="heroicon-o-arrow-path" class="w-5 h-5 text-blue-600" />
+                <x-filament::icon icon="heroicon-o-arrow-path" class="w-5 h-5 " />
                 <span class="text-sm font-medium text-gray-900">Début Sédimentation</span>
             </div>
             <span class="text-sm text-gray-700">
@@ -762,9 +762,9 @@
         </div>
 
         {{-- VERT FCM --}}
-        <div class="flex items-center justify-between p-2 rounded bg-green-50 border border-green-200">
+        <div class="flex items-center justify-between p-2 ">
             <div class="flex items-center gap-2">
-                <x-filament::icon icon="heroicon-o-check-circle" class="w-5 h-5 text-green-600" />
+                <x-filament::icon icon="heroicon-o-check-circle" class="w-5 h-5 " />
                 <span class="text-sm font-medium text-gray-900">Vert FCM</span>
             </div>
             <span class="text-sm text-gray-700">
@@ -773,9 +773,9 @@
         </div>
 
         {{-- VERT COMPÉTENCE --}}
-        <div class="flex items-center justify-between p-2 rounded bg-purple-50 border border-purple-200">
+        <div class="flex items-center justify-between p-2 ">
             <div class="flex items-center gap-2">
-                <x-filament::icon icon="heroicon-o-academic-cap" class="w-5 h-5 text-purple-600" />
+                <x-filament::icon icon="heroicon-o-academic-cap" class="w-5 h-5 " />
                 <span class="text-sm font-medium text-gray-900">Vert Compétence</span>
             </div>
             <span class="text-sm text-gray-700">
@@ -784,12 +784,17 @@
         </div>
     </div>
 
+  
+
    
     @if($this->historiqueEtats->isEmpty())
         <div class="text-center py-4 text-gray-500 text-sm">
-            Aucun jalon enregistré
+            Aucun gel enregistré
         </div>
     @else
+    <div class="text-left py-4 text-gray-500 text-sm">
+       Les Gels
+    </div>
         <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
             @foreach($this->historiqueEtats as $etat)
                 <div class="border-l-4 pl-3 py-2 rounded-r  transition-colors">

@@ -59,7 +59,7 @@ class AddEtatForm extends Component
         }
 
         if (!$this->canCreateEtat) {
-            abort(403, 'Vous n\'avez pas les droits pour créer/modifier un état');
+            abort(403, 'Vous n\'avez pas les droits pour créer/modifier un état gel');
         }
     }
 
@@ -110,10 +110,10 @@ class AddEtatForm extends Component
                     'date_fin' => $this->dateFin,
                 ]);
 
-                \Log::info('État modifié', ['etat_id' => $etat->id]);
+                \Log::info('État Gel modifié', ['etat_id' => $etat->id]);
 
                 Notification::make()
-                    ->title('État modifié avec succès!')
+                    ->title('État Gel modifié avec succès!')
                     ->success()
                     ->send();
             } else {
@@ -130,10 +130,10 @@ class AddEtatForm extends Component
                     $this->dateFin ? \Carbon\Carbon::parse($this->dateFin) : null
                 );
 
-                \Log::info('Nouvel état créé', ['marin_id' => $this->marinId]);
+                \Log::info('Nouvel État Gel créé', ['marin_id' => $this->marinId]);
 
                 Notification::make()
-                    ->title('État ajouté avec succès!')
+                    ->title('Etat Gel ajouté avec succès!')
                     ->success()
                     ->send();
             }
@@ -145,7 +145,7 @@ class AddEtatForm extends Component
             $this->dispatch('close-modal', id: 'ajouterEtat');
 
         } catch (\Exception $e) {
-            \Log::error('Erreur lors de l\'opération sur l\'état', [
+            \Log::error('Erreur lors de l\'opération sur l\'état gel', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
