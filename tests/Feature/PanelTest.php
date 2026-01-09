@@ -277,7 +277,9 @@ it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', f
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
         
-        ->removeTableFilter('en_fcm')
+        //->removeTableFilter('en_fcm')
+        ->filterTable('en_fcm', ['value'=>'tous'])
+        //->resetTableFilters()
         //->assertCanSeeTableRecords([$marin])
         ->callTableAction('toggle_fcm', $marin,
         [
@@ -291,7 +293,7 @@ it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', f
 
      
 
-        //dump(Event::dispatched(UserGeneratedEvent::class));
+       // dump(Event::dispatched(UserGeneratedEvent::class));
 
         Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
             return $event->event_type == UserGeneratedEventTypes::MARIN_EN_FCM->value &&
@@ -320,7 +322,8 @@ it('genere un  UserGeneratedEvent quand on demande a ne plus suivre un marin en 
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
         
-        ->removeTableFilter('en_fcm')
+        //->removeTableFilter('en_fcm')
+        ->filterTable('en_fcm', ['value'=>'tous'])
         ->callTableAction('toggle_fcm', $marin)
         ->assertHasNoActionErrors();
 
@@ -349,7 +352,8 @@ it('genere un  UserGeneratedEvent quand on assigne une cohorte a un marin suivi 
     
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->removeTableFilter('en_fcm')
+        //->removeTableFilter('en_fcm')
+        ->filterTable('en_fcm', ['value'=>'tous'])
         ->callTableAction('toggle_fcm', $marin,
         [
             'cohorte_id' => $cohorte->uuid,   
@@ -383,7 +387,8 @@ it('genere un  UserGeneratedEvent quand on assigne un mentor a un marin suivi en
     
     Livewire::actingAs($this->admin)
     ->test(Resources\MarinResource\Pages\ListMarins::class)
-    ->removeTableFilter('en_fcm')
+    //->removeTableFilter('en_fcm')
+    ->filterTable('en_fcm', ['value'=>'tous'])
     ->callTableAction('toggle_fcm', $marin,
     [
         'cohorte_id' => null,   
@@ -419,7 +424,8 @@ it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi e
     Livewire::actingAs($this->admin)
     ->test(Resources\MarinResource\Pages\ListMarins::class)
     
-    ->removeTableFilter('en_fcm')
+    //->removeTableFilter('en_fcm')
+    ->filterTable('en_fcm', ['value'=>'tous'])
     
     ->callTableAction('toggle_fcm', $marin,
     [
