@@ -1,3 +1,48 @@
+## 0.1.0 (January 13, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.10 –> 0.1.0
+- Implements art #666617 : test unitaires OK
+- Implements art #665480 : Suppression de ExportController dans Competence Resource pour exportation Data
+- Implements art #665449  : Suppression de la page LivretMentorConsultation
+- Implémentation des tests élémentaires sur les pages de base du module.
+- Corrections syntaxiques, suppression de fichiers devenus inutiles.
+- Réintroduction des menus d'accès direct, et ajustement des pages préférées.
+- Implements art #662190  : Suite des Travaux Unitaires (encore des Reglages a effectuer)
+- Implements art #663213 : Modification BCFet bug  mentor
+- Implements art #662190 : Fin des modifcations des sseders Parcours DEASM test Unitaite : PagePanel et retouche PanelTest (pas fini)
+- Implements art #661834  : Modification Commandant Escaffe
+- Implements art #661551 : Debut des travaux test unitaire (ne marche pas encore, en pause car je dois retoucher partie BCF)
+- Retrait de référence inutile.
+- Retrait de la dernière référence à la classe FcmCentral Marin dans l'initialisation du LivretFcm.
+- Implements art #660223 : Figer les uuid sur le Seeder DEASM
+- Implements art #660180 : Debut de export Data en CSV depuis marin pour BCF (manque des champs a rajouter prochainement)
+- Implements art #660180 : modification acces Admin pour le mot de passe dans Marins modification pour page LivretMentor (rajout des classes)
+- Implements art #657999 : Travaux Correction savoirfaire bug 2.0
+- Implements art #657999 : Travaux Correction savoirfaire bug
+- Implements art #659711 : Correction Bug Savoirfaires-Objectifs
+- Implements art #657999 : Travaux Correction savoirfaire bug 2.0
+- Implements art #657999 : Travaux Correction savoirfaire bug
+- Implements art #657999 : Travaux Modification BCF
+- Ce commit ajuste la déclaration du livret de FCM pour lui passer les classes Marin et UserGeneratedEvent à utiliser ainsi que le préfixe des permissions (fcmcentral::).
+- Correction Bug TypeEtat dans le Seeder Principal de FcmCentral
+- Correction PSR-4 Composer dump-autoload ok
+- Modification en vue du passage en production.
+- Refonte page fiche Bilan , ajouts etats  , meilleure contraste dark nmode
+- Correction bug affichage : SF identique mais type different, objectifs existant mais non affichés
+- Correction bug redacteurNotesId
+- Correction bug Notes Etats Marin
+- Nettoyage des Models MArins et FcmMain , debut du menu Helper, widget test vue Roles Permissions Marin
+- Refonte Page Annuaire Form
+- Correction vue parcours du marin depuis dahboard Mentor ( etude des permissions pour differencier mentor et marin)
+- Creation widgets pour marins et mentor : Travail fait vite fait pour la reunion de mardi 02/09 ; visuel page mentor depuis widget ne marche car ne recupere pas arguement dans page filament Relation a revoir entre Marins et FcmMAarins
+- Correction typo dans une permissions. Rajout du seeder de la permissions de modification de la configuration du module.
+- Création de nouvelles permissions pour réglementer l'emploi des fonctions du module. Rajout des vérifications de ces permissions dans les actions Filament correspondantes.
+- Correction de typo pour la déclaration de la policy associé au modèle Cohorte. Correction de la référence au modèle Cohorte dans la CohorteResource. Création de la permission fcmcentral::recherche_annuaire pour pouvoir autoriser ou refuser l'accès la page de recherche dans l'annuaire Rajout de cette permission dans le role "superviseur_fcm"
+- Projet Dashboard pour Marin 1.0
+- Modif DataSeeder et MonlivretFCM Seeder ; il manquait un virgule LivretFCM : Si user pas de de parcours , on retournait une erreur lors affichage
+- Pour éviter les exceptions lors du logout.
+- Introduction de la page Mon Livret de FCM
+- Introduction d'une policy pour le modèle Marin et seeder d'un role.
+
 ## 0.0.10 (August 25, 2025)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.9 –> 0.0.10
 - Merge branch 'fldb-nouveau-livret'
