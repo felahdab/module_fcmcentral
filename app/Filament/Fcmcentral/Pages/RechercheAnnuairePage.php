@@ -21,6 +21,8 @@ use App\Models\User;
 
 use Modules\RH\Events\UnMarinDoitEtreCreeEvent;
 use Modules\RH\Filament\RH\Pages\RechercheAnnuaireForms\RechercheAnnuaireCreateUserOrMarinForm;
+use Modules\RH\Services\AnnudefGradeService;
+
 
 use Modules\FcmCommun\Models\Marin;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
@@ -64,6 +66,10 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
             ->requiresConfirmation()
             ->modalSubmitAction(false)
             ->modalWidth(Enums\MaxWidth::SevenExtraLarge)
+            ->fillForm(fn ($record): array => [
+                'nid' => $record->nid,
+                'grade_id' => AnnudefGradeService::getGradeFromAnnudefRank($record->gradelong) ?->id
+            ])
             ->form([
                 Wizard::make(array_merge(RechercheAnnuaireCreateUserOrMarinForm::getSchema(), 
                                         RechercheAnnuaireForm::getSchema()))
