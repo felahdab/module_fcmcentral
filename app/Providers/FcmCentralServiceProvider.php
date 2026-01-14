@@ -5,15 +5,9 @@ namespace Modules\FcmCentral\Providers;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Livewire;
-use Filament\Support\Assets\Js;
-use Filament\Support\Assets\Css;
-use Filament\Support\Assets\Asset;
-use Filament\Support\Facades\FilamentAsset;
 
-use Modules\FcmCentral\Console\TestParcoursArchitecture;
-use Modules\FcmCentral\Console\SeedTestData;
-use Modules\FcmCentral\Console\TestAttributionParcoursAUser;
+use Filament\Support\Assets\Css;
+use Filament\Support\Facades\FilamentAsset;
 
 use App\Filament\PanelRegistry\DirectMenuItem;
 use App\Filament\PanelRegistry\PreferedPageItem;
@@ -105,7 +99,14 @@ class FcmCentralServiceProvider extends ServiceProvider
                     DirectMenuItem::make()
                         ->name("Mon livret de FCM")
                         ->url(fn() => MonLivretDeFcm::getUrl(panel: "FCM Central"))
-                        ->visible(fn() => MonLivretDeFcm::canAccess())
+                        ->visible(function() {
+                            // On n'affiche cette page que si l'utilisateur actuel a une fiche de Marin et qu'il a un parcours de FCM
+                            $marin = Models\Marin::fromCurrentUser();
+                            if ($marin == null) return false;
+
+                            return $marin->complements_fcm?->donnees_du_parcours != null;
+                            
+                        })
                 ])
         ]);
    
@@ -122,11 +123,18 @@ class FcmCentralServiceProvider extends ServiceProvider
             [
             PreferedPageItem::make()
                 ->name('FCM central: Gestion des marins')
-                ->visible(fn() => auth()->check() && ListMarins::canAccess())
+                ->visible(fn() =>ListMarins::canAccess())
                 ->routeName(fn() => ListMarins::getRouteName(panel: 'FCM Central')),
             PreferedPageItem::make()
                 ->name('FCM central: Mon livret de FCM')
-                ->visible(fn() => auth()->check() && MonLivretDeFcm::canAccess())
+                ->visible(function() {
+                    // On n'affiche cette page que si l'utilisateur actuel a une fiche de Marin et qu'il a un parcours de FCM
+                    $marin = Models\Marin::fromCurrentUser();
+                    if ($marin == null) return false;
+
+                    return $marin->complements_fcm?->donnees_du_parcours != null;
+                    
+                })
                 ->routeName(fn() => MonLivretDeFcm::getRouteName(panel: 'FCM Central'))
             ]
         );
