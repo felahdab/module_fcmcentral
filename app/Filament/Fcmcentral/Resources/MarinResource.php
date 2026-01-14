@@ -24,6 +24,7 @@ use Modules\RH\Models\Specialite;
 use Modules\FcmCentral\Models\Role;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 use Modules\FcmCentral\Traits\FcmPermissionTrait;
+use Filament\Forms\Components\Select;
 
 
 //use Modules\FcmCentral\Filament\Fcmcentral\Exports\MarinBcfExporter;
@@ -201,6 +202,7 @@ public static function isMentorOfMarin(Marin $marin): bool
         
         return $table
             ->defaultSort('nom', 'asc')
+           
             ->headerActions([
 
                     // Cette methode ne fait que telecahrger sur le serveur (app/storage) , on veut telecahrger en direct
@@ -319,27 +321,20 @@ public static function isMentorOfMarin(Marin $marin): bool
 Tables\Columns\IconColumn::make('fcm_actif')
 ->label('FCM')
 ->boolean()
-->state(fn ($record) => $record->estEnFcm() && $record->getDernierTypeEtatCode() !== 'FCM_FIN')
+->state(fn ($record) => $record->estEnFcm() && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN')
 ->trueIcon('heroicon-s-check-circle')
-->falseIcon(fn ($record) => $record->getDernierTypeEtatCode() === 'FCM_FIN' ? 'heroicon-c-shield-check' : 'heroicon-o-x-circle')
-->trueColor(fn ($record) => $record->getDernierTypeEtatCode() === 'FCM_FIN' ? 'gray' : 'success')
-->falseColor(fn ($record) => $record->getDernierTypeEtatCode() === 'FCM_FIN' ? 'gray' : 'danger')
+->falseIcon(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'heroicon-c-shield-check' : 'heroicon-o-x-circle')
+->trueColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'success')
+->falseColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'danger')
 ->action(
     Tables\Actions\Action::make('toggle_fcm')
         ->modalHeading(fn ($record) => $record->estEnFcm() ? 'Marin en FCM' : 'Activer FCM')
         ->modalDescription(fn ($record) => $record->fullNameAndGrade)
         ->requiresConfirmation()
         ->form(function ($record) {
-            if ($record->estEnFcm() && $record->getDernierTypeEtatCode() !== 'FCM_FIN') {
+            if ($record->estEnFcm() && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN') {
                // return []; // Pas de formulaire si déjà actif et pas en FCM_FIN
-               $event = new UserGeneratedEvent(
-                UserGeneratedEventTypes::MARIN_PAS_FCM,
-                auth()->user()->uuid,
-                ObjectClasses::MARIN,
-                $record->uuid,
-                []
-            );
-            event($event);
+              
             }
             return [
                 Forms\Components\Select::make('cohorte_id')
@@ -372,7 +367,7 @@ Tables\Columns\IconColumn::make('fcm_actif')
         })
         ->action(function ($record, $data) {
             
-            if ($record->estEnFcm() && $record->getDernierTypeEtatCode() !== 'FCM_FIN') {
+            if ($record->estEnFcm() && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN') {
                 \Filament\Notifications\Notification::make()
                     ->title('Marin déjà en FCM')
                     ->warning()
@@ -419,71 +414,86 @@ Tables\Columns\IconColumn::make('fcm_actif')
         })
         ->visible(fn($record) =>
             static::canAccessAnyPermission(['admin','permission.mentor', 'permission.bcf', 'permission.fps'])
-            && ($record->getDernierTypeEtatCode() !== 'FCM_FIN')
+            && ($record->complementsFcm?->getJalonFcmLibelle() !== 'FIN')
         )
 ),
 
 // Colonne Type Etat FCM dynamique
-Tables\Columns\TextColumn::make('type_etat_fcm')
-->label('Type état')
-->state(function ($record) {
-    if (!$record->estEnFcm()) return null;
-    return $record->getDernierTypeEtatLibelle();
-})
-->badge()
-->color(fn ($record) => match($record->getDernierTypeEtatCode()) {
-    'FCM_ACT' => 'success',
-    'FCM_SED' => 'info',
-    'FCM_PAU' => 'warning',
-    'FCM_FIN' => 'gray',
-    default => 'gray',
-})
-->icon(fn ($record) => match($record->getDernierTypeEtatCode()) {
-    'FCM_ACT' => 'heroicon-s-check-circle',
-    'FCM_SED' => 'heroicon-s-arrow-path',
-    'FCM_PAU' => 'heroicon-s-pause-circle',
-    'FCM_FIN' => 'heroicon-o-minus-circle',
-    default => 'heroicon-o-minus-circle',
-})
-->placeholder('Non assigné')
-->tooltip('Cliquer pour modifier')
-->action(
-    Tables\Actions\Action::make('modifier_type_etat')
-        ->modalHeading('Modifier le type d\'état FCM')
-        ->modalDescription(fn ($record) => $record->fullNameAndGrade)
-        ->form([
-            Forms\Components\Select::make('type_etat_id')
-                ->label('Type d\'état')
-                ->options(
-                    \Modules\FcmCentral\Models\TypeEtat::query()
-                        ->orderBy('libelle_court')
-                        ->pluck('libelle_court', 'id')
-                )
-                ->required()
-                ->default(fn ($record) => $record->getDernierTypeEtatId()),
-
-                Forms\Components\DatePicker::make('date_debut')
-                ->label('Date de début')
-                ->helperText('La date ci dessus sera la date de fin de l\'etat en cours')
-                ->required()
-                ->default(now()),
-        ])
-        ->action(function ($record, array $data) {
-            // Historiser chaque changement dans la table etat
-            // $fcmMarin = $record->complementsFcm;
-            // if ($fcmMarin) {
-                // Mettre date de fin au statut actuel
-               // $etatActuel = $fcmMarin->etats()->latest('date_debut')->first();
-               $etatActuel = $record->etats()->latest('date_debut')->first();
-                if ($etatActuel && !$etatActuel->date_fin){
-                    //$etatActuel->update(['date_fin'=>now()]);
-                    $dateFin = \Carbon\Carbon::parse($data['date_debut']);
-                    $etatActuel->update(['date_fin'=>$dateFin]);
+Tables\Columns\TextColumn::make('type_jalon_fcm')
+    ->label('Jalon')
+    ->state(function ($record) {
+        if (!$record->estEnFcm()) return null;
+        return $record->complementsFcm?->getJalonFcmLibelle();
+    })
+    ->badge()
+    ->color(function ($record) {
+        $etat = $record->complementsFcm?->getJalonFcmLibelle();
+        return match($etat) {
+            'SED' => 'info',
+            'FCM' => 'success',
+            'FIN' => 'gray',
+            default => 'gray',
+        };
+    })
+    ->icon(function ($record) {
+        $etat = $record->complementsFcm?->getJalonFcmLibelle();
+        return match($etat) {
+            'SED' => 'heroicon-s-arrow-path',
+            'FCM' => 'heroicon-s-check-circle',
+            'FIN' => 'heroicon-o-minus-circle',
+            default => 'heroicon-o-minus-circle',
+        };
+    })
+    ->placeholder('Non assigné')
+    ->tooltip('Cliquer pour modifier')
+    ->action(
+        Tables\Actions\Action::make('jalons_fcm')
+            ->modalHeading('Modifier les Jalons FCM')
+            ->modalDescription(fn ($record) => $record->fullNameAndGrade)
+            ->form([
+                Forms\Components\DatePicker::make('date_sedimentation')
+                    ->label('Date de sédimentation')
+                    ->helperText('Début de la sédimentation')
+                    ->default(fn ($record) => $record->complementsFcm?->date_sedimentation),
+                Forms\Components\DatePicker::make('date_fcm')
+                    ->label('Date FCM')
+                    ->helperText('Début effectif du parcours FCM (laisser vide pour changer de statut)')
+                    ->default(fn ($record) => $record->complementsFcm?->date_fcm),
+                Forms\Components\DatePicker::make('date_competence')
+                    ->label('Date compétence')
+                    ->helperText('Fin de la FCM, compétence acquise (laisser vide pour changer de statut)')
+                    ->default(fn ($record) => $record->complementsFcm?->date_competence),
+            ])
+            ->action(function ($record, array $data) {
+                if (!empty($data['date_sedimentation'])) {
+                    event(new UserGeneratedEvent(
+                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+                        auth()->user()->uuid,
+                        ObjectClasses::MARIN,
+                        $record->uuid,
+                        ["date_sedimentation" => $data["date_sedimentation"]]
+                    ));
                 }
-                $typeEtat = \Modules\FcmCentral\Models\TypeEtat::find($data['type_etat_id']);
-               // $record->historiserEtat($typeEtat->code);
-               $dateDebut = \Carbon\Carbon::parse($data['date_debut']);
-               $record->historiserEtat($typeEtat->code, $dateDebut);
+                if (!empty($data['date_fcm'])) {
+                    event(new UserGeneratedEvent(
+                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+                        auth()->user()->uuid,
+                        ObjectClasses::MARIN,
+                        $record->uuid,
+                        ["date_fcm" => $data["date_fcm"]]
+                    ));
+                }
+                if (!empty($data['date_competence'])) {
+                    event(new UserGeneratedEvent(
+                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+                        auth()->user()->uuid,
+                        ObjectClasses::MARIN,
+                        $record->uuid,
+                        ["date_competence" => $data["date_competence"]]
+                    ));
+                }
+
+
             //}
         })
         ->visible(fn ($record) =>
@@ -497,7 +507,7 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
                 Tables\Columns\TextColumn::make('complements_fcm.cohorte.libelle_court')
                     ->label('Cohorte')
                     ->searchable()
-                    ->sortable()
+                    //->sortable()
                     ->placeholder('Non assignée')
                     ->action(
                         Tables\Actions\Action::make('gerer_cohorte')
@@ -608,7 +618,7 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
 
                 Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
                     ->label('Taux')
-                    ->sortable()
+                    //->sortable()
                     ->suffix('%')
                     ->formatStateUsing(fn ($state) => intval(round($state)))
                     ->placeholder('0'),
@@ -625,10 +635,31 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
             
             ->filters([
                 Filter::make('en_fcm')
-                    ->form([Toggle::make('en_fcm')->label('Marins en FCM')->default(true)])
-                    ->query(fn (Builder $query, array $data): Builder =>
-                        $query->when($data['en_fcm'] ?? false, fn ($q) => $q->enFcm())
-                    ),
+                ->form([
+                    Select::make('value')
+                        ->label('Statut FCM')
+                        ->options([
+                            'tous' => 'Tous les marins',
+                            'en_fcm' => 'Marins en FCM uniquement',
+                            'hors_fcm' => 'Marins hors FCM',
+                        ])
+                        ->default('en_fcm'),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                    return match($data['value'] ?? 'en_fcm') {
+                        'en_fcm' => $query->enFcm(),
+                        'hors_fcm' => $query->whereDoesntHave('complementsFcm'),
+                        default => $query,
+                    };
+                })
+                ->indicateUsing(function (array $data): ?string {
+                    return match($data['value'] ?? 'en_fcm') {
+                        'en_fcm' => '✓ Marins en FCM uniquement',
+                        'hors_fcm' => '✓ Marins hors FCM',
+                        default => null,
+                    };
+                }),
+        
                 SelectFilter::make('specialite_id')
                     ->label('Spécialité')
                     ->options(Specialite::query()->orderBy('libelle_court')->pluck('libelle_court', 'id')),
@@ -646,131 +677,7 @@ Tables\Columns\TextColumn::make('type_etat_fcm')
                     ->visible(fn ($record) => static::canEdit($record)),
 
                    
-                // USERS
-                Tables\Actions\Action::make('associer_user')
-    ->icon(fn ($record) => $record->user ? 'heroicon-m-pencil-square' : 'heroicon-m-user-plus')
-    ->color(fn ($record) => $record->user ? 'warning' : 'success')
-    ->iconButton()
-    ->visible(fn ($record) =>
-        static::canAccessAnyPermission(['admin'])
-    )
-    ->form(fn ($record) => $record->user
-        ? [
-            // Forms\Components\Placeholder::make('roles_info')
-            // ->label('Rôles Actuels')
-            // ->content(function ($record){
-            //     $roles = $record->user?->roles->pluck('name')->toArray() ?? [];
-            //     return empty($roles)
-            //     ? 'Aucun role assigné'
-            //     : implode(', ', array_map(fn($r) => str_replace('fcmcentral::','', $r), $roles));
-            // }),
-            
-            
-            Forms\Components\TextInput::make('password')
-                ->label('Nouveau mot de passe')
-                ->password()
-                ->minLength(8)
-                ->maxLength(100)
-                ->helperText('Laissez vide pour conserver le mot de passe actuel')
-                ->dehydrated(fn ($state) => filled($state)), // ✅ Ne soumettre que si rempli
-            // Forms\Components\Select::make('roles')
-            //     ->label('Rôles')
-            //     ->multiple()
-            //     ->options(
-            //         \Spatie\Permission\Models\Role::query()
-            //             ->where('guard_name', 'web')
-            //             ->where('name', 'like', 'fcmcentral::%')
-            //             ->pluck('name', 'name') // ✅ name => name (pas id)
-            //     )
-            //     ->searchable()
-            //     ->preload()
-            //     ->default(fn ($record) => $record->user?->roles->pluck('name')->toArray() ?? []) // ✅ pluck('name')
-        ]
-        : [
-            Forms\Components\Placeholder::make('email')
-                ->label('Email')
-                ->content($record->email),
-            Forms\Components\TextInput::make('password')
-                ->label('Mot de passe')
-                ->password()
-                ->minLength(8)
-                ->maxLength(100)
-                ->required(),
-            // Forms\Components\Select::make('roles')
-            //     ->label('Rôles')
-            //     ->multiple()
-            //     ->options(
-            //         \Modules\FcmCentral\Models\Role::query()
-            //             ->where('guard_name', 'web')
-            //             ->where('name', 'like', 'fcmcentral::%')
-            //             ->pluck('name', 'name') // ✅ name => name
-            //     )
-            //     ->searchable()
-            //     ->preload()
-            //     ->required(),
-        ]
-    )
-    ->action(function ($record, array $data) {
-        $user = $record->user;
-       
-        if (!$user) {
-            // ✅ CRÉATION DU USER
-            $user = \Modules\RH\Models\User::create([
-                'email' => $record->email,
-                'display_name' => $record->prenom . ' ' . $record->nom,
-                'password' => $data['password'], // ✅ bcrypt() dans le mutateur
-                'admin' => false,
-                'uuid' => \Illuminate\Support\Str::uuid(), // ✅ Si nécessaire
-            ]);
-           
-            $record->user_id = $user->id;
-            $record->save();
-        } else {
-            // ✅ MISE À JOUR DU USER (uniquement si mot de passe fourni)
-            $updateData = [];
-           
-            if (!empty($data['password'])) {
-                $updateData['password'] = $data['password']; // ✅ bcrypt() dans le mutateur
-            }
-           
-            if (!empty($updateData)) {
-                $user->update($updateData);
-            }
-        }
-       
-        // ✅ SYNCHRONISATION DES RÔLES
-        // if (isset($data['roles']) && is_array($data['roles'])) {
-        //    // $user->syncRoles($data['roles'],'web');
-        //    $user->roles()->detach();
-        //    foreach ($data['roles'] as $roleName){
-        //     $user->assignRole($roleName);
-        //    }
-        // }
-        // if (isset($data['roles']) && is_array($data['roles'])) {
-        //     // Utilise le modèle Role de ton module
-        //     $user->roles()->detach();
-        
-        //     foreach ($data['roles'] as $roleName) {
-        //         $role = \Modules\FcmCentral\Models\Role::where('name', $roleName)
-        //             ->where('guard_name', 'web')
-        //             ->first(); 
-        //         if ($role) {
-        //             $user->assignRole($role); // assignRole accepte un objet Role
-        //         }
-        //     }
-        // }
-        
-        
-       
-        \Filament\Notifications\Notification::make()
-            ->title('Compte utilisateur mis à jour')
-            ->body('Le compte utilisateur et les rôles ont été mis à jour.')
-            ->success()
-            ->send();
-    })
-    ->modalHeading(fn ($record) => $record->user ? 'Modifier le compte utilisateur' : 'Créer le compte utilisateur')
-    ->modalSubmitActionLabel(fn ($record) => $record->user ? 'Mettre à jour' : 'Créer')
-    ->modalCancelActionLabel('Annuler'),
+               
 
                     
 

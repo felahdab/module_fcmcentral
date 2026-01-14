@@ -126,25 +126,25 @@ it('affiche la page création de type de note', function() {
 
 it('affiche la page liste des etats', function() {
     $this->actingAs($this->admin)
-        ->get(Resources\EtatResource::getUrl('index'))
+        ->get(Resources\GelResource::getUrl('index'))
         ->assertSuccessful();
 });
 
 it('affiche la page création de etat', function() {
     $this->actingAs($this->admin)
-        ->get(Resources\EtatResource::getUrl('create'))
+        ->get(Resources\GelResource::getUrl('create'))
         ->assertSuccessful();
 });
 
 it('affiche la page liste des types etats', function() {
     $this->actingAs($this->admin)
-        ->get(Resources\TypeEtatResource::getUrl('index'))
+        ->get(Resources\TypeGelResource::getUrl('index'))
         ->assertSuccessful();
 });
 
 it('affiche la page création de type etat', function() {
     $this->actingAs($this->admin)
-        ->get(Resources\TypeEtatResource::getUrl('create'))
+        ->get(Resources\TypeGelResource::getUrl('create'))
         ->assertSuccessful();
 });
 

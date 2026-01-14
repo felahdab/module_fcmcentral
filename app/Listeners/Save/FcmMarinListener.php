@@ -5,12 +5,12 @@ namespace Modules\FcmCentral\Listeners\Save;
 use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
 
-use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
-use Modules\FcmCommun\Enums\Constants;
 
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
+use Carbon\Carbon;
 
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 
@@ -36,6 +36,7 @@ class FcmMarinListener
 
     if ($marin) {
         Log::info('Marin trouvé :', ['id' => $marin->id]);
+        $data = $event->detail ?? [];
 
         // === RETRAIT DU SUIVI FCM ===
         if ($event->isOfType(UserGeneratedEventTypes::MARIN_PAS_FCM) && $marin->suivi_en_fcm) {
@@ -46,8 +47,13 @@ class FcmMarinListener
 
             // Historiser l'état "Fin FCM"
             $fcmMarin = $marin->complementsFcm;
+           
             if ($fcmMarin && $fcmMarin->donnees_du_parcours) {
-                $marin->historiserEtat('FCM_FIN');
+               // $marin->historiserEtat('FCM_FIN');
+               $fcmMarin->date_competence = isset($data['date_competence'])
+               ? Carbon::parse($data['date_competence'])
+               : Carbon::now();
+               $fcmMarin->save();
             }
 
             Log::info('Le marin a été retiré du suivi FCM', [
@@ -55,7 +61,7 @@ class FcmMarinListener
                 'uuid' => $marin->uuid,
             ]);
 
-            $notification = Constants::getMess(Constants::MARIN_PAS_FCM, $marin->nom);
+            $notification = UserGeneratedEventNotifications::getMess(UserGeneratedEventNotifications::MARIN_PAS_FCM, $marin->nom);
 
             Notification::make()
                 ->title($notification['title'])
@@ -73,13 +79,24 @@ class FcmMarinListener
             // Si pas encore FcmMarin : création + état "En Sedimentation"
             if (!$marin->complementsFcm) {
                 $fcmMarin = FcmMarin::create(["rh_marin_id" => $marin->id]);
-                if($fcmMarin->donnees_du_parcours){
-                $marin->historiserEtat('FCM_SED');
-                }
+               
+                //$marin->historiserEtat('FCM_SED');
+                // $fcmMarin->date_sedimentation = isset($data['date_sedimentation'])
+                // ? Carbon::parse($data['date_sedimentation'])
+                // : Carbon::now();
+                $fcmMarin->date_sedimentation = Carbon::now();
+               
+                $fcmMarin->save();
+                
             } else {
                 // Si déjà FcmMarin : état "En FCM Actif"
+                $fcmMarin = $marin->complementsFcm;
                 if($fcmMarin->donnees_du_parcours){
-                $marin->historiserEtat('FCM_ACT');
+                //$marin->historiserEtat('FCM_ACT');
+                // $fcmMarin->date_fcm = isset($data['date_fcm'])
+                // ? Carbon::parse($data['date_fcm'])
+                // : Carbon::now();
+                // $fcmMarin->save();
                 }
             }
 
@@ -88,7 +105,7 @@ class FcmMarinListener
                 'uuid' => $marin->uuid,
             ]);
 
-            $notification = Constants::getMess(Constants::MARIN_EN_FCM, $marin->nom);
+            $notification = UserGeneratedEventNotifications::getMess(UserGeneratedEventNotifications::MARIN_EN_FCM, $marin->nom);
 
             Notification::make()
                 ->title($notification['title'])

@@ -2,8 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\EtatResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\EtatResource\RelationManagers;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource\Pages;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource\RelationManagers;
 use Modules\FcmCentral\Models\Etat;
 use Modules\FcmCentral\Models\TypeEtat;
 use Filament\Forms;
@@ -15,12 +15,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\FcmCentral\Traits\FilamentPermissionTrait;
 
-class EtatResource extends Resource
+class GelResource extends Resource
 {
     
     use FilamentPermissionTrait;
 
     protected static ?string $model = Etat::class;
+    protected static ?string $navigationLabel = "Gels" ;
+    protected static ?string $label = "Gel" ;
+    protected static ?string $plurialLabel = "Gels" ;
+
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -50,7 +54,7 @@ class EtatResource extends Resource
                 ->required(),
 
                 Forms\Components\Select::make('type_etat_id')
-                ->label('Type Etat')
+                ->label('Type Gel')
                 ->relationship('typeEtat', 'libelle_court')
                 ->searchable()
                 ->preload()
@@ -121,7 +125,7 @@ class EtatResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type_etat_id')
-                ->label('Type Etat')
+                ->label('Type Gel')
                 ->relationship('typeEtat', 'libelle_court'),
 
             Tables\Filters\SelectFilter::make('marin_id')
@@ -166,9 +170,9 @@ class EtatResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListEtats::route('/'),
-            'create' => Pages\CreateEtat::route('/create'),
-            'edit' => Pages\EditEtat::route('/{record}/edit'),
+            'index' => Pages\ListGels::route('/'),
+            'create' => Pages\CreateGel::route('/create'),
+            'edit' => Pages\EditGel::route('/{record}/edit'),
         ];
     }
 }

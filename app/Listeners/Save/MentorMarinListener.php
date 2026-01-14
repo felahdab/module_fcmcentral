@@ -6,8 +6,7 @@ use Illuminate\Support\Facades\Log;
 
 use Filament\Notifications\Notification;
 
-use Modules\FcmCommun\Enums\Constants;
-use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
@@ -50,7 +49,7 @@ class MentorMarinListener
                 ],
             );
             
-            $notification = Constants::getMess(Constants::MENTOR, $marin->nom);
+            $notification = UserGeneratedEventNotifications::getMess(UserGeneratedEventNotifications::MENTOR, $marin->nom);
 
             // Notification Filament
             Notification::make()

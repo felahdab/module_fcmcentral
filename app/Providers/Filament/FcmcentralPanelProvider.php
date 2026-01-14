@@ -52,8 +52,8 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeNoteResource;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\EtatResource;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeEtatResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeGelResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource;
 
@@ -199,21 +199,21 @@ class FcmcentralPanelProvider extends PanelProvider
                 $this->canAccessAnyPermission(['typeNote.index']))
                 ,
 
-                NavigationItem::make('Gestion des Etats')
+                NavigationItem::make('Gestion des Gels')
                 ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'etat') && !str_contains(request()->route()?->getName() ?? '', 'type'))
-                ->url(fn (): string => EtatResource::getUrl('index'))
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'gel') && !str_contains(request()->route()?->getName() ?? '', 'type'))
+                ->url(fn (): string => GelResource::getUrl('index'))
                 //->visible(fn (): bool => $this->canAccessAdminMenus()),
                 ->visible(fn (): bool => 
-                $this->canAccessAnyPermission(['etat.index']))
+                $this->canAccessAnyPermission(['gel.index']))
                 ,
-                NavigationItem::make('Gestion des Types Etats')
+                NavigationItem::make('Gestion des Types Gels')
                 ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'type-etats'))
-                ->url(fn (): string => TypeEtatResource::getUrl('index'))
+                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'type-gels'))
+                ->url(fn (): string => TypeGelResource::getUrl('index'))
                 //->visible(fn (): bool => $this->canAccessAdminMenus()),
                 ->visible(fn (): bool => 
-                $this->canAccessAnyPermission(['typeEtat.index']))
+                $this->canAccessAnyPermission(['typeGel.index']))
                 ,
 
             ])

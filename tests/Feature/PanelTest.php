@@ -277,7 +277,9 @@ it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', f
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
         
-        ->removeTableFilter('en_fcm')
+        //->removeTableFilter('en_fcm')
+        ->filterTable('en_fcm', ['value'=>'tous'])
+        //->resetTableFilters()
         //->assertCanSeeTableRecords([$marin])
         ->callTableAction('toggle_fcm', $marin,
         [
@@ -291,7 +293,7 @@ it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', f
 
      
 
-        //dump(Event::dispatched(UserGeneratedEvent::class));
+       // dump(Event::dispatched(UserGeneratedEvent::class));
 
         Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin){
             return $event->event_type == UserGeneratedEventTypes::MARIN_EN_FCM->value &&
@@ -308,19 +310,18 @@ it('genere un  UserGeneratedEvent quand on demande a ne plus suivre un marin en 
     Event::fake();
 
    // Création d'un marin non suivi en FCM
-   $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
-   // Verification explicite 
-   $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
-   // S'assurer qu'il n'est pas déjà en FCM
-   \Modules\FcmCentral\Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
-   $marin->refresh();
-   expect($marin->estEnFcm());
+   $fcmMarin = \Modules\FcmCentral\Models\FcmMarin::factory()->create();
+   $marin = $fcmMarin->marin;
+   
+  // dump($marin);
+   expect($marin->estEnFcm())->toBeTrue();
 
     // Simuler la fin du FCM via le changement d'état (exemple : FCM_FIN)
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
         
-        ->removeTableFilter('en_fcm')
+        //->removeTableFilter('en_fcm')
+        ->filterTable('en_fcm', ['value'=>'tous'])
         ->callTableAction('toggle_fcm', $marin)
         ->assertHasNoActionErrors();
 
@@ -331,25 +332,125 @@ it('genere un  UserGeneratedEvent quand on demande a ne plus suivre un marin en 
        
 });
 
+it('ajoute la date_sedimentation lors de l\'activation FCM', function () {
+    //Event::fake();
 
+    $fcmMarin = \Modules\FcmCentral\Models\FcmMarin::factory()->create();
+    $marin = $fcmMarin->marin;
+    \Modules\FcmCentral\Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
+    $marin->refresh();
+    expect($marin->estEnFcm())->toBeFalse();
+
+
+    // Livewire::actingAs($this->admin)
+    //     ->test(Resources\MarinResource\Pages\ListMarins::class)
+    //     ->filterTable('en_fcm', ['value'=>'tous'])
+    //     ->callTableAction('toggle_fcm', $marin, [
+    //         'cohorte_id' => $cohorte->uuid,
+    //         'mentor_id' => $mentor->uuid,
+    //         'parcours_id' => $parcours->uuid,
+    //     ])
+    //     ->assertHasNoActionErrors();
+
+        //dump(Event::dispatched(UserGeneratedEvent::class));
+
+      
+
+    event(new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
+        user_uuid: $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid: $marin->uuid,
+        detail: [
+            "cohorte_id" => 1,
+            "date_de_debut"=> Carbon::tomorrow(),
+        ]
+    ));
+
+    $marin->refresh();
+    //dump ($marin->complementsFcm);
+    expect($marin->estEnFcm())->toBeTrue();
+    expect($marin->complementsFcm->date_sedimentation)->not->toBeNull();
+
+    
+});
+
+
+
+it('génère un UserGeneratedEvent quand on modifie les jalons FCM', function(){
+    Event::fake();
+    
+    // Création d'un marin non suivi en FCM
+    $fcmMarin = \Modules\FcmCentral\Models\FcmMarin::factory()->create();
+   $marin = $fcmMarin->marin;
+   
+  // dump($marin);
+   expect($marin->estEnFcm())->toBeTrue();
+
+   $dateSedimentation = now()->subDays(30)->format('Y-m-d');
+    $dateFcm = now()->subDays(15)->format('Y-m-d');
+    $dateCompetence = now()->format('Y-m-d');
+
+    Livewire::actingAs($this->admin)
+        ->test(Resources\MarinResource\Pages\ListMarins::class)
+        ->filterTable('en_fcm', ['value'=>'tous'])
+        ->callTableAction( 'jalons_fcm', $marin, [
+            'date_sedimentation' => $dateSedimentation,
+            'date_fcm' => $dateFcm,
+            'date_competence' => $dateCompetence,
+        ])
+        ->assertHasNoActionErrors();
+
+    
+        //dump(Event::dispatched(UserGeneratedEvent::class));
+
+            // Vérifier qu'un événement a été dispatché pour chaque date
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin, $dateSedimentation) {
+        return $event->event_type == UserGeneratedEventTypes::DEFINIR_JALON_FCM->value &&
+                $event->object_class == ObjectClasses::MARIN->value &&
+                $event->object_uuid == $marin->uuid &&
+                isset($event->detail['date_sedimentation']) &&
+                $event->detail['date_sedimentation'] == $dateSedimentation;
+    });
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin, $dateFcm) {
+        return $event->event_type == UserGeneratedEventTypes::DEFINIR_JALON_FCM->value &&
+                $event->object_class == ObjectClasses::MARIN->value &&
+                $event->object_uuid == $marin->uuid &&
+                isset($event->detail['date_fcm']) &&
+                $event->detail['date_fcm'] == $dateFcm;
+    });
+
+    Event::assertDispatched(UserGeneratedEvent::class, function($event) use ($marin, $dateCompetence) {
+        return $event->event_type == UserGeneratedEventTypes::DEFINIR_JALON_FCM->value &&
+                $event->object_class == ObjectClasses::MARIN->value &&
+                $event->object_uuid == $marin->uuid &&
+                isset($event->detail['date_competence']) &&
+                $event->detail['date_competence'] == $dateCompetence;
+    });
+
+    // Vérifier que 3 événements ont bien été dispatchés
+    Event::assertDispatchedTimes(UserGeneratedEvent::class, 3);
+
+
+    });
 
 it('genere un  UserGeneratedEvent quand on assigne une cohorte a un marin suivi en fcm', function(){
     Event::fake();
     
     // Création d'un marin non suivi en FCM
-   $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
-   // Verification explicite 
-   $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
-   // S'assurer qu'il n'est pas déjà en FCM
-   
-   $marin->refresh();
-   expect($marin->estEnFcm());
-
+    $fcmMarin = \Modules\FcmCentral\Models\FcmMarin::factory()->create();
+   $marin = $fcmMarin->marin;
+    // S'assurer qu'il n'est pas déjà en FCM
+    \Modules\FcmCentral\Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
+    $marin->refresh();
+    expect($marin->estEnFcm())->toBeFalse();
     $cohorte = Models\Cohorte::factory()->create();
     
     Livewire::actingAs($this->admin)
         ->test(Resources\MarinResource\Pages\ListMarins::class)
-        ->removeTableFilter('en_fcm')
+        //->removeTableFilter('en_fcm')
+        ->filterTable('en_fcm', ['value'=>'tous'])
         ->callTableAction('toggle_fcm', $marin,
         [
             'cohorte_id' => $cohorte->uuid,   
@@ -371,19 +472,19 @@ it('genere un  UserGeneratedEvent quand on assigne un mentor a un marin suivi en
     Event::fake();
     
      // Création d'un marin non suivi en FCM
-     $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
-     // Verification explicite 
-     $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
-     // S'assurer qu'il n'est pas déjà en FCM
-     
-     $marin->refresh();
-     expect($marin->estEnFcm());
+     $fcmMarin = \Modules\FcmCentral\Models\FcmMarin::factory()->create();
+   $marin = $fcmMarin->marin;
+    // S'assurer qu'il n'est pas déjà en FCM
+    \Modules\FcmCentral\Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
+    $marin->refresh();
+    expect($marin->estEnFcm())->toBeFalse();
   
     $mentor = Models\Marin::factory()->create();
     
     Livewire::actingAs($this->admin)
     ->test(Resources\MarinResource\Pages\ListMarins::class)
-    ->removeTableFilter('en_fcm')
+    //->removeTableFilter('en_fcm')
+    ->filterTable('en_fcm', ['value'=>'tous'])
     ->callTableAction('toggle_fcm', $marin,
     [
         'cohorte_id' => null,   
@@ -406,20 +507,20 @@ it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi e
     Event::fake();
     
      // Création d'un marin non suivi en FCM
-     $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
-     // Verification explicite 
-     $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
-     // S'assurer qu'il n'est pas déjà en FCM
-     
-     $marin->refresh();
-     expect($marin->estEnFcm());
+     $fcmMarin = \Modules\FcmCentral\Models\FcmMarin::factory()->create();
+   $marin = $fcmMarin->marin;
+    // S'assurer qu'il n'est pas déjà en FCM
+    \Modules\FcmCentral\Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
+    $marin->refresh();
+    expect($marin->estEnFcm())->toBeFalse();
   
-    $parcours = Models\Marin::factory()->create();
+    $parcours = Models\Parcours::factory()->create();
     
     Livewire::actingAs($this->admin)
     ->test(Resources\MarinResource\Pages\ListMarins::class)
     
-    ->removeTableFilter('en_fcm')
+    //->removeTableFilter('en_fcm')
+    ->filterTable('en_fcm', ['value'=>'tous'])
     
     ->callTableAction('toggle_fcm', $marin,
     [
@@ -446,15 +547,11 @@ it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi e
 it('affiche le livret FCM', function () {
     // Création d'un marin FCM via factory
     $this->assertTrue(Models\Marin::all()->count() == 0);
-     // Création d'un marin non suivi en FCM
-   $marin = \Modules\FcmCentral\Models\Marin::factory()->create();
-   // Verification explicite 
-   $marin = \Modules\FcmCentral\Models\Marin::find($marin->id);
-   Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
-   // S'assurer qu'il n'est pas déjà en FCM
+    $fcmMarin = \Modules\FcmCentral\Models\FcmMarin::factory()->create();
+   $marin = $fcmMarin->marin;
    
-   $marin->refresh();
-   expect($marin->estEnFcm());
+  // dump($marin);
+   expect($marin->estEnFcm())->toBeTrue();
     $this->assertTrue(Models\Marin::all()->count() == 1);
 
     //dump($marin->complementsFcm);

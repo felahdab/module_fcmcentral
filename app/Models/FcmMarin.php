@@ -21,6 +21,10 @@ class FcmMarin extends Model
         'data',
         'cohorte_id',
         'mentor_id',
+        'date_sedimentation',
+        'date_fcm',
+        'date_competence',
+        'gel'
     ];
 
     protected $casts = [
@@ -187,4 +191,21 @@ class FcmMarin extends Model
             'has_cohorte'  => $this->hasCohorte(),
         ];
     }
+
+
+    // Jalon FCM Marin
+    public function getJalonFcmLibelle(): ?string
+{
+    if ($this->date_sedimentation && !$this->date_fcm && !$this->date_competence) {
+        return 'SED';
+    }
+    if ($this->date_sedimentation && $this->date_fcm && !$this->date_competence) {
+        return 'FCM';
+    }
+    if ($this->date_sedimentation && $this->date_fcm && $this->date_competence) {
+        return 'FIN';
+    }
+    return null;
+}
+
 }
