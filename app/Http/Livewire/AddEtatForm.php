@@ -41,12 +41,7 @@ class AddEtatForm extends Component
     #[Computed]
     public function canCreateEtat(): bool
     {
-        return MarinResource::canAccessAnyPermission([
-            'admin',
-            'permission.bcf',
-            'permission.fps',
-            'permission.bord'
-        ]);
+        return auth()->user()->can("fcmcentral::etat.create");
     }
 
     public function mount($marinId, $etatId = null)
@@ -78,11 +73,11 @@ class AddEtatForm extends Component
     }
 
     public function cancel()
-{
-    $this->reset(['typeEtatId', 'dateDebut', 'dateFin', 'etatId']);
-    $this->dateDebut = now()->format('Y-m-d');
-    $this->dispatch('close-modal', id: 'ajouterEtat');
-}
+    {
+        $this->reset(['typeEtatId', 'dateDebut', 'dateFin', 'etatId']);
+        $this->dateDebut = now()->format('Y-m-d');
+        $this->dispatch('close-modal', id: 'ajouterEtat');
+    }
 
 
     public function save()
@@ -158,8 +153,6 @@ class AddEtatForm extends Component
                 ->send();
         }
     }
-
-   
 
     public function render()
     {

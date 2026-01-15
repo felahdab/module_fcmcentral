@@ -36,11 +36,6 @@ use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 use App\Filament\Pages\UserPreferences;
 use Filament\Support\Assets\Theme;
 
-use Modules\FcmCentral\Traits\FcmPermissionTrait;
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
-
-
-
 // Import des Resources
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource;
@@ -67,10 +62,6 @@ use Modules\FcmCentral\Models\ParcoursType;
 class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
-    use FcmPermissionTrait;
-    use FilamentPermissionTrait;
-
-
 
     private string $module = "FcmCentral";
 
@@ -94,9 +85,9 @@ class FcmcentralPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: module_path($this->module, 'app/Filament/Fcmcentral/Widgets'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Widgets")
             ->widgets($this->getConditionalWidgets())
-            ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
-                return $this->buildConditionalNavigation($builder);
-            })
+            // ->navigation(function (NavigationBuilder $builder): NavigationBuilder {
+            //     return $this->buildConditionalNavigation($builder);
+            // })
 
            
             
@@ -168,53 +159,43 @@ class FcmcentralPanelProvider extends PanelProvider
                 NavigationItem::make('Gestion des marins')
                     ->icon('heroicon-o-users')
                     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'marin'))
-                    ->url(fn (): string => MarinResource::getUrl('index'))
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['marin.index']))
-                    ,
+                    ->url(fn (): string => MarinResource\Pages\ListMarins::getUrl(panel: 'FCM Central'))
+                    ->visible(fn (): bool => MarinResource\Pages\ListMarins::canAccess()),
                 
-                NavigationItem::make('Gestion des cohortes')
-                    ->icon('heroicon-o-user-group')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'cohorte'))
-                    ->url(fn (): string => CohorteResource::getUrl('index'))
-                    //->visible(fn (): bool => $this->canAccessAdminMenus()),
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['cohorte.index']))
-                    ,
+                // NavigationItem::make('Gestion des cohortes')
+                //     ->icon('heroicon-o-user-group')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'cohorte'))
+                //     ->url(fn (): string => CohorteResource\Pages\ListCohortes::getUrl(panel: 'FCM Central'))
+                //     ->visible(fn (): bool => CohorteResource\Pages\ListCohortes::canAccess()),
 
-                NavigationItem::make('Gestion des Notes')
-                ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'note') && !str_contains(request()->route()?->getName() ?? '', 'type'))
-                ->url(fn (): string => NoteResource::getUrl('index'))
-                //->visible(fn (): bool => $this->canAccessAdminMenus()),
-                ->visible(fn (): bool => 
-                $this->canAccessAnyPermission(['note.index']))
-                ,
-                NavigationItem::make('Gestion des Types Notes')
-                ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'type-notes'))
-                ->url(fn (): string => TypeNoteResource::getUrl('index'))
-                //->visible(fn (): bool => $this->canAccessAdminMenus()),
-                ->visible(fn (): bool => 
-                $this->canAccessAnyPermission(['typeNote.index']))
-                ,
+                // NavigationItem::make('Gestion des Notes')
+                //     ->icon('heroicon-o-user-group')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'note') && !str_contains(request()->route()?->getName() ?? '', 'type'))
+                //     ->url(fn (): string => NoteResource\Pages\ListNotes::getUrl(panel: 'FCM Central'))
+                //     ->visible(fn (): bool => NoteResource\Pages\ListNotes::canAccess()),
 
-                NavigationItem::make('Gestion des Gels')
-                ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'gel') && !str_contains(request()->route()?->getName() ?? '', 'type'))
-                ->url(fn (): string => GelResource::getUrl('index'))
-                //->visible(fn (): bool => $this->canAccessAdminMenus()),
-                ->visible(fn (): bool => 
-                $this->canAccessAnyPermission(['gel.index']))
-                ,
-                NavigationItem::make('Gestion des Types Gels')
-                ->icon('heroicon-o-user-group')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'type-gels'))
-                ->url(fn (): string => TypeGelResource::getUrl('index'))
-                //->visible(fn (): bool => $this->canAccessAdminMenus()),
-                ->visible(fn (): bool => 
-                $this->canAccessAnyPermission(['typeGel.index']))
-                ,
+                // NavigationItem::make('Gestion des Types Notes')
+                //     ->icon('heroicon-o-user-group')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'type-notes'))
+                //     ->url(fn (): string => TypeNoteResource\Pages\ListTypeNotes::getUrl(panel: 'FCM Central'))
+                //     ->visible(fn (): bool =>TypeNoteResource\Pages\ListTypeNotes::canAccess()),
+
+                // NavigationItem::make('Gestion des Gels')
+                // ->icon('heroicon-o-user-group')
+                // ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'gel') && !str_contains(request()->route()?->getName() ?? '', 'type'))
+                // ->url(fn (): string => GelResource::getUrl('index'))
+                // //->visible(fn (): bool => $this->canAccessAdminMenus()),
+                // ->visible(fn (): bool => 
+                // $this->canAccessAnyPermission(['gel.index']))
+                // ,
+                // NavigationItem::make('Gestion des Types Gels')
+                // ->icon('heroicon-o-user-group')
+                // ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'type-gels'))
+                // ->url(fn (): string => TypeGelResource::getUrl('index'))
+                // //->visible(fn (): bool => $this->canAccessAdminMenus()),
+                // ->visible(fn (): bool => 
+                // $this->canAccessAnyPermission(['typeGel.index']))
+                // ,
 
             ])
             //->visible(fn (): bool => $this->canAccessAdminMenus())
@@ -224,46 +205,46 @@ class FcmcentralPanelProvider extends PanelProvider
         NavigationGroup::make('Parcours')
             
             ->items([
-                NavigationItem::make('Parcours figés')
-                    ->icon('heroicon-o-lock-closed')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours-serialise'))
-                    ->url(fn (): string => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource::getUrl('index'))
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['parcours.index']))
-                    ,
+                // NavigationItem::make('Parcours figés')
+                //     ->icon('heroicon-o-lock-closed')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours-serialise'))
+                //     ->url(fn (): string => \Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource::getUrl('index'))
+                //     ->visible(fn (): bool => 
+                //     $this->canAccessAnyPermission(['parcours.index']))
+                //     ,
                 
-                NavigationItem::make('Parcours')
-                    ->icon('heroicon-o-map')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours') && !str_contains(request()->route()?->getName() ?? '', 'serialise'))
-                    ->url(fn (): string => ParcoursResource::getUrl('index'))
+                // NavigationItem::make('Parcours')
+                //     ->icon('heroicon-o-map')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours') && !str_contains(request()->route()?->getName() ?? '', 'serialise'))
+                //     ->url(fn (): string => ParcoursResource::getUrl('index'))
                     
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['parcoursSerialise.index']))
-                    ,
+                //     ->visible(fn (): bool => 
+                //     $this->canAccessAnyPermission(['parcoursSerialise.index']))
+                //     ,
 
-                NavigationItem::make('Affectation')
-                ->icon('heroicon-o-briefcase')
-                ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'affectation') )
-                ->url(fn (): string => AffectationResource::getUrl('index'))
-                ->visible(fn (): bool => 
-                $this->canAccessAnyPermission(['affectation.index']))
-                ,
+                // NavigationItem::make('Affectation')
+                // ->icon('heroicon-o-briefcase')
+                // ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'affectation') )
+                // ->url(fn (): string => AffectationResource::getUrl('index'))
+                // ->visible(fn (): bool => 
+                // $this->canAccessAnyPermission(['affectation.index']))
+                // ,
                 
-                NavigationItem::make('Competences Savoirfaire')
-                    ->icon('heroicon-o-briefcase')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence-savoirfaire') )
-                    ->url(fn (): string => CompetenceSavoirfaireResource::getUrl('index'))
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['competenceSavoirfaire.index']))
-                    ,
+                // NavigationItem::make('Competences Savoirfaire')
+                //     ->icon('heroicon-o-briefcase')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence-savoirfaire') )
+                //     ->url(fn (): string => CompetenceSavoirfaireResource::getUrl('index'))
+                //     ->visible(fn (): bool => 
+                //     $this->canAccessAnyPermission(['competenceSavoirfaire.index']))
+                //     ,
                 
-                NavigationItem::make('Objectifs')
-                    ->icon('heroicon-o-rectangle-stack')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'objectif'))
-                    ->url(fn (): string => ObjectifResource::getUrl('index'))
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['objectif.index']))
-                    ,
+                // NavigationItem::make('Objectifs')
+                //     ->icon('heroicon-o-rectangle-stack')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'objectif'))
+                //     ->url(fn (): string => ObjectifResource::getUrl('index'))
+                //     ->visible(fn (): bool => 
+                //     $this->canAccessAnyPermission(['objectif.index']))
+                //     ,
                 
                 
             ])
@@ -274,39 +255,39 @@ class FcmcentralPanelProvider extends PanelProvider
             NavigationGroup::make('Catalogue')  
             ->items([
 
-                NavigationItem::make('Compétences')
-                    ->icon('heroicon-o-star')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence') && !str_contains(request()->route()?->getName() ?? '', '-savoirfaire') )
-                    ->url(fn (): string => CompetenceResource::getUrl('index'))
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['competence.index']))
-                    ,
+                // NavigationItem::make('Compétences')
+                //     ->icon('heroicon-o-star')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'competence') && !str_contains(request()->route()?->getName() ?? '', '-savoirfaire') )
+                //     ->url(fn (): string => CompetenceResource::getUrl('index'))
+                //     ->visible(fn (): bool => 
+                //     $this->canAccessAnyPermission(['competence.index']))
+                //     ,
                 
-                NavigationItem::make('Savoir Faire')
-                    ->icon('heroicon-o-wrench-screwdriver')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'savoir-faire'))
-                    ->url(fn (): string => SavoirfaireResource::getUrl('index'))
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['savoirfaire.index']))
-                    ,
+                // NavigationItem::make('Savoir Faire')
+                //     ->icon('heroicon-o-wrench-screwdriver')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'savoir-faire'))
+                //     ->url(fn (): string => SavoirfaireResource::getUrl('index'))
+                //     ->visible(fn (): bool => 
+                //     $this->canAccessAnyPermission(['savoirfaire.index']))
+                //     ,
                 
                 
 
-                NavigationItem::make('Domaines')
-                    ->icon('heroicon-o-rectangle-stack')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'domaine'))
-                    ->url(fn (): string => DomaineResource::getUrl('index'))
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['domaine.index']))
-                    ,
+                // NavigationItem::make('Domaines')
+                //     ->icon('heroicon-o-rectangle-stack')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'domaine'))
+                //     ->url(fn (): string => DomaineResource::getUrl('index'))
+                //     ->visible(fn (): bool => 
+                //     $this->canAccessAnyPermission(['domaine.index']))
+                //     ,
 
-                NavigationItem::make('Type ')
-                    ->icon('heroicon-o-rectangle-stack')
-                    ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours-types'))
-                    ->url(fn (): string => ParcoursTypeResource::getUrl('index'))
-                    ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['parcoursType.index']))
-                    ,
+                // NavigationItem::make('Type ')
+                //     ->icon('heroicon-o-rectangle-stack')
+                //     ->isActiveWhen(fn (): bool => str_contains(request()->route()?->getName() ?? '', 'parcours-types'))
+                //     ->url(fn (): string => ParcoursTypeResource::getUrl('index'))
+                //     ->visible(fn (): bool => 
+                //     $this->canAccessAnyPermission(['parcoursType.index']))
+                //     ,
             ])
            
             ,
@@ -321,10 +302,8 @@ class FcmcentralPanelProvider extends PanelProvider
             NavigationItem::make('Configuration module')
                 ->icon('heroicon-o-cog-6-tooth')
                 ->isActiveWhen(fn (): bool => request()->routeIs('filament.fcm-central.pages.configuration'))
-                ->url(fn (): string => Configuration::getUrl()) // TODO: Remplacer par votre URL
-                ->visible(fn (): bool => 
-                    $this->canAccessAnyPermission(['permission.bcf','admin']))
-                    ,
+                ->url(fn (): string => Configuration::getUrl()) 
+                ->visible(fn (): bool => Configuration::canAccess() ) ,
             
             NavigationItem::make('Gestion permissions')
                 ->icon('heroicon-o-shield-check')

@@ -18,25 +18,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 use Modules\FcmCentral\Helpers\OutilsHelper;
 
 class DomaineResource extends Resource
 {
-
-    use FilamentPermissionTrait;
-   
     protected static ?string $model = Domaine::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
-
-      // Permissions marche avec le Trait
-      protected static array $permissions = [
-        'fcmcentral::domaine.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.bcf',
-        'fcmcentral::permission.fps',
-    ];
+    protected static ?string $navigationGroup = "Catalogue";
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {

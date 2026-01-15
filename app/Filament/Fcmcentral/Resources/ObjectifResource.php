@@ -10,20 +10,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Filters\SelectFilter;
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 
 class ObjectifResource extends Resource
 {
-    use FilamentPermissionTrait;
-
     protected static ?string $model = Objectif::class;
-
-    protected static array $permissions = [
-        'fcmcentral::objectif.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.fps',
-        'fcmcentral::permission.bcf',
-    ];
+    protected static ?string $navigationGroup = "Parcours";
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {

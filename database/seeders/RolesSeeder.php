@@ -17,7 +17,7 @@ class RolesSeeder extends Seeder
      * @return void
      */
     public function run()
-{   
+    {   
    
     //\App\Models\Role::truncate();
 
@@ -70,7 +70,8 @@ class RolesSeeder extends Seeder
         "fcmcentral::livret.telecharger",
         "fcmcentral::livret.proposer",
         "fcmcentral::livret.commentaire",
-        "fcmcentral::permission.marin"
+        "fcmcentral::permission.marin",
+        "rh::marins.create"
     ];
     
     // Permissions dynamiques

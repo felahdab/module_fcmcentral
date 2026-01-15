@@ -13,28 +13,18 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 
 class GelResource extends Resource
 {
-    
-    use FilamentPermissionTrait;
-
     protected static ?string $model = Etat::class;
     protected static ?string $navigationLabel = "Gels" ;
     protected static ?string $label = "Gel" ;
     protected static ?string $plurialLabel = "Gels" ;
 
+    protected static ?string $navigationGroup = "Gestion";
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-     // Permissions marche avec le Trait
-     protected static array $permissions = [
-        'fcmcentral::etat.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.fps',
-        'fcmcentral::permission.bcf',
-    ];
 
     public static function form(Form $form): Form
     {

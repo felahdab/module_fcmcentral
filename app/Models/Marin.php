@@ -538,6 +538,14 @@ class Marin extends BaseMarin
         });
     }
 
+    public function scopePasEnFcm(Builder $query): void
+    {
+        $query->whereNotIn('id', function($subQuery) {
+            $subQuery->select('rh_marin_id')
+                     ->from('fcmcentral_fcm_marins');
+        });
+    }
+
     /**
      * Scope pour filtrer par grade
      * 

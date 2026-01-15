@@ -13,28 +13,16 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 
 
 
 class TypeNoteResource extends Resource
 {
-   
-    use FilamentPermissionTrait;
-   
     protected static ?string $model = TypeNote::class;
+    protected static ?string $navigationGroup = "Gestion";
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-
-   // Permissions marche avec le Trait
-   protected static array $permissions = [
-    'fcmcentral::typeNote.index',
-    'fcmcentral::admin',
-    'fcmcentral::permission.fps',
-    'fcmcentral::permission.bcf',
-];
-    
 
     public static function form(Form $form): Form
     {

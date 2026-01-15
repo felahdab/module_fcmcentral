@@ -47,7 +47,8 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
             return false;
         
         $user = auth()->user();
-        return $user->can('fcmcentral::recherche_annuaire');
+        return $user->can('fcmcentral::recherche_annuaire') && 
+        auth()->user()->canAny(["users.create", "rh::marins.create", "fcmcentral::marin.suivreEnFcm"]);
     }
 
     public function getRowActions()

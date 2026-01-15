@@ -17,21 +17,13 @@ class PermissionsSeeder extends Seeder
      */
     public function run()
     {
-        //\App\Models\Permission::truncate();
-
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
-        DB::table('model_has_permissions')->truncate();
-        DB::table('role_has_permissions')->truncate();
-        DB::table('permissions')->truncate();
-    
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-    
-        
-       
-
         Permission::firstOrCreate([
             "name" => "fcmcentral::recherche_annuaire",
+            "guard_name" => "web"
+        ]);
+
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::voir_tous_les_marins",
             "guard_name" => "web"
         ]);
 
@@ -39,11 +31,6 @@ class PermissionsSeeder extends Seeder
             "name" => "fcmcentral::change_module_configuration",
             "guard_name" => "web"
         ]);
-
-        
-        //=== ATTRIBUER ===
-
-        
 
         Permission::firstOrCreate([
             "name" => "fcmcentral::attribuer.parcours",
@@ -60,6 +47,10 @@ class PermissionsSeeder extends Seeder
             "guard_name" => "web"
         ]);
 
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::definir_jalons_de_fcm",
+            "guard_name" => "web"
+        ]);
 
         Permission::firstOrCreate([
             "name" => "fcmcentral::marin.suivreEnFcm",
@@ -106,6 +97,11 @@ class PermissionsSeeder extends Seeder
 
         Permission::firstOrCreate([
             "name" => "fcmcentral::note.voir",
+            "guard_name" => "web"
+        ]);
+
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::note.valider",
             "guard_name" => "web"
         ]);
 
@@ -183,18 +179,6 @@ class PermissionsSeeder extends Seeder
             "name" => "fcmcentral::permission.cdt",
             "guard_name" => "web"
         ]);
-
-       
-
-
-
-
-       
-
-
-       
-
-
 
     }
 }

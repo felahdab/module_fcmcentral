@@ -16,25 +16,15 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Modules\FcmCentral\Helpers\OutilsHelper;
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 
 
 class ParcoursTypeResource extends Resource
 {
     protected static ?string $model = ParcoursType::class;
 
+    protected static ?string $navigationGroup = "Catalogue";
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    
-    use FilamentPermissionTrait;
-
-    // Permissions marche avec le Trait
-    protected static array $permissions = [
-        'fcmcentral::typeParcours.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.fps',
-        'fcmcentral::permission.bcf',
-    ];
 
     public static function form(Form $form): Form
     {

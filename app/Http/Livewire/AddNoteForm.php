@@ -50,69 +50,69 @@ class AddNoteForm extends Component
     }
 
     public function save()
-{
-    $this->validate();
+    {
+        $this->validate();
 
-    try {
-        // ✅ Ajouter des logs pour déboguer
-        \Log::info('Tentative de création de note', [
-            'rh_marin_id' => $this->marinId,
-            'type_note_id' => $this->typeNote,
-            'user_id' => auth()->id(),
-            'redacteur_id' => $this->redacteurId,
-            'data' => [
-                'libelle' => $this->libelle,
-                'date' => $this->date,
-                'lien_url' => $this->lienUrl,
-                'valide_bcf' => $this->valide_bcf,
-            ]
-        ]);
-
-        $note = Note::create([
-            'rh_marin_id' => $this->marinId,
-            'type_note_id' => $this->typeNote,
-            'libelle' => trim($this->libelle),
-            'date' => $this->date,
-            'lien_url' => $this->lienUrl ?: null,
-            //'redacteur_id' => auth()->id(),
-            'redacteur_id' => $this->redacteurId,
-            'valide_bcf' => $this->valide_bcf,
-        ]);
-
-        \Log::info('Note créée avec succès', ['note_id' => $note->id]);
-
-        $this->reset(['typeNote', 'libelle', 'lienUrl', 'valide_bcf']);
-        $this->date = now()->format('Y-m-d');
-       
-        $this->dispatch('note-added');
-        $this->dispatch('close-modal', id: 'ajouterNote');
-       
-        Notification::make()
-            ->title('Note ajoutée avec succès!')
-            ->success()
-            ->send();
-
-    } catch (\Exception $e) {
-        // ✅ Log détaillé de l'erreur
-        \Log::error('Erreur lors de l\'ajout de la note', [
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString(),
-            'data' => [
+        try {
+            // ✅ Ajouter des logs pour déboguer
+            \Log::info('Tentative de création de note', [
                 'rh_marin_id' => $this->marinId,
                 'type_note_id' => $this->typeNote,
                 'user_id' => auth()->id(),
-            ]
-        ]);
-       
-        Notification::make()
-            ->title('Erreur lors de l\'ajout de la note')
-            ->body('Détail : ' . $e->getMessage())
-            ->danger()
-            ->send();
+                'redacteur_id' => $this->redacteurId,
+                'data' => [
+                    'libelle' => $this->libelle,
+                    'date' => $this->date,
+                    'lien_url' => $this->lienUrl,
+                    'valide_bcf' => $this->valide_bcf,
+                ]
+            ]);
+
+            $note = Note::create([
+                'rh_marin_id' => $this->marinId,
+                'type_note_id' => $this->typeNote,
+                'libelle' => trim($this->libelle),
+                'date' => $this->date,
+                'lien_url' => $this->lienUrl ?: null,
+                //'redacteur_id' => auth()->id(),
+                'redacteur_id' => $this->redacteurId,
+                'valide_bcf' => $this->valide_bcf,
+            ]);
+
+            \Log::info('Note créée avec succès', ['note_id' => $note->id]);
+
+            $this->reset(['typeNote', 'libelle', 'lienUrl', 'valide_bcf']);
+            $this->date = now()->format('Y-m-d');
+        
+            $this->dispatch('note-added');
+            $this->dispatch('close-modal', id: 'ajouterNote');
+        
+            Notification::make()
+                ->title('Note ajoutée avec succès!')
+                ->success()
+                ->send();
+
+        } catch (\Exception $e) {
+            // ✅ Log détaillé de l'erreur
+            \Log::error('Erreur lors de l\'ajout de la note', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'data' => [
+                    'rh_marin_id' => $this->marinId,
+                    'type_note_id' => $this->typeNote,
+                    'user_id' => auth()->id(),
+                ]
+            ]);
+        
+            Notification::make()
+                ->title('Erreur lors de l\'ajout de la note')
+                ->body('Détail : ' . $e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
-}
 
 
     public function cancel()
@@ -123,24 +123,24 @@ class AddNoteForm extends Component
     }
 
     public function render()
-{
-    $typesNotes = TypeNote::orderBy('libelle_court')->get();
-    $marin = Marin::with(['grade'])->find($this->marinId);
+    {
+        $typesNotes = TypeNote::orderBy('libelle_court')->get();
+        $marin = Marin::with(['grade'])->find($this->marinId);
 
-    // Ajout : récupération des rédacteurs
-    $redacteurs = Marin::orderBy('nom')
-        ->get()
-        ->mapWithKeys(function ($marin) {
-            return [$marin->id => $marin->grade?->libelle_court . ' ' . $marin->prenom . ' ' . $marin->nom];
-        })
-        ->toArray();
+        // Ajout : récupération des rédacteurs
+        $redacteurs = Marin::orderBy('nom')
+            ->get()
+            ->mapWithKeys(function ($marin) {
+                return [$marin->id => $marin->grade?->libelle_court . ' ' . $marin->prenom . ' ' . $marin->nom];
+            })
+            ->toArray();
 
-    return view('fcmcentral::filament.fcmcentral.livewire.add-note-form', [
-        'typesNotes' => $typesNotes,
-        'marin' => $marin,
-        'redacteurs' => $redacteurs, // ✅ Passe la variable à la vue
-    ]);
-}
+        return view('fcmcentral::filament.fcmcentral.livewire.add-note-form', [
+            'typesNotes' => $typesNotes,
+            'marin' => $marin,
+            'redacteurs' => $redacteurs, // ✅ Passe la variable à la vue
+        ]);
+    }
 
 
 }

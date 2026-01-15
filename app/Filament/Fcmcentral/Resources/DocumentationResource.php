@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 
 
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 use Modules\FcmCentral\Helpers\OutilsHelper;
 
 class DocumentationResource extends Resource
@@ -29,17 +29,10 @@ class DocumentationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    use FilamentPermissionTrait;
-
-     // Permissions marche avec le Trait
-     protected static array $permissions = [
-        'fcmcentral::documentation.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.bcf',
-        'fcmcentral::permission.fps',
-        'fcmcentral::permission.marin',
-        'fcmcentral::permission.mentor',
-    ];
+    public static function canAccess(array $parameters = []): bool
+    {
+        return false; // TODO: déterminer ce qu'on doit faire avec ces pages. C'est quoi une documentation ?
+    }
 
     public static function form(Form $form): Form
     {

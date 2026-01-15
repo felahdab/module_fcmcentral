@@ -7,7 +7,7 @@ use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
 use Modules\FcmCentral\Models\Marin;
 
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -16,20 +16,10 @@ use Filament\Tables\Table;
 
 class NoteResource extends Resource
 {
-
-    use FilamentPermissionTrait;
-
     protected static ?string $model = Note::class;
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationGroup = "Gestion";
 
-
-    // Permissions marche avec le Trait
-    protected static array $permissions = [
-        'fcmcentral::note.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.fps',
-        'fcmcentral::permission.bcf',
-    ];
 
     public static function form(Form $form): Form
     {
