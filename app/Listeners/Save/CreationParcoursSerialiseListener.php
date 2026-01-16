@@ -5,7 +5,6 @@ namespace Modules\FcmCentral\Listeners\Save;
 use Illuminate\Support\Facades\Log;
 use Filament\Notifications\Notification;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
-use Modules\FcmCommun\Traits\LoadsModelsDynamically;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Parcours;
@@ -15,8 +14,6 @@ use Modules\FcmCommun\Jobs\MajPpaMarinfcm;
 
 class CreationParcoursSerialiseListener
 {
-    use LoadsModelsDynamically;
-
     /**
      * Gere l'evenement.
      */

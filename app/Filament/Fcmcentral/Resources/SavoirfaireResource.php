@@ -20,27 +20,15 @@ use Filament\Tables\Filters\SelectFilter;
 
 
 use Modules\FcmCentral\Helpers\OutilsHelper;
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 
 class SavoirfaireResource extends Resource
 {
-    
-    
-    use FilamentPermissionTrait;
-    
     protected static ?string $model = Savoirfaire::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = "Catalogue";
+    protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
-   
-
-    // Permissions marche avec le Trait
-    protected static array $permissions = [
-        'fcmcentral::savoirfaire.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.fps',
-        'fcmcentral::permission.bcf',
-    ];
 
     public static function form(Form $form): Form
     {

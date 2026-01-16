@@ -1209,11 +1209,11 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
         $objectifsDuSf = $getObjectifsDuSavoirfaire($parcoursMarin, $savoirfaireUuid);
         $objectifsHorsCategorie = array_diff($objectifsUuids, $objectifsDuSf);
     
-        echo "\n🔍 Objectifs du savoir-faire: " . implode(', ', $objectifsDuSf) . "\n";
-        echo "🔍 Objectifs hors catégorie: " . implode(', ', $objectifsHorsCategorie) . "\n";
+        //echo "\n🔍 Objectifs du savoir-faire: " . implode(', ', $objectifsDuSf) . "\n";
+        //echo "🔍 Objectifs hors catégorie: " . implode(', ', $objectifsHorsCategorie) . "\n";
     
         // ✅ ÉTAPE 2: Valider seulement la première objectif du savoir-faire
-        echo "\n📝 Validation du premier objectif\n";
+        //echo "\n📝 Validation du premier objectif\n";
        
         event(new UserGeneratedEvent(
             event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
@@ -1230,7 +1230,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
     
         // ✅ ÉTAPE 3: Valider les activités hors catégorie
         if (!empty($objectifsHorsCategorie)) {
-            echo "📝 Validation des objectif hors catégorie (" . count($objectifsHorsCategorie) . ")\n";
+            //echo "📝 Validation des objectif hors catégorie (" . count($objectifsHorsCategorie) . ")\n";
            
             foreach($objectifsHorsCategorie as $actUuid) {
                 event(new UserGeneratedEvent(
@@ -1250,10 +1250,10 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
     
         // ✅ Compter les events avant validation du savoir-faire
         $eventsAvant = \DB::table('fcmcentral_stored_events')->count();
-        echo "🔍 Events avant validation savoir-faire: {$eventsAvant}\n";
+        //echo "🔍 Events avant validation savoir-faire: {$eventsAvant}\n";
     
         // ✅ ÉTAPE 4: Valider le savoir-faire complet
-        echo "\n📝 Validation du savoir-faire complet\n";
+        //echo "\n📝 Validation du savoir-faire complet\n";
        
         event(new UserGeneratedEvent(
             event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
@@ -1272,7 +1272,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
         $parcoursMarin = $marin->complements_fcm->donnees_du_parcours->parcoursmarin;
     
         // ✅ VÉRIFICATION 1: État des activités dans le parcours
-        echo "\n🔎 Vérification des objectifs du savoir-faire\n";
+        //echo "\n🔎 Vérification des objectifs du savoir-faire\n";
        
         $sfTrouve = false;
     
@@ -1331,7 +1331,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
     
         // ✅ VÉRIFICATION 2: Les activités hors catégorie restent inchangées
         if (!empty($objectifsHorsCategorie)) {
-            echo "\n🔎 Vérification des activités hors catégorie\n";
+            //echo "\n🔎 Vérification des activités hors catégorie\n";
            
             foreach($objectifsHorsCategorie as $actUuid) {
                 $objectifTrouvee = false;
@@ -1416,7 +1416,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
                         expect($csf['etat_valid'] ?? false)->toBeTrue('Le savoir-faire devrait être validé');
                         expect($csf['commentaire'])->toBe('validation savoir-faire complet');
                        
-                        echo "✅ Test réussi!\n";
+                        //echo "✅ Test réussi!\n";
                         return;
                     }
                 }

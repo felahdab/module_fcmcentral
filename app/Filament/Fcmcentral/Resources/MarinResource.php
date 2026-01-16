@@ -2,8 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use App\Filament\Pages\RechercheAnnuairePage;
 use Illuminate\Database\Eloquent\Builder;
+
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,6 +12,12 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Toggle;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Actions\Action;
+
+use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
+
+use Modules\RH\Models\Specialite;
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
@@ -20,126 +26,36 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\FcmMarin;
-use Modules\RH\Models\Specialite;
-use Modules\FcmCentral\Models\Role;
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
-use Modules\FcmCentral\Traits\FcmPermissionTrait;
-use Filament\Forms\Components\Select;
-
-
-//use Modules\FcmCentral\Filament\Fcmcentral\Exports\MarinBcfExporter;
-//use Filament\Tables\Actions\ExportAction;
-//use Filament\Actions\Exports\Enums\ExportFormat;
-use Filament\Tables\Actions\Action;
 
 class MarinResource extends Resource
 {
-    use FilamentPermissionTrait, FcmPermissionTrait;
-    
     protected static ?string $model = Marin::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $navigationGroup = 'Marins';
     protected static ?string $navigationLabel = "Marins";
 
-    protected static array $permissions = [
-        'fcmcentral::marin.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.bcf',
-        'fcmcentral::permission.fps',
-    ];
-
-    // Retirer bouton Creer Create
     public static function canCreate(): bool
     {
         return false;
     }
-
-    // Creer fonction pour RH Creation MArin pour ne pas envoyer fcmcentral::
-    public static function canAccessAdminMenus() : bool
-    {
-        return static:: canAccessAnyPermission([
-            'permission.mentor',
-            'permission.bcf',
-            'permission.fps'
-        ]);
-    }
-
-    
-
-
-     
 
     /**
      * Badge de navigation avec comptage selon les droits
      */
     public static function getNavigationBadge(): ?string
     {
-        try {
-            if (static:: canAccessPermission('admin')) {
-                // Admins voient tous les marins FCM
-                return (string) Marin::enFcm()->count();
-            }
-            
-            if (static:: canAccessAnyPermission([
-                'permission.mentor',
-                'permission.bcf',
-                'permission.fps'
-            ])) {
-                // Mentors voient seulement leurs marins
-                $currentMarin = Marin::fromCurrentUser();
-                if ($currentMarin) {
-                    $count = FcmMarin::where('mentor_id', $currentMarin->id)->count();
-                    return $count > 0 ? (string) $count : null;
-                }
-            }
-        } catch (\Exception $e) {
-            // En cas d'erreur, pas de badge
+        if (auth()->user()->can("fcmcentral::voir_tous_les_marins")){
+            return (string) Marin::enFcm()->count();
         }
-        
-        return null;
-    }
 
-
-   /**
- * Vérifie si l'utilisateur connecté est le mentor du marin donné
- */
-public static function isMentorOfMarin(Marin $marin): bool
-{
-    try {
         $currentMarin = Marin::fromCurrentUser();
-       
-        if (!$currentMarin) {
-            \Log::warning('isMentorOfMarin: utilisateur sans compte marin', [
-                'user_id' => auth()->id(),
-            ]);
-            return false;
+
+        if ($currentMarin) {
+            return FcmMarin::where('mentor_id', $currentMarin->id)->count();
         }
-
-        // Vérifier si le currentMarin est mentor du marin passé en paramètre
-        $isMentor = FcmMarin::where('mentor_id', $currentMarin->id)
-            ->where('rh_marin_id', $marin->id)
-            ->exists();
        
-        \Log::info('Vérification mentor', [
-            'current_marin_id' => $currentMarin->id,
-            'target_marin_id' => $marin->id,
-            'is_mentor' => $isMentor,
-        ]);
-       
-        return $isMentor;
-       
-    } catch (\Exception $e) {
-        \Log::error('Erreur lors de la vérification du mentor', [
-            'message' => $e->getMessage(),
-            'marin_id' => $marin->id ?? null,
-            'user_id' => auth()->id(),
-        ]);
-        return false;
+        return "0";
     }
-}
-
-
-
 
     /**
      * Filtrage automatique selon les droits
@@ -148,33 +64,33 @@ public static function isMentorOfMarin(Marin $marin): bool
     {
         $query = parent::getEloquentQuery();
 
-        try {
-            // Les admins voient tout
-            if (static:: canAccessAnyPermission([
-                'admin',
-                'permission.bcf',
-                'permission.fps'])) {
-                return $query;
-            }
-            
-            // Les mentors voient seulement leurs marins
-            if (static:: canAccessAnyPermission([
-                'permission.mentor',
-                ]
-                )) {
-                $currentMarin = Marin::fromCurrentUser();
-                if ($currentMarin) {
-                    $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
-                        ->pluck('rh_marin_id');
-                    
-                    return $query->whereIn('id', $marinIds);
-                }
-            }
-        } catch (\Exception $e) {
-            // En cas d'erreur, query vide
-            return $query->whereRaw('1 = 0');
+        /**
+         * Si l'utilisateur n'est pas authentifié, on renvoie une requête qui bloque tout accès.
+         */
+        if (!auth()->check())
+        {
+            return $query->whereRaw('1=0');
         }
 
+        /**
+         * A partir de ce point, on sait que l'utilisateur est authentifié.
+         */
+
+        
+        // Les admins voient tout
+        if (auth()->user()->can("fcmcentral::voir_tous_les_marins")){
+            return $query;
+        }
+
+        $currentMarin = Marin::fromCurrentUser();
+
+        if ($currentMarin && $currentMarin->est_mentor) {
+            $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
+                ->pluck('rh_marin_id');
+            
+            return $query->whereIn('id', $marinIds);
+        }
+    
         // Par défaut, query vide
         return $query->whereRaw('1 = 0');
     }
@@ -204,18 +120,6 @@ public static function isMentorOfMarin(Marin $marin): bool
             ->defaultSort('nom', 'asc')
            
             ->headerActions([
-
-                    // Cette methode ne fait que telecahrger sur le serveur (app/storage) , on veut telecahrger en direct
-                    // ExportAction::make('export')
-                    // ->label('Exporter les marins')
-                    // ->exporter(MarinBcfExporter::class)
-                    // ->color('primary')
-                    // ->formats([ExportFormat::Csv])
-                    // ->icon('heroicon-o-arrow-down-tray')
-                    // ->fileName('marins-fcm.csv')
-                    // ->visible(fn() => static::canAccessAnyPermission(['admin',  'permission.bcf']))
-                    // ,
-               
                    /** Telechargement CSV */
                    Action::make('downloadCsv')
                    ->label('Exporter les marins')
@@ -299,7 +203,7 @@ public static function isMentorOfMarin(Marin $marin): bool
                            "Content-Disposition" => "attachment; filename=marins-fcm.csv",
                        ]);
                    })
-                   ->visible(fn() => static::canAccessAnyPermission(['admin', 'permission.bcf'])),
+                   ->visible(fn() => auth()->check() && auth()->user()->can("fcmcentral::exporter_csv")),
            
                    /** Fin Telechargment */
                 
@@ -309,7 +213,7 @@ public static function isMentorOfMarin(Marin $marin): bool
                     ->color('success')
                     ->button()
                     ->url(fn() => RechercheAnnuairePage::getUrl())
-                    ->visible(fn() => static::canAccessAnyPermission(['admin', 'permission.mentor', 'permission.bcf', 'permission.fps']))
+                    ->visible(fn() => RechercheAnnuairePage::canAccess())
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('grade.libelle_court')->searchable()->toggleable(),
@@ -318,190 +222,186 @@ public static function isMentorOfMarin(Marin $marin): bool
                 
                 // 🎯 FCM ACTIF (Oui/Non)
                 // Colonne FCM avec gestion du typeEtat
-Tables\Columns\IconColumn::make('fcm_actif')
-->label('FCM')
-->boolean()
-->state(fn ($record) => $record->estEnFcm() && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN')
-->trueIcon('heroicon-s-check-circle')
-->falseIcon(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'heroicon-c-shield-check' : 'heroicon-o-x-circle')
-->trueColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'success')
-->falseColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'danger')
-->action(
-    Tables\Actions\Action::make('toggle_fcm')
-        ->modalHeading(fn ($record) => $record->estEnFcm() ? 'Marin en FCM' : 'Activer FCM')
-        ->modalDescription(fn ($record) => $record->fullNameAndGrade)
-        ->requiresConfirmation()
-        ->form(function ($record) {
-            if ($record->estEnFcm() && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN') {
-               // return []; // Pas de formulaire si déjà actif et pas en FCM_FIN
-              
-            }
-            return [
-                Forms\Components\Select::make('cohorte_id')
-                    ->label("Choisir la cohorte")
-                    ->visible(fn() => static::canAccessPermission('attribuer.cohorte'))
-                    ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
-                Forms\Components\Select::make('mentor_id')
-                    ->label("Choisir un mentor")
-                    ->visible(fn() => static::canAccessPermission('attribuer.mentor'))
-                    ->options(
-                        Marin::query()
-                            ->whereNull('deleted_at')
-                            ->orderBy('nom')
-                            ->orderBy('prenom')
-                            ->get()
-                            ->mapWithKeys(function ($marin) {
-                                $fullName = trim($marin->prenom . ' ' . $marin->nom);
-                                $grade = $marin->grade?->libelle_court ?? '';
-                                $label = $grade ? $grade . ' ' . $fullName : $fullName;
-                                return [$marin->uuid => $label];
+                Tables\Columns\IconColumn::make('fcm_actif')
+                    ->label('FCM')
+                    ->boolean()
+                    ->state(fn ($record) => $record->suivi_en_fcm && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN')
+                    ->trueIcon('heroicon-s-check-circle')
+                    ->falseIcon(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'heroicon-c-shield-check' : 'heroicon-o-x-circle')
+                    ->trueColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'success')
+                    ->falseColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'danger')
+                    ->action(
+                        Tables\Actions\Action::make('toggle_fcm')
+                            ->modalHeading(fn ($record) => $record->suivi_en_fcm ? 'Marin en FCM' : 'Activer FCM')
+                            ->modalDescription(fn ($record) => $record->fullNameAndGrade)
+                            ->requiresConfirmation()
+                            ->form(function ($record) {
+                                if ($record->suivi_en_fcm && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN') {
+                                }
+                                
+                                return [
+                                    Forms\Components\Select::make('cohorte_id')
+                                        ->label("Choisir la cohorte")
+                                        ->visible(fn() => auth()->user()->can('fcmcentral::attribuer.cohorte'))
+                                        ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
+                                    Forms\Components\Select::make('mentor_id')
+                                        ->label("Choisir un mentor")
+                                        ->visible(fn() => auth()->user()->can('fcmcentral::attribuer.mentor'))
+                                        ->options(
+                                            Marin::query()
+                                                ->whereNull('deleted_at')
+                                                ->orderBy('nom')
+                                                ->orderBy('prenom')
+                                                ->get()
+                                                ->mapWithKeys(function ($marin) {
+                                                    $fullName = trim($marin->prenom . ' ' . $marin->nom);
+                                                    $grade = $marin->grade?->libelle_court ?? '';
+                                                    $label = $grade ? $grade . ' ' . $fullName : $fullName;
+                                                    return [$marin->uuid => $label];
+                                                })
+                                        )
+                                        ->searchable(),
+                                    Forms\Components\Select::make('parcours_id')
+                                        ->label('Choisir un Parcours')
+                                        ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
+                                        ->searchable()
+                                        ->visible(fn() => auth()->user()->can('fcmcentral::attribuer.parcours'))
+                                ];
                             })
-                    )
-                    ->searchable(),
-                Forms\Components\Select::make('parcours_id')
-                    ->label('Choisir un Parcours')
-                    ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
-                    ->searchable()
-                    ->visible(fn() => static::canAccessPermission('attribuer.parcours')),
-            ];
-        })
-        ->action(function ($record, $data) {
-            
-            if ($record->estEnFcm() && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN') {
-                \Filament\Notifications\Notification::make()
-                    ->title('Marin déjà en FCM')
-                    ->warning()
-                    ->send();
-                return;
-            }
-            
-            // Activation FCM + historisation état FCM_sed
-            event(new UserGeneratedEvent(
-                UserGeneratedEventTypes::MARIN_EN_FCM,
-                auth()->user()->uuid,
-                ObjectClasses::MARIN,
-                $record->uuid,
-                ['statut_fcm' => 'En validation']
-            ));
-            // Attribution cohorte/mentor/parcours
-            if (!empty($data['cohorte_id'])) {
-                event(new UserGeneratedEvent(
-                    UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
-                    auth()->user()->uuid,
-                    ObjectClasses::MARIN,
-                    $record->uuid,
-                    ["cohorte" => $data["cohorte_id"]]
-                ));
-            }
-            if (!empty($data['mentor_id'])) {
-                event(new UserGeneratedEvent(
-                    UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
-                    auth()->user()->uuid,
-                    ObjectClasses::MARIN,
-                    $record->uuid,
-                    ["mentor" => $data["mentor_id"]]
-                ));
-            }
-            if (!empty($data['parcours_id'])) {
-                event(new UserGeneratedEvent(
-                    UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
-                    auth()->user()->uuid,
-                    ObjectClasses::MARIN,
-                    $record->uuid,
-                    ["parcours" => $data["parcours_id"]]
-                ));
-            }
-        })
-        ->visible(fn($record) =>
-            static::canAccessAnyPermission(['admin','permission.mentor', 'permission.bcf', 'permission.fps'])
-            && ($record->complementsFcm?->getJalonFcmLibelle() !== 'FIN')
-        )
-),
+                            ->action(function ($record, $data) {
+                                
+                                if ($record->estEnFcm() && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN') {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title('Marin déjà en FCM')
+                                        ->warning()
+                                        ->send();
+                                    return;
+                                }
+                                
+                                // Activation FCM + historisation état FCM_sed
+                                event(new UserGeneratedEvent(
+                                    UserGeneratedEventTypes::MARIN_EN_FCM,
+                                    auth()->user()->uuid,
+                                    ObjectClasses::MARIN,
+                                    $record->uuid,
+                                    ['statut_fcm' => 'En validation']
+                                ));
+                                // Attribution cohorte/mentor/parcours
+                                if (!empty($data['cohorte_id'])) {
+                                    event(new UserGeneratedEvent(
+                                        UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
+                                        auth()->user()->uuid,
+                                        ObjectClasses::MARIN,
+                                        $record->uuid,
+                                        ["cohorte" => $data["cohorte_id"]]
+                                    ));
+                                }
+                                if (!empty($data['mentor_id'])) {
+                                    event(new UserGeneratedEvent(
+                                        UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
+                                        auth()->user()->uuid,
+                                        ObjectClasses::MARIN,
+                                        $record->uuid,
+                                        ["mentor" => $data["mentor_id"]]
+                                    ));
+                                }
+                                if (!empty($data['parcours_id'])) {
+                                    event(new UserGeneratedEvent(
+                                        UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+                                        auth()->user()->uuid,
+                                        ObjectClasses::MARIN,
+                                        $record->uuid,
+                                        ["parcours" => $data["parcours_id"]]
+                                    ));
+                                }
+                            })
+                            ->visible(fn($record) =>
+                                $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN' &&
+                                auth()->user()->canAny(["fcmcentral::attribuer.cohorte", "fcmcentral::attribuer.mentor", "fcmcentral::attribuer.parcours"])
+                            )
+                    ),
 
-// Colonne Type Etat FCM dynamique
-Tables\Columns\TextColumn::make('type_jalon_fcm')
-    ->label('Jalon')
-    ->state(function ($record) {
-        if (!$record->estEnFcm()) return null;
-        return $record->complementsFcm?->getJalonFcmLibelle();
-    })
-    ->badge()
-    ->color(function ($record) {
-        $etat = $record->complementsFcm?->getJalonFcmLibelle();
-        return match($etat) {
-            'SED' => 'info',
-            'FCM' => 'success',
-            'FIN' => 'gray',
-            default => 'gray',
-        };
-    })
-    ->icon(function ($record) {
-        $etat = $record->complementsFcm?->getJalonFcmLibelle();
-        return match($etat) {
-            'SED' => 'heroicon-s-arrow-path',
-            'FCM' => 'heroicon-s-check-circle',
-            'FIN' => 'heroicon-o-minus-circle',
-            default => 'heroicon-o-minus-circle',
-        };
-    })
-    ->placeholder('Non assigné')
-    ->tooltip('Cliquer pour modifier')
-    ->action(
-        Tables\Actions\Action::make('jalons_fcm')
-            ->modalHeading('Modifier les Jalons FCM')
-            ->modalDescription(fn ($record) => $record->fullNameAndGrade)
-            ->form([
-                Forms\Components\DatePicker::make('date_sedimentation')
-                    ->label('Date de sédimentation')
-                    ->helperText('Début de la sédimentation')
-                    ->default(fn ($record) => $record->complementsFcm?->date_sedimentation),
-                Forms\Components\DatePicker::make('date_fcm')
-                    ->label('Date FCM')
-                    ->helperText('Début effectif du parcours FCM (laisser vide pour changer de statut)')
-                    ->default(fn ($record) => $record->complementsFcm?->date_fcm),
-                Forms\Components\DatePicker::make('date_competence')
-                    ->label('Date compétence')
-                    ->helperText('Fin de la FCM, compétence acquise (laisser vide pour changer de statut)')
-                    ->default(fn ($record) => $record->complementsFcm?->date_competence),
-            ])
-            ->action(function ($record, array $data) {
-                if (!empty($data['date_sedimentation'])) {
-                    event(new UserGeneratedEvent(
-                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
-                        auth()->user()->uuid,
-                        ObjectClasses::MARIN,
-                        $record->uuid,
-                        ["date_sedimentation" => $data["date_sedimentation"]]
-                    ));
-                }
-                if (!empty($data['date_fcm'])) {
-                    event(new UserGeneratedEvent(
-                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
-                        auth()->user()->uuid,
-                        ObjectClasses::MARIN,
-                        $record->uuid,
-                        ["date_fcm" => $data["date_fcm"]]
-                    ));
-                }
-                if (!empty($data['date_competence'])) {
-                    event(new UserGeneratedEvent(
-                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
-                        auth()->user()->uuid,
-                        ObjectClasses::MARIN,
-                        $record->uuid,
-                        ["date_competence" => $data["date_competence"]]
-                    ));
-                }
-
-
-            //}
-        })
-        ->visible(fn ($record) =>
-            $record->estEnFcm()
-            //&& $record->getDernierTypeEtatCode() !== 'FCM_FIN'
-            && static::canAccessAnyPermission(['admin', 'permission.bcf', 'permission.fps'])
-        )
-),
+                // Colonne Type Etat FCM dynamique
+                Tables\Columns\TextColumn::make('type_jalon_fcm')
+                    ->label('Jalon')
+                    ->state(function ($record) {
+                        if (!$record->suivi_en_fcm) return null;
+                        return $record->complementsFcm?->getJalonFcmLibelle();
+                    })
+                    ->badge()
+                    ->color(function ($record) {
+                        $etat = $record->complementsFcm?->getJalonFcmLibelle();
+                        return match($etat) {
+                            'SED' => 'info',
+                            'FCM' => 'success',
+                            'FIN' => 'gray',
+                            default => 'gray',
+                        };
+                    })
+                    ->icon(function ($record) {
+                        $etat = $record->complementsFcm?->getJalonFcmLibelle();
+                        return match($etat) {
+                            'SED' => 'heroicon-s-arrow-path',
+                            'FCM' => 'heroicon-s-check-circle',
+                            'FIN' => 'heroicon-o-minus-circle',
+                            default => 'heroicon-o-minus-circle',
+                        };
+                    })
+                    ->placeholder('Non assigné')
+                    ->tooltip('Cliquer pour modifier')
+                    ->action(
+                        Tables\Actions\Action::make('jalons_fcm')
+                            ->modalHeading('Modifier les Jalons FCM')
+                            ->modalDescription(fn ($record) => $record->fullNameAndGrade)
+                            ->form([
+                                Forms\Components\DatePicker::make('date_sedimentation')
+                                    ->label('Date de sédimentation')
+                                    ->helperText('Début de la sédimentation')
+                                    ->default(fn ($record) => $record->complementsFcm?->date_sedimentation),
+                                Forms\Components\DatePicker::make('date_fcm')
+                                    ->label('Date FCM')
+                                    ->helperText('Début effectif du parcours FCM (laisser vide pour changer de statut)')
+                                    ->default(fn ($record) => $record->complementsFcm?->date_fcm),
+                                Forms\Components\DatePicker::make('date_competence')
+                                    ->label('Date compétence')
+                                    ->helperText('Fin de la FCM, compétence acquise (laisser vide pour changer de statut)')
+                                    ->default(fn ($record) => $record->complementsFcm?->date_competence),
+                            ])
+                            ->action(function ($record, array $data) {
+                                if (!empty($data['date_sedimentation'])) {
+                                    event(new UserGeneratedEvent(
+                                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+                                        auth()->user()->uuid,
+                                        ObjectClasses::MARIN,
+                                        $record->uuid,
+                                        ["date_sedimentation" => $data["date_sedimentation"]]
+                                    ));
+                                }
+                                if (!empty($data['date_fcm'])) {
+                                    event(new UserGeneratedEvent(
+                                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+                                        auth()->user()->uuid,
+                                        ObjectClasses::MARIN,
+                                        $record->uuid,
+                                        ["date_fcm" => $data["date_fcm"]]
+                                    ));
+                                }
+                                if (!empty($data['date_competence'])) {
+                                    event(new UserGeneratedEvent(
+                                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+                                        auth()->user()->uuid,
+                                        ObjectClasses::MARIN,
+                                        $record->uuid,
+                                        ["date_competence" => $data["date_competence"]]
+                                    ));
+                                }
+                        })
+                        ->visible(fn ($record) =>
+                            $record->suivi_en_fcm
+                            && auth()->check()
+                            && auth()->user()->can("fcmcentral::definir_jalons_de_fcm")
+                        )
+                ),
 
 
                 Tables\Columns\TextColumn::make('complements_fcm.cohorte.libelle_court')
@@ -530,8 +430,11 @@ Tables\Columns\TextColumn::make('type_jalon_fcm')
                                     ));
                                 }
                             })
-                            ->visible(fn ($record) => $record->estEnFcm() && static::canAccessPermission('attribuer.cohorte'))
-                    ),
+                            ->visible(fn ($record) => $record->estEnFcm() && 
+                                auth()->check() &&
+                                auth()->user()->can("fcmcentral::attribuer.cohorte")
+                            )
+                        ),
 
                 // 👤 MENTOR CLIQUABLE
                 Tables\Columns\TextColumn::make('complements_fcm.mentor.nom')
@@ -579,9 +482,11 @@ Tables\Columns\TextColumn::make('type_jalon_fcm')
                                     ));
                                 }
                             })
-                            ->visible(fn ($record) => $record->estEnFcm() && static::canAccessPermission('attribuer.mentor'))
-                    ),
-
+                            ->visible(fn ($record) => $record->estEnFcm() && 
+                                    auth()->check() &&
+                                    auth()->user()->can("fcmcentral::attribuer.mentor")
+                            )),
+                    
                 // 📚 PARCOURS CLIQUABLE
                 Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.parcours_serialise.libelle_court')
                     ->label('Parcours')
@@ -613,8 +518,10 @@ Tables\Columns\TextColumn::make('type_jalon_fcm')
                                     ));
                                 }
                             })
-                            ->visible(fn ($record) => $record->estEnFcm() && static::canAccessPermission('attribuer.parcours'))
-                    ),
+                            ->visible(fn ($record) => $record->estEnFcm() && 
+                                auth()->check() &&
+                                auth()->user()->can("fcmcentral::attribuer.parcours")
+                            )),
 
                 Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
                     ->label('Taux')
@@ -648,7 +555,7 @@ Tables\Columns\TextColumn::make('type_jalon_fcm')
                 ->query(function (Builder $query, array $data): Builder {
                     return match($data['value'] ?? 'en_fcm') {
                         'en_fcm' => $query->enFcm(),
-                        'hors_fcm' => $query->whereDoesntHave('complementsFcm'),
+                        'hors_fcm' => $query->pasEnFcm(),
                         default => $query,
                     };
                 })
@@ -675,12 +582,6 @@ Tables\Columns\TextColumn::make('type_jalon_fcm')
                     ->iconButton()
                     ->icon('heroicon-m-pencil-square')
                     ->visible(fn ($record) => static::canEdit($record)),
-
-                   
-               
-
-                    
-
                 // VOIR LIVRET    
                 Tables\Actions\Action::make('livret-de-fcm')
                     ->iconButton()
@@ -691,248 +592,184 @@ Tables\Columns\TextColumn::make('type_jalon_fcm')
                         'title' => 'Livret FCM',
                         'class' => 'btn-livret',
                     ])
-                    ->visible(fn ($record) => static::canAccessPermission('livret.voir') && $record->complements_fcm?->donnees_du_parcours)
+                    ->visible(fn ($record) => $record->complements_fcm?->donnees_du_parcours &&
+                        auth()->check() &&
+                        auth()->user()->can("fcmcentral::livret.voir"))
                     ->url(fn ($record) => static::getUrl('livret-de-fcm', ['record' => $record->id])),
 
-                    // FICHE BILAN
-                    Tables\Actions\Action::make('fiche-bilan')
-                        ->iconButton()
-                        ->icon('heroicon-m-chart-bar-square')
-                        ->color('warning')
-                        ->extraAttributes([
-                            'title' => 'Fiche Bilan FCM',
-                            'class' => 'btn-bilan',
-                        ])
-                        ->visible(function ($record) {
-                            return static::canAccessPermission('livret.voir')
-                            && $record->complements_fcm
-                            && $record->complements_fcm->donnees_du_parcours;
-                        })
-                        ->action(function ($record){
-                            $url = static::getUrl('fiche-bilan', ['record' => $record->id]);
-                            return redirect($url);
-                        }),
-
-                    
-                    // ICONE PDF
-                    Tables\Actions\Action::make('livret-pdf')
-    ->iconButton()
-    ->icon('heroicon-m-document-text')
-    ->color('secondary')
-    ->extraAttributes([
-        'title' => 'Télécharger PDF du Livret FCM',
-        'class' => 'btn-pdf',
-    ])
-    ->visible(function ($record) {
-        return static::canAccessPermission('livret.telecharger')
-        && $record->complements_fcm
-        && $record->complements_fcm->donnees_du_parcours;
-;
-    })
-    ->action(function ($record) {
-        return response()->streamDownload(function () use ($record) {
-            echo app(\Modules\FcmCommun\Services\LivretPdfService::class)->generatePdf($record);
-        }, "livret-fcm-{$record->nom}-{$record->prenom}.pdf", [
-            'Content-Type' => 'application/pdf',
-        ]);
-    }),
+                // FICHE BILAN
+                Tables\Actions\Action::make('fiche-bilan')
+                    ->iconButton()
+                    ->icon('heroicon-m-chart-bar-square')
+                    ->color('warning')
+                    ->extraAttributes([
+                        'title' => 'Fiche Bilan FCM',
+                        'class' => 'btn-bilan',
+                    ])
+                    ->visible(fn ($record) => MarinResource\Pages\FicheBilan::canAccess(["record" => $record]))
+                    ->url(fn($record) => MarinResource\Pages\FicheBilan::getUrl(['record' => $record->id])),
+                // ICONE PDF
+                Tables\Actions\Action::make('livret-pdf')
+                    ->iconButton()
+                    ->icon('heroicon-m-document-text')
+                    ->color('secondary')
+                    ->extraAttributes([
+                        'title' => 'Télécharger PDF du Livret FCM',
+                        'class' => 'btn-pdf',
+                    ])
+                    ->visible(fn ($record) => $record->complements_fcm?->donnees_du_parcours &&
+                        auth()->check() &&
+                        auth()->user()->can("fcmcentral::livret.telecharger"))
+                    ->action(function ($record) {
+                        return response()->streamDownload(function () use ($record) {
+                            echo app(\Modules\FcmCommun\Services\LivretPdfService::class)->generatePdf($record);
+                        }, "livret-fcm-{$record->nom}-{$record->prenom}.pdf", [
+                            'Content-Type' => 'application/pdf',
+                        ]);
+                    }),
 
                     // ✅ NOUVEAU BOUTON NOTE
-Tables\Actions\Action::make('create-note')
-->iconButton()
-->icon('heroicon-m-newspaper')
-->color('danger')
-->extraAttributes([
-    'title' => 'Créer une note',
-    'class' => 'btn-note',
-])
-->visible(function ($record) {
-    // Visible si le marin est suivi en FCM et que l'utilisateur peut créer des notes
-    return static:: canAccessAnyPermission([
-        'admin',
-        'note.index',
-        'permission.fps',
-    'permission.bcf',
-        
-    ])
-    && $record->complements_fcm
-    && $record->complements_fcm->donnees_du_parcours;
-})
-->modalHeading('Créer une note')
-->modalDescription(fn ($record) => "Créer une note pour {$record->prenom} {$record->nom}")
-->modalWidth('lg')
-->form([
-    Forms\Components\Textarea::make('libelle')
-        ->required()
-        ->label('Contenu de la note')
-        ->rows(4)
-        ->maxLength(1000)
-        ->placeholder('Saisissez le contenu de votre note...'),
+                Tables\Actions\Action::make('create-note')
+                ->iconButton()
+                ->icon('heroicon-m-newspaper')
+                ->color('danger')
+                ->extraAttributes([
+                    'title' => 'Créer une note',
+                    'class' => 'btn-note',
+                ])
+                ->visible(fn ($record) => $record->suivi_en_fcm &&
+                        auth()->check() &&
+                        auth()->user()->can("fcmcentral::note.creer"))
+                ->modalHeading('Créer une note')
+                ->modalDescription(fn ($record) => "Créer une note pour {$record->prenom} {$record->nom}")
+                ->modalWidth('lg')
+                ->form([
+                    Forms\Components\Textarea::make('libelle')
+                        ->required()
+                        ->label('Contenu de la note')
+                        ->rows(4)
+                        ->maxLength(1000)
+                        ->placeholder('Saisissez le contenu de votre note...'),
 
-    // Marin pré-sélectionné (caché)
-    Forms\Components\Hidden::make('marin_id')
-        ->default(fn ($record) => $record->id),
+                    // Marin pré-sélectionné (caché)
+                    Forms\Components\Hidden::make('marin_id')
+                        ->default(fn ($record) => $record->id),
 
-    // Affichage du marin sélectionné
-    Forms\Components\Placeholder::make('marin_selected')
-        ->label('Marin concerné')
-        ->content(fn ($record) => $record->grade?->libelle_court . ' ' . $record->prenom . ' ' . $record->nom),
+                    // Affichage du marin sélectionné
+                    Forms\Components\Placeholder::make('marin_selected')
+                        ->label('Marin concerné')
+                        ->content(fn ($record) => $record->grade?->libelle_court . ' ' . $record->prenom . ' ' . $record->nom),
 
-    Forms\Components\Select::make('type_note_id')
-        ->label('Type de note')
-        ->options(function() {
-            return \Modules\FcmCentral\Models\TypeNote::pluck('libelle_court', 'id');
-        })
-        ->searchable()
-        ->preload()
-        ->nullable()
-        ->createOptionForm([
-            Forms\Components\Textarea::make('code')
-                ->required()
-                ->label('code')
-                ,
-            Forms\Components\TextInput::make('libelle_court')
-                ->required()
-                ->label('Libellé court')
-                ->maxLength(150),
-            
-        ])
-        ->createOptionUsing(function (array $data) {
-            return \Modules\FcmCentral\Models\TypeNote::create($data)->id;
-        }),
+                    Forms\Components\Select::make('type_note_id')
+                        ->label('Type de note')
+                        ->options(function() {
+                            return \Modules\FcmCentral\Models\TypeNote::pluck('libelle_court', 'id');
+                        })
+                        ->searchable()
+                        ->preload()
+                        ->nullable()
+                        ->createOptionForm([
+                            Forms\Components\Textarea::make('code')
+                                ->required()
+                                ->label('code')
+                                ,
+                            Forms\Components\TextInput::make('libelle_court')
+                                ->required()
+                                ->label('Libellé court')
+                                ->maxLength(150),
+                            
+                        ])
+                        ->createOptionUsing(function (array $data) {
+                            return \Modules\FcmCentral\Models\TypeNote::create($data)->id;
+                        }),
+                    Forms\Components\DatePicker::make('date')
+                        ->label('Date')
+                        ->default(now())
+                        ->nullable(),
+                    Forms\Components\Select::make('redacteur_id')
+                        ->label('Rédacteur')
+                        ->options(function () {
+                            return \Modules\FcmCentral\Models\Marin::orderBy('nom')
+                                ->get()
+                                ->mapWithKeys(fn($marin) => [
+                                    $marin->id => ($marin->grade?->libelle_court . ' ' . $marin->prenom . ' ' . $marin->nom)
+                                ])
+                                ->toArray();
+                        })
+                        ->searchable()
+                        ->required()
+                        ->default(function () {
+                            $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+                            return $currentMarin ? $currentMarin->id : auth()->user()->id;
+                        }),
+                    Forms\Components\Toggle::make('valide_bcf')
+                        ->label('Validé BCF')
+                        ->default(false)
+                        ->visible(fn () => auth()->user()->can("fcmcentral::note.valider")), // Seuls les admins peuvent cocher
 
-    Forms\Components\DatePicker::make('date')
-        ->label('Date')
-        ->default(now())
-        ->nullable(),
+                    Forms\Components\TextInput::make('lien_url')
+                        ->label('Lien URL (optionnel)')
+                        ->url()
+                        ->nullable()
+                        ->placeholder('https://...'),
 
-    // Rédacteur automatique selon le rôle
-    // Forms\Components\Hidden::make('redacteur_id')
-    //     ->default(function () {
-    //         if (static::canAccessAnyPermission([
-                
-    //             'permission.bcf','admin'
-               
-    //         ])) {
-    //             // Si c'est un mentor, utiliser son ID marin
-    //             $currentMarin = Marin::fromCurrentUser();
-    //             return $currentMarin ? $currentMarin->id : auth()->user()->id;
-    //         }
-    //         // Sinon utiliser l'ID utilisateur
-    //         return auth()->user()->id;
-    //     }),
+                    // Champs cachés pour objet_type et objet_id
+                    Forms\Components\Hidden::make('objet_type')
+                        ->default('marin'),
+                    Forms\Components\Hidden::make('objet_id')
+                        ->default(fn ($record) => $record->id),
+                ])
+                ->action(function ($record, array $data) {
+                    try {
+                        \Log::info('Tentative de création de note', [
+                            'record_id' => $record->id,
+                            'data' => $data,
+                        ]);
 
-    // Affichage du rédacteur
-    // Forms\Components\Placeholder::make('redacteur_info')
-        // ->label('Rédacteur')
-        // ->content(function () {
-        //     if (static::canAccessAnyPermission([
-                
-        //         'permission.bcf','admin'
-                
-        //     ])) {
-        //         $currentMarin = Marin::fromCurrentUser();
-        //         if ($currentMarin) {
-        //             return $currentMarin->grade?->libelle_court . ' ' . $currentMarin->prenom . ' ' . $currentMarin->nom;
-        //         }
-        //     }
-        //     return auth()->user()->name ?? 'Utilisateur connecté';
-        // }),
-        Forms\Components\Select::make('redacteur_id')
-    ->label('Rédacteur')
-    ->options(function () {
-        return \Modules\FcmCentral\Models\Marin::orderBy('nom')
-            ->get()
-            ->mapWithKeys(fn($marin) => [
-                $marin->id => ($marin->grade?->libelle_court . ' ' . $marin->prenom . ' ' . $marin->nom)
-            ])
-            ->toArray();
-    })
-    ->searchable()
-    ->required()
-    ->default(function () {
-        $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
-        return $currentMarin ? $currentMarin->id : auth()->user()->id;
-    }),
-
-       
-    
-
-    Forms\Components\Toggle::make('valide_bcf')
-        ->label('Validé BCF')
-        ->default(false)
-        ->visible(fn () => static:: canAccessAnyPermission([
-            'admin',
-            'permission.bcf',  
-    ])), // Seuls les admins peuvent cocher
-
-    Forms\Components\TextInput::make('lien_url')
-        ->label('Lien URL (optionnel)')
-        ->url()
-        ->nullable()
-        ->placeholder('https://...'),
-
-    // Champs cachés pour objet_type et objet_id
-    Forms\Components\Hidden::make('objet_type')
-        ->default('marin'),
-    Forms\Components\Hidden::make('objet_id')
-        ->default(fn ($record) => $record->id),
-])
-->action(function ($record, array $data) {
-    try {
-        \Log::info('Tentative de création de note', [
-            'record_id' => $record->id,
-            'data' => $data,
-        ]);
-
-        // Créer la note
-      
-        $note = \Modules\FcmCentral\Models\Note::create([
-            'libelle' => $data['libelle'],
-            'rh_marin_id' => $record->id,
-            //'marin_id' => $record->complementsFcm->id,
-            'type_note_id' => $data['type_note_id'] ?? null,
-            'date' => $data['date'] ?? now(),
-            'redacteur_id' => $data['redacteur_id'],
-            'valide_bcf' => $data['valide_bcf'] ?? false,
-            'lien_url' => $data['lien_url'] ?? null,
-            'objet_type' => 'marin',
-            'objet_id' => $record->id,
-        ]);
-
-        // Notification de succès
-        \Filament\Notifications\Notification::make()
-            ->title('Note créée avec succès')
-            ->body("La note pour {$record->prenom} {$record->nom} a été créée.")
-            ->success()
-            ->send();
-
-    } catch (\Exception $e) {
-        \Log::error('Erreur lors de la création de la note', [
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString(),
-            'record_id' => $record->id,
-            'data' => $data,
-        ]);
-
-        // Notification d'erreur
-        \Filament\Notifications\Notification::make()
-            ->title('Erreur lors de la création')
-            ->body('Une erreur est survenue lors de la création de la note.')
-            ->danger()
-            ->send();
-    }
-})
-->requiresConfirmation()
-->modalSubmitActionLabel('Créer la note')
-->modalCancelActionLabel('Annuler'),
-
-
-                // Fin Note
-                
+                        // Créer la note
                     
+                        $note = \Modules\FcmCentral\Models\Note::create([
+                            'libelle' => $data['libelle'],
+                            'rh_marin_id' => $record->id,
+                            //'marin_id' => $record->complementsFcm->id,
+                            'type_note_id' => $data['type_note_id'] ?? null,
+                            'date' => $data['date'] ?? now(),
+                            'redacteur_id' => $data['redacteur_id'],
+                            'valide_bcf' => $data['valide_bcf'] ?? false,
+                            'lien_url' => $data['lien_url'] ?? null,
+                            'objet_type' => 'marin',
+                            'objet_id' => $record->id,
+                        ]);
+
+                        // Notification de succès
+                        \Filament\Notifications\Notification::make()
+                            ->title('Note créée avec succès')
+                            ->body("La note pour {$record->prenom} {$record->nom} a été créée.")
+                            ->success()
+                            ->send();
+
+                    } catch (\Exception $e) {
+                        \Log::error('Erreur lors de la création de la note', [
+                            'message' => $e->getMessage(),
+                            'file' => $e->getFile(),
+                            'line' => $e->getLine(),
+                            'trace' => $e->getTraceAsString(),
+                            'record_id' => $record->id,
+                            'data' => $data,
+                        ]);
+
+                        // Notification d'erreur
+                        \Filament\Notifications\Notification::make()
+                            ->title('Erreur lors de la création')
+                            ->body('Une erreur est survenue lors de la création de la note.')
+                            ->danger()
+                            ->send();
+                    }
+                })
+                ->requiresConfirmation()
+                ->modalSubmitActionLabel('Créer la note')
+                ->modalCancelActionLabel('Annuler'),
+                // Fin Note
             ]);
     }
 

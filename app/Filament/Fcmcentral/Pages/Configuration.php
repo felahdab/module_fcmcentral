@@ -27,7 +27,7 @@ class Configuration extends Page implements HasForms, HasActions
 
     protected static ?string $title = 'Configuration du module FCM Central';
     protected static ?string $navigationLabel = 'Configuration';
-
+    protected static ?string $navigationGroup = "Administration";
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static string $view = 'fcmcentral::filament.fcmcentral.pages.configuration';
@@ -42,7 +42,7 @@ class Configuration extends Page implements HasForms, HasActions
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->can('fcmcentral::change_module_configuration');
+        return auth()->check() && auth()->user()->can('fcmcentral::change_configuration_module');
     }
     
     public function validateConfigurationAction()

@@ -17,30 +17,17 @@ use Filament\Tables\Filters\Filter;
 
 use Modules\FcmCentral\Http\Livewire\ParcoursDetails;
 use Filament\Forms\Components\Placeholder;
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\MarinsRelationManager;
 
 class ParcoursSerialiseResource extends Resource
 {
-    
-    
-    use FilamentPermissionTrait;
-    
     protected static ?string $model = ParcoursSerialise::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    
-
-    // Permissions marche avec le Trait
-    protected static array $permissions = [
-        'fcmcentral::parcoursSerialise.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.fps',
-        'fcmcentral::permission.bcf',
-    ];
+    protected static ?string $navigationGroup = "Parcours";
+    protected static ?string $navigationIcon = 'heroicon-o-lock-closed';
     
     public static function form(Form $form): Form
     {

@@ -48,108 +48,56 @@ class FicheBilan extends ViewRecord
     public function mount($record): void
     {
         parent::mount($record);
-        
         $this->marinId = is_numeric($record) ? $record : $record->id;
-        
-        if (!$this->canAccessMarin()) {
-            abort(403, 'Accès non autorisé à cette fiche bilan');
-        }
     }
 
     // ============================================
     // 🔐 CONTRÔLES D'ACCÈS
     // ============================================
 
-    private function canAccessMarin(): bool
-{
-    try {
-        // Admin a tous les droits
-        if (MarinResource::canAccessAnyPermission(['admin'])) {
+    public static function canAccess(array $parameters = []): bool
+    {
+        if (! array_key_exists("record", $parameters)) return false;
+
+        $marinId = $parameters["record"]->id;
+
+        $marin_a_voir = Marin::find($marinId);
+        if (! $marin_a_voir)
+            return false;
+
+        if (! auth()->user()->can("fcmcentral::ficheBilan.voir")){
+            return false;
+        }
+        
+        if ( auth()->user()->can("fcmcentral::voir_tous_les _marins") )
             return true;
-        }
-       
-        // BCF / FPS peuvent voir toutes les fiches
-        if (MarinResource::canAccessAnyPermission(['permission.bcf', 'permission.fps'])) {
-            return true;
-        }
-       
-        // Bord peut voir les fiches
-        if (MarinResource::canAccessAnyPermission(['permission.bord'])) {
-            return true;
-        }
-       
-        // Mentor du marin
-        if (MarinResource::canAccessAnyPermission(['permission.mentor'])) {
-            $currentMarin = Marin::fromCurrentUser();
-           
-            if (!$currentMarin) {
-                \Log::warning('Mentor sans compte marin', [
-                    'user_id' => auth()->id(),
-                ]);
-                return false;
-            }
-           
-            // Vérifier si c'est le mentor de CE marin
-            $isMentor = FcmMarin::where('mentor_id', $currentMarin->id)
-                ->where('rh_marin_id', $this->marinId)
-                ->exists();
-           
-            if (!$isMentor) {
-                \Log::warning('Mentor tentant d\'accéder à un marin qui n\'est pas le sien', [
-                    'mentor_id' => $currentMarin->id,
-                    'marin_id' => $this->marinId,
-                ]);
-            }
-           
-            return $isMentor;
-        }
-       
-        \Log::warning('Accès refusé - Aucune permission valide', [
-            'user_id' => auth()->id(),
-            'marin_id' => $this->marinId,
-        ]);
-       
-        return false;
-       
-    } catch (\Exception $e) {
-        \Log::error('Erreur lors de la vérification d\'accès', [
-            'message' => $e->getMessage(),
-            'marin_id' => $this->marinId,
-            'user_id' => auth()->id(),
-        ]);
-        return false;
+
+        $currentMarin = Marin::fromCurrentUser();
+
+        if ($currentMarin->id == $marin_a_voir->id) return true; // On autorise le marin à voir sa propre fiche Bilan.
+    
+        // Vérifier si c'est le mentor de CE marin
+        $isMentor = FcmMarin::where('mentor_id', $currentMarin->id)
+            ->where('rh_marin_id', $marinId)
+            ->exists();
+   
+        return $isMentor;
     }
-}
 
 
     public function canCreateNote(): bool
     {
-        // ✅ SEULS BCF, BORD, FPS et ADMIN peuvent créer/voir les notes
-        return MarinResource::canAccessAnyPermission([
-            'admin',
-            'permission.bcf',
-            'permission.fps',
-            'permission.bord'
-        ]);
+        return auth()->user()->can("fcmcentral::note.creer");
     }
 
     public function canCreateEtat(): bool
     {
-        // ✅ SEULS BCF, BORD, FPS et ADMIN peuvent créer/modifier les etats
-        return MarinResource::canAccessAnyPermission([
-            'admin',
-            'permission.bcf',
-            'permission.fps',
-            'permission.bord'
-        ]);
+        return auth()->user()->can("fcmcentral::etat.create");
     }
 
     private function canValidateBCF(): bool
     {
-        return MarinResource::canAccessAnyPermission([
-            'admin',
-            'permission.bcf'
-        ]);
+        return auth()->user()->can("fcmcentral::note.valider");
     }
 
     // ============================================
@@ -736,10 +684,7 @@ public function sauvegarderJalons()
 
 public function canEditJalons(): bool
 {
-    return auth()->user()->can('fcmcentral::admin') 
-    || auth()->user()->can('admin') 
-        || auth()->user()->can('fcmcentral::permission.bcf')
-        || auth()->user()->can('fcmcentral::permission.fps');
+    return auth()->user()->can("fcmcentral::definir_jalons_de_fcm");
 }
 
 public function getDateSedimentationFormatee(): string

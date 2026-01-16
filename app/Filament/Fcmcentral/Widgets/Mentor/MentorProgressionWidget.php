@@ -5,13 +5,10 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor;
 use Filament\Widgets\ChartWidget;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
-use Modules\FcmCentral\Traits\FcmPermissionTrait;
 use Illuminate\Support\Facades\Log;
 
 class MentorProgressionWidget extends ChartWidget
 {
-    use FcmPermissionTrait;
-
     protected static ?string $heading = 'Progression comparative des marins';
     protected static ?int $sort = 3;
     protected int | string | array $columnSpan = 'full';
@@ -19,7 +16,11 @@ class MentorProgressionWidget extends ChartWidget
 
     public static function canView(): bool
     {
-        return static::canAccessModuleWithPermissions('widget.mentor');
+        // Ce widget ne doit être visible que si l'utilisateur est un mentor.
+        $currentMarin = Marin::fromCurrentUser();
+        if (!$currentMarin) return false;
+
+        return $currentMarin->est_mentor ;
     }
 
     protected function getData(): array

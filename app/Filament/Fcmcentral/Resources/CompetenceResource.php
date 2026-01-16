@@ -2,11 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Filament\Actions\Exports\Enums\Contracts\ExportFormat;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\RelationManagers;
 use Modules\FcmCentral\Models\Competence;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -17,43 +14,14 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
-
-
-
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\RelationManagers\SavoirfairesRelationManager;
+ 
 use Modules\FcmCentral\Helpers\OutilsHelper;
-
-// Import/ Export
-use Modules\FcmCentral\Filament\Fcmcentral\Exports\CompetenceExporter;
-use Modules\FcmCentral\Filament\Fcmcentral\Imports\CompetenceImporter;
-use Filament\Tables\Actions\ExportAction;
-use Filament\Tables\Actions\ImportAction;
-use Filament\Tables\Actions\ExportBulkAction;
-use Filament\Tables\Actions\Action;
-// Fin Import / Export
 
 class CompetenceResource extends Resource
 {
-
-    use FilamentPermissionTrait;
-    
     protected static ?string $model = Competence::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-
-
-
-    // Permissions marche avec le Trait
-    protected static array $permissions = [
-        'fcmcentral::competence.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.bcf',
-        'fcmcentral::permission.fps',
-    ];
-
-
+    protected static ?string $navigationGroup = "Catalogue";
+    protected static ?string $navigationIcon = 'heroicon-o-star';
 
     public static function form(Form $form): Form
     {

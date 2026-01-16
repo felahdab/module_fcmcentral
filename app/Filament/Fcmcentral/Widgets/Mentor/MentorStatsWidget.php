@@ -6,18 +6,19 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
-use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
 class MentorStatsWidget extends BaseWidget
 {
-    use FcmPermissionTrait;
-
     protected static ?int $sort = 1;
     protected int | string | array $columnSpan = 'full';
 
     public static function canView(): bool
     {
-        return static::canAccessModuleWithPermissions('widget.mentor');
+        // Ce widget ne doit être visible que si l'utilisateur est un mentor.
+        $currentMarin = Marin::fromCurrentUser();
+        if (!$currentMarin) return false;
+
+        return $currentMarin->est_mentor ;
     }
 
     protected function getStats(): array

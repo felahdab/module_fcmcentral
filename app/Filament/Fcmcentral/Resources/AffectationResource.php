@@ -19,30 +19,17 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 
 use Modules\FcmCentral\Helpers\OutilsHelper;
 
 
 class AffectationResource extends Resource
 {
-
-    use FilamentPermissionTrait;
-    
     protected static ?string $model = Affectation::class;
 
-    // Permissions marche avec le Trait
-    protected static array $permissions = [
-        'fcmcentral::affectation.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.bcf',
-        'fcmcentral::permission.fps',
-    ];
-
-
-  
-
-
+    protected static ?string $navigationGroup = "Catalogue";
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
 
     public static function form(Form $form): Form

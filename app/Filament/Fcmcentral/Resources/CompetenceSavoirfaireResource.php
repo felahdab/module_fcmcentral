@@ -14,22 +14,14 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource\Pages;
 
 class CompetenceSavoirfaireResource extends Resource
 {
-    use FilamentPermissionTrait;
-
     protected static ?string $model = CompetenceSavoirfaire::class;
-
-    // Permissions marche avec le Trait
-    protected static array $permissions = [
-        'fcmcentral::competenceSavoirfaire.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.bcf',
-        'fcmcentral::permission.fps',
-    ];
+    protected static ?string $navigationGroup = "Parcours";
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
     public static function form(Form $form): Form
     {

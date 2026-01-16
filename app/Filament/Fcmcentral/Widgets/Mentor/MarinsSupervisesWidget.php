@@ -7,20 +7,21 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
-use Modules\FcmCentral\Traits\FcmPermissionTrait;
 use Illuminate\Support\Facades\Log;
 
 class MarinsSupervisesWidget extends BaseWidget
 {
-    use FcmPermissionTrait;
-    
     protected static ?string $heading = 'Marins supervisés';
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
 
     public static function canView(): bool
     {
-        return static::canAccessModuleWithPermissions('widget.mentor');
+        // Ce widget ne doit être visible que si l'utilisateur est un mentor.
+        $currentMarin = Marin::fromCurrentUser();
+        if (!$currentMarin) return false;
+
+        return $currentMarin->est_mentor ;
     }
 
     public function table(Table $table): Table

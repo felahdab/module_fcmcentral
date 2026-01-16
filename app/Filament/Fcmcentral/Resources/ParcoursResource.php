@@ -22,24 +22,15 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursType;
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+ 
 use Modules\FcmCentral\Services\ParcoursService;
 
 class ParcoursResource extends Resource
 {
-    
-    use FilamentPermissionTrait;
-   
+
     protected static ?string $model = Parcours::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-
-    protected static array $permissions = [
-        'fcmcentral::parcours.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.bcf',
-        'fcmcentral::permission.fps',
-    ];
+    protected static ?string $navigationGroup = "Parcours";
 
     public static function form(Form $form): Form
     {
@@ -137,6 +128,7 @@ class ParcoursResource extends Resource
                 Action::make('serializeParcours')
                     ->label('Figer')
                     ->button()
+                    ->visible(fn() => auth()->user()->can("fcmcentral::parcours.figer"))
                     ->color('success')
                     ->modalHeading('Figer le Parcours')
                     ->modalWidth('lg')

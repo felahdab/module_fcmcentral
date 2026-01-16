@@ -2,12 +2,12 @@
 
 namespace Modules\FcmCentral\Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Role;
 use App\Models\Permission;
-use Illuminate\Support\Facades\Log;
+
 
 class RolesSeeder extends Seeder
 {
@@ -17,43 +17,11 @@ class RolesSeeder extends Seeder
      * @return void
      */
     public function run()
-{   
+    {   
    
-    //\App\Models\Role::truncate();
-
-    
-
-
-
-    ////////////////
-    // ROLE
-    ///////////////
-
-
-    // Marin
-    // Attribuer
-    $role = Role::firstOrCreate([
-        "name" => "fcmcentral::marin",
-        "guard_name" => "web"
-    ]);
-    
-    // Permissions fixes
-    $permissions = [
-        "fcmcental::widget.marin",
-    ];
-
-    // Permissions dynamiques
-    $permissions = array_merge(
-        $permissions,
-        $this->addPermissionsForResource('marin', ['index',  'edit'])
-    );
-
-    // Lier
-    $this->attachPermissionsToRole($role, $permissions);
-
-    // FIN
-
-
+    //////////////////////
+    // ROLES PAR DEFAUT //
+    //////////////////////
 
     // Marin FCM
     // Attribuer
@@ -64,20 +32,10 @@ class RolesSeeder extends Seeder
     
     // Permissions fixes
     $permissions = [
-        "fcmcentral::widget.marin",
-        "fcmcentral::bilan.voir",
         "fcmcentral::livret.voir",
         "fcmcentral::livret.telecharger",
         "fcmcentral::livret.proposer",
-        "fcmcentral::livret.commentaire",
-        "fcmcentral::permission.marin"
     ];
-    
-    // Permissions dynamiques
-    $permissions = array_merge(
-        $permissions,
-        $this->addPermissionsForResource('marin', ['index',  'edit'])
-    );
     
     // Lier
     $this->attachPermissionsToRole($role, $permissions);
@@ -96,102 +54,22 @@ class RolesSeeder extends Seeder
     
     // Permissions fixes
     $permissions = [
-        "fcmcentral::widget.mentor",
-        "fcmcentral::recherche_annuaire",
-        "fcmcentral::bilan.voir",
         "fcmcentral::livret.voir",
         "fcmcentral::livret.telecharger",
         "fcmcentral::livret.valider",
         "fcmcentral::livret.commentaire",
-        "fcmcentral::permission.mentor",
-        
+        "fcmcentral::note.creer",
     ];
     
     // Permissions dynamiques
     $permissions = array_merge(
         $permissions,
         $this->addPermissionsForResource('marin', ['index', 'create', 'edit'])
-        // Ajoute d'autres ressources si besoin
     );
     
-    // Lier
     $this->attachPermissionsToRole($role, $permissions);
 
     // FIN
-
-
-
-    
-
-
-
-    // Chef de Service
-    // Attribuer
-    $role = Role::firstOrCreate([
-        "name" => "fcmcentral::chefdeservice",
-        "guard_name" => "web"
-    ]);
-    
-    // Permissions fixes
-    $permissions = [
-        "fcmcentral::widget.chefdeservice",
-        "fcmcentral::bilan.voir",
-        "fcmcentral::livret.voir",
-        "fcmcentral::livret.telecharger",
-        "fcmcentral::permission.chefdeservice",
-        
-    ];
-    
-    // Permissions dynamiques
-    $permissions = array_merge(
-        $permissions,
-        $this->addPermissionsForResource('marin', ['index'])
-        // Ajoute d'autres ressources si besoin
-    );
-    
-    // Lier
-    $this->attachPermissionsToRole($role, $permissions);
-
-    // FIN
-
-
-
-
-
-
-
-    // CDT
-    // Attribuer
-    $role = Role::firstOrCreate([
-        "name" => "fcmcentral::cdt",
-        "guard_name" => "web"
-    ]);
-    
-    // Permissions fixes
-    $permissions = [
-        "fcmcentral::widget.cdt",
-        "fcmcentral::bilan.voir",
-        "fcmcentral::livret.voir",
-        "fcmcentral::livret.telecharger",
-        "fcmcentral::permission.cdt"
-        
-    ];
-    
-    // Permissions dynamiques
-    $permissions = array_merge(
-        $permissions,
-        $this->addPermissionsForResource('marin', ['index']),
-        $this->addPermissionsForResource('note', ['index', 'create', 'edit','delete'])
-        // Ajoute d'autres ressources si besoin
-    );
-    
-    // Lier
-    $this->attachPermissionsToRole($role, $permissions);
-
-    // FIN
-
-
-
 
     // FPS
     // Attribuer
@@ -202,20 +80,19 @@ class RolesSeeder extends Seeder
     
     // Permissions fixes
     $permissions = [
-        "fcmcentral::widget.fps",
         "fcmcentral::recherche_annuaire",
-        "fcmcentral::bilan.voir",
+        "users.create",
         "fcmcentral::livret.voir",
         "fcmcentral::livret.telecharger",
         "fcmcentral::livret.valider",
         "fcmcentral::livret.annuler",
-        "fcmcentral::attribuer.note",
         "fcmcentral::attribuer.parcours",
         "fcmcentral::attribuer.cohorte",
         "fcmcentral::attribuer.mentor",
         "fcmcentral::marin.suivreEnFcm",
-        "fcmcentral::parcoursSerialise.figer",
-        "fcmcentral::permission.fps",
+        "fcmcentral::parcours.figer",
+        "fcmcentral::note.creer",
+        "fcmcentral::note.valider",
     ];
     
     // Permissions dynamiques
@@ -245,12 +122,6 @@ class RolesSeeder extends Seeder
 
     // FIN
 
-
-
-
-
-
-
     // BCF
     // Attribuer
     $role = Role::firstOrCreate([
@@ -260,20 +131,19 @@ class RolesSeeder extends Seeder
     
     // Permissions fixes
     $permissions = [
-        "fcmcentral::widget.bcf",
         "fcmcentral::recherche_annuaire",
-        "fcmcentral::bilan.voir",
+        "users.create",
         "fcmcentral::livret.voir",
         "fcmcentral::livret.telecharger",
         "fcmcentral::livret.valider",
         "fcmcentral::livret.annuler",
-        "fcmcentral::attribuer.note",
         "fcmcentral::attribuer.parcours",
         "fcmcentral::attribuer.cohorte",
         "fcmcentral::attribuer.mentor",
         "fcmcentral::marin.suivreEnFcm",
-        "fcmcentral::parcoursSerialise.figer",
-        "fcmcentral::permission.bcf",
+        "fcmcentral::parcours.figer",
+        "fcmcentral::note.creer",
+        "fcmcentral::note.valider",
     ];
     
     // Permissions dynamiques
@@ -301,33 +171,27 @@ class RolesSeeder extends Seeder
     // Lier
     $this->attachPermissionsToRole($role, $permissions);
 
-    // FIN
-
-
-
 
     // ADMIN
     // Attribuer
     $role = Role::firstOrCreate([
-        "name" => "admin",
+        "name" => "Administrateur FCM Central",
         "guard_name" => "web"
     ]);
     
     // Permissions fixes
     $permissions = [
-        "fcmcentral::widget.admin",
+        "fcmcentral::change_configuration_module",
         "fcmcentral::recherche_annuaire",
-        "fcmcentral::bilan.voir",
         "fcmcentral::livret.voir",
         "fcmcentral::livret.telecharger",
         "fcmcentral::livret.valider",
         "fcmcentral::livret.annuler",
-        "fcmcentral::attribuer.note",
         "fcmcentral::attribuer.parcours",
         "fcmcentral::attribuer.cohorte",
         "fcmcentral::attribuer.mentor",
         "fcmcentral::marin.suivreEnFcm",
-        "fcmcentral::parcoursSerialise.figer",
+        "fcmcentral::parcours.figer",
         "fcmcentral::admin",
     ];
     
@@ -370,16 +234,10 @@ class RolesSeeder extends Seeder
         $permissionNames = [];
         foreach ($actions as $action) {
             $permName = "fcmcentral::{$resource}.{$action}";
-            Permission::firstOrCreate([
-                "name" => $permName,
-                "guard_name" => "web"
-            ]);
             $permissionNames[] = $permName;
         }
         return $permissionNames;
     }
-
-    
 
 
     /**

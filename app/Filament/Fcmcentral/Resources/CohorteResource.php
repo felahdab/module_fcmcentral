@@ -11,31 +11,13 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages;
-use Modules\FcmCommun\Models\Cohorte;
-
-use Modules\FcmCentral\Traits\FilamentPermissionTrait;
+use Modules\FcmCentral\Models\Cohorte;
 
 class CohorteResource extends Resource
 {
-    
-
-    use FilamentPermissionTrait;
-    
     protected static ?string $model = Cohorte::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    
-
-
-     // Permissions marche avec le Trait
-    protected static array $permissions = [
-        'fcmcentral::cohorte.index',
-        'fcmcentral::admin',
-        'fcmcentral::permission.bcf',
-        'fcmcentral::permission.fps'
-    ];
-
+    protected static ?string $navigationGroup = "Gestion";
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
     
     public static function getNavigationBadge(): ?string
     {
@@ -57,8 +39,7 @@ class CohorteResource extends Resource
                     ->label('Libellé long')
                     ->required(),
                 DatePicker::make('date_sortie_cours')
-                    ->label('Date fin')
-                   ,    
+                    ->label('Date fin'),    
             ]);
     }
 

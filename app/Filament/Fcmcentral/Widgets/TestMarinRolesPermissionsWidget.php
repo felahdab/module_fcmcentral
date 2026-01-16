@@ -4,23 +4,19 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets;
 
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
 class TestMarinRolesPermissionsWidget extends BaseWidget
 {
-    
+    // TODO: remonter ce widget dans Skeletor. Utile d'une façon générale et pas seulement pour la FCM.
         protected static ?int $sort = 5;
-        use FcmPermissionTrait;
 
         /**
          * Widget visible seulement pour les admins FCM
          */
         public static function canView(): bool
         {
-            return static::canAccessModuleWithPermissions('admin');
+            // TODO: regarder s'il faut restreindre l'accès à ce widget.
+            return true;
         }
     
         protected function getStats(): array
