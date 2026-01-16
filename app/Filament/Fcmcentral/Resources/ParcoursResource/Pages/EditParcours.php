@@ -31,11 +31,6 @@ class EditParcours extends EditRecord
         ];
     }
 
-    protected function authorizeUser()
-    {
-        return true;
-    }
-
     protected function getHeaderActions(): array
     {
         $parcours_service = new ParcoursService();
@@ -44,7 +39,7 @@ class EditParcours extends EditRecord
            // Actions\DeleteAction::make(),
             Action::make('figer')
                 ->requiresConfirmation()
-                ->visible($this->authorizeUser())
+                ->visible(fn() => auth()->user()->can("fcmcentral::parcours.figer"))
                 ->modalHeading(fn($record) => 'Figer le Parcours : '.$record->libelle_court)
                 ->modalDescription('En figeant le parcours, à compter de la date saisie, tous les parcours individualisés des marins suivant ce PPA seront mis à jour. Cette action est irreversible.')
                 ->form([

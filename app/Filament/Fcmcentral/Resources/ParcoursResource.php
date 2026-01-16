@@ -128,6 +128,7 @@ class ParcoursResource extends Resource
                 Action::make('serializeParcours')
                     ->label('Figer')
                     ->button()
+                    ->visible(fn() => auth()->user()->can("fcmcentral::parcours.figer"))
                     ->color('success')
                     ->modalHeading('Figer le Parcours')
                     ->modalWidth('lg')

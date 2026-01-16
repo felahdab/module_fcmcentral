@@ -4,12 +4,9 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin;
 
 use Filament\Widgets\Widget;
 use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
 class MarinProgressWidget extends Widget
 {
-    use FcmPermissionTrait;
-    
     protected static string $view = 'fcmcentral::filament.fcmcentral.widgets.marin-progress-widget';
     
     protected int | string | array $columnSpan = 'full';
@@ -24,11 +21,9 @@ class MarinProgressWidget extends Widget
     public static function canView(): bool
     {
         $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
-        
-        return static::canAccessModuleWithPermissions('widget.marin')
-        && $marin->complements_fcm
-        && $marin->complements_fcm->donnees_du_parcours
-        ;
+        // TODO: faut-il limiter davantage l'accès ? Certains marin disposant
+        // d'un parcours doivent-ils être empéchés de voir ce widget ?
+        return $marin?->complements_fcm?->donnees_du_parcours != null;
     }
 
     public function getProgressData(): array

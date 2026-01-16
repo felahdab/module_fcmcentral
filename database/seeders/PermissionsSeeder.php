@@ -28,7 +28,7 @@ class PermissionsSeeder extends Seeder
         ]);
 
         Permission::firstOrCreate([
-            "name" => "fcmcentral::change_module_configuration",
+            "name" => "fcmcentral::change_configuration_module",
             "guard_name" => "web"
         ]);
 
@@ -58,10 +58,15 @@ class PermissionsSeeder extends Seeder
         ]);
 
         Permission::firstOrCreate([
-            "name" => "fcmcentral::parcoursSerialise.figer",
+            "name" => "fcmcentral::parcours.figer",
             "guard_name" => "web"
         ]);
 
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::exporter_csv",
+            "guard_name" => "web"
+        ]);
+        
 
         //=== LIVRET ===
 
@@ -96,87 +101,12 @@ class PermissionsSeeder extends Seeder
         ]);
 
         Permission::firstOrCreate([
-            "name" => "fcmcentral::note.voir",
-            "guard_name" => "web"
-        ]);
-
-        Permission::firstOrCreate([
             "name" => "fcmcentral::note.valider",
             "guard_name" => "web"
         ]);
 
-        
-
-
-        //=== PERMISSIONS WIDGETS ===
-
-        // Dashboard Marin
         Permission::firstOrCreate([
-            "name" => "fcmcentral::widget.marin",
-            "guard_name" => "web"
-        ]);
-
-        // Dashboard Mentor
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::widget.mentor",
-            "guard_name" => "web"
-        ]);
-
-        // Dashboard ChefdeService
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::widget.chefdeservice",
-            "guard_name" => "web"
-        ]);
-
-         // Dashboard CDT
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::widget.cdt",
-            "guard_name" => "web"
-        ]);
-
-         // Dashboard FPS
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::widget.fps",
-            "guard_name" => "web"
-        ]);
-
-         // Dashboard BCF
-         Permission::firstOrCreate([
-            "name" => "fcmcentral::widget.bcf",
-            "guard_name" => "web"
-        ]);
-
-
-        //=== PERMISSIONS SPECIAL ===
-        // Pour des pages speciales ou autres ( ex Resource Documentations )
-
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::permission.chefdeservice",
-            "guard_name" => "web"
-        ]);
-
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::permission.mentor",
-            "guard_name" => "web"
-        ]);
-
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::permission.marin",
-            "guard_name" => "web"
-        ]);
-
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::permission.bcf",
-            "guard_name" => "web"
-        ]);
-
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::permission.fps",
-            "guard_name" => "web"
-        ]);
-
-        Permission::firstOrCreate([
-            "name" => "fcmcentral::permission.cdt",
+            "name" => "fcmcentral::note.creer",
             "guard_name" => "web"
         ]);
 

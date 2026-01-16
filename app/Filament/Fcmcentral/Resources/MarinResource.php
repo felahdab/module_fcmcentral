@@ -48,55 +48,13 @@ class MarinResource extends Resource
             return (string) Marin::enFcm()->count();
         }
 
-        if (auth()->user()->can("fcmcentral::permission.mentor"))
-        {
-            $currentMarin = Marin::fromCurrentUser();
+        $currentMarin = Marin::fromCurrentUser();
 
-            if ($currentMarin) {
-                return FcmMarin::where('mentor_id', $currentMarin->id)->count();
-            }
+        if ($currentMarin) {
+            return FcmMarin::where('mentor_id', $currentMarin->id)->count();
         }
        
         return "0";
-    }
-
-
-   /**
-     * Vérifie si l'utilisateur connecté est le mentor du marin donné
-     */
-    public static function isMentorOfMarin(Marin $marin): bool
-    {
-        try {
-            $currentMarin = Marin::fromCurrentUser();
-        
-            if (!$currentMarin) {
-                \Log::warning('isMentorOfMarin: utilisateur sans compte marin', [
-                    'user_id' => auth()->id(),
-                ]);
-                return false;
-            }
-
-            // Vérifier si le currentMarin est mentor du marin passé en paramètre
-            $isMentor = FcmMarin::where('mentor_id', $currentMarin->id)
-                ->where('rh_marin_id', $marin->id)
-                ->exists();
-        
-            \Log::info('Vérification mentor', [
-                'current_marin_id' => $currentMarin->id,
-                'target_marin_id' => $marin->id,
-                'is_mentor' => $isMentor,
-            ]);
-        
-            return $isMentor;
-        
-        } catch (\Exception $e) {
-            \Log::error('Erreur lors de la vérification du mentor', [
-                'message' => $e->getMessage(),
-                'marin_id' => $marin->id ?? null,
-                'user_id' => auth()->id(),
-            ]);
-            return false;
-        }
     }
 
     /**
@@ -118,28 +76,21 @@ class MarinResource extends Resource
          * A partir de ce point, on sait que l'utilisateur est authentifié.
          */
 
-        try {
-            // Les admins voient tout
-            if (auth()->user()->can("fcmcentral::voir_tous_les_marins")){
-                return $query;
-            }
-
-            if (auth()->user()->can("fcmcentral::permission.mentor"))
-            {
-                $currentMarin = Marin::fromCurrentUser();
-
-                if ($currentMarin) {
-                    $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
-                        ->pluck('rh_marin_id');
-                    
-                    return $query->whereIn('id', $marinIds);
-                }
-            }
-        } catch (\Exception $e) {
-            // En cas d'erreur, query vide
-            return $query->whereRaw('1 = 0');
+        
+        // Les admins voient tout
+        if (auth()->user()->can("fcmcentral::voir_tous_les_marins")){
+            return $query;
         }
 
+        $currentMarin = Marin::fromCurrentUser();
+
+        if ($currentMarin && $currentMarin->est_mentor) {
+            $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
+                ->pluck('rh_marin_id');
+            
+            return $query->whereIn('id', $marinIds);
+        }
+    
         // Par défaut, query vide
         return $query->whereRaw('1 = 0');
     }
@@ -688,7 +639,7 @@ class MarinResource extends Resource
                 ])
                 ->visible(fn ($record) => $record->suivi_en_fcm &&
                         auth()->check() &&
-                        auth()->user()->can("fcmcentral::note.create"))
+                        auth()->user()->can("fcmcentral::note.creer"))
                 ->modalHeading('Créer une note')
                 ->modalDescription(fn ($record) => "Créer une note pour {$record->prenom} {$record->nom}")
                 ->modalWidth('lg')

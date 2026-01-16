@@ -17,7 +17,6 @@ class ViewParcours extends ViewRecord
     protected static string $view = 'fcmcentral::filament.fcmcentral.resources.parcours-resource.pages.view-parcours';
 
     public $parcours;
-  
 
     public function mount($record): void
     {

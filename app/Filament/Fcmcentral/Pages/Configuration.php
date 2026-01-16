@@ -42,7 +42,7 @@ class Configuration extends Page implements HasForms, HasActions
 
     public static function canAccess(): bool
     {
-        return auth()->check() && auth()->user()->can('fcmcentral::change_module_configuration');
+        return auth()->check() && auth()->user()->can('fcmcentral::change_configuration_module');
     }
     
     public function validateConfigurationAction()

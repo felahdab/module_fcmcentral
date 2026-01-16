@@ -3,8 +3,6 @@
 namespace Modules\FcmCentral\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Builder;
 
 use Modules\RH\Models\Marin as RHMarin;
@@ -12,7 +10,7 @@ use Modules\FcmCommun\Models\Marin as BaseMarin;
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCentral\Models\FcmMarin;
 use Illuminate\Support\Str;
-use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean;
+
 
 /**
 * Modèle Marin pour le module FCM Central
@@ -690,26 +688,26 @@ class Marin extends BaseMarin
     }
 
 
-        // ETAT
-        public function getDernierTypeEtat()
-        {
-            //return $this->marin?->complementsFcm?->etats()->latest('date_debut')->first();
-            return $this->etats()->latest('date_debut')->first();
-        }
-        public function getDernierTypeEtatCode()
-        {
-            return $this->getDernierTypeEtat()?->typeEtat?->code;
-        }
-        public function getDernierTypeEtatLibelle()
-        {
-            return $this->getDernierTypeEtat()?->typeEtat?->libelle_court;
-        }
-        public function getDernierTypeEtatId()
-        {
-            return $this->getDernierTypeEtat()?->typeEtat?->id;
-        }
+    // ETAT
+    public function getDernierTypeEtat()
+    {
+        //return $this->marin?->complementsFcm?->etats()->latest('date_debut')->first();
+        return $this->etats()->latest('date_debut')->first();
+    }
+    public function getDernierTypeEtatCode()
+    {
+        return $this->getDernierTypeEtat()?->typeEtat?->code;
+    }
+    public function getDernierTypeEtatLibelle()
+    {
+        return $this->getDernierTypeEtat()?->typeEtat?->libelle_court;
+    }
+    public function getDernierTypeEtatId()
+    {
+        return $this->getDernierTypeEtat()?->typeEtat?->id;
+    }
 
-        public function etats()
+    public function etats()
     {
         return $this->hasMany(Etat::class, 'rh_marin_id', 'id');
     }
@@ -728,13 +726,43 @@ class Marin extends BaseMarin
 
     public function getEnGelAttribute(): bool
     {
+        if (! $this->suivi_en_fcm) return false;
         // Faire la requete sur la table des gels/degels pour déterminer si la dernière entrée est un gel ou un degel
         // On peut mettre en cache le résultat.
         return false;
     }
 
-
+    /**
+     * Permet de faire $marin->est_mentor pour déterminer si un marin a d'autres marin placés sous son mentorat.
+     */
+    public function getEstMentorAttribute(): bool
+    {
+        $nb_mentores = FcmMarin::where('mentor_id', $this->id)->count();
+        return $nb_mentores > 0;
+    }
     
-      
+    /**
+     * Déterminer si le Marin est le mentor d'un autre Marin ou pas
+     */
+    public function est_mentor_de(Marin $marin) : bool
+    {
+        if (! $this->est_mentor) return false;
+
+        return FcmMarin::where('mentor_id', $this->id)
+            ->where('rh_marin_id', $marin->id)
+            ->exists();
+
+    }  
+
+    /**
+     * Renvoit la collections des Marin dont le Marin est le mentor
+     */
+    public function getMarinsMentoresAttribute()
+    {
+        if (! $this->est_mentor) return false;
+
+        return Marin::whereIn("id", FcmMarin::where('mentor_id', $this->id)->pluck('id'))->get();
+
+    }
 
 }

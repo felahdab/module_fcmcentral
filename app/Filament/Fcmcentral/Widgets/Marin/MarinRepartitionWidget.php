@@ -4,12 +4,9 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin;
 
 use Filament\Widgets\ChartWidget;
 use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Traits\FcmPermissionTrait;
 
 class MarinRepartitionWidget extends ChartWidget
 {
-    use FcmPermissionTrait;
-   
     protected static ?string $heading = 'Répartition des savoir-faire par type';
    
     protected int | string | array $columnSpan = [
@@ -24,11 +21,9 @@ class MarinRepartitionWidget extends ChartWidget
     public static function canView(): bool
     {
         $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
-        
-        return static::canAccessModuleWithPermissions('widget.marin')
-        && $marin->complements_fcm
-        && $marin->complements_fcm->donnees_du_parcours
-        ;
+        // TODO: faut-il limiter davantage l'accès ? Certains marin disposant
+        // d'un parcours doivent-ils être empéchés de voir ce widget ?
+        return $marin?->complements_fcm?->donnees_du_parcours != null;
     }
 
     public function getMarin(): ?Marin
