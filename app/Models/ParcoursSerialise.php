@@ -8,9 +8,12 @@ use Modules\FcmCommun\Models\Marin;
 use Modules\FcmCommun\Models\MarinParcours;
 use Modules\FcmCentral\Traits\HasTablePrefix;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\FcmCentral\Database\Factories\ParcoursSerialiseFactory;
 
 class ParcoursSerialise extends ParcoursSerialiseBase
 {
+    use HasFactory;
     use HasTablePrefix;
 
     // A supp debut
@@ -38,6 +41,10 @@ class ParcoursSerialise extends ParcoursSerialiseBase
     }
     // A Supp Fin
 
+    protected static function newFactory(): ParcoursSerialiseFactory
+    {
+        return ParcoursSerialiseFactory::new();
+    }
 
     // Relation entre FcmCentral  ParcoursSerialises et FcmMarins
     public function fcmMarins(): BelongsToMany

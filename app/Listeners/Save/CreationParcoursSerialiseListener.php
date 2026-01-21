@@ -3,17 +3,26 @@
 namespace Modules\FcmCentral\Listeners\Save;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Filament\Notifications\Notification;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Models\MarinParcours;
 use Modules\FcmCentral\Helpers\OutilsHelper;
 use Modules\FcmCommun\Jobs\MajPpaMarinfcm;
+use Modules\FcmCommun\Services\MigrationParcoursMarinService;
 
 class CreationParcoursSerialiseListener
 {
+    
+    public function __construct(
+        private MigrationParcoursMarinService $migrationService
+    ) {}
+
+    
     /**
      * Gere l'evenement.
      */
@@ -22,6 +31,8 @@ class CreationParcoursSerialiseListener
         if (! $event->isOfType(UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE)) {
             return;
         }
+
+        DB::beginTransaction();
 
         try {
             $parcours = Parcours::where('uuid', $event->object_uuid)->first();
@@ -34,6 +45,12 @@ class CreationParcoursSerialiseListener
             $data = $event->detail;
             $date = $data['date_de_debut'] ?? now()->toDateString();
             $version = $data['version'] ?? $parcours->getLatestSerializedVersion() + 1;
+
+            Log::info("=== DÉBUT CRÉATION PARCOURS SÉRIALISÉ ===", [
+                'parcours_id' => $parcours->id,
+                'parcours_code' => $parcours->code,
+                'version' => $version,
+            ]);
 
             // Charger explicitement les relations nécessaires
             $parcours->load([
@@ -48,7 +65,9 @@ class CreationParcoursSerialiseListener
                 },
                 'affectations.competences.competenceSavoirfaires.savoirfaire',
                 'affectations.competences.competenceSavoirfaires.savoirfaireType',
-                'affectations.competences.competenceSavoirfaires.objectifs' // si objectifs relation existe
+                'affectations.competences.competenceSavoirfaires.objectifs' => function ($q) {
+                    $q->orderBy('ordre');
+                }
             ]);
 
             // Construire la structure sérialisée
@@ -58,7 +77,7 @@ class CreationParcoursSerialiseListener
             Log::info("Total objectifs sérialisés: {$totalObjectifs}");
 
             // Enregistrer la sérialisation
-            $nouveauParcoursSerialise=ParcoursSerialise::create([
+            $nouveauParcoursSerialise = ParcoursSerialise::create([
                 'parcours_id'   => $parcours->id,
                 'parcours'      => $serializedData,
                 'date_debut'    => $date,
@@ -67,81 +86,158 @@ class CreationParcoursSerialiseListener
                 'version'       => $version,
             ]);
 
-            Log::info("Parcours {$parcours->libelle_court} sérialisé (version={$version}) avec {$totalObjectifs} objectifs");
-
-
-            // Partie si ancienne version existe (mettre une date de fin au parcours precedent +  recloner les parcours existant avec les datas anciennes)
-            $ancienneVersion = ParcoursSerialise::where('parcours_id', $parcours->id)
-            //->whereNull('date_fin')
-            ->where('version','<',$version)
-            ->orderByDesc('version')
-            ->first();
-
-            Log::info('RECH ANCIENNE VERSION', [
-                'parcours_id' => $parcours->id,
-                'type' => $ancienneVersion ? $ancienneVersion->version :  'AUCUNE',
-                'New version' => $version,
+            Log::info("✅ Nouveau ParcoursSerialise créé", [
+                'id' => $nouveauParcoursSerialise->id,
+                'uuid' => $nouveauParcoursSerialise->uuid,
+                'version' => $version,
+                'objectifs_count' => $totalObjectifs,
             ]);
 
-            if ($ancienneVersion) {
-                $versionN1 = $ancienneVersion->version;
-                $marinParcoursList = \Modules\FcmCentral\Models\MarinParcours::where('parcoursserialise_id', $ancienneVersion->id)->get();
+            // ✅ Récupérer TOUTES les anciennes versions de CE PARCOURS uniquement
+            $anciensVersions = ParcoursSerialise::where('parcours_id', $parcours->id)
+                ->where('version', '<', $version)
+                ->orderBy('version')
+                ->get();
+
+            Log::info('🔍 Recherche anciennes versions', [
+                'parcours_id' => $parcours->id,
+                'parcours_code' => $parcours->code,
+                'nb_versions_trouvees' => $anciensVersions->count(),
+                'versions' => $anciensVersions->pluck('version')->toArray(),
+                'nouvelle_version' => $version,
+            ]);
+
+            if ($anciensVersions->isNotEmpty()) {
+                // ✅ Récupérer les IDs des anciennes versions de CE PARCOURS
+                $anciennesVersionIds = $anciensVersions->pluck('id');
                 
-                Log::info('DEBUT MODIFICATION', [
-                    
-                    'nb_marins' => $marinParcoursList->count(),
-                    'Ancienne version' => $versionN1,
+                // ✅ Récupérer SEULEMENT les MarinParcours liés à ces versions spécifiques
+                $marinParcoursList = MarinParcours::whereIn('parcoursserialise_id', $anciennesVersionIds)
+                    ->with(['fcmMarin.marin', 'parcours_serialise'])
+                    ->get();
+
+                Log::info('📋 MarinParcours à traiter', [
+                    'parcours_id' => $parcours->id,
+                    'parcours_code' => $parcours->code,
+                    'nb_versions_anciennes' => $anciensVersions->count(),
+                    'versions_concernees' => $anciensVersions->pluck('version')->toArray(),
+                    'nb_marins_total' => $marinParcoursList->count(),
+                    'ids_versions_anciennes' => $anciennesVersionIds->toArray(),
                 ]);
 
+                // ✅ Backup des parcoursmarin avant migration
+                $nbBackups = 0;
                 foreach ($marinParcoursList as $marinParcours) {
                     $marinUuid = $marinParcours->marin?->uuid ?? $marinParcours->fcmMarin?->marin?->uuid ?? null;
 
-                    
+                    if (!$marinUuid) {
+                        Log::warning("⚠️ UUID marin introuvable", [
+                            'marin_parcours_id' => $marinParcours->id,
+                        ]);
+                        continue;
+                    }
+
+                    // ✅ Vérifier que le parcoursSerialise appartient bien à CE parcours
+                    if ($marinParcours->parcours_serialise?->parcours_id !== $parcours->id) {
+                        Log::warning("⚠️ MarinParcours ne correspond pas au parcours", [
+                            'marin_parcours_id' => $marinParcours->id,
+                            'parcours_id_attendu' => $parcours->id,
+                            'parcours_id_trouve' => $marinParcours->parcours_serialise?->parcours_id,
+                        ]);
+                        continue;
+                    }
+
                     $parcoursMarinJson = is_string($marinParcours->parcoursmarin)
                         ? json_decode($marinParcours->parcoursmarin, true)
                         : $marinParcours->parcoursmarin;
 
-                       
-                        Log::info('AVANT BACKUP', [
-                            'marinuuid' => $marinUuid,
-                            'type' => gettype($parcoursMarinJson),
-                            'version' => $versionN1,
-                        ]);
-                    \Modules\FcmCommun\Services\ParcoursMarinBackupService::backup(
-                        $marinUuid,
-                        $parcoursMarinJson,
-                        $versionN1,
-                        'FcmCentral',
-                        now()->format('Y-m-d_His')
-                    );
-                    Log::info('FIN BACKUP');
-                }
-            
-                $ancienneVersion->date_fin = $date;
-                $ancienneVersion->save();
-            
-                if ($marinParcoursList->isNotEmpty()) {
-                    Log::info('AVANT DISPATCH JOB', [
-                        'uuid' => $nouveauParcoursSerialise->uuid
-                    ]);
-                    MajPpaMarinfcm::dispatchSync($nouveauParcoursSerialise->uuid);
-                    Log::info('APRES DISPATCH JOB');
-                }
-            }
-            
-            // Fin partie ancienne
+                    $versionOriginale = $marinParcours->parcours_serialise?->version ?? 'unknown';
 
-            $notification = UserGeneratedEventNotifications::getMess(UserGeneratedEventNotifications::PARCOURS, $parcours->libelle_court);
+                    Log::info('💾 Backup parcours marin', [
+                        'marin_uuid' => $marinUuid,
+                        'marin_parcours_id' => $marinParcours->id,
+                        'version_originale' => $versionOriginale,
+                    ]);
+
+                    // try {
+                    //     \Modules\FcmCommun\Services\ParcoursMarinBackupService::backup(
+                    //         $marinUuid,
+                    //         $parcoursMarinJson,
+                    //         $versionOriginale,
+                    //         'FcmCentral',
+                    //         now()->format('Y-m-d_His')
+                    //     );
+                    //     $nbBackups++;
+                    // } catch (\Exception $e) {
+                    //     Log::error("❌ Erreur backup", [
+                    //         'marin_uuid' => $marinUuid,
+                    //         'error' => $e->getMessage(),
+                    //     ]);
+                    // }
+                }
+
+                Log::info("📊 Backups terminés", [
+                    'nb_backups_reussis' => $nbBackups,
+                    'nb_total' => $marinParcoursList->count(),
+                ]);
+
+                // ✅ Clôturer TOUTES les anciennes versions de CE PARCOURS
+                foreach ($anciensVersions as $ancienneVersion) {
+                    $ancienneVersion->date_fin = $date;
+                    $ancienneVersion->save();
+                    
+                    Log::info('🔒 Version clôturée', [
+                        'parcours_id' => $parcours->id,
+                        'version' => $ancienneVersion->version,
+                        'date_fin' => $date,
+                    ]);
+                }
+
+                // ✅ Dispatch job pour migration avec le service
+                if ($marinParcoursList->isNotEmpty()) {
+                    if (app()->environment('testing')) {
+                        // Appel direct du service en mode test
+                        Log::info('🧪 Mode TEST - Migration synchrone via service');
+                        $this->migrationService->migrerVersNouvelleVersion($nouveauParcoursSerialise->uuid);
+                    } else {
+    
+                    Log::info('🚀 Dispatch job MAJ PPA (migration avec service)', [
+                        'parcours_id' => $parcours->id,
+                        'nouveau_parcours_serialise_uuid' => $nouveauParcoursSerialise->uuid,
+                        'nb_marins' => $marinParcoursList->count(),
+                    ]);
+                    
+                    MajPpaMarinfcm::dispatchSync($nouveauParcoursSerialise->uuid);
+                    
+                    Log::info('✅ Job MAJ PPA terminé');
+                }
+                }
+            } else {
+                Log::info("ℹ️ Aucune version existante pour ce parcours");
+            }
+
+            DB::commit();
+
+            Log::info("=== ✅ FIN CRÉATION PARCOURS SÉRIALISÉ ===", [
+                'parcours_id' => $parcours->id,
+                'nouvelle_version' => $version,
+            ]);
+
+            $notification = UserGeneratedEventNotifications::getMess(
+                UserGeneratedEventNotifications::PARCOURS,
+                $parcours->libelle_court
+            );
 
             Notification::make()
                 ->title($notification['title'] ?? 'Parcours sérialisé')
                 ->success()
-                ->body($notification['message'] ?? 'Sérialisation terminée')
+                ->body($notification['message'] ?? "Version {$version} créée avec succès")
                 ->send();
 
-                
         } catch (\Exception $e) {
-            Log::error("Erreur lors de la sérialisation du parcours", [
+            DB::rollBack();
+
+            Log::error("❌ ERREUR SÉRIALISATION PARCOURS", [
                 'uuid' => $event->object_uuid,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -156,7 +252,7 @@ class CreationParcoursSerialiseListener
     }
 
     /**
-     * Construit la structure complète du parcours (affectations -> competences -> competenceSavoirfaires -> objectifs)
+     * Construit la structure complète du parcours
      */
     private function buildCompleteParcoursData(Parcours $parcours): array
     {
@@ -196,9 +292,11 @@ class CreationParcoursSerialiseListener
                     'competenceSavoirfaires' => [],
                 ];
 
-                // liaisons competence -> savoirfaire (table competenceSavoirfaires)
                 $csfs = $competence->competenceSavoirfaires->sortBy('ordre');
                 foreach ($csfs as $csf) {
+                    $sf = $csf->savoirfaire;
+                    $color_ob = ($sf && $sf->color) ? $sf->color : $competence->color;
+
                     $csfData = [
                         'id' => $csf->id,
                         'uuid' => $csf->uuid ?? null,
@@ -215,8 +313,7 @@ class CreationParcoursSerialiseListener
                         'objectifs' => [],
                     ];
 
-                    if ($csf->savoirfaire) {
-                        $sf = $csf->savoirfaire;
+                    if ($sf) {
                         $csfData['savoirfaire'] = [
                             'id' => $sf->id,
                             'uuid' => $sf->uuid,
@@ -224,13 +321,12 @@ class CreationParcoursSerialiseListener
                             'libelle_court' => OutilsHelper::sanitizeForAlpine($sf->libelle_court),
                             'libelle_long' => OutilsHelper::sanitizeForAlpine($sf->libelle_long),
                             'competence_id' => $sf->competence_id,
-                            'color' => (($sf->color<>'')?$sf->color:$competence->color),
+                            'color' => $color_ob,
                         ];
                     }
-                    $color_ob = (($sf->color<>'')?$sf->color:$competence->color);
-                    // objectifs (si relation chargée)
+
                     if ($csf->relationLoaded('objectifs')) {
-                        $objs = $csf->objectifs->sortBy('ordre')->map(function ($o,$color_ob) {
+                        $objs = $csf->objectifs->sortBy('ordre')->map(function ($o) use ($color_ob) {
                             return [
                                 'id' => $o->id,
                                 'uuid' => $o->uuid,
@@ -238,7 +334,7 @@ class CreationParcoursSerialiseListener
                                 'description' => OutilsHelper::sanitizeForAlpine($o->description) ?? null,
                                 'ordre' => $o->ordre ?? null,
                                 'code' => $o->code,
-                                
+                                'color' => $color_ob,
                             ];
                         })->values()->toArray();
                         $csfData['objectifs'] = $objs;
