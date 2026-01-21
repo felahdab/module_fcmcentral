@@ -8,9 +8,12 @@ use Modules\FcmCentral\Traits\HasTablePrefix;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\ParcoursSerialise;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\FcmCentral\Database\Factories\MarinParcoursFactory;
 
 class MarinParcours extends BaseModel
 {
+    use HasFactory;
     use HasTablePrefix;
     
 /*
@@ -48,6 +51,11 @@ class MarinParcours extends BaseModel
 
 
         );
+    }
+
+    protected static function newFactory():MarinParcoursFactory
+    {
+        return MarinParcoursFactory::new();
     }
 
    
