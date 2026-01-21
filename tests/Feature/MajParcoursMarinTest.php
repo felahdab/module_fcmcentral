@@ -21,7 +21,7 @@ use Carbon\Carbon;
 uses(RefreshDatabase::class);
 uses(Tests\TestCase::class);
 
-pest()->group("Fcm Central");
+pest()->group("Fcm Central1");
 
 beforeEach(function () {
     $this->admin = \App\Models\User::factory()->create();
@@ -57,14 +57,47 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
     it('met à jour parcoursserialise_id dans MarinParcours lors du changement de version', function () {
         $this->assertTrue(Models\Marin::all()->count() == 0);
        
-        $fcmMarin1 = \Modules\FcmCentral\Models\FcmMarin::factory()->create();
+
+        $fcmMarin1 = FcmMarin::factory()->create();
         $marin1 = $fcmMarin1->marin;
        
-        $fcmMarin2 = \Modules\FcmCentral\Models\FcmMarin::factory()->create();
-        $marin2 = $fcmMarin2->marin;
-       
+        event(new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
+            user_uuid: $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid: $marin1->uuid,
+            detail: [
+                "cohorte_id" => 1,
+                "date_de_debut"=> Carbon::tomorrow(),
+            ]
+        ));
+        $marin1->refresh();
+        //dump ($marin->complementsFcm);
         expect($marin1->estEnFcm())->toBeTrue();
+        
+
+
+
+      
+       
+        $fcmMarin2 = FcmMarin::factory()->create();
+        $marin2 = $fcmMarin2->marin;
+        
+        event(new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
+            user_uuid: $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid: $marin2->uuid,
+            detail: [
+                "cohorte_id" => 1,
+                "date_de_debut"=> Carbon::tomorrow(),
+            ]
+        ));
+        $marin2->refresh();
+        //dump ($marin->complementsFcm);
         expect($marin2->estEnFcm())->toBeTrue();
+       
+
         $this->assertTrue(Models\Marin::all()->count() == 2);
    
         // Seed du parcours
@@ -222,9 +255,42 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         // ✅ Créer 2 marins
         $fcmMarin1 = FcmMarin::factory()->create();
         $marin1 = $fcmMarin1->marin;
+       
+        event(new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
+            user_uuid: $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid: $marin1->uuid,
+            detail: [
+                "cohorte_id" => 1,
+                "date_de_debut"=> Carbon::tomorrow(),
+            ]
+        ));
+        $marin1->refresh();
+        //dump ($marin->complementsFcm);
+        expect($marin1->estEnFcm())->toBeTrue();
         
+
+
+
+      
+       
         $fcmMarin2 = FcmMarin::factory()->create();
         $marin2 = $fcmMarin2->marin;
+        
+        event(new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
+            user_uuid: $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid: $marin2->uuid,
+            detail: [
+                "cohorte_id" => 1,
+                "date_de_debut"=> Carbon::tomorrow(),
+            ]
+        ));
+        $marin2->refresh();
+        //dump ($marin->complementsFcm);
+        expect($marin2->estEnFcm())->toBeTrue();
 
         // ✅ Créer V1 pour parcours1
         event(new UserGeneratedEvent(
@@ -343,12 +409,64 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         // ✅ Créer 3 marins
         $fcmMarin1 = FcmMarin::factory()->create();
         $marin1 = $fcmMarin1->marin;
+       
+        event(new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
+            user_uuid: $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid: $marin1->uuid,
+            detail: [
+                "cohorte_id" => 1,
+                "date_de_debut"=> Carbon::tomorrow(),
+            ]
+        ));
+        $marin1->refresh();
+        //dump ($marin->complementsFcm);
+        expect($marin1->estEnFcm())->toBeTrue();
         
+
+
+
+      
+       
         $fcmMarin2 = FcmMarin::factory()->create();
         $marin2 = $fcmMarin2->marin;
         
+        event(new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
+            user_uuid: $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid: $marin2->uuid,
+            detail: [
+                "cohorte_id" => 1,
+                "date_de_debut"=> Carbon::tomorrow(),
+            ]
+        ));
+        $marin2->refresh();
+        //dump ($marin->complementsFcm);
+        expect($marin2->estEnFcm())->toBeTrue();
+
+
+
+
         $fcmMarin3 = FcmMarin::factory()->create();
         $marin3 = $fcmMarin3->marin;
+        
+        event(new UserGeneratedEvent(
+            event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
+            user_uuid: $this->admin->uuid,
+            object_class: ObjectClasses::MARIN,
+            object_uuid: $marin3->uuid,
+            detail: [
+                "cohorte_id" => 1,
+                "date_de_debut"=> Carbon::tomorrow(),
+            ]
+        ));
+        $marin3->refresh();
+        //dump ($marin->complementsFcm);
+        expect($marin3->estEnFcm())->toBeTrue();
+
+        
 
         // ✅ Créer V2
         event(new UserGeneratedEvent(
