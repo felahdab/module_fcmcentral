@@ -21,7 +21,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMar
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
 
-
+use Modules\FcmCentral\Console;
 
 class FcmCentralServiceProvider extends ServiceProvider
 {
@@ -168,8 +168,9 @@ class FcmCentralServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         $this->commands([
-
-                ]);
+            Console\ChargeParcours::class,
+            Console\SauvegardeParcours::class
+        ]);
     }
 
     /**
