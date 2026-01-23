@@ -158,7 +158,7 @@ class CreationParcoursSerialiseListener
     /**
      * Construit la structure complète du parcours (affectations -> competences -> competenceSavoirfaires -> objectifs)
      */
-    private function buildCompleteParcoursData(Parcours $parcours): array
+    public function buildCompleteParcoursData(Parcours $parcours): array
     {
         $result = [
             'id' => $parcours->id,
@@ -175,6 +175,7 @@ class CreationParcoursSerialiseListener
             $affData = [
                 'id' => $aff->id,
                 'uuid' => $aff->uuid,
+                'code' => $aff->code,
                 'libelle_court' => OutilsHelper::sanitizeForAlpine($aff->libelle_court),
                 'libelle_long' => OutilsHelper::sanitizeForAlpine($aff->libelle_long),
                 'color' => $aff->color,
