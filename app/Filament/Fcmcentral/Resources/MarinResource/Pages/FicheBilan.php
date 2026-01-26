@@ -57,6 +57,8 @@ class FicheBilan extends ViewRecord
 
     public static function canAccess(array $parameters = []): bool
     {
+        if (!auth()->check()) return false;
+
         if (! array_key_exists("record", $parameters)) return false;
 
         $marinId = $parameters["record"]->id;
@@ -73,6 +75,7 @@ class FicheBilan extends ViewRecord
             return true;
 
         $currentMarin = Marin::fromCurrentUser();
+        if ($currentMarin == null) return false;
 
         if ($currentMarin->id == $marin_a_voir->id) return true; // On autorise le marin à voir sa propre fiche Bilan.
     
