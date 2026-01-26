@@ -9,8 +9,11 @@ use function Pest\Laravel\{actingAs};
 use Livewire\Livewire;
 use Filament\Facades\Filament;
 use Filament\Pages\Dashboard;
+
 use App\Models\User;
+use App\Models\Permission;
 use App\Models\Setting;
+
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\Configuration;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources;
 use Modules\FcmCentral\Models;
@@ -1426,3 +1429,19 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
     
 
 });
+
+
+it('les widgets ne provoquent pas d\'exception quand l\'utilisateur n\'est pas un marin bug #678635', function() {
+    // On teste carrément sans authentification.
+
+    $this->assertTrue(Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MarinsSupervisesWidget::canView() == false);
+    $this->assertTrue(Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorProgressionWidget::CanView() == false);
+    $this->assertTrue(Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorStatsWidget::canView() == false);
+
+    $this->assertTrue(Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinEvolutionWidget::canView() == false);
+    $this->assertTrue(Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinProgressWidget::canView() == false);
+    $this->assertTrue(Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinRepartitionWidget::canView() == false);
+    $this->assertTrue(Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinStatsWidget::canView() == false);
+    
+});
+
