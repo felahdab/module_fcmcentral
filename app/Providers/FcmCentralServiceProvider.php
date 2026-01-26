@@ -204,7 +204,7 @@ class FcmCentralServiceProvider extends ServiceProvider
     {
         $this->publishes([
             module_path($this->moduleName, 'resources/docs') => resource_path('docs/FCM Central')
-        ], $this->moduleNameLower.'-module-documentation'
+        ], 'doc'
         );
     }
     
