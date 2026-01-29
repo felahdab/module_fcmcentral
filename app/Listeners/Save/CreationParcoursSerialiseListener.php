@@ -257,19 +257,19 @@ class CreationParcoursSerialiseListener
     public function buildCompleteParcoursData(Parcours $parcours): array
     {
         $result = [
-            'id' => $parcours->id,
+            //'id' => $parcours->id,
             'uuid' => $parcours->uuid,
             'code' => $parcours->code,
             'libelle_court' => OutilsHelper::sanitizeForAlpine($parcours->libelle_court),
             'libelle_long' => OutilsHelper::sanitizeForAlpine($parcours->libelle_long),
-            'parcours_type_id' => $parcours->parcours_type_id,
+            'parcours_type_uuid' => $parcours->parcoursType->uuid,
             'color' => $parcours->color,
             'affectations' => [],
         ];
 
         foreach ($parcours->affectations as $aff) {
             $affData = [
-                'id' => $aff->id,
+                //'id' => $aff->id,
                 'uuid' => $aff->uuid,
                 'code' => $aff->code,
                 'libelle_court' => OutilsHelper::sanitizeForAlpine($aff->libelle_court),
@@ -283,7 +283,7 @@ class CreationParcoursSerialiseListener
 
             foreach ($aff->competences as $competence) {
                 $compData = [
-                    'id' => $competence->id,
+                    //'id' => $competence->id,
                     'uuid' => $competence->uuid,
                     'code' => $competence->code,
                     'libelle_court' => OutilsHelper::sanitizeForAlpine($competence->libelle_court),
@@ -299,15 +299,17 @@ class CreationParcoursSerialiseListener
                     $color_ob = ($sf && $sf->color) ? $sf->color : $competence->color;
 
                     $csfData = [
-                        'id' => $csf->id,
+                       // 'id' => $csf->id,
                         'uuid' => $csf->uuid ?? null,
                         'ordre' => $csf->ordre ?? null,
                         'heures' => $csf->heures ?? null,
                         'jours' => $csf->jours ?? null,
                         'libelle_court' => OutilsHelper::sanitizeForAlpine($csf->libelle_court) ?? null,
+                        'libelle_long' => OutilsHelper::sanitizeForAlpine($csf->libelle_long) ?? null,
                         'savoirfaire' => null,
                         'savoirfaire_type' => $csf->savoirfaireType ? [
-                            'id' => $csf->savoirfaireType->id,
+                            //'id' => $csf->savoirfaireType->id,
+                            'uuid' => $csf->savoirfaireType->id,
                             'code' => $csf->savoirfaireType->code ?? null,
                             'libelle_court' => OutilsHelper::sanitizeForAlpine($csf->savoirfaireType->libelle_court) ?? null,
                         ] : null,
@@ -316,12 +318,12 @@ class CreationParcoursSerialiseListener
 
                     if ($sf) {
                         $csfData['savoirfaire'] = [
-                            'id' => $sf->id,
+                            //'id' => $sf->id,
                             'uuid' => $sf->uuid,
                             'code' => $sf->code,
                             'libelle_court' => OutilsHelper::sanitizeForAlpine($sf->libelle_court),
                             'libelle_long' => OutilsHelper::sanitizeForAlpine($sf->libelle_long),
-                            'competence_id' => $sf->competence_id,
+                            'competence_uuid' => $sf->competence_uuid,
                             'color' => $color_ob,
                         ];
                     }
@@ -329,7 +331,7 @@ class CreationParcoursSerialiseListener
                     if ($csf->relationLoaded('objectifs')) {
                         $objs = $csf->objectifs->sortBy('ordre')->map(function ($o) use ($color_ob) {
                             return [
-                                'id' => $o->id,
+                                //'id' => $o->id,
                                 'uuid' => $o->uuid,
                                 'libelle_court' => OutilsHelper::sanitizeForAlpine($o->libelle_court),
                                 'description' => OutilsHelper::sanitizeForAlpine($o->description) ?? null,

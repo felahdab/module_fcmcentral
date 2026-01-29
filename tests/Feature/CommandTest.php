@@ -28,7 +28,9 @@ it('sauvegarde un parcours sous forme de fichier json', function() {
 
     $this->assertTrue(File::exists("$filename"));
 
-});
+})
+->group('Command')
+;
 
 it('restaure un parcours depuis un json', function() {
     
@@ -41,4 +43,5 @@ it('restaure un parcours depuis un json', function() {
     expect(Models\Parcours::count())->toBeGreaterThan(0);
     $parcours = Models\Parcours::first();
 
-})->depends('it sauvegarde un parcours sous forme de fichier json');
+})->depends('it sauvegarde un parcours sous forme de fichier json')
+->group('Command');

@@ -55,10 +55,10 @@ class ChargeParcours extends Command implements PromptsForMissingInput
     public function chargeParcoursEnBase($content, $force = false)
     {
         /**
-         * Le parcours doit impérativement avoir un parcours_type (parcours_type_id != NULL).
+         * Le parcours doit impérativement avoir un parcours_type (parcours_type_uuid != NULL).
          * Il faut donc d'abord regarder sur le parcours_type_id est bien défini.
          */
-        $parcours_type = Models\ParcoursType::find($content["parcours_type_id"]);
+        $parcours_type = Models\ParcoursType::find($content["parcours_type_uuid"]);
         if ($parcours_type == null)
         {
             $this->warn("Le parcours type référencé dans ce fichier de donné n'existe pas. On créé un parcours type bidon pour permettre l'import.");
