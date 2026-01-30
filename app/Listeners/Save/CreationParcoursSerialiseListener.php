@@ -262,7 +262,14 @@ class CreationParcoursSerialiseListener
             'code' => $parcours->code,
             'libelle_court' => OutilsHelper::sanitizeForAlpine($parcours->libelle_court),
             'libelle_long' => OutilsHelper::sanitizeForAlpine($parcours->libelle_long),
-            'parcours_type_uuid' => $parcours->parcoursType->uuid,
+            'parcours_type' => [
+                'uuid' => $parcours->parcoursType->uuid,
+                'libelle_long' => $parcours->parcoursType->libelle_long,
+                'libelle_court' => $parcours->parcoursType->libelle_court,
+                'ordre' => $parcours->parcoursType->ordre,
+                'color' => $parcours->parcoursType->color,
+                'code' => $parcours->parcoursType->code,
+             ],
             'color' => $parcours->color,
             'affectations' => [],
         ];
@@ -309,7 +316,7 @@ class CreationParcoursSerialiseListener
                         'savoirfaire' => null,
                         'savoirfaire_type' => $csf->savoirfaireType ? [
                             //'id' => $csf->savoirfaireType->id,
-                            'uuid' => $csf->savoirfaireType->id,
+                            'uuid' => $csf->savoirfaireType->uuid,
                             'code' => $csf->savoirfaireType->code ?? null,
                             'libelle_court' => OutilsHelper::sanitizeForAlpine($csf->savoirfaireType->libelle_court) ?? null,
                         ] : null,
