@@ -163,7 +163,6 @@ class FicheBilan extends ViewRecord
                     $couleurClasse = $this->getCouleurSavoirFaire($pourcentage, $csf['etat_valid'] ?? false);
                 
                     $savoirFairesArray[] = [
-                        'id' => $csf['savoirfaire']['id'] ?? $csf['id'],
                         'uuid' => $csf['savoirfaire']['uuid'] ?? $csf['uuid'] ?? '',
                         'libelle_court' => $csf['savoirfaire']['libelle_court'] ?? $csf['libelle_court'] ?? '',
                         'libelle_long' => $csf['savoirfaire']['libelle_long'] ?? '',

@@ -30,6 +30,8 @@ use App\Http\Middleware\SetTenantCookieMiddleware;
 use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 use App\Filament\Pages\UserPreferences;
 
+use Filament\Support\Enums\MaxWidth;
+
 class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
@@ -75,6 +77,8 @@ class FcmcentralPanelProvider extends PanelProvider
             ])
             ->topNavigation()
             ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')))
+            // Taille panel
+            ->maxContentWidth(MaxWidth ::Full) 
             ->userMenuItems($this->getConditionalUserMenuItems());
 
         return $panel;

@@ -55,18 +55,20 @@ class ChargeParcours extends Command implements PromptsForMissingInput
     public function chargeParcoursEnBase($content, $force = false)
     {
         /**
-         * Le parcours doit impérativement avoir un parcours_type (parcours_type_id != NULL).
-         * Il faut donc d'abord regarder sur le parcours_type_id est bien défini.
+         * Le parcours doit impérativement avoir un parcours_type (parcours_type_uuid != NULL).
+         * Il faut donc d'abord regarder si le parcours_type est bien défini.
          */
-        $parcours_type = Models\ParcoursType::find($content["parcours_type_id"]);
+        $parcours_type = Models\ParcoursType::where("uuid", $content["parcours_type"]["uuid"])->first();
         if ($parcours_type == null)
         {
-            $this->warn("Le parcours type référencé dans ce fichier de donné n'existe pas. On créé un parcours type bidon pour permettre l'import.");
-            $parcours_type = Models\ParcoursType::create([
-                "code" => "code",
-                "libelle_court" => "libelle_court"
-            ]);
+            $this->warn("Le parcours type référencé dans ce fichier de données n'existe pas. On créé un parcours type bidon pour permettre l'import.");
+            $parcours_type = Models\ParcoursType::create($content["parcours_type"]);
         }
+        /**
+         * Le parcours type référencé dans les données à charger existe désormais. On rajoute
+         * son id à la description du parcours en vue de l'import de ce dernier et de la création
+         * de la référence.
+         */
         $content["parcours_type_id"] = $parcours_type->id;
 
         $parcours = Models\Parcours::where("uuid", $uuid = Arr::get($content, "uuid"))->first();
@@ -78,7 +80,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
             }
             $this->warn("Un parcours avec l'uuid {$uuid} existe déjà ! On poursuit la mise à jour.");
             $parcours->update(
-                Arr::except($content, ["id", "affectations"])
+                Arr::except($content, ["id", "affectations", "parcours_type"])
             );
         }
         else
@@ -86,7 +88,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
             $this->info("Creation du parcours");
             $parcours = Models\Parcours::firstOrCreate(
                 ["uuid" => $content["uuid"]],
-                Arr::except($content, ["id", "affectations"])
+                Arr::except($content, ["id", "affectations", "parcours_type"])
             );
         }
         /**
@@ -280,27 +282,23 @@ class ChargeParcours extends Command implements PromptsForMissingInput
     {
         /**
          * Voyons le savoir faire type.
-         * En l'absence d'UUID, on n'a pas d'autre choix que de vérifier en base sur un autre critère.
-         * On va prendre le code pour le moment...
         */
-        $SFT = Models\SavoirfaireType::where("code", $code = Arr::get($savoir_faire_type, "code"))->first();
+        $SFT = Models\SavoirfaireType::where("uuid", $uuid = Arr::get($savoir_faire_type, "uuid"))->first();
         if ($SFT != null)
         {
             if (! $force)
             {
-                $this->fail("Un savoir-faire-type avec le code {$code} existe déjà!");
+                $this->fail("Un savoir-faire-type avec le uuid {$uuid} existe déjà!");
             }
-            $this->warn("Un savoir-faire-type avec le code {$code} existe déjà ! On poursuit la mise à jour.");
+            $this->warn("Un savoir-faire-type avec le uuid {$uuid} existe déjà ! On poursuit la mise à jour.");
             $SFT->update(
-                Arr::except($savoir_faire_type, ["id"])
+                Arr::except($savoir_faire_type, "uuid")
             );
         }
         else
         {
-            $this->info("Creation de l'entrée compétenceSavoirfaire {$code}");
-            $SFT = Models\SavoirfaireType::firstOrCreate(
-                Arr::except($savoir_faire_type, ["id"])
-            );
+            $this->info("Creation de l'entrée savoir-faire-type {$uuid}");
+            $SFT = Models\SavoirfaireType::firstOrCreate( $savoir_faire_type );
         }
         return $SFT;
     }

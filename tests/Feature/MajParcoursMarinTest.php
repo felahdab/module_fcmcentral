@@ -21,7 +21,7 @@ use Carbon\Carbon;
 uses(RefreshDatabase::class);
 uses(Tests\TestCase::class);
 
-pest()->group("Fcm Central1");
+pest()->group("Fcm Central");
 
 beforeEach(function () {
     $this->admin = \App\Models\User::factory()->create();
@@ -52,7 +52,9 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         expect($serialise->version)->toBe(1)
             ->and($serialise->date_fin)->toBeNull()
             ->and($serialise->parcours_id)->toBe($parcours->id);
-    });
+    })
+    ->group('ParcoursMarin')
+    ;
 
     it('met à jour parcoursserialise_id dans MarinParcours lors du changement de version', function () {
         $this->assertTrue(Models\Marin::all()->count() == 0);
@@ -196,7 +198,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         // ✅ Vérifier que v1 est clôturée
         $v1->refresh();
         expect($v1->date_fin)->not->toBeNull();
-    })->group('Test', 'ParcoursSerialise', 'Listener');
+    })->group('ParcoursMarin');
 
     it('clôture toutes les anciennes versions (2, 6, 8 -> 10)', function () {
         $parcours = Parcours::factory()->create();
@@ -245,7 +247,9 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
        
         expect($v10)->not->toBeNull()
             ->and($v10->date_fin)->toBeNull();
-    });
+    })
+    ->group('ParcoursMarin')
+    ;
 
     it('ne touche pas aux autres parcours lors de la mise à jour', function () {
         // ✅ Créer 2 parcours DISTINCTS
@@ -400,7 +404,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         expect($countV1)->toBe(2) // v1 + v2 pour parcours1
             ->and($countV2)->toBe(1); // v1 uniquement pour parcours2
 
-    })->group('ParcoursSerialise', 'Listener', 'Isolation');
+    })->group('ParcoursMarin');
 
     it('gère plusieurs marins sur différentes versions du même parcours', function () {
         // ✅ Créer le parcours
@@ -595,7 +599,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         expect($countMarinsV2)->toBe(0)
             ->and($countMarinsV5)->toBe(0);
 
-    })->group('FcmCentral', 'ParcoursSerialise', 'Listener', 'MultiVersion');
+    })->group('ParcoursMarin');
 
     it('utilise la date actuelle si date_de_debut non fournie', function () {
         $parcours = Parcours::factory()->create();
@@ -611,6 +615,6 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         $serialise = ParcoursSerialise::where('parcours_id', $parcours->id)->first();
        
         expect($serialise->date_debut)->toBe(now()->format('Y-m-d'));
-    })->group('FcmCentral', 'ParcoursSerialise', 'Listener', 'DateDefaut');
+    })->group('ParcoursMarin');
 
 });
