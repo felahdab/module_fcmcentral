@@ -216,7 +216,9 @@ class MarinResource extends Resource
                     ->visible(fn() => RechercheAnnuairePage::canAccess())
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('grade.libelle_court')->searchable()->toggleable(),
+                Tables\Columns\TextColumn::make('grade.libelle_court')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('unite.libelle_court')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('unite.lieuUnite.libelle_court')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('nom')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('prenom')->searchable()->label('Prénom'),
                 
@@ -404,10 +406,11 @@ class MarinResource extends Resource
                 ),
 
 
-                Tables\Columns\TextColumn::make('complements_fcm.cohorte.libelle_court')
+                Tables\Columns\TextColumn::make('complementsFcm.cohorte.libelle_court')
                     ->label('Cohorte')
                     ->searchable()
                     //->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('Non assignée')
                     ->action(
                         Tables\Actions\Action::make('gerer_cohorte')
@@ -437,7 +440,7 @@ class MarinResource extends Resource
                         ),
 
                 // 👤 MENTOR CLIQUABLE
-                Tables\Columns\TextColumn::make('complements_fcm.mentor.nom')
+                Tables\Columns\TextColumn::make('complementsFcm.mentor.nom')
                     ->label('Mentor')
                     ->formatStateUsing(fn ($record) => $record->getMentor() ?
                         ($record->getMentor()->grade?->libelle_court ?? '') . ' ' . $record->getMentor()->nom :
@@ -471,7 +474,7 @@ class MarinResource extends Resource
                             ])
                             ->action(function ($record, array $data) {
                                 if (!empty($data['retirer_mentor'])) {
-                                    $record->complements_fcm->update(['mentor_id' => null]);
+                                    $record->complementsFcm->update(['mentor_id' => null]);
                                 } elseif (!empty($data['mentor_id'])) {
                                     event(new UserGeneratedEvent(
                                         UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
@@ -488,14 +491,14 @@ class MarinResource extends Resource
                             )),
                     
                 // 📚 PARCOURS CLIQUABLE
-                Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.parcours_serialise.libelle_court')
+                Tables\Columns\TextColumn::make('complementsFcm.donnees_du_parcours.parcours_serialise.libelle_court')
                     ->label('Parcours')
                     ->formatStateUsing(fn ($record) =>
-                        $record->complements_fcm?->donnees_du_parcours?->parcours_serialise?->libelle_court ?? 'Non assigné'
+                        $record->complementsFcm?->donnees_du_parcours?->parcours_serialise?->libelle_court ?? 'Non assigné'
                     )
                     ->badge()
-                    ->color(fn ($record) => $record->complements_fcm?->donnees_du_parcours ? 'success' : 'gray')
-                    ->icon(fn ($record) => $record->complements_fcm?->donnees_du_parcours ? 'heroicon-s-book-open' : 'heroicon-s-plus')
+                    ->color(fn ($record) => $record->complementsFcm?->donnees_du_parcours ? 'success' : 'gray')
+                    ->icon(fn ($record) => $record->complementsFcm?->donnees_du_parcours ? 'heroicon-s-book-open' : 'heroicon-s-plus')
                     ->placeholder('Non assigné')
                     ->action(
                         Tables\Actions\Action::make('gerer_parcours')
@@ -523,7 +526,7 @@ class MarinResource extends Resource
                                 auth()->user()->can("fcmcentral::attribuer.parcours")
                             )),
 
-                Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
+                Tables\Columns\TextColumn::make('complementsFcm.donnees_du_parcours.taux_global')
                     ->label('Taux')
                     //->sortable()
                     ->suffix('%')
@@ -546,23 +549,33 @@ class MarinResource extends Resource
                     Select::make('value')
                         ->label('Statut FCM')
                         ->options([
-                            'tous' => 'Tous les marins',
-                            'en_fcm' => 'Marins en FCM uniquement',
-                            'hors_fcm' => 'Marins hors FCM',
+                           
+                            'enFcm' => 'Marins en FCM uniquement',
+                            'horsFcm' => 'Marins hors FCM',
                         ])
-                        ->default('en_fcm'),
+                       ->placeholder('Tous les Marins')
+                       ->default('enFcm')
+                       ->native(false),
                 ])
                 ->query(function (Builder $query, array $data): Builder {
-                    return match($data['value'] ?? 'en_fcm') {
-                        'en_fcm' => $query->enFcm(),
-                        'hors_fcm' => $query->pasEnFcm(),
+                    if (empty($data['value'])){
+                        return $query;
+                    }
+
+                    return match($data['value'] ?? 'enFcm') {
+                        'enFcm' => $query->enFcm(),
+                        'horsFcm' => $query->pasEnFcm(),
                         default => $query,
                     };
                 })
                 ->indicateUsing(function (array $data): ?string {
-                    return match($data['value'] ?? 'en_fcm') {
-                        'en_fcm' => '✓ Marins en FCM uniquement',
-                        'hors_fcm' => '✓ Marins hors FCM',
+                    if (empty($data['value'])){
+                        return null;
+                    }
+
+                    return match($data['value'] ?? 'enFcm') {
+                        'enFcm' => '✓ Marins en FCM uniquement',
+                        'horsFcm' => '✓ Marins hors FCM',
                         default => null,
                     };
                 }),
@@ -570,6 +583,10 @@ class MarinResource extends Resource
                 SelectFilter::make('specialite_id')
                     ->label('Spécialité')
                     ->options(Specialite::query()->orderBy('libelle_court')->pluck('libelle_court', 'id')),
+
+                   
+                    
+                    
             ])
 
             
@@ -592,7 +609,7 @@ class MarinResource extends Resource
                         'title' => 'Livret FCM',
                         'class' => 'btn-livret',
                     ])
-                    ->visible(fn ($record) => $record->complements_fcm?->donnees_du_parcours &&
+                    ->visible(fn ($record) => $record->complementsFcm?->donnees_du_parcours &&
                         auth()->check() &&
                         auth()->user()->can("fcmcentral::livret.voir"))
                     ->url(fn ($record) => static::getUrl('livret-de-fcm', ['record' => $record->id])),
@@ -617,7 +634,7 @@ class MarinResource extends Resource
                         'title' => 'Télécharger PDF du Livret FCM',
                         'class' => 'btn-pdf',
                     ])
-                    ->visible(fn ($record) => $record->complements_fcm?->donnees_du_parcours &&
+                    ->visible(fn ($record) => $record->complementsFcm?->donnees_du_parcours &&
                         auth()->check() &&
                         auth()->user()->can("fcmcentral::livret.telecharger"))
                     ->action(function ($record) {
@@ -782,11 +799,11 @@ class MarinResource extends Resource
     public static function getActivitesEnAttenteCount($marin): int
     {
         try {
-            if (!$marin->suiviEnFcm || !$marin->complements_fcm) {
+            if (!$marin->suiviEnFcm || !$marin->complementsFcm) {
                 return 0;
             }
 
-            $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
+            $parcours = $marin->complementsFcm->donnees_du_parcours->parcoursmarin ?? null;
             if (!$parcours) {
                 return 0;
             }
