@@ -530,10 +530,12 @@ class Marin extends BaseMarin
      */
     public function scopeEnFcm(Builder $query): void
     {
-        $query->whereIn('id', function($subQuery) {
-            $subQuery->select('rh_marin_id')
-                     ->from('fcmcentral_fcm_marins');
-        });
+        // $query->whereIn('id', function($subQuery) {
+        //     $subQuery->select('rh_marin_id')
+        //              ->from('fcmcentral_fcm_marins');
+        // });
+
+        $query->whereHas('complementsFcm');
     }
 
     public function scopePasEnFcm(Builder $query): void
