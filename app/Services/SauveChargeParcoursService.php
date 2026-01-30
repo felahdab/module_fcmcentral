@@ -37,9 +37,14 @@ class SauveChargeParcoursService
         File::put($filename, $fileContent);
     }
 
-    public function charge(Parcours $parcours, string $filename)
+    public function charge_from_file(string $filename)
     {
 
+    }
+
+    public function charge_from_content(string $content)
+    {
+        
     }
 
 }
