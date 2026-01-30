@@ -15,22 +15,16 @@ beforeEach(function () {
 
 });
 
-// ========================================
-// TESTS PAGES
-// ========================================
-
 it('sauvegarde un parcours sous forme de fichier json', function() {
     $this->seed(DeasmMasterSeeder::class);
     expect(Models\Parcours::count())->toBeGreaterThan(0);
     $parcours = Models\Parcours::first();
     $filename = "test-sauvegarde.json";
-    Artisan::call("fcmcentral:sauvegarde-parcours {$parcours->uuid} {$filename}");
+    Artisan::call("fcmcentral:sauvegarde-parcours --force {$parcours->uuid} {$filename} ");
 
     $this->assertTrue(File::exists("$filename"));
 
-})
-->group('Command')
-;
+});
 
 it('restaure un parcours depuis un json', function() {
     
@@ -43,5 +37,6 @@ it('restaure un parcours depuis un json', function() {
     expect(Models\Parcours::count())->toBeGreaterThan(0);
     $parcours = Models\Parcours::first();
 
-})->depends('it sauvegarde un parcours sous forme de fichier json')
-->group('Command');
+    File::delete($filename);
+
+})->depends('it sauvegarde un parcours sous forme de fichier json');
