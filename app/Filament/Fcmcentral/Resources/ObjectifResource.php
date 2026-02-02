@@ -15,7 +15,7 @@ use Filament\Tables\Filters\SelectFilter;
 class ObjectifResource extends Resource
 {
     protected static ?string $model = Objectif::class;
-    protected static ?string $navigationGroup = "Parcours";
+    protected static ?string $navigationGroup = "Catalogue";
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form

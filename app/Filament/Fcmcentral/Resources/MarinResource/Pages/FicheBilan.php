@@ -71,7 +71,7 @@ class FicheBilan extends ViewRecord
             return false;
         }
         
-        if ( auth()->user()->can("fcmcentral::voir_tous_les _marins") )
+        if ( auth()->user()->can("fcmcentral::voir_tous_les_marins") )
             return true;
 
         $currentMarin = Marin::fromCurrentUser();
@@ -912,9 +912,9 @@ public function getDateCompetenceFormatee(): string
     public function getTitle(): string
     {
         if ($this->marin) {
-            return "Fiche Bilan FCM - {$this->marin->grade?->libelle_court} {$this->marin->prenom} {$this->marin->nom}";
+            return "Fiche bilan FCM - {$this->marin->grade?->libelle_court} {$this->marin->prenom} {$this->marin->nom}";
         }
         
-        return 'Fiche Bilan FCM';
+        return 'Fiche bilan FCM';
     }
 }

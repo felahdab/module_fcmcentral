@@ -355,7 +355,7 @@
 
     {{-- PROGRESSION GLOBALE --}}
     <x-filament::section class="text-center section-card">
-        <x-slot name="heading">Progression Globale</x-slot>
+        <x-slot name="heading">Progression globale</x-slot>
         <div class="p-4">
             <div class="text-5xl font-bold
                 {{ $this->statistiques['pourcentage_global'] >= 80 ? 'text-green-600' : 
@@ -408,7 +408,7 @@
     {{-- SAVOIR-FAIRE NON COMMENCÉS --}}
     @if($this->statistiques['savoirfaires_non_commences'] > 0)
         <x-filament::section class="text-center section-card">
-            <x-slot name="heading">Savoir-faire Non Commencés</x-slot>
+            <x-slot name="heading">Savoir-faire non commencés</x-slot>
             <div class="p-4">
                 @php
                     $total = $this->statistiques['total_savoirfaires'] ?? 0;
@@ -471,7 +471,7 @@
 
     {{-- ÉCOLE À DISTANCE --}}
     <x-filament::section class="text-center section-card">
-        <x-slot name="heading">SF - École à Distance</x-slot>
+        <x-slot name="heading">SF - Enseignement à distance</x-slot>
         <div class="p-4">
             @php
                 $total = $this->statistiques['total_ead'] ?? 0;
@@ -644,7 +644,7 @@
 
             {{-- ÉQUIPE PÉDAGOGIQUE --}}
             <x-filament::section class="section-card">
-                <x-slot name="heading">Équipe Pédagogique</x-slot>
+                <x-slot name="heading">Équipe pédagogique</x-slot>
                 <div class="space-y-3">
                     <div class="flex justify-between border-b pb-2">
                         <span class="text-sm font-medium text-gray-700">Cohorte:</span>
@@ -725,8 +725,8 @@
 <x-filament::section class="section-card">
     <x-slot name="heading">
         <div class="flex items-center justify-between">
-            <span>Jalons et Gel FCM</span>
-            @if($this->canEditJalons())
+            <span>Jalons et gel FCM</span>
+            {{-- @if($this->canEditJalons())
                 <x-filament::icon-button
                     icon="heroicon-o-pencil"
                     size="md"
@@ -745,7 +745,7 @@
                     tooltip="Ajouter un Gel"
                     wire:click="ajouterEtat"
                 />
-            @endif
+            @endif --}}
         </div>
     </x-slot>
 
@@ -754,7 +754,7 @@
         <div class="flex items-center justify-between p-2 ">
             <div class="flex items-center gap-2">
                 <x-filament::icon icon="heroicon-o-arrow-path" class="w-5 h-5 " />
-                <span class="text-sm font-medium text-gray-900">Début Sédimentation</span>
+                <span class="text-sm font-medium text-gray-900">Date d'entrée en FCM</span>
             </div>
             <span class="text-sm text-gray-700">
                 {{ $this->getDateSedimentationFormatee() }}
@@ -765,7 +765,7 @@
         <div class="flex items-center justify-between p-2 ">
             <div class="flex items-center gap-2">
                 <x-filament::icon icon="heroicon-o-check-circle" class="w-5 h-5 " />
-                <span class="text-sm font-medium text-gray-900">Vert FCM</span>
+                <span class="text-sm font-medium text-gray-900">Date de fin de sédimentation</span>
             </div>
             <span class="text-sm text-gray-700">
                 {{ $this->getDateFcmFormatee() }}
@@ -776,7 +776,7 @@
         <div class="flex items-center justify-between p-2 ">
             <div class="flex items-center gap-2">
                 <x-filament::icon icon="heroicon-o-academic-cap" class="w-5 h-5 " />
-                <span class="text-sm font-medium text-gray-900">Vert Compétence</span>
+                <span class="text-sm font-medium text-gray-900">Date de vert compétence</span>
             </div>
             <span class="text-sm text-gray-700">
                 {{ $this->getDateCompetenceFormatee() }}
@@ -821,7 +821,7 @@
                             @endif
                            
                             {{-- ✅ BOUTON MODIFIER --}}
-                            @if($this->canCreateEtat())
+                            {{-- @if($this->canCreateEtat())
                                 <x-filament::icon-button
                                     icon="heroicon-o-pencil"
                                     size="sm"
@@ -829,7 +829,7 @@
                                     tooltip="Modifier cet état"
                                     wire:click="modifierEtat({{ $etat->id }})"
                                 />
-                            @endif
+                            @endif --}}
                         </div>
                     </div>
                 </div>
@@ -851,7 +851,7 @@
             {{-- SAVOIR-FAIRE --}}
             <x-filament::section class="section-card">
                 <x-slot name="heading">
-                    Progression par Savoir-Faire ({{ $this->savoirFaires->count() }})
+                    Progression par savoir-faire ({{ $this->savoirFaires->count() }})
                 </x-slot>
                 <div class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
                     @forelse($this->savoirFaires->groupBy('affectation') as $affectation => $savoirFairesByAffectation)
@@ -926,8 +926,8 @@
            <x-filament::section class="section-card">
                 <x-slot name="heading">
                     <div class="flex items-center justify-between">
-                        <span>Commentaires et Observations ({{ $this->notes->count() }})</span>
-                        @if($this->canCreateNote())
+                        <span>Commentaires et observations ({{ $this->notes->count() }})</span>
+                        {{-- @if($this->canCreateNote())
                             <x-filament::icon-button
                                 icon="heroicon-o-plus-circle"
                                 size="md"
@@ -935,7 +935,7 @@
                                 tooltip="Ajouter un commentaire"
                                 wire:click="ajouterNote"
                             />
-                        @endif
+                        @endif --}}
                     </div>
                 </x-slot>
                 @if($this->notes->isEmpty())
@@ -944,11 +944,11 @@
                             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
                         </svg>
                         <p class="text-sm">Aucun commentaire enregistré</p>
-                        @if($this->canCreateNote())
+                        {{-- @if($this->canCreateNote())
                             <button wire:click="ajouterNote" class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
                                 Ajouter un commentaire
                             </button>
-                        @endif
+                        @endif --}}
                     </div>
                 @else
                     <div class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
@@ -999,7 +999,7 @@
                         <svg class="w-5 h-5 mr-2 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
                         </svg>
-                        Objectifs en Attente de Validation ({{ $this->activitesEnAttente->count() }})
+                        Objectifs en attente de validation ({{ $this->activitesEnAttente->count() }})
                     </div>
                 </x-slot>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1037,7 +1037,7 @@
 @endif
 
 {{-- MODAL AJOUT NOTE --}}
-<x-filament::modal id="ajouterNote" width="2xl">
+{{-- <x-filament::modal id="ajouterNote" width="2xl">
     <x-slot name="heading">
         <div class="flex items-center">
             <svg class="w-6 h-6 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -1048,11 +1048,11 @@
     </x-slot>
 
     @livewire('Modules\FcmCentral\Http\Livewire\AddNoteForm', ['marinId' => $marinId], key('add-note-' . $marinId))
-</x-filament::modal>
+</x-filament::modal> --}}
 
 
 {{-- MODAL ETAT --}}
-<x-filament::modal
+{{-- <x-filament::modal
     id="ajouterEtat"
     width="2xl"
     :close-by-clicking-away="false"
@@ -1062,12 +1062,12 @@
             <svg class="w-6 h-6 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
             </svg>
-            <span>Jalon/Statut FCM</span>
+            <span>Jalon/statut FCM</span>
         </div>
     </x-slot>
 
     @livewire('Modules\FcmCentral\Http\Livewire\AddEtatForm', ['marinId' => $marinId], key('add-etat-form-' . $marinId))
-</x-filament::modal>
+</x-filament::modal> --}}
 
 
 
@@ -1083,7 +1083,7 @@
 
     <div class="space-y-4">
         <div>
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Date Sédimentation</label>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Date d'entrée en FCM</label>
             <input 
                 type="date" 
                 wire:model="jalonForm.date_sedimentation"
@@ -1092,7 +1092,7 @@
         </div>
 
         <div>
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Date FCM</label>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Date de fin de sédimentation</label>
             <input 
                 type="date" 
                 wire:model="jalonForm.date_fcm"
@@ -1101,7 +1101,7 @@
         </div>
 
         <div>
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Date Compétence</label>
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Date de vert compétence</label>
             <input 
                 type="date" 
                 wire:model="jalonForm.date_competence"

@@ -20,7 +20,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResour
 class CompetenceSavoirfaireResource extends Resource
 {
     protected static ?string $model = CompetenceSavoirfaire::class;
-    protected static ?string $navigationGroup = "Parcours";
+    protected static ?string $navigationGroup = "Catalogue";
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
     public static function form(Form $form): Form

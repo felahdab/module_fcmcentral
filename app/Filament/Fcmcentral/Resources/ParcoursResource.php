@@ -30,7 +30,7 @@ class ParcoursResource extends Resource
 
     protected static ?string $model = Parcours::class;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = "Parcours";
+    protected static ?string $navigationGroup = "Catalogue";
 
     public static function form(Form $form): Form
     {

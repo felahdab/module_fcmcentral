@@ -26,7 +26,7 @@ class ParcoursSerialiseResource extends Resource
 {
     protected static ?string $model = ParcoursSerialise::class;
 
-    protected static ?string $navigationGroup = "Parcours";
+    protected static ?string $navigationGroup = "Catalogue";
     protected static ?string $navigationIcon = 'heroicon-o-lock-closed';
     
     public static function form(Form $form): Form

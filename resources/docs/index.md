@@ -5,3 +5,4 @@ Bienvenue sur la documentation FCM Central. Utilisez le menu ci-dessous pour nav
 ## Menu
 
 - [Roles/Permissions](roles-permissions.md)
+- [Permissions/Page](pages-permissions.md)

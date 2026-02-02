@@ -232,6 +232,17 @@ class MarinResource extends Resource
                     ->falseIcon(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'heroicon-c-shield-check' : 'heroicon-o-x-circle')
                     ->trueColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'success')
                     ->falseColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'danger')
+                    // ->visible(function(){
+                    //     $filters= $this->getTable()->getFiltersState();
+                    //     $filterValue = $filters['en_fcm']['value'];
+                    //     dd( $filterValue);
+                    //     // Masquer la colonne si filtre est en "enFCM"
+                    //     if ($filterValue === 'enFcm'){
+                    //         return false;
+                    //     }
+                        
+                    //     return true;
+                    // })
                     ->action(
                         Tables\Actions\Action::make('toggle_fcm')
                             ->modalHeading(fn ($record) => $record->suivi_en_fcm ? 'Marin en FCM' : 'Activer FCM')
@@ -412,32 +423,33 @@ class MarinResource extends Resource
                     //->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->placeholder('Non assignée')
-                    ->action(
-                        Tables\Actions\Action::make('gerer_cohorte')
-                            ->modalHeading('Attribuer une cohorte')
-                            ->modalDescription(fn ($record) => $record->fullNameAndGrade)
-                            ->form([
-                                Forms\Components\Select::make('cohorte_id')
-                                    ->label('Choisir une cohorte')
-                                    ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid'))
-                                    ->searchable(),
-                            ])
-                            ->action(function ($record, array $data) {
-                                if (!empty($data['cohorte_id'])) {
-                                    event(new UserGeneratedEvent(
-                                        UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
-                                        auth()->user()->uuid,
-                                        ObjectClasses::MARIN,
-                                        $record->uuid,
-                                        ["cohorte" => $data["cohorte_id"]]
-                                    ));
-                                }
-                            })
-                            ->visible(fn ($record) => $record->estEnFcm() && 
-                                auth()->check() &&
-                                auth()->user()->can("fcmcentral::attribuer.cohorte")
-                            )
-                        ),
+                    // ->action(
+                    //     Tables\Actions\Action::make('gerer_cohorte')
+                    //         ->modalHeading('Attribuer une cohorte')
+                    //         ->modalDescription(fn ($record) => $record->fullNameAndGrade)
+                    //         ->form([
+                    //             Forms\Components\Select::make('cohorte_id')
+                    //                 ->label('Choisir une cohorte')
+                    //                 ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid'))
+                    //                 ->searchable(),
+                    //         ])
+                    //         ->action(function ($record, array $data) {
+                    //             if (!empty($data['cohorte_id'])) {
+                    //                 event(new UserGeneratedEvent(
+                    //                     UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
+                    //                     auth()->user()->uuid,
+                    //                     ObjectClasses::MARIN,
+                    //                     $record->uuid,
+                    //                     ["cohorte" => $data["cohorte_id"]]
+                    //                 ));
+                    //             }
+                    //         })
+                    //         ->visible(fn ($record) => $record->estEnFcm() && 
+                    //             auth()->check() &&
+                    //             auth()->user()->can("fcmcentral::attribuer.cohorte")
+                    //         )
+                    //     )
+                    ,
 
                 // 👤 MENTOR CLIQUABLE
                 Tables\Columns\TextColumn::make('complementsFcm.mentor.nom')
@@ -468,14 +480,15 @@ class MarinResource extends Resource
                                             ])
                                     )
                                     ->searchable(),
-                                Forms\Components\Toggle::make('retirer_mentor')
-                                    ->label('Retirer le mentor')
-                                    ->visible(fn ($record) => $record->getMentor() !== null),
+                                // Forms\Components\Toggle::make('retirer_mentor')
+                                //     ->label('Retirer le mentor')
+                                //     ->visible(fn ($record) => $record->getMentor() !== null),
                             ])
                             ->action(function ($record, array $data) {
-                                if (!empty($data['retirer_mentor'])) {
-                                    $record->complementsFcm->update(['mentor_id' => null]);
-                                } elseif (!empty($data['mentor_id'])) {
+                                // if (!empty($data['retirer_mentor'])) {
+                                //     $record->complementsFcm->update(['mentor_id' => null]);
+                                // } elseif (!empty($data['mentor_id'])) {
+                                    if(!empty($data['mentor_id'])) {
                                     event(new UserGeneratedEvent(
                                         UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
                                         auth()->user()->uuid,
@@ -540,7 +553,8 @@ class MarinResource extends Resource
                     ->badge()
                     ->color(fn (int $state): string => $state > 0 ? 'warning' : 'success')
                     ->icon(fn (int $state): string => $state > 0 ? 'heroicon-m-clock' : 'heroicon-m-check-circle')
-                    ->tooltip(fn (int $state): string => $state > 0 ? "$state activité(s) en attente de validation" : 'Aucune activité en attente'),
+                    ->extraAttributes(['class'=>'cursor-default'])
+                    //->tooltip(fn (int $state): string => $state > 0 ? "$state activité(s) en attente de validation" : 'Aucune activité en attente'),
             ])
             
             ->filters([
@@ -667,16 +681,15 @@ class MarinResource extends Resource
                         ->rows(4)
                         ->maxLength(1000)
                         ->placeholder('Saisissez le contenu de votre note...'),
-
-                    // Marin pré-sélectionné (caché)
+                
                     Forms\Components\Hidden::make('marin_id')
                         ->default(fn ($record) => $record->id),
-
-                    // Affichage du marin sélectionné
+                
                     Forms\Components\Placeholder::make('marin_selected')
                         ->label('Marin concerné')
                         ->content(fn ($record) => $record->grade?->libelle_court . ' ' . $record->prenom . ' ' . $record->nom),
-
+                
+                    /*
                     Forms\Components\Select::make('type_note_id')
                         ->label('Type de note')
                         ->options(function() {
@@ -688,21 +701,23 @@ class MarinResource extends Resource
                         ->createOptionForm([
                             Forms\Components\Textarea::make('code')
                                 ->required()
-                                ->label('code')
-                                ,
+                                ->label('code'),
                             Forms\Components\TextInput::make('libelle_court')
                                 ->required()
                                 ->label('Libellé court')
                                 ->maxLength(150),
-                            
                         ])
                         ->createOptionUsing(function (array $data) {
                             return \Modules\FcmCentral\Models\TypeNote::create($data)->id;
                         }),
+                    */
+                
                     Forms\Components\DatePicker::make('date')
                         ->label('Date')
                         ->default(now())
                         ->nullable(),
+                
+                    /*
                     Forms\Components\Select::make('redacteur_id')
                         ->label('Rédacteur')
                         ->options(function () {
@@ -719,20 +734,24 @@ class MarinResource extends Resource
                             $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
                             return $currentMarin ? $currentMarin->id : auth()->user()->id;
                         }),
+                    */
+                
+                    /*
                     Forms\Components\Toggle::make('valide_bcf')
                         ->label('Validé BCF')
                         ->default(false)
-                        ->visible(fn () => auth()->user()->can("fcmcentral::note.valider")), // Seuls les admins peuvent cocher
-
+                        ->visible(fn () => auth()->user()->can("fcmcentral::note.valider")),
+                    */
+                
                     Forms\Components\TextInput::make('lien_url')
                         ->label('Lien URL (optionnel)')
                         ->url()
                         ->nullable()
                         ->placeholder('https://...'),
-
-                    // Champs cachés pour objet_type et objet_id
+                
                     Forms\Components\Hidden::make('objet_type')
                         ->default('marin'),
+                
                     Forms\Components\Hidden::make('objet_id')
                         ->default(fn ($record) => $record->id),
                 ])
@@ -742,29 +761,31 @@ class MarinResource extends Resource
                             'record_id' => $record->id,
                             'data' => $data,
                         ]);
-
+                
+                        // Détermination du rédacteur (user connecté)
+                        $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+                        $redacteurId = $currentMarin ? $currentMarin->id : auth()->user()->id;
+                
                         // Créer la note
-                    
                         $note = \Modules\FcmCentral\Models\Note::create([
                             'libelle' => $data['libelle'],
                             'rh_marin_id' => $record->id,
                             //'marin_id' => $record->complementsFcm->id,
-                            'type_note_id' => $data['type_note_id'] ?? null,
+                            // 'type_note_id' => $data['type_note_id'] ?? null, // Champ commenté
                             'date' => $data['date'] ?? now(),
-                            'redacteur_id' => $data['redacteur_id'],
-                            'valide_bcf' => $data['valide_bcf'] ?? false,
+                            'redacteur_id' => $redacteurId, // Utilisateur connecté
+                            'valide_bcf' => false, // Champ commenté mais valeur prise en compte
                             'lien_url' => $data['lien_url'] ?? null,
                             'objet_type' => 'marin',
                             'objet_id' => $record->id,
                         ]);
-
-                        // Notification de succès
+                
                         \Filament\Notifications\Notification::make()
                             ->title('Note créée avec succès')
                             ->body("La note pour {$record->prenom} {$record->nom} a été créée.")
                             ->success()
                             ->send();
-
+                
                     } catch (\Exception $e) {
                         \Log::error('Erreur lors de la création de la note', [
                             'message' => $e->getMessage(),
@@ -774,8 +795,7 @@ class MarinResource extends Resource
                             'record_id' => $record->id,
                             'data' => $data,
                         ]);
-
-                        // Notification d'erreur
+                
                         \Filament\Notifications\Notification::make()
                             ->title('Erreur lors de la création')
                             ->body('Une erreur est survenue lors de la création de la note.')
@@ -783,6 +803,7 @@ class MarinResource extends Resource
                             ->send();
                     }
                 })
+                
                 ->requiresConfirmation()
                 ->modalSubmitActionLabel('Créer la note')
                 ->modalCancelActionLabel('Annuler'),
