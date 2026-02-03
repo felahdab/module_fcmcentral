@@ -499,7 +499,7 @@
     {{-- COMPÉTENCES COMPAGNONNAGE --}}
     @if($this->statistiques['competences_compagnonnage_total'] > 0)
     <x-filament::section class="text-center section-card">
-        <x-slot name="heading">C Compagnonnage</x-slot>
+        <x-slot name="heading">C - Compagnonnage</x-slot>
         <div class="p-4">
             @php
                 $total = $this->statistiques['competences_compagnonnage_total'] ?? 0;
@@ -523,7 +523,7 @@
     {{-- COMPÉTENCES STAGE --}}
     @if($this->statistiques['competences_stages_total'] > 0)
     <x-filament::section class="text-center section-card">
-        <x-slot name="heading">C Stage</x-slot>
+        <x-slot name="heading">C - Stage</x-slot>
         <div class="p-4">
             @php
                 $total = $this->statistiques['competences_stages_total'] ?? 0;
@@ -546,7 +546,7 @@
     {{-- COMPÉTENCES EAD --}}
     @if($this->statistiques['competences_ead_total'] > 0)
     <x-filament::section class="text-center section-card">
-        <x-slot name="heading">C EAD</x-slot>
+        <x-slot name="heading">C - EAD</x-slot>
         <div class="p-4">
             @php
                 $total = $this->statistiques['competences_ead_total'] ?? 0;
@@ -636,9 +636,12 @@
                         <span class="text-sm text-gray-900">{{ $this->marin->specialite?->libelle_long ?? 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
-                        <span class="text-sm font-medium text-gray-700">Unité:</span>
-                        <span class="text-sm text-gray-900">{{ $this->marin->unite?->libelle_long ?? 'N/A' }}</span>
+                        <span class="text-sm font-medium text-gray-700">Cohorte:</span>
+                        <span class="text-sm text-gray-900">
+                            {{ $this->marin->complementsFcm?->cohorte?->libelle_long ?? 'N/A' }}
+                        </span>
                     </div>
+                   
                 </div>
             </x-filament::section>
 
@@ -647,10 +650,8 @@
                 <x-slot name="heading">Équipe pédagogique</x-slot>
                 <div class="space-y-3">
                     <div class="flex justify-between border-b pb-2">
-                        <span class="text-sm font-medium text-gray-700">Cohorte:</span>
-                        <span class="text-sm text-gray-900">
-                            {{ $this->marin->complementsFcm?->cohorte?->libelle_long ?? 'N/A' }}
-                        </span>
+                        <span class="text-sm font-medium text-gray-700">Unité:</span>
+                        <span class="text-sm text-gray-900">{{ $this->marin->unite?->libelle_long ?? 'N/A' }}</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
                         <span class="text-sm font-medium text-gray-700">Mentor:</span>

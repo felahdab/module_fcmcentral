@@ -368,16 +368,16 @@ class MarinResource extends Resource
                             ->modalDescription(fn ($record) => $record->fullNameAndGrade)
                             ->form([
                                 Forms\Components\DatePicker::make('date_sedimentation')
-                                    ->label('Date de sédimentation')
-                                    ->helperText('Début de la sédimentation')
+                                    ->label('Début d\'entrée en FCM')
+                                    ->helperText('Début d\'entrée en FCM')
                                     ->default(fn ($record) => $record->complementsFcm?->date_sedimentation),
                                 Forms\Components\DatePicker::make('date_fcm')
-                                    ->label('Date FCM')
-                                    ->helperText('Début effectif du parcours FCM (laisser vide pour changer de statut)')
+                                    ->label('Date de fin de sédimentation ')
+                                    ->helperText('Date de fin de sédimentation (laisser vide pour changer de statut)')
                                     ->default(fn ($record) => $record->complementsFcm?->date_fcm),
                                 Forms\Components\DatePicker::make('date_competence')
-                                    ->label('Date compétence')
-                                    ->helperText('Fin de la FCM, compétence acquise (laisser vide pour changer de statut)')
+                                    ->label('Date de vert compétence')
+                                    ->helperText('Date de vert compétence (laisser vide pour changer de statut)')
                                     ->default(fn ($record) => $record->complementsFcm?->date_competence),
                             ])
                             ->action(function ($record, array $data) {
