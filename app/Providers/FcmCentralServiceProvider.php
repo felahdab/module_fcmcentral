@@ -37,22 +37,23 @@ class FcmCentralServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
+        Models\Affectation::class => Policies\AffectationPolicy::class,
+        Models\Cohorte::class => Policies\CohortePolicy::class,
+        Models\Competence::class => Policies\CompetencePolicy::class,
+        Models\CompetenceSavoirfaire::class => Policies\CompetenceSavoirfairePolicy::class,
+        Models\Domaine::class => Policies\DomainePolicy::class,
+        Models\Etat::class => Policies\EtatPolicy::class, //GEL
+       
+        Models\Marin::class => Policies\MarinPolicy::class,
+        Models\Note::class => Policies\NotePolicy::class,
+        Models\Objectif::class => Policies\ObjectifPolicy::class,
         Models\Parcours::class => Policies\ParcoursPolicy::class,
         Models\ParcoursSerialise::class => Policies\ParcoursSerialisePolicy::class,
-        Models\Affectation::class => Policies\AffectationPolicy::class,
-        Models\Competence::class => Policies\CompetencePolicy::class,
-        Models\Savoirfaire::class => Policies\SavoirfairePolicy::class,
-        Models\Objectif::class => Policies\ObjectifPolicy::class,
-        Models\Marin::class => Policies\MarinPolicy::class,
-        Models\Domaine::class => Policies\DomainePolicy::class,
-        Models\Cohorte::class => Policies\CohortePolicy::class,
-        Models\Etat::class => Policies\EtatPolicy::class,
-        Models\CompetenceSavoirfaire::class => Policies\CompetenceSavoirfairePolicy::class,
-        Models\Note::class => Policies\NotePolicy::class,
         Models\ParcoursType::class => Policies\ParcoursTypePolicy::class,
+        Models\Savoirfaire::class => Policies\SavoirfairePolicy::class,
         Models\SavoirfaireType::class => Policies\SavoirfaireTypePolicy::class,
-        Models\TypeEtat::class => Policies\TypeEtatPolicy::class,
-        Models\TypeNote::class => Policies\TypeNotePolicy::class
+        Models\TypeNote::class => Policies\TypeNotePolicy::class,
+        Models\TypeEtat::class => Policies\TypeEtatPolicy::class, //TYPE GEL
 
     ];
 

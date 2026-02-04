@@ -546,7 +546,7 @@
     {{-- COMPÉTENCES EAD --}}
     @if($this->statistiques['competences_ead_total'] > 0)
     <x-filament::section class="text-center section-card">
-        <x-slot name="heading">C - EAD</x-slot>
+        <x-slot name="heading">C - Enseignement à distance</x-slot>
         <div class="p-4">
             @php
                 $total = $this->statistiques['competences_ead_total'] ?? 0;

@@ -358,8 +358,8 @@ class MarinResource extends Resource
                             ->modalDescription(fn ($record) => $record->fullNameAndGrade)
                             ->form([
                                 Forms\Components\DatePicker::make('date_sedimentation')
-                                    ->label('Début d\'entrée en FCM')
-                                    ->helperText('Début d\'entrée en FCM')
+                                    ->label('Date de début d\'entrée en FCM')
+                                    ->helperText('Date de début d\'entrée en FCM')
                                     ->default(fn ($record) => $record->complementsFcm?->date_sedimentation),
                                 Forms\Components\DatePicker::make('date_fcm')
                                     ->label('Date de fin de sédimentation ')
