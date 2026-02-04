@@ -216,8 +216,8 @@ class MarinResource extends Resource
                     ->visible(fn() => RechercheAnnuairePage::canAccess())
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('grade.libelle_court')->searchable()->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('unite.libelle_court')->searchable()->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('grade.libelle_court')->searchable()->toggleable(),
+                Tables\Columns\TextColumn::make('unite.libelle_court')->searchable()->toggleable(),
                 Tables\Columns\TextColumn::make('unite.lieuUnite.libelle_court')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('nom')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('prenom')->searchable()->label('Prénom'),
@@ -232,17 +232,7 @@ class MarinResource extends Resource
                     ->falseIcon(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'heroicon-c-shield-check' : 'heroicon-o-x-circle')
                     ->trueColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'success')
                     ->falseColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'danger')
-                    // ->visible(function(){
-                    //     $filters= $this->getTable()->getFiltersState();
-                    //     $filterValue = $filters['en_fcm']['value'];
-                    //     dd( $filterValue);
-                    //     // Masquer la colonne si filtre est en "enFCM"
-                    //     if ($filterValue === 'enFcm'){
-                    //         return false;
-                    //     }
-                        
-                    //     return true;
-                    // })
+                    ->hidden(fn ($livewire): bool => method_exists($livewire, 'isFilterEnFcmActive') && $livewire->isFilterEnFcmActive())
                     ->action(
                         Tables\Actions\Action::make('toggle_fcm')
                             ->modalHeading(fn ($record) => $record->suivi_en_fcm ? 'Marin en FCM' : 'Activer FCM')
@@ -421,7 +411,7 @@ class MarinResource extends Resource
                     ->label('Cohorte')
                     ->searchable()
                     //->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable()
                     ->placeholder('Non assignée')
                     // ->action(
                     //     Tables\Actions\Action::make('gerer_cohorte')

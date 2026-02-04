@@ -18,6 +18,13 @@ class ListMarins extends ListRecords
         ];
     }
 
+    // Methode pour reperer si le filtre est actif pour enlver la colonne FCM
+    public function isFilterEnFcmActive(): bool
+    {
+        return ($this->tableFilters['en_fcm']['value'] ?? null) === 'enFcm';
+    }
+
+
     public static function canAccess(array $parameters = []): bool
     {
         return auth()->user()?->can('fcmcentral::marin.index');
