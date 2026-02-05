@@ -110,5 +110,15 @@ class PermissionsSeeder extends Seeder
             "guard_name" => "web"
         ]);
 
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::ficheBilan.notevoir",
+            "guard_name" => "web"
+        ]);
+
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::fcm.admin",
+            "guard_name" => "web"
+        ]);
+
     }
 }

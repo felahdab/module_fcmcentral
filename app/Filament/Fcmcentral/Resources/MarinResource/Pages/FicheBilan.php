@@ -93,6 +93,8 @@ class FicheBilan extends ViewRecord
         return auth()->user()->can("fcmcentral::note.creer");
     }
 
+
+
     public function canCreateEtat(): bool
     {
         return auth()->user()->can("fcmcentral::etat.create");

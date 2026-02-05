@@ -754,7 +754,7 @@ class MarinResource extends Resource
                 
                         // Détermination du rédacteur (user connecté)
                         $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
-                        $redacteurId = $currentMarin ? $currentMarin->id : auth()->user()->id;
+                        $redacteurId =  auth()->user()->id;
                 
                         // Créer la note
                         $note = \Modules\FcmCentral\Models\Note::create([
