@@ -216,7 +216,7 @@ class MarinResource extends Resource
                     ->visible(fn() => RechercheAnnuairePage::canAccess())
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('grade.libelle_court')->searchable()->toggleable(),
+                Tables\Columns\TextColumn::make('grade.libelle_court')->searchable(),
                 Tables\Columns\TextColumn::make('unite.libelle_court')->searchable()->toggleable(),
                 Tables\Columns\TextColumn::make('unite.lieuUnite.libelle_court')->searchable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('nom')->searchable()->sortable(),
