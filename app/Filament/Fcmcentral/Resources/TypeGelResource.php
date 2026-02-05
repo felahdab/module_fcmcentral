@@ -25,6 +25,17 @@ class TypeGelResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
 
+    // ✅ Vérifier si l'utilisateur est admin
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
+
+    // ✅ Optionnel : Masquer aussi dans la navigation si pas admin
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
 
 public static function form(Form $form): Form
 {
