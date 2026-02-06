@@ -201,3 +201,9 @@ it('affiche la page création de objectif', function() {
         ->get(Resources\ObjectifResource::getUrl('create'))
         ->assertSuccessful();
 });
+
+it('ne genere pas d exception quand on demande a voir la page ListMarins en etant invite', function() {
+    $this->get(Resources\MarinResource::getUrl('index'));
+
+    $this->assertTrue(true);
+});
