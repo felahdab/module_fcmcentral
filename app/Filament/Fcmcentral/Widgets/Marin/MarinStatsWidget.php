@@ -12,10 +12,11 @@ class MarinStatsWidget extends BaseWidget
 
     public static function canView(): bool
     {
-        $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+        // $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
         // TODO: faut-il limiter davantage l'accès ? Certains marin disposant
         // d'un parcours doivent-ils être empéchés de voir ce widget ?
-        return $marin?->complements_fcm?->donnees_du_parcours != null;
+       //  return $marin?->complements_fcm?->donnees_du_parcours != null;
+       return false;
     }
 
     protected function getStats(): array

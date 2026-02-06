@@ -99,6 +99,7 @@ class FcmcentralPanelProvider extends PanelProvider
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinEvolutionWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinRepartitionWidget::class,
                     \Modules\FcmCentral\Filament\Fcmcentral\Widgets\TestMarinRolesPermissionsWidget::class,
+                    \Modules\FcmCentral\Filament\Fcmcentral\Widgets\DocumentationMentorWidget::class,
                 ]);
         return $widgets;
     }

@@ -86,10 +86,14 @@ class MarinsSupervisesWidget extends BaseWidget
                 Tables\Actions\Action::make('voir_parcours')
                     ->label('Voir parcours')
                     ->icon('heroicon-m-eye')
-                    ->url(fn (Marin $record): string =>
-                        $this->hasParcours($record)
-                            ? \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(['marinId' => $record->id])
-                            : '#'
+                    // ->url(fn (Marin $record): string =>
+                    //     $this->hasParcours($record)
+                    //         ? \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(['marinId' => $record->id])
+                    //         : '#'
+                    // )
+                    ->url(fn ($record) =>
+                        route('filament.FCM Central.resources.marins.livret-de-fcm',
+                        ['record' =>$record])
                     )
                     //->openUrlInNewTab()
                     ->visible(fn (Marin $record) => $this->hasParcours($record)),

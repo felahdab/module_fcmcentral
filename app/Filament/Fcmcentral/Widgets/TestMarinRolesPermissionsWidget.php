@@ -16,7 +16,7 @@ class TestMarinRolesPermissionsWidget extends BaseWidget
         public static function canView(): bool
         {
             // TODO: regarder s'il faut restreindre l'accès à ce widget.
-            return true;
+            return false;
         }
     
         protected function getStats(): array

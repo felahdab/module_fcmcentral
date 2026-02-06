@@ -754,8 +754,10 @@ class MarinResource extends Resource
                 
                         // Détermination du rédacteur (user connecté)
                         $currentMarin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
-                        $redacteurId =  auth()->user()->id;
-                
+                       // $redacteurId =  auth()->user()->id;
+                      
+                       $redacteur = auth()->user()->display_name;
+                      // dd( $redacteur);
                         // Créer la note
                         $note = \Modules\FcmCentral\Models\Note::create([
                             'libelle' => $data['libelle'],
@@ -763,7 +765,8 @@ class MarinResource extends Resource
                             //'marin_id' => $record->complementsFcm->id,
                             // 'type_note_id' => $data['type_note_id'] ?? null, // Champ commenté
                             'date' => $data['date'] ?? now(),
-                            'redacteur_id' => $redacteurId, // Utilisateur connecté
+                            //'redacteur_id' => $redacteurId, // Utilisateur connecté
+                            'redacteur' => $redacteur,
                             'valide_bcf' => false, // Champ commenté mais valeur prise en compte
                             'lien_url' => $data['lien_url'] ?? null,
                             'objet_type' => 'marin',

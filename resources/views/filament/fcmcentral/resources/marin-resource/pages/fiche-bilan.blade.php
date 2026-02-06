@@ -969,7 +969,7 @@
                                     <div class="text-right ml-4">
                                         @if($note->redacteur)
                                             <div class="text-xs text-gray-600 mb-1">
-                                                {{ $note->redacteur->grade?->libelle_court ?? '' }} {{ $note->redacteur->nom ?? 'Inconnu' }}
+                                                {{ $note->redacteur ?? 'Inconnu' }}
                                             </div>
                                         @endif
                                         @if($note->valide_bcf)

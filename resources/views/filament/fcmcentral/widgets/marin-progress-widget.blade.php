@@ -6,9 +6,9 @@
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white">
                     Progression du parcours
                 </h3>
-                <span class="text-sm text-gray-500 dark:text-gray-400">
+                {{-- <span class="text-sm text-gray-500 dark:text-gray-400">
                     {{ $this->getProgressData()['completed'] }}/{{ $this->getProgressData()['total'] }} heures
-                </span>
+                </span> --}}
             </div>
             
             @php
@@ -17,10 +17,10 @@
             @endphp
             
             <div class="space-y-2">
-                <div class="flex justify-between text-sm">
+                {{-- <div class="flex justify-between text-sm">
                     <span class="text-gray-600 dark:text-gray-400">Heures validées</span>
                     <span class="font-medium text-gray-900 dark:text-white">{{ $progress }}%</span>
-                </div>
+                </div> --}}
                 
                 <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
                     <div class="bg-primary-600 h-4 rounded-full transition-all duration-500 ease-out" 
@@ -28,10 +28,10 @@
                     </div>
                 </div>
                 
-                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                {{-- <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>{{ $progressData['completed'] }} heures validées</span>
                     <span>{{ $progressData['total'] - $progressData['completed'] }} heures restantes</span>
-                </div>
+                </div> --}}
             </div>
             {{-- @if($details)
             <div class="mt-4 space-y-2 text-xs text-gray-500 dark:text-gray-400 border-t pt-3">
