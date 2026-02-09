@@ -513,35 +513,35 @@ class MarinResource extends Resource
                                             ]),
                             
                                         // ✅ HISTORIQUE
-                                        Forms\Components\Placeholder::make('historique')
-                                            ->label('Historique des gels')
-                                            ->content(function ($record) {
-                                                $gels = $record->etats()->orderBy('date_debut', 'desc')->get();
+                                        // Forms\Components\Placeholder::make('historique')
+                                        //     ->label('Historique des gels')
+                                        //     ->content(function ($record) {
+                                        //         $gels = $record->etats()->orderBy('date_debut', 'desc')->get();
                                                 
-                                                if ($gels->isEmpty()) {
-                                                    return '✅ Aucun gel enregistré';
-                                                }
+                                        //         if ($gels->isEmpty()) {
+                                        //             return '✅ Aucun gel enregistré';
+                                        //         }
                             
-                                                $html = '<div class="space-y-2 mt-2">';
-                                                foreach ($gels as $gel) {
-                                                    $actif = $gel->date_fin ? '⚫ Terminé' : '🔴 En cours';
-                                                    $debut = $gel->date_debut?->format('d/m/Y') ?? '-';
-                                                    $fin = $gel->date_fin?->format('d/m/Y') ?? '-';
-                                                    $type = $gel->typeEtat?->libelle_court ?? 'Gel';
+                                        //         $html = '<div class="space-y-2 mt-2">';
+                                        //         foreach ($gels as $gel) {
+                                        //             $actif = $gel->date_fin ? '⚫ Terminé' : '🔴 En cours';
+                                        //             $debut = $gel->date_debut?->format('d/m/Y') ?? '-';
+                                        //             $fin = $gel->date_fin?->format('d/m/Y') ?? '-';
+                                        //             $type = $gel->typeEtat?->libelle_court ?? 'Gel';
                                                     
-                                                    $html .= "<div class='p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm'>";
-                                                    $html .= "<strong>{$actif}</strong> {$type}<br>";
-                                                    $html .= "Du <strong>{$debut}</strong> au {$fin}";
-                                                    if ($gel->libelle) {
-                                                        $html .= "<br><span class='text-gray-600 dark:text-gray-400 text-xs italic'>{$gel->libelle}</span>";
-                                                    }
-                                                    $html .= "</div>";
-                                                }
-                                                $html .= '</div>';
+                                        //             $html .= "<div class='p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm'>";
+                                        //             $html .= "<strong>{$actif}</strong> {$type}<br>";
+                                        //             $html .= "Du <strong>{$debut}</strong> au {$fin}";
+                                        //             if ($gel->libelle) {
+                                        //                 $html .= "<br><span class='text-gray-600 dark:text-gray-400 text-xs italic'>{$gel->libelle}</span>";
+                                        //             }
+                                        //             $html .= "</div>";
+                                        //         }
+                                        //         $html .= '</div>';
                             
-                                                return new \Illuminate\Support\HtmlString($html);
-                                            })
-                                            ->columnSpanFull(),
+                                        //         return new \Illuminate\Support\HtmlString($html);
+                                        //     })
+                                        //     ->columnSpanFull(),
                                     ])
                                     ->columns(1)
                                     ->collapsible(),
