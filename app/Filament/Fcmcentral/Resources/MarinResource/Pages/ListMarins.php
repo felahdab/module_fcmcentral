@@ -27,6 +27,6 @@ class ListMarins extends ListRecords
 
     public static function canAccess(array $parameters = []): bool
     {
-        return auth()->user()?->can('fcmcentral::marin.index');
+        return auth()->user()?->can('fcmcentral::marin.index') ?? false;
     }
 }
