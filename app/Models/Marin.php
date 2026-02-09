@@ -691,6 +691,7 @@ class Marin extends BaseMarin
 
 
     // ETAT
+    // A SUPPRIMER
     public function getDernierTypeEtat()
     {
         //return $this->marin?->complementsFcm?->etats()->latest('date_debut')->first();
@@ -709,11 +710,6 @@ class Marin extends BaseMarin
         return $this->getDernierTypeEtat()?->typeEtat?->id;
     }
 
-    public function etats()
-    {
-        return $this->hasMany(Etat::class, 'rh_marin_id', 'id');
-    }
-
     public function historiserEtat(string $codeEtat, ?\Carbon\Carbon $dateDebut = null, ?\Carbon\Carbon $dateFin = null ):void
     {
         $typeEtat = TypeEtat::where('code', $codeEtat)->firstOrFail();
@@ -725,6 +721,34 @@ class Marin extends BaseMarin
             'date_fin' => $dateFin,
         ]);
     }
+
+    // FIN A SUPPRIMER
+
+
+    public function etats()
+    {
+        return $this->hasMany(Etat::class, 'rh_marin_id', 'id');
+    }
+
+    public function gelActif()
+    {
+        // Gel actif = date_fin null
+        return $this->etats()->whereNull('date_fin')->first();
+    }
+
+    public function estGele(): bool
+    {
+        // Vérifie directement dans la table etats
+        return $this->etats()->whereNull('date_fin')->exists();
+    }
+
+    public function historiqueGels()
+    {
+        return $this->etats()->orderBy('date_debut', 'desc')->get();
+    }
+
+
+    
 
     public function getEnGelAttribute(): bool
     {
