@@ -91,10 +91,14 @@ class MarinsSupervisesWidget extends BaseWidget
                     //         ? \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(['marinId' => $record->id])
                     //         : '#'
                     // )
-                    ->url(fn ($record) =>
-                        route('filament.FCM Central.resources.marins.livret-de-fcm',
-                        ['record' =>$record])
+                    
+                     ->url(fn (Marin $record): string =>
+                        $this->hasParcours($record)
+                            ? \Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight::getUrl(['record' => $record->id])
+                            : '#'
                     )
+
+                    
                     //->openUrlInNewTab()
                     ->visible(fn (Marin $record) => $this->hasParcours($record)),
 
