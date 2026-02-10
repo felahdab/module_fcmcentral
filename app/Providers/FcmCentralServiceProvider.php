@@ -70,11 +70,6 @@ class FcmCentralServiceProvider extends ServiceProvider
         $this->registerDocumentation();
         $this->registerFilamentAssets();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
-
-        //Rajout pour les PDF
-        $this->publishes([
-            module_path($this->moduleName, 'resources/pdfs') => public_path('fcmcentral/pdfs'),
-        ],'fcmcentral-pdfs');
     }
 
     /**
@@ -210,10 +205,10 @@ class FcmCentralServiceProvider extends ServiceProvider
     {
         $this->publishes([
              module_path($this->moduleName, 'resources/docs') => public_path('docs/FCM Central')
-         ], 'fcmcentral-docs'
-        // module_path($this->moduleName, 'resources/docs') => public_path('fcmcentral/docs')
-        //  ], 'fcmcentral-docs'
-        );
+         ], 'doc');
+         $this->publishes([
+            module_path($this->moduleName, 'resources/pdfs') => public_path('pdfs/fcmcentral'),
+        ],'doc');
     }
     
     /**

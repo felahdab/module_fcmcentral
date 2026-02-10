@@ -26,6 +26,6 @@ class DocumentationMentorWidget extends Widget
 
     public function getPdfUrl(): string
     {
-        return asset('fcmcentral/pdfs/LdM_DEASM.pdf');
+        return asset('pdfs/fcmcentral/LdM_DEASM.pdf');
     }
 }
