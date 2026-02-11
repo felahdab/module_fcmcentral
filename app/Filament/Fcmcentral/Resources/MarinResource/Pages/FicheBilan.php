@@ -93,6 +93,12 @@ class FicheBilan extends ViewRecord
         return auth()->user()->can("fcmcentral::note.creer");
     }
 
+    public function canViewNotes(): bool
+    {
+        return auth()->user()->can("fcmcentral::note.voir");
+    }
+
+
 
 
     public function canCreateEtat(): bool
@@ -222,11 +228,11 @@ class FicheBilan extends ViewRecord
     
     
 
-    #[Computed]
+   #[Computed]
     public function notes()
     {
         // ✅ SEULS BCF/FPS/BORD/ADMIN voient les notes
-        if (!$this->canCreateNote()) {
+        if (!$this->canViewNotes()) {
             return collect([]);
         }
 
@@ -243,6 +249,7 @@ class FicheBilan extends ViewRecord
 
         return $query->get();
     }
+
 
     
     public function ajouterEtat()
