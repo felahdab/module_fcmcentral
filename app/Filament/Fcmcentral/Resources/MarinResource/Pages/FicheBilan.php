@@ -237,7 +237,7 @@ class FicheBilan extends ViewRecord
         }
 
         $query = Note::where('rh_marin_id', $this->marinId)
-            ->with(['typeNote'])
+            ->with(['typeNote', 'redacteur'])
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc');
 
