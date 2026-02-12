@@ -15,6 +15,7 @@ class MonLivretDeFcm extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
+    protected static ?string $navigationLabel = "Mon livret FCM";
 
     public Marin $marin;
     public ?int $marinId = null;

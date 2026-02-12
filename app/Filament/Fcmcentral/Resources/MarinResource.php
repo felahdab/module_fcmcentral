@@ -225,104 +225,130 @@ class MarinResource extends Resource
                 // 🎯 FCM ACTIF (Oui/Non)
                 // Colonne FCM avec gestion du typeEtat
                 Tables\Columns\IconColumn::make('fcm_actif')
-                    ->label('FCM')
-                    ->boolean()
-                    ->state(fn ($record) => $record->suivi_en_fcm && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN')
-                    ->trueIcon('heroicon-s-check-circle')
-                    ->falseIcon(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'heroicon-c-shield-check' : 'heroicon-o-x-circle')
-                    ->trueColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'success')
-                    ->falseColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'danger')
-                    ->hidden(fn ($livewire): bool => method_exists($livewire, 'isFilterEnFcmActive') && $livewire->isFilterEnFcmActive())
-                    ->action(
-                        Tables\Actions\Action::make('toggle_fcm')
-                            ->modalHeading(fn ($record) => $record->suivi_en_fcm ? 'Marin en FCM' : 'Activer FCM')
-                            ->modalDescription(fn ($record) => $record->fullNameAndGrade)
-                            ->requiresConfirmation()
-                            ->form(function ($record) {
-                                if ($record->suivi_en_fcm && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN') {
-                                }
-                                
-                                return [
-                                    Forms\Components\Select::make('cohorte_id')
-                                        ->label("Choisir la cohorte")
-                                        ->visible(fn() => auth()->user()->can('fcmcentral::attribuer.cohorte'))
-                                        ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
-                                    Forms\Components\Select::make('mentor_id')
-                                        ->label("Choisir un mentor")
-                                        ->visible(fn() => auth()->user()->can('fcmcentral::attribuer.mentor'))
-                                        ->options(
-                                            Marin::query()
-                                                ->whereNull('deleted_at')
-                                                ->orderBy('nom')
-                                                ->orderBy('prenom')
-                                                ->get()
-                                                ->mapWithKeys(function ($marin) {
-                                                    $fullName = trim($marin->prenom . ' ' . $marin->nom);
-                                                    $grade = $marin->grade?->libelle_court ?? '';
-                                                    $label = $grade ? $grade . ' ' . $fullName : $fullName;
-                                                    return [$marin->uuid => $label];
-                                                })
-                                        )
-                                        ->searchable(),
-                                    Forms\Components\Select::make('parcours_id')
-                                        ->label('Choisir un Parcours')
-                                        ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
-                                        ->searchable()
-                                        ->visible(fn() => auth()->user()->can('fcmcentral::attribuer.parcours'))
-                                ];
-                            })
-                            ->action(function ($record, $data) {
-                                
-                                if ($record->estEnFcm() && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN') {
-                                    \Filament\Notifications\Notification::make()
-                                        ->title('Marin déjà en FCM')
-                                        ->warning()
-                                        ->send();
-                                    return;
-                                }
-                                
-                                // Activation FCM + historisation état FCM_sed
+                ->label('FCM')
+                ->boolean()
+                ->state(fn ($record) => $record->suivi_en_fcm && $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN')
+                ->trueIcon('heroicon-s-check-circle')
+                ->falseIcon(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'heroicon-c-shield-check' : 'heroicon-o-x-circle')
+                ->trueColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'success')
+                ->falseColor(fn ($record) => $record->complementsFcm?->getJalonFcmLibelle() === 'FIN' ? 'gray' : 'danger')
+                ->hidden(fn ($livewire): bool => method_exists($livewire, 'isFilterEnFcmActive') && $livewire->isFilterEnFcmActive())
+                ->action(
+                    Tables\Actions\Action::make('toggle_fcm')
+                        ->modalHeading(fn ($record) => $record->suivi_en_fcm ? 'Marin en FCM' : 'Activer FCM')
+                        ->modalDescription(fn ($record) => $record->fullNameAndGrade)
+                        ->requiresConfirmation()
+                        ->form(function ($record) {
+                            // Si admin et déjà en FCM, pas de modal, action directe
+                            if (
+                                auth()->user()->can('fcmcentral::fcm.admin') &&
+                                $record->suivi_en_fcm &&
+                                $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN'
+                            ) {
+                                return [];
+                            }
+                            // Sinon, modal classique
+                            return [
+                                Forms\Components\Select::make('cohorte_id')
+                                    ->label("Choisir la cohorte")
+                                    ->visible(fn() => auth()->user()->can('fcmcentral::attribuer.cohorte'))
+                                    ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
+                                Forms\Components\Select::make('mentor_id')
+                                    ->label("Choisir un mentor")
+                                    ->visible(fn() => auth()->user()->can('fcmcentral::attribuer.mentor'))
+                                    ->options(
+                                        Marin::query()
+                                            ->whereNull('deleted_at')
+                                            ->orderBy('nom')
+                                            ->orderBy('prenom')
+                                            ->get()
+                                            ->mapWithKeys(function ($marin) {
+                                                $fullName = trim($marin->prenom . ' ' . $marin->nom);
+                                                $grade = $marin->grade?->libelle_court ?? '';
+                                                $label = $grade ? $grade . ' ' . $fullName : $fullName;
+                                                return [$marin->uuid => $label];
+                                            })
+                                    )
+                                    ->searchable(),
+                                Forms\Components\Select::make('parcours_id')
+                                    ->label('Choisir un Parcours')
+                                    ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))
+                                    ->searchable()
+                                    ->visible(fn() => auth()->user()->can('fcmcentral::attribuer.parcours'))
+                            ];
+                        })
+                        ->action(function ($record, $data) {
+                            // Si admin et déjà en FCM, on désactive FCM sans modal
+                            if (
+                                auth()->user()->can('fcmcentral::fcm.admin') &&
+                                $record->estEnFcm() &&
+                                $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN'
+                            ) {
                                 event(new UserGeneratedEvent(
-                                    UserGeneratedEventTypes::MARIN_EN_FCM,
+                                    UserGeneratedEventTypes::MARIN_PAS_FCM,
                                     auth()->user()->uuid,
                                     ObjectClasses::MARIN,
                                     $record->uuid,
-                                    ['statut_fcm' => 'En validation']
+                                    []
                                 ));
-                                // Attribution cohorte/mentor/parcours
-                                if (!empty($data['cohorte_id'])) {
-                                    event(new UserGeneratedEvent(
-                                        UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
-                                        auth()->user()->uuid,
-                                        ObjectClasses::MARIN,
-                                        $record->uuid,
-                                        ["cohorte" => $data["cohorte_id"]]
-                                    ));
-                                }
-                                if (!empty($data['mentor_id'])) {
-                                    event(new UserGeneratedEvent(
-                                        UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
-                                        auth()->user()->uuid,
-                                        ObjectClasses::MARIN,
-                                        $record->uuid,
-                                        ["mentor" => $data["mentor_id"]]
-                                    ));
-                                }
-                                if (!empty($data['parcours_id'])) {
-                                    event(new UserGeneratedEvent(
-                                        UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
-                                        auth()->user()->uuid,
-                                        ObjectClasses::MARIN,
-                                        $record->uuid,
-                                        ["parcours" => $data["parcours_id"]]
-                                    ));
-                                }
-                            })
-                            ->visible(fn($record) =>
-                                $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN' &&
-                                auth()->user()->canAny(["fcmcentral::attribuer.cohorte", "fcmcentral::attribuer.mentor", "fcmcentral::attribuer.parcours"])
+                                \Filament\Notifications\Notification::make()
+                                    ->title('FCM désactivé')
+                                    ->success()
+                                    ->send();
+                                return;
+                            }
+
+                            // Sinon, activation FCM + attribution
+                            event(new UserGeneratedEvent(
+                                UserGeneratedEventTypes::MARIN_EN_FCM,
+                                auth()->user()->uuid,
+                                ObjectClasses::MARIN,
+                                $record->uuid,
+                                ['statut_fcm' => 'En validation']
+                            ));
+
+                            if (!empty($data['cohorte_id'])) {
+                                event(new UserGeneratedEvent(
+                                    UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
+                                    auth()->user()->uuid,
+                                    ObjectClasses::MARIN,
+                                    $record->uuid,
+                                    ["cohorte" => $data["cohorte_id"]]
+                                ));
+                            }
+                            if (!empty($data['mentor_id'])) {
+                                event(new UserGeneratedEvent(
+                                    UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
+                                    auth()->user()->uuid,
+                                    ObjectClasses::MARIN,
+                                    $record->uuid,
+                                    ["mentor" => $data["mentor_id"]]
+                                ));
+                            }
+                            if (!empty($data['parcours_id'])) {
+                                event(new UserGeneratedEvent(
+                                    UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+                                    auth()->user()->uuid,
+                                    ObjectClasses::MARIN,
+                                    $record->uuid,
+                                    ["parcours" => $data["parcours_id"]]
+                                ));
+                            }
+                        })
+                        ->visible(fn($record) =>
+                            $record->complementsFcm?->getJalonFcmLibelle() !== 'FIN' &&
+                            (
+                                auth()->user()->can('fcmcentral::fcm.admin') ||
+                                auth()->user()->canAny([
+                                    "fcmcentral::attribuer.cohorte",
+                                    "fcmcentral::attribuer.mentor",
+                                    "fcmcentral::attribuer.parcours"
+                                ])
                             )
-                    ),
+                        )
+                ),
+
+
 
                 // Colonne Type Etat FCM dynamique
                 Tables\Columns\TextColumn::make('type_jalon_fcm')
@@ -363,58 +389,43 @@ class MarinResource extends Resource
                                 Forms\Components\Section::make('Jalons FCM')
                                     ->schema([
                                         // DATE SÉDIMENTATION
-                                        Forms\Components\Toggle::make('modifier_date_sedimentation')
-                                            ->label('Modifier la date de sédimentation')
-                                            ->default(fn ($record) => !empty($record->complementsFcm?->date_sedimentation))
-                                            ->live()
-                                            ->afterStateUpdated(function ($state, Forms\Set $set, $record) {
-                                                if (!$state) {
-                                                    $set('date_sedimentation', null);
-                                                } else {
-                                                    $set('date_sedimentation', $record->complementsFcm?->date_sedimentation ?? now());
-                                                }
-                                            }),
-                            
+                                      
                                         Forms\Components\DatePicker::make('date_sedimentation')
                                             ->label('Date de début d\'entrée en FCM')
-                                            ->visible(fn (Forms\Get $get) => $get('modifier_date_sedimentation'))
-                                            ->default(fn ($record) => $record->complementsFcm?->date_sedimentation),
+                                            
+                                            ->default(fn ($record) => $record->complementsFcm?->date_sedimentation)
+                                            ->required(),
                             
                                         // DATE FCM
-                                        Forms\Components\Toggle::make('modifier_date_fcm')
-                                            ->label('Modifier la date de fin de sédimentation')
-                                            ->default(fn ($record) => !empty($record->complementsFcm?->date_fcm))
-                                            ->live()
-                                            ->afterStateUpdated(function ($state, Forms\Set $set, $record) {
-                                                if (!$state) {
-                                                    $set('date_fcm', null);
-                                                } else {
-                                                    $set('date_fcm', $record->complementsFcm?->date_fcm ?? now());
-                                                }
-                                            }),
-                            
                                         Forms\Components\DatePicker::make('date_fcm')
-                                            ->label('Date de fin de sédimentation')
-                                            ->visible(fn (Forms\Get $get) => $get('modifier_date_fcm'))
-                                            ->default(fn ($record) => $record->complementsFcm?->date_fcm),
-                            
-                                        // DATE COMPÉTENCE
-                                        Forms\Components\Toggle::make('modifier_date_competence')
-                                            ->label('Modifier la date de vert compétence')
-                                            ->default(fn ($record) => !empty($record->complementsFcm?->date_competence))
-                                            ->live()
-                                            ->afterStateUpdated(function ($state, Forms\Set $set, $record) {
-                                                if (!$state) {
-                                                    $set('date_competence', null);
-                                                } else {
-                                                    $set('date_competence', $record->complementsFcm?->date_competence ?? now());
-                                                }
-                                            }),
-                            
-                                        Forms\Components\DatePicker::make('date_competence')
-                                            ->label('Date de vert compétence')
-                                            ->visible(fn (Forms\Get $get) => $get('modifier_date_competence'))
-                                            ->default(fn ($record) => $record->complementsFcm?->date_competence),
+                                        ->label('Date de fin de sédimentation')
+                                        ->default(fn ($record) => $record->complementsFcm?->date_fcm),
+
+                                    Forms\Components\Checkbox::make('date_fcm_non_renseignee')
+                                        ->label('Date non renseignée')
+                                        ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                            if ($state) {
+                                                $set('date_fcm', null);
+                                            }
+                                        }),
+
+
+                                    Forms\Components\DatePicker::make('date_competence')
+                                        ->label('Date de vert compétence')
+                                        ->default(fn ($record) => $record->complementsFcm?->date_competence),
+
+                                    Forms\Components\Checkbox::make('date_competence_non_renseignee')
+                                        ->label('Date non renseignée')
+                                        ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                            if ($state) {
+                                                $set('date_competence', null);
+                                            }
+                                        }),
+
+
+
+
+                                        
                                     ])
                                     ->columns(1),
                             
@@ -425,14 +436,14 @@ class MarinResource extends Resource
                                         if ($gelEnCours) {
                                             $debut = $gelEnCours->date_debut->format('d/m/Y');
                                             $type = $gelEnCours->typeEtat?->libelle_court ?? '';
-                                            return "🔴 **Marin en gel** {$type} depuis le {$debut}";
+                                            return "🔴 **Mise en gel**  depuis le {$debut}";
                                         }
-                                        return '🟢 Marin non gelé';
+                                        return '🟢 Marin en FCM';
                                     })
                                     ->schema([
                                         // ✅ TOGGLE POUR CRÉER/CLÔTURER GEL
                                         Forms\Components\Toggle::make('action_gel')
-                                            ->label(fn ($record) => $record->gelActif() ? 'Clôturer le gel en cours' : 'Créer un nouveau gel')
+                                            ->label(fn ($record) => $record->gelActif() ? 'Fin de la mise en gel' : 'Mise en gel')
                                             ->live()
                                             ->afterStateUpdated(function ($state, Forms\Set $set, $record) {
                                                 if ($state) {
@@ -480,12 +491,12 @@ class MarinResource extends Resource
                                                     ->createOptionUsing(fn (array $data) => \Modules\FcmCentral\Models\TypeEtat::create($data)->id),
                             
                                                 Forms\Components\DatePicker::make('date_debut_gel')
-                                                    ->label('Date de début du gel')
+                                                    ->label('Date de début de la mise en gel')
                                                     ->required()
                                                     ->default(now()),
                             
                                                 Forms\Components\Textarea::make('motif_gel')
-                                                    ->label('Motif du gel')
+                                                    ->label('Motif de la mise en gel')
                                                     ->rows(3),
                                             ]),
                             
@@ -503,11 +514,11 @@ class MarinResource extends Resource
                                                         $type = $gel->typeEtat?->libelle_court ?? 'Gel';
                                                         $motif = $gel->libelle ? " - {$gel->libelle}" : '';
                                                         
-                                                        return "**{$type}** depuis le {$debut}{$motif}";
+                                                        return "**Mise en gel** depuis le {$debut}{$motif}";
                                                     }),
                             
                                                 Forms\Components\DatePicker::make('date_fin_gel')
-                                                    ->label('Date de fin du gel')
+                                                    ->label('Date de fin de la mise en gel')
                                                     ->required()
                                                     ->default(now()),
                                             ]),
@@ -549,95 +560,80 @@ class MarinResource extends Resource
                             ->action(function ($record, array $data) {
                                
                                 // DATE SÉDIMENTATION
-                                if (array_key_exists('modifier_date_sedimentation', $data)) {
-                                    if ($data['modifier_date_sedimentation']) {
-                                        // Toggle ON : envoyer la date
-                                        $dateValue = $data['date_sedimentation'] ?? null;
-                                    } else {
-                                        // Toggle OFF : envoyer null pour effacer
-                                        $dateValue = null;
-                                    }
+                                if (($record->complementsFcm?->date_sedimentation ?? null) != ($data['date_sedimentation'] ?? null)) {
                                     
+
                                     event(new UserGeneratedEvent(
                                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                                         auth()->user()->uuid,
                                         ObjectClasses::MARIN,
                                         $record->uuid,
-                                        ["date_sedimentation" => $dateValue]
+                                        ["date_sedimentation" => $data['date_sedimentation']]
                                     ));
                                 }
                                 
                                 // DATE FCM
-                                if (array_key_exists('modifier_date_fcm', $data)) {
-                                    if ($data['modifier_date_fcm']) {
-                                        // Toggle ON : envoyer la date
-                                        $dateValue = $data['date_fcm'] ?? null;
-                                    } else {
-                                        // Toggle OFF : envoyer null pour effacer
-                                        $dateValue = null;
-                                    }
-                                    
+                                if (($record->complementsFcm?->date_fcm?? null) != ($data['date_fcm'] ?? null)) {
+
+
                                     event(new UserGeneratedEvent(
                                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                                         auth()->user()->uuid,
                                         ObjectClasses::MARIN,
                                         $record->uuid,
-                                        ["date_fcm" => $dateValue]
+                                        ["date_fcm" => $data['date_fcm']]
                                     ));
                                 }
                                 
                                 // DATE COMPÉTENCE
-                                if (array_key_exists('modifier_date_competence', $data)) {
-                                    if ($data['modifier_date_competence']) {
-                                        // Toggle ON : envoyer la date
-                                        $dateValue = $data['date_competence'] ?? null;
-                                    } else {
-                                        // Toggle OFF : envoyer null pour effacer
-                                        $dateValue = null;
-                                    }
+                              if (($record->complementsFcm?->date_competence?? null) != ($data['date_competence'] ?? null)) {
+
                                     
                                     event(new UserGeneratedEvent(
                                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                                         auth()->user()->uuid,
                                         ObjectClasses::MARIN,
                                         $record->uuid,
-                                        ["date_competence" => $dateValue]
+                                        ["date_competence" => $data['date_competence']]
                                     ));
                                 }
 
 
                             
                                 // ✅ GESTION DU GEL (seulement si toggle activé)
-                                if (!empty($data['action_gel'])) {
-                                    $gelEnCours = $record->gelActif();
-                            
-                                    // CRÉER UN NOUVEAU GEL
-                                    if (!$gelEnCours && !empty($data['date_debut_gel']) && !empty($data['type_gel_id'])) {
-                                        $record->etats()->create([
-                                            'type_etat_id' => $data['type_gel_id'],
-                                            'libelle' => $data['motif_gel'] ?? '',
-                                            'date_debut' => $data['date_debut_gel'],
-                                            'date_fin' => null,
-                                        ]);
-                                        
-                                        \Filament\Notifications\Notification::make()
-                                            ->title('✅ Gel créé')
-                                            ->success()
-                                            ->send();
+                                if (!empty($data['date_debut_gel'])) {
+                                    $typeGel = null;
+                                    $libelleCourt = null;
+                                    if (!empty($data['type_gel_id'])) {
+                                        $typeGel = \Modules\FcmCentral\Models\TypeEtat::find($data['type_gel_id']);
+                                        $libelleCourt = $typeGel?->libelle_court;
                                     }
-                                    
-                                    // CLÔTURER LE GEL EN COURS
-                                    elseif ($gelEnCours && !empty($data['date_fin_gel'])) {
-                                        $gelEnCours->update([
-                                            'date_fin' => $data['date_fin_gel'],
-                                        ]);
-                                        
-                                        \Filament\Notifications\Notification::make()
-                                            ->title('✅ Gel clôturé')
-                                            ->success()
-                                            ->send();
-                                    }
+
+                                    event(new UserGeneratedEvent(
+                                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+                                        auth()->user()->uuid,
+                                        ObjectClasses::MARIN,
+                                        $record->uuid,
+                                        [
+                                            'date_debut_gel' => $data['date_debut_gel'],
+                                            'type_gel_id' => $data['type_gel_id'] ?? null,
+                                            'type_gel_libelle_court' => $libelleCourt,
+                                            'motif_gel' => $data['motif_gel'] ?? '',
+                                        ]
+                                    ));
                                 }
+                                if (!empty($data['date_fin_gel'])) {
+                                    event(new UserGeneratedEvent(
+                                        UserGeneratedEventTypes::DEFINIR_JALON_FCM,
+                                        auth()->user()->uuid,
+                                        ObjectClasses::MARIN,
+                                        $record->uuid,
+                                        [
+                                            'date_fin_gel' => $data['date_fin_gel'],
+                                        ]
+                                    ));
+                                }
+                                
                             
                                 
                             })

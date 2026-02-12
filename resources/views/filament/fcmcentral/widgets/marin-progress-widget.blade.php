@@ -17,10 +17,10 @@
             @endphp
             
             <div class="space-y-2">
-                {{-- <div class="flex justify-between text-sm">
+               <div class="flex justify-between text-sm">
                     <span class="text-gray-600 dark:text-gray-400">Heures validées</span>
                     <span class="font-medium text-gray-900 dark:text-white">{{ $progress }}%</span>
-                </div> --}}
+                </div>
                 
                 <div class="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
                     <div class="bg-primary-600 h-4 rounded-full transition-all duration-500 ease-out" 

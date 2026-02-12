@@ -67,6 +67,30 @@ class DefinirJalonFcmListener
                 }
             }
 
+            // ✅ GESTION DU GEL
+            if (array_key_exists('date_debut_gel', $data) && $data['date_debut_gel']) {
+                // Créer un nouveau gel
+                $marin->etats()->create([
+                    'type_etat_id' => $data['type_gel_id'] ?? null,
+                    'libelle' => $data['motif_gel'] ?? '',
+                    'date_debut' => Carbon::parse($data['date_debut_gel']),
+                    'date_fin' => null,
+                ]);
+                Log::info('Nouveau gel créé', ['marinUuid' => $marin->uuid]);
+            }
+
+            if (array_key_exists('date_fin_gel', $data) && $data['date_fin_gel']) {
+                // Clôturer le gel actif
+                $gelActif = $marin->gelActif();
+                if ($gelActif) {
+                    $gelActif->update([
+                        'date_fin' => Carbon::parse($data['date_fin_gel']),
+                    ]);
+                    Log::info('Gel clôturé', ['marinUuid' => $marin->uuid]);
+                }
+            }
+
+
             $fcmMarin->save();
 
             $notification = UserGeneratedEventNotifications::getMess(
