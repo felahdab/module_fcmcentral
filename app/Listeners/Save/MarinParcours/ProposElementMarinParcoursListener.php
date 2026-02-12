@@ -96,6 +96,7 @@ class ProposElementMarinParcoursListener
         $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
         $comment = preg_replace('/\s+/', ' ', $comment);
         return addslashes(trim($comment));
+        //return trim($comment);
     }
 
     protected function dispatchProposition(array &$parcoursMarin, string $type, string $uuid, string $displayName): bool
