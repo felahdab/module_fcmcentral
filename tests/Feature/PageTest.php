@@ -76,16 +76,16 @@ it('affiche la page création de domaines', function() {
         ->assertSuccessful();
 });
 
-it('affiche la page liste des parcours type', function() {
+it('affiche PAS la page liste des parcours type', function() {
     $this->actingAs($this->admin)
         ->get(Resources\ParcoursTypeResource::getUrl('index'))
-        ->assertSuccessful();
+        ->assertStatus(403);
 });
 
-it('affiche la page création de parcours type', function() {
+it('affiche PAS la page création de parcours type', function() {
     $this->actingAs($this->admin)
         ->get(Resources\ParcoursTypeResource::getUrl('create'))
-        ->assertSuccessful();
+        ->assertStatus(403);
 });
 
 it('affiche la page liste des cohortes', function() {
@@ -112,16 +112,16 @@ it('affiche la page création de note', function() {
         ->assertSuccessful();
 });
 
-it('affiche la page liste des types de notes', function() {
+it('affiche PAS la page liste des types de notes', function() {
     $this->actingAs($this->admin)
         ->get(Resources\TypeNoteResource::getUrl('index'))
-        ->assertSuccessful();
+        ->assertStatus(403);
 });
 
-it('affiche la page création de type de note', function() {
+it('affiche PAS la page création de type de note', function() {
     $this->actingAs($this->admin)
         ->get(Resources\TypeNoteResource::getUrl('create'))
-        ->assertSuccessful();
+        ->assertStatus(403);
 });
 
 it('affiche la page liste des etats', function() {
@@ -136,16 +136,16 @@ it('affiche la page création de etat', function() {
         ->assertSuccessful();
 });
 
-it('affiche la page liste des types etats', function() {
+it('affiche PAS la page liste des types etats', function() {
     $this->actingAs($this->admin)
         ->get(Resources\TypeGelResource::getUrl('index'))
-        ->assertSuccessful();
+        ->assertStatus(403);
 });
 
-it('affiche la page création de type etat', function() {
+it('affiche PAS la page création de type etat', function() {
     $this->actingAs($this->admin)
         ->get(Resources\TypeGelResource::getUrl('create'))
-        ->assertSuccessful();
+        ->assertStatus(403);
 });
 
 it('affiche la page liste des parcours figes', function() {

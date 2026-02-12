@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor;
 
 use Filament\Widgets\Widget;
 use Modules\FcmCentral\Models\Marin;
