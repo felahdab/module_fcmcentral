@@ -242,10 +242,10 @@ class FicheBilan extends ViewRecord
             ->orderBy('created_at', 'desc');
 
         // ✅ FILTRAGE SELON LES PERMISSIONS
-        if (!$this->canValidateBCF()) {
-            // Non-BCF ne voient que les notes validées
-            $query->where('valide_bcf', true);
-        }
+        // if (!$this->canValidateBCF()) {
+        //     // Non-BCF ne voient que les notes validées
+        //     $query->where('valide_bcf', true);
+        // }
 
         return $query->get();
     }

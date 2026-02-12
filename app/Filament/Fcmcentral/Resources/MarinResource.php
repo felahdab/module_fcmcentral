@@ -1003,7 +1003,7 @@ class MarinResource extends Resource
                             'libelle' => $data['libelle'],
                             'rh_marin_id' => $record->id,
                             //'marin_id' => $record->complementsFcm->id,
-                            // 'type_note_id' => $data['type_note_id'] ?? null, // Champ commenté
+                            'type_note_id' => $data['type_note_id'] ?? null, // Champ commenté
                             'date' => $data['date'] ?? now(),
                             //'redacteur_id' => $redacteurId, // Utilisateur connecté
                             'redacteur' => $redacteur,
