@@ -1,3 +1,33 @@
+## 0.1.1 (February 13, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.1.0 –> 0.1.1
+- Modification de l'émission de l'évènement de mise en gel.
+- Correction namespace du widget de documentation. Ajustement des tests: les pages de gestion des types de note, d'état et de parcours sont bloquées.
+- Implements art #685746 : Modifications diverses sur les IHM et les permissions
+- Ajustement de la publication de la documentation et du PDF destiné aux mentors + widget donnant le lien vers le PDF en question.
+- Implements art #685746 modification bcf 8
+- Implements artifact #690856: la page ListMarins ne génère plus d'exception quand on lui demande si canAccess avec un utilisateur invité. On introduit un test élémentaire pour éviter la régression.
+- Nettoyage des tests. Retrait du fichier temporaire utilisé pour la sauvegarde et la restauration du parcours.
+- En prévision d'une future refactorisation. Spécialisation des 2 méthodes de chargement: from_file ou from_content.
+- La FicheBilan ne doit pas faire référence aux id qui ont disparu.
+- Avec la nouvelle version sérialisée du parcours, on peut donc vérifier l'existence du parcours_type, et si besoin le recréér en base. Et on n'a plus besoin de chercher le savoir_faire_type par son code, mais on peut utiliser l'UUID.
+- Il faut que la version sérialisé du parcours soit totalement auto porteuse. Donc le parcours_type doit être intégralement sérialisé, et pas seulement son UUID. Sinon, il faut aller chercher la définition du parcours type ailleurs. En en l'occurence, il n'y a pas d'ailleurs.
+- On retire le seeder des UUID. Les données qui sont déjà dans la base de l'instance de production pourront être facilement sauvegardées, donc les objets auxquels on a rajouté une colonne UUID disposeront déjà d'un UUID généré par le serveur de BDD.
+- Modification de la migration: au rajoute de la colonne UUID, on définit la valeur par défaut pour laisser le serveur de base de données nous générer automatiquement des UUID.
+- Implements art #685517 : passer en full screen le panel FCM Central
+- Implements art #680367 : travaux sur modification Parcours Rajout UUID  manquants (faire un migrate) Creation Seeder pour avoir des UUID Fixes Correction  Tests Suppresion migration pour creer table documentations (a supprimer dans la  PROD PhpmyAdmin)
+- Implements artifact #682868: modifie le tag de publication de la documentation pour correspondre à la commande skeletor:publish-module-documentation
+- Implements artifact #678635 Les widgets ne provoquent plus d'exception quand l utilisateur n est pas un marin ou n'a aucune autorisation. Meme chose avec la fiche bilan.
+- Implements artifact #664288: introduit 2 commandes artisan permettant respectivement de sauvegarder la définition d'un parcours dans un fichier json, et de charger la définition d'un parcours depuis un fichier JSON. 2 tests unitaires sont inclus dans le commit.
+- Implements art #677000 Correction Bug  Serialisation Parcours Marin - Retouche
+- Implements art #677000 Correction Bug  Serialisation Parcours Marin
+- Poursuite du nettoyage des vérifications de permissions dans le module. Nettoyage des tests verbeux.
+- Implements artifact #458991 Prends en compte les informations de NID et de grade renvoyés par la recherche Annudef lors de la création de la fiche du Marin depuis la recherche Annudef dans FcmCentral.
+- Implements artifact #672615 Ajuste les closures qui déterminent si les liens pointant vers la page "Mon livret FCM" sont cohérentes avec le fait que l'utilisateur courant a effectivement un livret de FCM.
+- Implements art 668586 : Test Unitaire OK
+- Implements art #668586 : Retouche des test Unitaires en fonction des dernieres modifications
+- Implements art #668586 : modification Etats en Gel, retouche page fiche bilan, recherche bug Bu? suggestion ? non trouve encore
+- Implements art #668586 : mise a jour event MarinRessource et Fiche Bilan filtre sur MarinResource
+
 ## 0.1.0 (January 13, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.0.10 –> 0.1.0
 - Implements art #666617 : test unitaires OK
