@@ -8,6 +8,7 @@ use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Models\TypeEtat;
 use Modules\FcmCentral\Models\FcmMarin;
 use Carbon\Carbon;
 
@@ -70,8 +71,15 @@ class DefinirJalonFcmListener
             // ✅ GESTION DU GEL
             if (array_key_exists('date_debut_gel', $data) && $data['date_debut_gel']) {
                 // Créer un nouveau gel
+                //dd($data);
+                /**
+                 * On a prévu de s'appuyer sur un modèle pour anticiper des évolutions futures.
+                 * 
+                 */
+                $etatTypeId = TypeEtat::where('uuid', $data['type_gel_uuid'])->first()?->id;
+                //$etatTypeId = TypeEtat::where('uuid', $data['type_gel_uuid'])->first()?->id;
                 $marin->etats()->create([
-                    'type_etat_id' => $data['type_gel_id'] ?? null,
+                    'type_etat_id' =>  $etatTypeId ?? null,
                     'libelle' => $data['motif_gel'] ?? '',
                     'date_debut' => Carbon::parse($data['date_debut_gel']),
                     'date_fin' => null,

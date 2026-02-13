@@ -470,27 +470,27 @@ class MarinResource extends Resource
                                         Forms\Components\Fieldset::make('Nouveau gel')
                                             ->visible(fn (Forms\Get $get, $record) => $get('action_gel') && !$record->gelActif())
                                             ->schema([
-                                                Forms\Components\Select::make('type_gel_id')
-                                                    ->label('Type de gel')
-                                                    ->options(function () {
-                                                        return \Modules\FcmCentral\Models\TypeEtat::pluck('libelle_court', 'id');
-                                                    })
-                                                    ->searchable()
-                                                    ->preload()
-                                                    ->required()
-                                                    ->createOptionForm([
-                                                        Forms\Components\TextInput::make('libelle_court')
-                                                            ->required()
-                                                            ->label('Libellé')
-                                                            ->maxLength(150),
-                                                        Forms\Components\TextInput::make('code')
-                                                            ->required()
-                                                            ->label('Code')
-                                                            ->maxLength(50),
-                                                    ])
-                                                    ->createOptionUsing(fn (array $data) => \Modules\FcmCentral\Models\TypeEtat::create($data)->id),
-                            
-                                                Forms\Components\DatePicker::make('date_debut_gel')
+                                                // Forms\Components\Select::make('type_gel_id')
+                                                //     ->label('Type de gel')
+                                                //     ->options(function () {
+                                                //         return \Modules\FcmCentral\Models\TypeEtat::pluck('libelle_court', 'id');
+                                                //     })
+                                                //     ->searchable()
+                                                //     ->preload()
+                                                //     ->required()
+                                                //     ->createOptionForm([
+                                                //         Forms\Components\TextInput::make('libelle_court')
+                                                //             ->required()
+                                                //             ->label('Libellé')
+                                                //             ->maxLength(150),
+                                                //         Forms\Components\TextInput::make('code')
+                                                //             ->required()
+                                                //             ->label('Code')
+                                                //             ->maxLength(50),
+                                                //     ])
+                                                //     ->createOptionUsing(fn (array $data) => \Modules\FcmCentral\Models\TypeEtat::create($data)->id),
+                                                
+                                                    Forms\Components\DatePicker::make('date_debut_gel')
                                                     ->label('Date de début de la mise en gel')
                                                     ->required()
                                                     ->default(now()),
@@ -522,43 +522,11 @@ class MarinResource extends Resource
                                                     ->required()
                                                     ->default(now()),
                                             ]),
-                            
-                                        // ✅ HISTORIQUE
-                                        // Forms\Components\Placeholder::make('historique')
-                                        //     ->label('Historique des gels')
-                                        //     ->content(function ($record) {
-                                        //         $gels = $record->etats()->orderBy('date_debut', 'desc')->get();
-                                                
-                                        //         if ($gels->isEmpty()) {
-                                        //             return '✅ Aucun gel enregistré';
-                                        //         }
-                            
-                                        //         $html = '<div class="space-y-2 mt-2">';
-                                        //         foreach ($gels as $gel) {
-                                        //             $actif = $gel->date_fin ? '⚫ Terminé' : '🔴 En cours';
-                                        //             $debut = $gel->date_debut?->format('d/m/Y') ?? '-';
-                                        //             $fin = $gel->date_fin?->format('d/m/Y') ?? '-';
-                                        //             $type = $gel->typeEtat?->libelle_court ?? 'Gel';
-                                                    
-                                        //             $html .= "<div class='p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm'>";
-                                        //             $html .= "<strong>{$actif}</strong> {$type}<br>";
-                                        //             $html .= "Du <strong>{$debut}</strong> au {$fin}";
-                                        //             if ($gel->libelle) {
-                                        //                 $html .= "<br><span class='text-gray-600 dark:text-gray-400 text-xs italic'>{$gel->libelle}</span>";
-                                        //             }
-                                        //             $html .= "</div>";
-                                        //         }
-                                        //         $html .= '</div>';
-                            
-                                        //         return new \Illuminate\Support\HtmlString($html);
-                                        //     })
-                                        //     ->columnSpanFull(),
                                     ])
                                     ->columns(1)
                                     ->collapsible(),
                             ])
                             ->action(function ($record, array $data) {
-                               
                                 // DATE SÉDIMENTATION
                                 if (($record->complementsFcm?->date_sedimentation ?? null) != ($data['date_sedimentation'] ?? null)) {
                                     
@@ -586,7 +554,7 @@ class MarinResource extends Resource
                                 }
                                 
                                 // DATE COMPÉTENCE
-                              if (($record->complementsFcm?->date_competence?? null) != ($data['date_competence'] ?? null)) {
+                                if (($record->complementsFcm?->date_competence?? null) != ($data['date_competence'] ?? null)) {
 
                                     
                                     event(new UserGeneratedEvent(
@@ -602,12 +570,18 @@ class MarinResource extends Resource
                             
                                 // ✅ GESTION DU GEL (seulement si toggle activé)
                                 if (!empty($data['date_debut_gel'])) {
+                                    //ddd($record, $data);
+
                                     $typeGel = null;
                                     $libelleCourt = null;
-                                    if (!empty($data['type_gel_id'])) {
-                                        $typeGel = \Modules\FcmCentral\Models\TypeEtat::find($data['type_gel_id']);
-                                        $libelleCourt = $typeGel?->libelle_court;
-                                    }
+                                    $uuidEtatType = null;
+                                       
+                                    //$typeGel = \Modules\FcmCentral\Models\TypeEtat::find($data['type_gel_id']);
+                                    $typeGel = \Modules\FcmCentral\Models\TypeEtat::first();
+                                    
+                                    $libelleCourt = $typeGel?->libelle_court;
+                                    $uuidEtatType = $typeGel?->uuid;
+                                    
 
                                     event(new UserGeneratedEvent(
                                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
@@ -616,20 +590,23 @@ class MarinResource extends Resource
                                         $record->uuid,
                                         [
                                             'date_debut_gel' => $data['date_debut_gel'],
-                                            'type_gel_id' => $data['type_gel_id'] ?? null,
+                                            'type_gel_uuid' => $uuidEtatType ?? null,
                                             'type_gel_libelle_court' => $libelleCourt,
                                             'motif_gel' => $data['motif_gel'] ?? '',
                                         ]
                                     ));
                                 }
                                 if (!empty($data['date_fin_gel'])) {
+                                    $gelActif= $record->gelActif();
                                     event(new UserGeneratedEvent(
                                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                                         auth()->user()->uuid,
                                         ObjectClasses::MARIN,
                                         $record->uuid,
                                         [
+                                            'uuid_gel' => $gelActif->uuid,
                                             'date_fin_gel' => $data['date_fin_gel'],
+                                            
                                         ]
                                     ));
                                 }
