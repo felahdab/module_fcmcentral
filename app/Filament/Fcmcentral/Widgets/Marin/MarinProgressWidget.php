@@ -2,12 +2,13 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin;
 
+use Modules\FcmCommun\Services\CalculHeuresParcoursService;
 use Filament\Widgets\Widget;
 use Modules\FcmCentral\Models\Marin;
 
 class MarinProgressWidget extends Widget
 {
-    protected static string $view = 'fcmcentral::filament.fcmcentral.widgets.marin-progress-widget';
+    protected string $view = 'fcmcentral::filament.fcmcentral.widgets.marin-progress-widget';
     
     protected int | string | array $columnSpan = 'full';
 
@@ -20,7 +21,7 @@ class MarinProgressWidget extends Widget
 
     public static function canView(): bool
     {
-        $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+        $marin = Marin::fromCurrentUser();
         // TODO: faut-il limiter davantage l'accès ? Certains marin disposant
         // d'un parcours doivent-ils être empéchés de voir ce widget ?
         return $marin?->complements_fcm?->donnees_du_parcours != null;
@@ -63,7 +64,7 @@ class MarinProgressWidget extends Widget
             }
         }
 
-        $progress = \Modules\FcmCommun\Services\CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
+        $progress = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
 
         return [
             'progress' => $progress,

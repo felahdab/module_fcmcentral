@@ -2,8 +2,11 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,10 +22,10 @@ class AffectationsRelationManager extends RelationManager
 {
     protected static string $relationship = 'affectations';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select ::make('recordId')
                 ->label('Années')
                 ->otpions(Affectation::all()->pluck('code','id'))
@@ -50,17 +53,17 @@ class AffectationsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\AttachAction::make()
+                AttachAction::make()
                 ->color('primary')
-                ->form(fn (Tables\Actions\AttachAction $action): array => [
+                ->form(fn (AttachAction $action): array => [
                     $action->getRecordSelect(),
-                    Forms\Components\TextInput::make('pivot.ordre')
+                    TextInput::make('pivot.ordre')
                         ->label('Ordre')
                         ->required()
                         ->numeric(),     
                 ])
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\EditAction::make()
                 //     ->iconButton()
                 //     ->icon('heroicon-m-pencil-square')
@@ -74,15 +77,15 @@ class AffectationsRelationManager extends RelationManager
                 //         ->required()
                 //         ->numeric(),
                 //     ]),
-                Tables\Actions\DetachAction::make()
+                DetachAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-arrow-top-right-on-square')
                     ->extraAttributes([
                         'title' => 'Détacher',
                     ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                   //  Tables\Actions\DetachBulkAction::make(),
                 ]),
             ]);

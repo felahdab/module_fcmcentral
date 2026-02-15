@@ -3,13 +3,23 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource\Pages\ListCompetenceSavoirfaires;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource\Pages\CreateCompetenceSavoirfaire;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource\Pages\EditCompetenceSavoirfaire;
 use Modules\FcmCentral\Models\CompetenceSavoirfaire;
 use Modules\FcmCentral\Models\Competence;
 use Modules\FcmCentral\Models\ParcoursType;
 use Modules\FcmCentral\Models\Savoirfaire;
 use Modules\FcmCentral\Models\SavoirfaireType;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,43 +30,43 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResour
 class CompetenceSavoirfaireResource extends Resource
 {
     protected static ?string $model = CompetenceSavoirfaire::class;
-    protected static ?string $navigationGroup = "Catalogue";
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-briefcase';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('competence_id')
+        return $schema
+            ->components([
+                Select::make('competence_id')
                     ->label('Competence')
                     ->options(Competence::all()->pluck('libelle_court', 'id'))
                     ->required()
                     ->searchable(),
 
-                Forms\Components\Select::make('savoirfaire_id')
+                Select::make('savoirfaire_id')
                     ->label('Savoir-faire')
                     ->options(Savoirfaire::all()->pluck('code', 'id'))
                     ->required()
                     ->searchable(),
 
-                Forms\Components\TextInput::make('ordre')
+                TextInput::make('ordre')
                     ->label('Ordre')
                     ->required()
                     ->numeric(),
 
-                Forms\Components\TextInput::make('heures')
+                TextInput::make('heures')
                     ->label('Heures')
                     ->numeric(),
 
-                Forms\Components\TextInput::make('jours')
+                TextInput::make('jours')
                     ->label('Jours')
                     ->numeric(),
 
-                Forms\Components\TextInput::make('libelle_court')
+                TextInput::make('libelle_court')
                     ->label('Intitulé')
                     ->maxLength(255),
 
-                Forms\Components\Select::make('savoirfaire_type_id')
+                Select::make('savoirfaire_type_id')
                     ->label('Type de Savoir-faire')
                     ->options(SavoirfaireType::all()->pluck('libelle_court', 'id'))
                     ->searchable(),
@@ -135,12 +145,12 @@ class CompetenceSavoirfaireResource extends Resource
                
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('comeptence_id')
+                SelectFilter::make('comeptence_id')
                     ->label('Année')
                     ->options(Competence::all()->pluck('libelle_court', 'id')),
-                    Tables\Filters\SelectFilter::make('parcours_type_id')
+                    SelectFilter::make('parcours_type_id')
                     ->label('Type de parcours')
-                    ->options( \Modules\FcmCentral\Models\ParcoursType::all()->pluck('libelle_court', 'id'))
+                    ->options( ParcoursType::all()->pluck('libelle_court', 'id'))
                     ->query(function ($query, $state) {
                       
                         if ($state['value'] ===null) {
@@ -163,13 +173,13 @@ class CompetenceSavoirfaireResource extends Resource
                 
 
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -177,9 +187,9 @@ class CompetenceSavoirfaireResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCompetenceSavoirfaires::route('/'),
-            'create' => Pages\CreateCompetenceSavoirfaire::route('/create'),
-            'edit' => Pages\EditCompetenceSavoirfaire::route('/{record}/edit'),
+            'index' => ListCompetenceSavoirfaires::route('/'),
+            'create' => CreateCompetenceSavoirfaire::route('/create'),
+            'edit' => EditCompetenceSavoirfaire::route('/{record}/edit'),
         ];
     }
 }

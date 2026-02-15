@@ -13,7 +13,7 @@ class Etat extends BaseEtat
     use HasTablePrefix;
 
 
-   
+
     public function marin(): BelongsTo
     {
         return $this->belongsTo(Marin::class, 'rh_marin_id');

@@ -2,6 +2,14 @@
 
 namespace Modules\FcmCentral\Console;
 
+use Modules\FcmCentral\Models\ParcoursType;
+use Modules\FcmCentral\Models\Parcours;
+use Modules\FcmCentral\Models\Affectation;
+use Modules\FcmCentral\Models\Competence;
+use Modules\FcmCentral\Models\CompetenceSavoirfaire;
+use Modules\FcmCentral\Models\Savoirfaire;
+use Modules\FcmCentral\Models\SavoirfaireType;
+use Modules\FcmCentral\Models\Objectif;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 use Illuminate\Support\Facades\File;
@@ -58,11 +66,11 @@ class ChargeParcours extends Command implements PromptsForMissingInput
          * Le parcours doit impérativement avoir un parcours_type (parcours_type_uuid != NULL).
          * Il faut donc d'abord regarder si le parcours_type est bien défini.
          */
-        $parcours_type = Models\ParcoursType::where("uuid", $content["parcours_type"]["uuid"])->first();
+        $parcours_type = ParcoursType::where("uuid", $content["parcours_type"]["uuid"])->first();
         if ($parcours_type == null)
         {
             $this->warn("Le parcours type référencé dans ce fichier de données n'existe pas. On créé un parcours type bidon pour permettre l'import.");
-            $parcours_type = Models\ParcoursType::create($content["parcours_type"]);
+            $parcours_type = ParcoursType::create($content["parcours_type"]);
         }
         /**
          * Le parcours type référencé dans les données à charger existe désormais. On rajoute
@@ -71,7 +79,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
          */
         $content["parcours_type_id"] = $parcours_type->id;
 
-        $parcours = Models\Parcours::where("uuid", $uuid = Arr::get($content, "uuid"))->first();
+        $parcours = Parcours::where("uuid", $uuid = Arr::get($content, "uuid"))->first();
         if ($parcours != null)
         {
             if (! $force)
@@ -86,7 +94,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         else
         {
             $this->info("Creation du parcours");
-            $parcours = Models\Parcours::firstOrCreate(
+            $parcours = Parcours::firstOrCreate(
                 ["uuid" => $content["uuid"]],
                 Arr::except($content, ["id", "affectations", "parcours_type"])
             );
@@ -102,9 +110,9 @@ class ChargeParcours extends Command implements PromptsForMissingInput
 
     }
 
-    public function chargeAffectationEnBase(Models\Parcours $parcours, $affectation, $force = false)
+    public function chargeAffectationEnBase(Parcours $parcours, $affectation, $force = false)
     {
-        $aff = Models\Affectation::where("uuid", $uuid = Arr::get($affectation, "uuid"))->first();
+        $aff = Affectation::where("uuid", $uuid = Arr::get($affectation, "uuid"))->first();
         if ($aff != null)
         {
             if (! $force)
@@ -119,7 +127,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         else
         {
             $this->info("Creation de l'affectation {$uuid}");
-            $aff = Models\Affectation::firstOrCreate(
+            $aff = Affectation::firstOrCreate(
                 ["uuid" => $affectation["uuid"]],
                 Arr::except($affectation, ["id", "pivot", "competences"])
             );
@@ -147,9 +155,9 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         }
     }
 
-    public function chargeCompetenceEnBase(Models\Affectation $affectation, $competence, $force=false)
+    public function chargeCompetenceEnBase(Affectation $affectation, $competence, $force=false)
     {
-        $comp = Models\Competence::where("uuid", $uuid = Arr::get($competence, "uuid"))->first();
+        $comp = Competence::where("uuid", $uuid = Arr::get($competence, "uuid"))->first();
         if ($comp != null)
         {
             if (! $force)
@@ -164,7 +172,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         else
         {
             $this->info("Creation de la compétence {$uuid}");
-            $comp = Models\Competence::firstOrCreate(
+            $comp = Competence::firstOrCreate(
                 ["uuid" => $competence["uuid"]],
                 Arr::except($competence, ["id", "competenceSavoirfaires"])
             );
@@ -186,7 +194,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         }
     }
 
-    public function chargeCompetenceSavoirfaireEnBase(Models\Competence $competence, $competenceSavoirfaire, $force = false)
+    public function chargeCompetenceSavoirfaireEnBase(Competence $competence, $competenceSavoirfaire, $force = false)
     {
         /**
          * Un objet du type ComptenceSavoirfaire doit imperativement avoir:
@@ -205,7 +213,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         $competenceSavoirfaire["savoirfaire_id"] = $SF->id;
         $competenceSavoirfaire["competence_id"] = $competence->id;
         
-        $compSF = Models\CompetenceSavoirfaire::where("uuid", $uuid = Arr::get($competenceSavoirfaire, "uuid"))->first();
+        $compSF = CompetenceSavoirfaire::where("uuid", $uuid = Arr::get($competenceSavoirfaire, "uuid"))->first();
         if ($compSF != null)
         {
             if (! $force)
@@ -220,7 +228,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         else
         {
             $this->info("Creation de l'entrée compétenceSavoirfaire {$uuid}");
-            $compSF = Models\CompetenceSavoirfaire::firstOrCreate(
+            $compSF = CompetenceSavoirfaire::firstOrCreate(
                 ["uuid" => $competenceSavoirfaire["uuid"]],
                 Arr::except($competenceSavoirfaire, ["id", "savoirfaire", "objectifs", "savoirfaire_type"])
             );
@@ -247,9 +255,9 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         }
     }
 
-    public function chargerSavoirFaireEnBase($savoirfaire, Models\Competence $competence, $force = false)
+    public function chargerSavoirFaireEnBase($savoirfaire, Competence $competence, $force = false)
     {
-        $SF = Models\Savoirfaire::where("uuid", $uuid = Arr::get($savoirfaire, "uuid"))->first();
+        $SF = Savoirfaire::where("uuid", $uuid = Arr::get($savoirfaire, "uuid"))->first();
         if ($SF != null)
         {
             if (! $force)
@@ -264,7 +272,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         else
         {
             $this->info("Creation du savoir-faire {$uuid}");
-            $SF = Models\Savoirfaire::firstOrCreate(
+            $SF = Savoirfaire::firstOrCreate(
                 ["uuid" => $savoirfaire["uuid"]], 
                 Arr::except($savoirfaire, ["id", "competence_id"])
             );
@@ -283,7 +291,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         /**
          * Voyons le savoir faire type.
         */
-        $SFT = Models\SavoirfaireType::where("uuid", $uuid = Arr::get($savoir_faire_type, "uuid"))->first();
+        $SFT = SavoirfaireType::where("uuid", $uuid = Arr::get($savoir_faire_type, "uuid"))->first();
         if ($SFT != null)
         {
             if (! $force)
@@ -298,18 +306,18 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         else
         {
             $this->info("Creation de l'entrée savoir-faire-type {$uuid}");
-            $SFT = Models\SavoirfaireType::firstOrCreate( $savoir_faire_type );
+            $SFT = SavoirfaireType::firstOrCreate( $savoir_faire_type );
         }
         return $SFT;
     }
 
-    public function chargeObjectifEnBase(Models\CompetenceSavoirfaire $compSF, $objectif, $force = false)
+    public function chargeObjectifEnBase(CompetenceSavoirfaire $compSF, $objectif, $force = false)
     {
         /** Un objectif doit forcément avoir une entree CompetenceSavoirFaire (competence_savoir_faire_id != NULL) */
 
         $objectif["competence_savoirfaire_id"] = $compSF->id;
 
-        $obj = Models\Objectif::where("uuid", $uuid = Arr::get($objectif, "uuid"))->first();
+        $obj = Objectif::where("uuid", $uuid = Arr::get($objectif, "uuid"))->first();
         if ($obj != null)
         {
             if (! $force)
@@ -324,7 +332,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
         else
         {
             $this->info("Creation de l'objectif : {$uuid}");
-            $obj = Models\Objectif::firstOrCreate(
+            $obj = Objectif::firstOrCreate(
                 ["uuid" => $objectif["uuid"]], 
                 Arr::except($objectif, ["id"])
             );

@@ -2,6 +2,7 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
+use Filament\Actions\CreateAction;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -14,7 +15,7 @@ class ListMarins extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 

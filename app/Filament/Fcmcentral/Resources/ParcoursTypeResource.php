@@ -2,11 +2,17 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource\Pages\ListParcoursTypes;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource\Pages\CreateParcoursType;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource\Pages\EditParcoursType;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource\RelationManagers;
 use Modules\FcmCentral\Models\ParcoursType;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -23,8 +29,8 @@ class ParcoursTypeResource extends Resource
 {
     protected static ?string $model = ParcoursType::class;
 
-    protected static ?string $navigationGroup = "Catalogue";
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
 
      // ✅ Vérifier si l'utilisateur est admin
@@ -40,10 +46,10 @@ class ParcoursTypeResource extends Resource
      }
  
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('code')
                 ->required()
                 ->maxLength(150)
@@ -95,12 +101,12 @@ class ParcoursTypeResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -115,9 +121,9 @@ class ParcoursTypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListParcoursTypes::route('/'),
-            'create' => Pages\CreateParcoursType::route('/create'),
-            'edit' => Pages\EditParcoursType::route('/{record}/edit'),
+            'index' => ListParcoursTypes::route('/'),
+            'create' => CreateParcoursType::route('/create'),
+            'edit' => EditParcoursType::route('/{record}/edit'),
         ];
     }
 }

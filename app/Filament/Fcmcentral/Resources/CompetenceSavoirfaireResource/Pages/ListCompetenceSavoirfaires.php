@@ -2,6 +2,7 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource\Pages;
 
+use Filament\Actions\CreateAction;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -13,7 +14,7 @@ class ListCompetenceSavoirfaires extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource\Pages;
 
+use Filament\Actions\DeleteAction;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceSavoirfaireResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -13,7 +14,7 @@ class EditCompetenceSavoirfaire extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

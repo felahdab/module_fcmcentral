@@ -2,15 +2,23 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Section;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages\ListParcoursSerialises;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages\EditParcoursSerialise;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages;
 
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Filters\Filter;
@@ -26,35 +34,35 @@ class ParcoursSerialiseResource extends Resource
 {
     protected static ?string $model = ParcoursSerialise::class;
 
-    protected static ?string $navigationGroup = "Catalogue";
-    protected static ?string $navigationIcon = 'heroicon-o-lock-closed';
+    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-lock-closed';
     
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 
-                Forms\Components\TextInput::make('libelle_court')
+                TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
                     ->maxLength(150)
                     ->disabled(),
-                Forms\Components\TextInput::make('libelle_long')
+                TextInput::make('libelle_long')
                     ->required()
                     ->label('Libellé long')
                     ->maxLength(1500)
                     ->disabled(),
-                Forms\Components\TextInput::make('version')
+                TextInput::make('version')
                     ->required()
                     ->label('Version')
                     ->maxLength(5)
                     ->default(1)
                     ->disabled(),
-                Forms\Components\DatePicker::make('date_debut')
+                DatePicker::make('date_debut')
                     ->label('Date début')
                     ->required()
                     ->disabled(),
-                Forms\Components\DatePicker::make('date_fin')
+                DatePicker::make('date_fin')
                     ->label('Date fin')
                     ->disabled(),
                 // Section "Parcours Serialisés"
@@ -80,32 +88,32 @@ class ParcoursSerialiseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('version')
+                TextColumn::make('version')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('libelle_court')
+                TextColumn::make('libelle_court')
                     ->searchable()
                     ->label('Libellé court'),
-                Tables\Columns\TextColumn::make('libelle_long')
+                TextColumn::make('libelle_long')
                     ->searchable()
                     ->label('Libellé long')
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('date_debut')
+                TextColumn::make('date_debut')
                     ->date()
                     ->label('Date début')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('date_fin')
+                TextColumn::make('date_fin')
                     ->date()
                     ->label('Date fin')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -117,7 +125,7 @@ class ParcoursSerialiseResource extends Resource
                 ->label('PPA en cours')
                 ->default(),
             ])
-            ->actions([
+            ->recordActions([
                 // Tables\Actions\ViewAction::make()
                 // ->iconButton()
                 // ->icon('heroicon-m-eye')
@@ -127,7 +135,7 @@ class ParcoursSerialiseResource extends Resource
                 //     'class' => 'btn-consult',
                 //     ]),
 
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                 ->iconButton()
                 ->icon('heroicon-m-eye')
                 ->modalHeading('Détail')
@@ -136,9 +144,9 @@ class ParcoursSerialiseResource extends Resource
                     'class' => 'btn-consult',
                     ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ;
@@ -154,10 +162,10 @@ class ParcoursSerialiseResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListParcoursSerialises::route('/'),
+            'index' => ListParcoursSerialises::route('/'),
             // 'view' => Pages\ViewParcoursSerialise::route('/{record}/view'),
             // 'create' => Pages\CreateParcoursSerialise::route('/create'),
-            'edit' => Pages\EditParcoursSerialise::route('/{record}/edit'),
+            'edit' => EditParcoursSerialise::route('/{record}/edit'),
         ];
     }
 }

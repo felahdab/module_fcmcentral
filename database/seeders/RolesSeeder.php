@@ -18,7 +18,7 @@ class RolesSeeder extends Seeder
      */
     public function run()
     {   
-   
+
     //////////////////////
     // ROLES PAR DEFAUT //
     //////////////////////
@@ -29,14 +29,14 @@ class RolesSeeder extends Seeder
         "name" => "fcmcentral::marin",
         "guard_name" => "web"
     ]);
-    
+
     // Permissions fixes
     $permissions = [
         "fcmcentral::livret.voir",
         "fcmcentral::livret.telecharger",
         "fcmcentral::livret.proposer",
     ];
-    
+
     // Lier
     $this->attachPermissionsToRole($role, $permissions);
 
@@ -51,7 +51,7 @@ class RolesSeeder extends Seeder
         "name" => "fcmcentral::mentor",
         "guard_name" => "web"
     ]);
-    
+
     // Permissions fixes
     $permissions = [
         "fcmcentral::livret.voir",
@@ -60,13 +60,13 @@ class RolesSeeder extends Seeder
         "fcmcentral::livret.commentaire",
         "fcmcentral::note.creer",
     ];
-    
+
     // Permissions dynamiques
     $permissions = array_merge(
         $permissions,
         $this->addPermissionsForResource('marin', ['index', 'create', 'edit'])
     );
-    
+
     $this->attachPermissionsToRole($role, $permissions);
 
     // FIN
@@ -77,7 +77,7 @@ class RolesSeeder extends Seeder
         "name" => "fcmcentral::fps",
         "guard_name" => "web"
     ]);
-    
+
     // Permissions fixes
     $permissions = [
         "fcmcentral::recherche_annuaire",
@@ -94,7 +94,7 @@ class RolesSeeder extends Seeder
         "fcmcentral::note.creer",
         "fcmcentral::note.valider",
     ];
-    
+
     // Permissions dynamiques
     $permissions = array_merge(
         $permissions,
@@ -116,7 +116,7 @@ class RolesSeeder extends Seeder
         $this->addPermissionsForResource('marin', ['index', 'create', 'store', 'edit', 'delete', 'reorder','import','export'])
         // Ajoute d'autres ressources si besoin
     );
-    
+
     // Lier
     $this->attachPermissionsToRole($role, $permissions);
 
@@ -128,7 +128,7 @@ class RolesSeeder extends Seeder
         "name" => "fcmcentral::bcf",
         "guard_name" => "web"
     ]);
-    
+
     // Permissions fixes
     $permissions = [
         "fcmcentral::recherche_annuaire",
@@ -145,7 +145,7 @@ class RolesSeeder extends Seeder
         "fcmcentral::note.creer",
         "fcmcentral::note.valider",
     ];
-    
+
     // Permissions dynamiques
     $permissions = array_merge(
         $permissions,
@@ -167,7 +167,7 @@ class RolesSeeder extends Seeder
         $this->addPermissionsForResource('marin', ['index', 'create','store', 'edit', 'delete', 'reorder','import','export'])
         // Ajoute d'autres ressources si besoin
     );
-    
+
     // Lier
     $this->attachPermissionsToRole($role, $permissions);
 
@@ -178,7 +178,7 @@ class RolesSeeder extends Seeder
         "name" => "Administrateur FCM Central",
         "guard_name" => "web"
     ]);
-    
+
     // Permissions fixes
     $permissions = [
         "fcmcentral::change_configuration_module",
@@ -194,7 +194,7 @@ class RolesSeeder extends Seeder
         "fcmcentral::parcours.figer",
         "fcmcentral::admin",
     ];
-    
+
     // Permissions dynamiques
     $permissions = array_merge(
         $permissions,
@@ -216,7 +216,7 @@ class RolesSeeder extends Seeder
         $this->addPermissionsForResource('marin', ['index', 'create','store', 'edit', 'delete', 'reorder','import','export'])
         // Ajoute d'autres ressources si besoin
     );
-    
+
     // Lier
     $this->attachPermissionsToRole($role, $permissions);
 

@@ -2,11 +2,19 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeGelResource\Pages\ListTypeGels;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeGelResource\Pages\CreateTypeGel;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeGelResource\Pages\EditTypeGel;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeGelResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeGelResource\RelationManagers;
 use Modules\FcmCentral\Models\TypeEtat;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -21,8 +29,8 @@ class TypeGelResource extends Resource
     protected static ?string $label = "Type de Gel" ;
     protected static ?string $plurialLabel = "Type de Gels" ;
 
-    protected static ?string $navigationGroup = "Gestion";
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static string | \UnitEnum | null $navigationGroup = "Gestion";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
 
 
     // ✅ Vérifier si l'utilisateur est admin
@@ -37,16 +45,16 @@ class TypeGelResource extends Resource
         return static::canAccess();
     }
 
-public static function form(Form $form): Form
+public static function form(Schema $schema): Schema
 {
-    return $form
-        ->schema([
-            Forms\Components\TextInput::make('code')
+    return $schema
+        ->components([
+            TextInput::make('code')
                 ->required()
                 ->label('Code')
                 ->maxLength(150),
 
-            Forms\Components\TextInput::make('libelle_court')
+            TextInput::make('libelle_court')
                 ->required()
                 ->label('Libellé court')
                 ->maxLength(150),
@@ -59,17 +67,17 @@ public static function table(Table $table): Table
     return $table
         ->defaultSort('libelle_court','asc')
         ->columns([
-            Tables\Columns\TextColumn::make('id')
+            TextColumn::make('id')
                 ->label('ID')
                 ->toggleable(isToggledHiddenByDefault: true)
                 ->searchable(),
            
-            Tables\Columns\TextColumn::make('code')
+            TextColumn::make('code')
                 ->searchable()
                 ->sortable()
                 ->label('Code')
                 ->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\TextColumn::make('libelle_court')
+            TextColumn::make('libelle_court')
                 ->searchable()
                 ->label('Libellé'),
                 
@@ -77,12 +85,12 @@ public static function table(Table $table): Table
         ->filters([
             //
         ])
-        ->actions([
-            Tables\Actions\EditAction::make(),
+        ->recordActions([
+            EditAction::make(),
         ])
-        ->bulkActions([
-            Tables\Actions\BulkActionGroup::make([
-                Tables\Actions\DeleteBulkAction::make(),
+        ->toolbarActions([
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
             ]),
         ]);
 }
@@ -91,9 +99,9 @@ public static function table(Table $table): Table
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTypeGels::route('/'),
-            'create' => Pages\CreateTypeGel::route('/create'),
-            'edit' => Pages\EditTypeGel::route('/{record}/edit'),
+            'index' => ListTypeGels::route('/'),
+            'create' => CreateTypeGel::route('/create'),
+            'edit' => EditTypeGel::route('/{record}/edit'),
         ];
     }
 }

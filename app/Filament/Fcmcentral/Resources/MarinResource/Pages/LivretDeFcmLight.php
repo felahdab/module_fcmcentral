@@ -2,10 +2,10 @@
  
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Livewire;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Livewire;
 
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
@@ -24,10 +24,10 @@ class LivretDeFcmLight extends ViewRecord
         return [];
     }
     
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-        ->schema([
+        return $schema
+        ->components([
             Section::make(fn() => 'Livret de ' . ($this->record->nom.' '. $this->record->prenom) )
                 ->schema([    
                     Livewire::make(LivretFcm::class, [

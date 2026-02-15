@@ -2,15 +2,21 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\CreateParcours;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ViewParcours;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\EditParcours;
 use Carbon\Carbon;
-
-use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 
@@ -29,13 +35,13 @@ class ParcoursResource extends Resource
 {
 
     protected static ?string $model = Parcours::class;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = "Catalogue";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
@@ -110,15 +116,15 @@ class ParcoursResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()
+            ->recordActions([
+                EditAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-pencil-square')
                     ->extraAttributes([
                         'title' => 'Modifier',
                         'class' => 'btn-modif',
                     ]),
-                Tables\Actions\ViewAction::make()
+                ViewAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-queue-list')
                     ->extraAttributes([
@@ -132,7 +138,7 @@ class ParcoursResource extends Resource
                     ->color('success')
                     ->modalHeading('Figer le Parcours')
                     ->modalWidth('lg')
-                    ->form([
+                    ->schema([
                         TextInput::make('version')
                             ->label('Version')
                             ->numeric()
@@ -166,8 +172,8 @@ class ParcoursResource extends Resource
                         event($event);
                     })
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                    // Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
@@ -201,10 +207,10 @@ class ParcoursResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListParcours::route('/'),
-            'create' => Pages\CreateParcours::route('/create'),
-            'view' => Pages\ViewParcours::route('/{record}/view'),
-            'edit' => Pages\EditParcours::route('/{record}/edit'),
+            'index' => ListParcours::route('/'),
+            'create' => CreateParcours::route('/create'),
+            'view' => ViewParcours::route('/{record}/view'),
+            'edit' => EditParcours::route('/{record}/edit'),
         ];
     }
 }

@@ -2,8 +2,11 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuaireForms;
 
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Forms;
-use Filament\Forms\Get;
 
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCentral\Models\Parcours;
@@ -17,21 +20,21 @@ class RechercheAnnuaireForm
     public static function getSchema()
     {
     return [
-        Forms\Components\Wizard\Step::make('FCM')
+        Step::make('FCM')
                 ->visible(fn() => auth()->user()?->can('fcmcentral::marin.suivreEnFcm'))
                 ->schema([
-                    Forms\Components\Toggle::make('suivre_en_fcm')
+                    Toggle::make('suivre_en_fcm')
                         ->visible(fn() => auth()->user()?->can('fcmcentral::marin.suivreEnFcm'))
                         ->label("Suivre en FCM")
                         ->live(),
                     
-                    Forms\Components\Select::make('cohorte_id')
+                    Select::make('cohorte_id')
                         ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer.cohorte'))
                         ->label("Cohorte de ce marin")
                         ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
                     
                     // Champ mentor visible seulement pour les admins
-                    Forms\Components\Select::make('mentor_id')
+                    Select::make('mentor_id')
                     ->label("Choisir un mentor")
                     ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer.mentor'))
                     ->options(
@@ -54,7 +57,7 @@ class RechercheAnnuaireForm
                     ->preload() // Charge les options au chargement de la page
                     ->native(false), // Utilise le select stylé Filament
                 
-                    Forms\Components\Select::make('parcours_id')
+                    Select::make('parcours_id')
                             ->visible(fn(Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer.parcours'))
                             ->label('Choisir un Parcours')
                             ->options(Parcours::whereHas('parcoursSerialise')->pluck('libelle_court', 'uuid'))

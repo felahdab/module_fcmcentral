@@ -2,7 +2,13 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages\ListCohortes;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages\CreateCohorte;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages\EditCohorte;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -16,18 +22,18 @@ use Modules\FcmCentral\Models\Cohorte;
 class CohorteResource extends Resource
 {
     protected static ?string $model = Cohorte::class;
-    protected static ?string $navigationGroup = "Gestion";
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static string | \UnitEnum | null $navigationGroup = "Gestion";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
     
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     } 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('libelle_court')
                     ->maxLength(255)
                     ->default(null)
@@ -68,8 +74,8 @@ class CohorteResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()
+            ->recordActions([
+                EditAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-pencil-square')
                     ->extraAttributes([
@@ -78,9 +84,9 @@ class CohorteResource extends Resource
                     ]), 
 
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -95,9 +101,9 @@ class CohorteResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCohortes::route('/'),
-            'create' => Pages\CreateCohorte::route('/create'),
-            'edit' => Pages\EditCohorte::route('/{record}/edit'),
+            'index' => ListCohortes::route('/'),
+            'create' => CreateCohorte::route('/create'),
+            'edit' => EditCohorte::route('/{record}/edit'),
         ];
     }
 }

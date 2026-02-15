@@ -1,5 +1,8 @@
 <?php
 
+use Tests\TestCase;
+use App\Models\User;
+use Modules\FcmCentral\Models\Marin;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
@@ -19,12 +22,12 @@ use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
 use Carbon\Carbon;
 
 uses(RefreshDatabase::class);
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 pest()->group("Fcm Central");
 
 beforeEach(function () {
-    $this->admin = \App\Models\User::factory()->create();
+    $this->admin = User::factory()->create();
 });
 
 describe('Création Parcours Sérialisé - FcmCentral', function () {
@@ -57,7 +60,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
     ;
 
     it('met à jour parcoursserialise_id dans MarinParcours lors du changement de version', function () {
-        $this->assertTrue(Models\Marin::all()->count() == 0);
+        $this->assertTrue(Marin::all()->count() == 0);
        
 
         $fcmMarin1 = FcmMarin::factory()->create();
@@ -100,13 +103,13 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         expect($marin2->estEnFcm())->toBeTrue();
        
 
-        $this->assertTrue(Models\Marin::all()->count() == 2);
+        $this->assertTrue(Marin::all()->count() == 2);
    
         // Seed du parcours
         $this->seed(DeasmMasterSeeder::class);
-        expect(Models\Parcours::count())->toBeGreaterThan(0);
+        expect(Parcours::count())->toBeGreaterThan(0);
    
-        $parcours = Models\Parcours::first();
+        $parcours = Parcours::first();
    
         // ✅ Création du parcours sérialisé V1
         event(new UserGeneratedEvent(
@@ -259,7 +262,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         // ✅ Créer 2 marins
         $fcmMarin1 = FcmMarin::factory()->create();
         $marin1 = $fcmMarin1->marin;
-       
+
         event(new UserGeneratedEvent(
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: $this->admin->uuid,
@@ -273,15 +276,15 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         $marin1->refresh();
         //dump ($marin->complementsFcm);
         expect($marin1->estEnFcm())->toBeTrue();
-        
 
 
 
-      
-       
+
+
+
         $fcmMarin2 = FcmMarin::factory()->create();
         $marin2 = $fcmMarin2->marin;
-        
+
         event(new UserGeneratedEvent(
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: $this->admin->uuid,

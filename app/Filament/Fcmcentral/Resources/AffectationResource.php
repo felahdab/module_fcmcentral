@@ -2,13 +2,20 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\Pages\ListAffectations;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\Pages\CreateAffectation;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\Pages\EditAffectation;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\RelationManagers;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\RelationManagers\CompetenceSavoirfairesRelationManager;
 
 use Modules\FcmCentral\Models\Affectation;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -28,14 +35,14 @@ class AffectationResource extends Resource
 {
     protected static ?string $model = Affectation::class;
 
-    protected static ?string $navigationGroup = "Catalogue";
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-briefcase';
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('libelle_court')
                     ->required()
                     ->maxLength(150)
@@ -116,8 +123,8 @@ class AffectationResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
+            ->recordActions([
+                ViewAction::make()
                 ->iconButton()
                 ->icon('heroicon-m-eye')
                 ->modalHeading('Détail')
@@ -125,7 +132,7 @@ class AffectationResource extends Resource
                     'title' => 'Consulter',
                     'class' => 'btn-consult',
                     ]),
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                 ->iconButton()
                 ->icon('heroicon-m-pencil-square')
                 ->extraAttributes([
@@ -133,9 +140,9 @@ class AffectationResource extends Resource
                     'class' => 'btn-modif',
                     ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -150,9 +157,9 @@ class AffectationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAffectations::route('/'),
-            'create' => Pages\CreateAffectation::route('/create'),
-            'edit' => Pages\EditAffectation::route('/{record}/edit'),
+            'index' => ListAffectations::route('/'),
+            'create' => CreateAffectation::route('/create'),
+            'edit' => EditAffectation::route('/{record}/edit'),
         ];
     }
 }

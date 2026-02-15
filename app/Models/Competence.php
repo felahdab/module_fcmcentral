@@ -31,7 +31,7 @@ class Competence extends Model
         "ordre",
         "color",
     ];
-    
+
     protected static function newFactory(): CompetenceFactory
     {
         return CompetenceFactory::new();
@@ -54,7 +54,7 @@ class Competence extends Model
         return $this->belongsTo(Affectation::class, 'affectation_id');
     }
 
-   
+
 
 
       // Relation Many To Many avec Savoirfaire via pivot
@@ -77,8 +77,8 @@ class Competence extends Model
           ])
           ->withTimestamps();
       }
-  
-  
+
+
       // Accès direct aux objets pivot
       public function competenceSavoirfaires(){
           return $this->hasMany(CompetenceSavoirfaire::class,'competence_id');

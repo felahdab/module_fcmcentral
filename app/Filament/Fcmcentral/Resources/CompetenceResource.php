@@ -2,9 +2,16 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages\ListCompetences;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages\CreateCompetence;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages\EditCompetence;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages;
 use Modules\FcmCentral\Models\Competence;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,13 +27,13 @@ use Modules\FcmCentral\Helpers\OutilsHelper;
 class CompetenceResource extends Resource
 {
     protected static ?string $model = Competence::class;
-    protected static ?string $navigationGroup = "Catalogue";
-    protected static ?string $navigationIcon = 'heroicon-o-star';
+    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-star';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
@@ -110,8 +117,8 @@ class CompetenceResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
+            ->recordActions([
+                ViewAction::make()
                 ->iconButton()
                 ->icon('heroicon-m-eye')
                 ->modalHeading('Détail')
@@ -119,7 +126,7 @@ class CompetenceResource extends Resource
                     'title' => 'Consulter',
                     'class' => 'btn-consult',
                     ]),
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                 ->iconButton()
                 ->icon('heroicon-m-pencil-square')
                 ->extraAttributes([
@@ -128,9 +135,9 @@ class CompetenceResource extends Resource
                     ]),
 
             ])
-            ->bulkActions([
-                 Tables\Actions\BulkActionGroup::make([
-                     Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                 BulkActionGroup::make([
+                     DeleteBulkAction::make(),
                  ]),
                
               
@@ -154,9 +161,9 @@ class CompetenceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCompetences::route('/'),
-            'create' => Pages\CreateCompetence::route('/create'),
-            'edit' => Pages\EditCompetence::route('/{record}/edit'),
+            'index' => ListCompetences::route('/'),
+            'create' => CreateCompetence::route('/create'),
+            'edit' => EditCompetence::route('/{record}/edit'),
         ];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin;
 
+use Carbon\Carbon;
+use Modules\FcmCommun\Services\CalculHeuresParcoursService;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\FcmCentral\Models\Marin;
@@ -93,7 +95,7 @@ class MarinStatsWidget extends BaseWidget
 
                         // ✅ Dernière validation
                         if (!empty($csf['date_validation'])) {
-                            $dateValidation = \Carbon\Carbon::parse($csf['date_validation']);
+                            $dateValidation = Carbon::parse($csf['date_validation']);
                             if (!$derniereValidation || $dateValidation->gt($derniereValidation)) {
                                 $derniereValidation = $dateValidation;
                             }
@@ -113,7 +115,7 @@ class MarinStatsWidget extends BaseWidget
         }
 
         // ✅ Taux global (basé sur les heures)
-        $tauxGlobal = \Modules\FcmCommun\Services\CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
+        $tauxGlobal = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
 
         return [
             'affectations' => $nbAffectations,

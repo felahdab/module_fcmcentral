@@ -2,6 +2,41 @@
 
 namespace Modules\FcmCentral\Providers;
 
+use Modules\FcmCentral\Models\Affectation;
+use Modules\FcmCentral\Policies\AffectationPolicy;
+use Modules\FcmCentral\Models\Cohorte;
+use Modules\FcmCentral\Policies\CohortePolicy;
+use Modules\FcmCentral\Models\Competence;
+use Modules\FcmCentral\Policies\CompetencePolicy;
+use Modules\FcmCentral\Models\CompetenceSavoirfaire;
+use Modules\FcmCentral\Policies\CompetenceSavoirfairePolicy;
+use Modules\FcmCentral\Models\Domaine;
+use Modules\FcmCentral\Policies\DomainePolicy;
+use Modules\FcmCentral\Models\Etat;
+use Modules\FcmCentral\Policies\EtatPolicy;
+use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Policies\MarinPolicy;
+use Modules\FcmCentral\Models\Note;
+use Modules\FcmCentral\Policies\NotePolicy;
+use Modules\FcmCentral\Models\Objectif;
+use Modules\FcmCentral\Policies\ObjectifPolicy;
+use Modules\FcmCentral\Models\Parcours;
+use Modules\FcmCentral\Policies\ParcoursPolicy;
+use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Policies\ParcoursSerialisePolicy;
+use Modules\FcmCentral\Models\ParcoursType;
+use Modules\FcmCentral\Policies\ParcoursTypePolicy;
+use Modules\FcmCentral\Models\Savoirfaire;
+use Modules\FcmCentral\Policies\SavoirfairePolicy;
+use Modules\FcmCentral\Models\SavoirfaireType;
+use Modules\FcmCentral\Policies\SavoirfaireTypePolicy;
+use Modules\FcmCentral\Models\TypeNote;
+use Modules\FcmCentral\Policies\TypeNotePolicy;
+use Modules\FcmCentral\Models\TypeEtat;
+use Modules\FcmCentral\Policies\TypeEtatPolicy;
+use Filament\Facades\Filament;
+use Modules\FcmCentral\Console\ChargeParcours;
+use Modules\FcmCentral\Console\SauvegardeParcours;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -37,23 +72,23 @@ class FcmCentralServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        Models\Affectation::class => Policies\AffectationPolicy::class,
-        Models\Cohorte::class => Policies\CohortePolicy::class,
-        Models\Competence::class => Policies\CompetencePolicy::class,
-        Models\CompetenceSavoirfaire::class => Policies\CompetenceSavoirfairePolicy::class,
-        Models\Domaine::class => Policies\DomainePolicy::class,
-        Models\Etat::class => Policies\EtatPolicy::class, //GEL
+        Affectation::class => AffectationPolicy::class,
+        Cohorte::class => CohortePolicy::class,
+        Competence::class => CompetencePolicy::class,
+        CompetenceSavoirfaire::class => CompetenceSavoirfairePolicy::class,
+        Domaine::class => DomainePolicy::class,
+        Etat::class => EtatPolicy::class, //GEL
        
-        Models\Marin::class => Policies\MarinPolicy::class,
-        Models\Note::class => Policies\NotePolicy::class,
-        Models\Objectif::class => Policies\ObjectifPolicy::class,
-        Models\Parcours::class => Policies\ParcoursPolicy::class,
-        Models\ParcoursSerialise::class => Policies\ParcoursSerialisePolicy::class,
-        Models\ParcoursType::class => Policies\ParcoursTypePolicy::class,
-        Models\Savoirfaire::class => Policies\SavoirfairePolicy::class,
-        Models\SavoirfaireType::class => Policies\SavoirfaireTypePolicy::class,
-        Models\TypeNote::class => Policies\TypeNotePolicy::class,
-        Models\TypeEtat::class => Policies\TypeEtatPolicy::class, //TYPE GEL
+        Marin::class => MarinPolicy::class,
+        Note::class => NotePolicy::class,
+        Objectif::class => ObjectifPolicy::class,
+        Parcours::class => ParcoursPolicy::class,
+        ParcoursSerialise::class => ParcoursSerialisePolicy::class,
+        ParcoursType::class => ParcoursTypePolicy::class,
+        Savoirfaire::class => SavoirfairePolicy::class,
+        SavoirfaireType::class => SavoirfaireTypePolicy::class,
+        TypeNote::class => TypeNotePolicy::class,
+        TypeEtat::class => TypeEtatPolicy::class, //TYPE GEL
 
     ];
 
@@ -107,7 +142,7 @@ class FcmCentralServiceProvider extends ServiceProvider
                         ->url(fn() => MonLivretDeFcm::getUrl(panel: "FCM Central"))
                         ->visible(function() {
                             // On n'affiche cette page que si l'utilisateur actuel a une fiche de Marin et qu'il a un parcours de FCM
-                            $marin = Models\Marin::fromCurrentUser();
+                            $marin = Marin::fromCurrentUser();
                             if ($marin == null) return false;
 
                             return $marin->complements_fcm?->donnees_du_parcours != null;
@@ -130,18 +165,18 @@ class FcmCentralServiceProvider extends ServiceProvider
             PreferedPageItem::make()
                 ->name('FCM central: Gestion des marins')
                 ->visible(fn() =>ListMarins::canAccess())
-                ->routeName(fn() => ListMarins::getRouteName(panel: 'FCM Central')),
+                ->routeName(fn() => ListMarins::getRouteName(Filament::getPanel('FCM Central'))),
             PreferedPageItem::make()
                 ->name('FCM central: Mon livret de FCM')
                 ->visible(function() {
                     // On n'affiche cette page que si l'utilisateur actuel a une fiche de Marin et qu'il a un parcours de FCM
-                    $marin = Models\Marin::fromCurrentUser();
+                    $marin = Marin::fromCurrentUser();
                     if ($marin == null) return false;
 
                     return $marin->complements_fcm?->donnees_du_parcours != null;
                     
                 })
-                ->routeName(fn() => MonLivretDeFcm::getRouteName(panel: 'FCM Central'))
+                ->routeName(fn() => MonLivretDeFcm::getRouteName(Filament::getPanel('FCM Central')))
             ]
         );
     }
@@ -174,8 +209,8 @@ class FcmCentralServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         $this->commands([
-            Console\ChargeParcours::class,
-            Console\SauvegardeParcours::class
+            ChargeParcours::class,
+            SauvegardeParcours::class
         ]);
     }
 

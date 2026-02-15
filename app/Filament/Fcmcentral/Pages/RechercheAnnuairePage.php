@@ -2,14 +2,14 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
 
+use Filament\Actions\Action;
+use Filament\Support\Enums\Width;
+use Filament\Schemas\Components\Wizard;
+use Filament\Actions\BulkAction;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Blade;
-
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Wizard;
 use Filament\Support\Enums;
 
 use Filament\Notifications\Notification;
@@ -38,7 +38,7 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
 {
     
     
-    protected static ?string $navigationGroup = 'Marins';
+    protected static string | \UnitEnum | null $navigationGroup = 'Marins';
     protected static ?string $navigationLabel = 'Recherche Annudef';
 
     public static function canAccess(): bool
@@ -66,12 +66,12 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                 ])
             ->requiresConfirmation()
             ->modalSubmitAction(false)
-            ->modalWidth(Enums\MaxWidth::SevenExtraLarge)
+            ->modalWidth(Width::SevenExtraLarge)
             ->fillForm(fn ($record): array => [
                 'nid' => $record->nid,
                 'grade_id' => AnnudefGradeService::getGradeFromAnnudefRank($record->gradelong) ?->id
             ])
-            ->form([
+            ->schema([
                 Wizard::make(array_merge(RechercheAnnuaireCreateUserOrMarinForm::getSchema(), 
                                         RechercheAnnuaireForm::getSchema()))
                 ->submitAction(new HtmlString(Blade::render(<<<BLADE
@@ -85,16 +85,6 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                 
             ])
             ->action(function ($record, $data){
-                /**
-                 * #attributes: array:6 [▼
-                *    "id" => 1
-                *    "nom" => "EL-AHDAB"
-                *    "prenom" => "Florian"
-                *    "email" => "florian.el-ahdab@intradef.gouv.fr"
-                *    "unite" => "MARINE/FRSTRIKEFOR/C2N - CENTRE COMBAT NAVAL/DIRECTEUR"
-                *    "nid" => "0012030028"
-                *  ]
-                 */
                 /**
                  * $record contient nom, prenom, email, unite et nid
                  */

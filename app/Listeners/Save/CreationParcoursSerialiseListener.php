@@ -2,6 +2,7 @@
 
 namespace Modules\FcmCentral\Listeners\Save;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Filament\Notifications\Notification;
@@ -234,7 +235,7 @@ class CreationParcoursSerialiseListener
                 ->body($notification['message'] ?? "Version {$version} créée avec succès")
                 ->send();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             Log::error("❌ ERREUR SÉRIALISATION PARCOURS", [
