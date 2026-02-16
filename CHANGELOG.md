@@ -1,3 +1,7 @@
+## 0.1.2 (February 16, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.1.1 –> 0.1.2
+- Implements art #696979 : Rajout permission refuser pour la proposition mentoré (role Mentor)
+
 ## 0.1.1 (February 13, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.1.0 –> 0.1.1
 - Modification de l'émission de l'évènement de mise en gel.
