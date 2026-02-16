@@ -90,6 +90,14 @@ class PermissionsSeeder extends Seeder
             "guard_name" => "web"
         ]);
 
+
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::livret.refuser",
+            "guard_name" => "web"
+        ]);
+
+        
+
         Permission::firstOrCreate([
             "name" => "fcmcentral::livret.telecharger",
             "guard_name" => "web"
