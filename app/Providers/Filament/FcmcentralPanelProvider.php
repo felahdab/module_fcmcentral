@@ -58,7 +58,6 @@ class FcmcentralPanelProvider extends PanelProvider
                 'primary' => Color::Teal,
             ])
             ->profile(UserPreferences::class)
-            ->font('Inter', provider: SpatieGoogleFontProvider::class)
             ->defaultAvatarProvider(AnnudefAvatarProvider::class)
             ->discoverResources(in: module_path($this->module, 'app/Filament/Fcmcentral/Resources'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Resources")
             ->discoverPages(in: module_path($this->module, 'app/Filament/Fcmcentral/Pages'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Pages")
@@ -84,10 +83,10 @@ class FcmcentralPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            //->topNavigation()
-            ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')))
+            ->topNavigation()
+            ->theme(asset('css/fanlab/fcmcentral/module-fcmcentral.css'))
             // Taille panel
-            ->maxContentWidth(Width ::Full) 
+            ->maxContentWidth(Width::Full) 
             ->userMenuItems($this->getConditionalUserMenuItems());
 
         return $panel;
