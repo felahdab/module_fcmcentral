@@ -5,5 +5,8 @@
   },
   "scripts": {
     "build": "tailwindcss -c ./resources/css/tailwind.config.js -i ./resources/css/theme.css -o ./resources/dist/module-fcmcentral.css --minify"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.18"
   }
 }

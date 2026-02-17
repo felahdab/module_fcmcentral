@@ -2,4 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-@import '/app/vendor/filament/filament/resources/css/theme.css';
+@source '/app/app/Filament/**/*';
+@source '/app/resources/views/filament/**/*';
+@source '/app/vendor/filament/**/*';
+@source '../../app/Filament/**/*';
+@source '../../app/Livewire/**/*';
+@source '../../resources/views/**/*';

@@ -84,7 +84,7 @@ class FcmcentralPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->topNavigation()
-            ->theme(asset('css/fanlab/fcmcentral/module-fcmcentral.css'))
+            ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')))
             // Taille panel
             ->maxContentWidth(Width::Full) 
             ->userMenuItems($this->getConditionalUserMenuItems());
