@@ -2,11 +2,14 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\RelationManagers;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
@@ -21,10 +24,10 @@ class CompetenceSavoirfairesRelationManager extends RelationManager
     protected static ?string $title = 'Savoirs Faire (via compétences)';
     protected static ?string $recordTitleAttribute = 'libelle_court';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-        ->schema([
+        return $schema
+        ->components([
             Select::make('competence_id')
                 ->label('Compétence')
                 ->options(fn() => $this->ownerRecord->competences->pluck('libelle_court', 'id')->toArray())
@@ -74,16 +77,16 @@ class CompetenceSavoirfairesRelationManager extends RelationManager
                 TextColumn::make('savoirfaireType.libelle_court')->label('Type'),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->label('Ajouter Savoir faire')
-                    ->mutateFormDataUsing(fn(array $data) => $data + ['uuid' => Str::uuid()->toString()])
+                    ->mutateDataUsing(fn(array $data) => $data + ['uuid' => Str::uuid()->toString()])
                     ->after(function (CompetenceSavoirfaire $record) {
                         // hook si nécessaire
                     }),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 }

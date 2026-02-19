@@ -29,7 +29,7 @@ class Affectation extends Model
         "ordre",
         "color",
     ];
-    
+
     protected static function newFactory(): AffectationFactory
     {
         return AffectationFactory::new();
@@ -39,7 +39,7 @@ class Affectation extends Model
     ////////////////////
     /// Parcours      //
     ////////////////////
-    
+
     // Relation avec Parcours (ManyToMAny)
     public function parcours(): BelongsToMany
     {

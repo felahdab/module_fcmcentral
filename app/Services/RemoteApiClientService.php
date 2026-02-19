@@ -100,7 +100,7 @@ class RemoteApiClientService
                     [ "id" => $parcoursserialise["id"] ],
                     $parcoursserialise
                 );
-                
+
                 //dump($parcoursserialise);
             }
         }

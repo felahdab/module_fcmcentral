@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class MarinEvolutionWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Évolution des heures validées';
+    protected ?string $heading = 'Évolution des heures validées';
     
     protected int | string | array $columnSpan = 'full';
     

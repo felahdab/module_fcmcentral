@@ -2,11 +2,18 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages\ListDomaines;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages\CreateDomaine;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages\EditDomaine;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\RelationManagers;
 use Modules\FcmCentral\Models\Domaine;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -24,13 +31,13 @@ use Modules\FcmCentral\Helpers\OutilsHelper;
 class DomaineResource extends Resource
 {
     protected static ?string $model = Domaine::class;
-    protected static ?string $navigationGroup = "Catalogue";
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('libelle_court')
                     ->required()
                     ->maxLength(150)
@@ -90,8 +97,8 @@ class DomaineResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
+            ->recordActions([
+                ViewAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-eye')
                     ->modalHeading('Détail')
@@ -99,7 +106,7 @@ class DomaineResource extends Resource
                         'title' => 'Consulter',
                         'class' => 'btn-consult',
                     ]),
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-pencil-square')
                     ->extraAttributes([
@@ -107,9 +114,9 @@ class DomaineResource extends Resource
                         'class' => 'btn-modif',
                     ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -124,9 +131,9 @@ class DomaineResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDomaines::route('/'),
-            'create' => Pages\CreateDomaine::route('/create'),
-            'edit' => Pages\EditDomaine::route('/{record}/edit'),
+            'index' => ListDomaines::route('/'),
+            'create' => CreateDomaine::route('/create'),
+            'edit' => EditDomaine::route('/{record}/edit'),
         ];
     }
 }

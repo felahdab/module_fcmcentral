@@ -3,6 +3,17 @@
 
 namespace Modules\FcmCentral\Providers\Filament;
 
+use Filament\Pages\Dashboard;
+use Filament\Support\Enums\Width;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorStatsWidget;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MarinsSupervisesWidget;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorProgressionWidget;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinProgressWidget;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinStatsWidget;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinEvolutionWidget;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinRepartitionWidget;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets\TestMarinRolesPermissionsWidget;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\DocumentationMentorWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -30,8 +41,6 @@ use App\Http\Middleware\SetTenantCookieMiddleware;
 use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 use App\Filament\Pages\UserPreferences;
 
-use Filament\Support\Enums\MaxWidth;
-
 class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
@@ -49,12 +58,11 @@ class FcmcentralPanelProvider extends PanelProvider
                 'primary' => Color::Teal,
             ])
             ->profile(UserPreferences::class)
-            ->font('Inter', provider: SpatieGoogleFontProvider::class)
             ->defaultAvatarProvider(AnnudefAvatarProvider::class)
             ->discoverResources(in: module_path($this->module, 'app/Filament/Fcmcentral/Resources'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Resources")
             ->discoverPages(in: module_path($this->module, 'app/Filament/Fcmcentral/Pages'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Pages")
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: module_path($this->module, 'app/Filament/Fcmcentral/Widgets'), for: "$moduleNamespace\\Filament\\Fcmcentral\\Widgets")
             ->widgets($this->getConditionalWidgets())
@@ -78,7 +86,7 @@ class FcmcentralPanelProvider extends PanelProvider
             ->topNavigation()
             ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')))
             // Taille panel
-            ->maxContentWidth(MaxWidth ::Full) 
+            ->maxContentWidth(Width::Full) 
             ->userMenuItems($this->getConditionalUserMenuItems());
 
         return $panel;
@@ -113,7 +121,7 @@ class FcmcentralPanelProvider extends PanelProvider
             'help' => MenuItem::make()
                 ->label('Aide')
                 ->icon('heroicon-m-question-mark-circle')
-                ->url(fn () => url(config('skeletor.prefixe_instance') . '/docs/' . Filament::getCurrentPanel()->getId()) . '/', shouldOpenInNewTab: true),
+                ->url(fn () => url(config('skeletor.prefixe_instance') . '/docs/' . Filament::getCurrentOrDefaultPanel()->getId()) . '/', shouldOpenInNewTab: true),
             
             'apidoc' => MenuItem::make()
                 ->label('API')

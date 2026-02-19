@@ -1,21 +1,12 @@
 {
   "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "npx tailwindcss --input resources/css/theme.css --config resources/css/tailwind.config.js --output /app/public/assets/css/fanlab/fcmcentral/module-fcmcentral.css",
-    "dev-watch": "npx tailwindcss --poll --watch --input resources/css/theme.css --config resources/css/tailwind.config.js --output /app/public/assets/css/fanlab/fcmcentral/module-fcmcentral.css",
-    "build": "npx tailwindcss --input resources/css/theme.css --config resources/css/tailwind.config.js --output resources/dist/module-fcmcentral.css"
-  },
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.10",
-    "@tailwindcss/typography": "^0.5.16",
-    "autoprefixer": "^10.4.21",
-    "axios": "^1.1.2",
-    "laravel-vite-plugin": "^0.7.5",
-    "postcss": "^8.5.3",
-    "postcss-nesting": "^13.0.1",
-    "sass": "^1.69.5",
-    "tailwindcss": "^4.0.14",
-    "vite": "^4.0.0"
+    "tailwindcss": "^3.4.0"
+  },
+  "scripts": {
+    "build": "tailwindcss -c ./resources/css/tailwind.config.js -i ./resources/css/theme.css -o ./resources/dist/module-fcmcentral.css --minify"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.18"
   }
 }

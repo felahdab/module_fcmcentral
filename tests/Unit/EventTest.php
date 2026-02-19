@@ -1,5 +1,6 @@
 <?php
 
+use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 
@@ -10,7 +11,7 @@ use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 
 uses(RefreshDatabase::class);
-uses(Tests\TestCase::class);
+uses(TestCase::class);
 
 pest()->group("Fcm Central");
 

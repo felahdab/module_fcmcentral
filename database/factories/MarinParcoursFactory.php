@@ -52,7 +52,7 @@ class MarinParcoursFactory extends Factory
     /**
      * Avec des taux spécifiques
      */
-    public function avecTaux(int $global = null, int $stage = null, int $activite = null): static
+    public function avecTaux(?int $global = null, ?int $stage = null, ?int $activite = null): static
     {
         return $this->state(function (array $attributes) use ($global, $stage, $activite) {
             $state = [];

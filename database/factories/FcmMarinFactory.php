@@ -2,14 +2,14 @@
 // filepath: Modules/FcmCentral/database/factories/FcmMarinFactory.php
  
 namespace Modules\FcmCentral\Database\Factories;
- 
+
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\RH\Models\Marin;
 use Modules\FcmCommun\Models\Cohorte;
- 
+
 /**
-* @extends \Illuminate\Database\Eloquent\Factories\Factory<\Modules\FcmCentral\Models\FcmMarin>
+ * @extends Factory<FcmMarin>
 */
 class FcmMarinFactory extends Factory
 {
@@ -19,7 +19,7 @@ class FcmMarinFactory extends Factory
      * @var string
      */
     protected $model = FcmMarin::class;
- 
+
     /**
      * Define the model's default state.
      *
@@ -42,7 +42,7 @@ class FcmMarinFactory extends Factory
             'mentor_id' => null,  // Sera assigné dans les tests si nécessaire
         ];
     }
- 
+
     /**
      * Indicate that the FcmMarin has a mentor.
      */
@@ -52,7 +52,7 @@ class FcmMarinFactory extends Factory
             'mentor_id' => Marin::factory(),
         ]);
     }
- 
+
     /**
      * Indicate that the FcmMarin belongs to a cohorte.
      */
@@ -62,7 +62,7 @@ class FcmMarinFactory extends Factory
             'cohorte_id' => Cohorte::factory(),
         ]);
     }
- 
+
     /**
      * Indicate that the FcmMarin has both mentor and cohorte.
      */
@@ -73,7 +73,7 @@ class FcmMarinFactory extends Factory
             'cohorte_id' => Cohorte::factory(),
         ]);
     }
- 
+
     /**
      * Configure the factory for a specific mentor.
      */
@@ -83,7 +83,7 @@ class FcmMarinFactory extends Factory
             'mentor_id' => $mentor->id,
         ]);
     }
- 
+
     /**
      * Configure the factory for a specific cohorte.
      */
@@ -93,7 +93,7 @@ class FcmMarinFactory extends Factory
             'cohorte_id' => $cohorte->id,
         ]);
     }
- 
+
     /**
      * Configure the factory for a specific marin RH.
      */
@@ -103,7 +103,7 @@ class FcmMarinFactory extends Factory
             'rh_marin_id' => $marin->id,
         ]);
     }
- 
+
     /**
      * Create an FcmMarin with advanced progression data.
      */
@@ -124,7 +124,7 @@ class FcmMarinFactory extends Factory
             ]),
         ]);
     }
- 
+
     /**
      * Create an inactive FcmMarin.
      */
@@ -138,44 +138,44 @@ class FcmMarinFactory extends Factory
         ]);
     }
 }
- 
- 
+
+
 
 
 // // Dans vos tests
- 
+
 // // ✅ Créer un FcmMarin simple
 // $fcmMarin = FcmMarin::factory()->create();
- 
+
 // // ✅ Créer avec mentor
 // $fcmMarin = FcmMarin::factory()->avecMentor()->create();
- 
+
 // // ✅ Créer avec cohorte
 // $fcmMarin = FcmMarin::factory()->avecCohorte()->create();
- 
+
 // // ✅ Créer complet (mentor + cohorte)
 // $fcmMarin = FcmMarin::factory()->complet()->create();
- 
+
 // // ✅ Créer pour un mentor spécifique
 // $mentor = Marin::factory()->create();
 // $fcmMarin = FcmMarin::factory()->pourMentor($mentor)->create();
- 
+
 // // ✅ Créer pour une cohorte spécifique
 // $cohorte = Cohorte::factory()->create();
 // $fcmMarin = FcmMarin::factory()->pourCohorte($cohorte)->create();
- 
+
 // // ✅ Créer avec progression
 // $fcmMarin = FcmMarin::factory()->avecProgression()->create();
- 
+
 // // ✅ Créer inactif
 // $fcmMarin = FcmMarin::factory()->inactif()->create();
- 
+
 // // ✅ Combinaisons
 // $fcmMarin = FcmMarin::factory()
 //     ->avecMentor()
 //     ->avecCohorte()
 //     ->avecProgression()
 //     ->create();
- 
+
 // // ✅ Créer plusieurs
 // $fcmMarins = FcmMarin::factory()->count(5)->avecMentor()->create();

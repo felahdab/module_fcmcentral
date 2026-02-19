@@ -2,6 +2,7 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
+use Carbon\Carbon;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -21,8 +22,8 @@ use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 class FicheBilan extends ViewRecord
 {
     protected static string $resource = MarinResource::class;
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static string $view = 'fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
+    protected string $view = 'fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan';
     protected static ?string $title = 'Fiche Bilan';
 
     public ?int $marinId = null;
@@ -584,8 +585,8 @@ public function getDureeEtat(): int
         return 0;
     }
    
-    $dateDebut = \Carbon\Carbon::parse($etat->date_debut);
-    $dateFin = $etat->date_fin ? \Carbon\Carbon::parse($etat->date_fin) : now();
+    $dateDebut = Carbon::parse($etat->date_debut);
+    $dateFin = $etat->date_fin ? Carbon::parse($etat->date_fin) : now();
    
     return $dateDebut->diffInDays($dateFin);
 }
@@ -598,7 +599,7 @@ public function getDateDebutEtat(): ?string
         return null;
     }
    
-    return \Carbon\Carbon::parse($etat->date_debut)->format('d/m/Y');
+    return Carbon::parse($etat->date_debut)->format('d/m/Y');
 }
 
 public function getDateFinEtat(): ?string
@@ -609,7 +610,7 @@ public function getDateFinEtat(): ?string
         return null;
     }
    
-    return \Carbon\Carbon::parse($etat->date_fin)->format('d/m/Y');
+    return Carbon::parse($etat->date_fin)->format('d/m/Y');
 }
 
 #[Computed]
@@ -627,13 +628,13 @@ public function ouvrirJalonModal()
     
     $this->jalonForm = [
         'date_sedimentation' => $fcmMarin?->date_sedimentation 
-            ? \Carbon\Carbon::parse($fcmMarin->date_sedimentation)->format('Y-m-d')
+            ? Carbon::parse($fcmMarin->date_sedimentation)->format('Y-m-d')
             : null,
         'date_fcm' => $fcmMarin?->date_fcm 
-            ? \Carbon\Carbon::parse($fcmMarin->date_fcm)->format('Y-m-d')
+            ? Carbon::parse($fcmMarin->date_fcm)->format('Y-m-d')
             : null,
         'date_competence' => $fcmMarin?->date_competence 
-            ? \Carbon\Carbon::parse($fcmMarin->date_competence)->format('Y-m-d')
+            ? Carbon::parse($fcmMarin->date_competence)->format('Y-m-d')
             : null,
     ];
     
@@ -679,9 +680,9 @@ public function sauvegarderJalons()
             ["date_competence" => $this->jalonForm['date_competence']]
         ));
         }
-        
+
         // $fcmMarin->save();
-        
+
         // \Filament\Notifications\Notification::make()
         //     ->title('Jalons mis à jour')
         //     ->success()
@@ -701,19 +702,19 @@ public function canEditJalons(): bool
 public function getDateSedimentationFormatee(): string
 {
     $date = $this->marin->complementsFcm?->date_sedimentation;
-    return $date ? \Carbon\Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
+    return $date ? Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
 }
 
 public function getDateFcmFormatee(): string
 {
     $date = $this->marin->complementsFcm?->date_fcm;
-    return $date ? \Carbon\Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
+    return $date ? Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
 }
 
 public function getDateCompetenceFormatee(): string
 {
     $date = $this->marin->complementsFcm?->date_competence;
-    return $date ? \Carbon\Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
+    return $date ? Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
 }
 
 
@@ -757,7 +758,7 @@ public function getDateCompetenceFormatee(): string
         $vert = $this->marin->vert_sedimentation;
         
         if ($debut && $vert) {
-            return \Carbon\Carbon::parse($debut)->diffInDays(\Carbon\Carbon::parse($vert));
+            return Carbon::parse($debut)->diffInDays(Carbon::parse($vert));
         }
         
         return 0;
@@ -768,7 +769,7 @@ public function getDateCompetenceFormatee(): string
         $vert = $this->marin->vert_sedimentation;
         
         if ($vert) {
-            return \Carbon\Carbon::parse($vert)->diffInDays(now());
+            return Carbon::parse($vert)->diffInDays(now());
         }
         
         return 0;
@@ -779,7 +780,7 @@ public function getDateCompetenceFormatee(): string
         $debut = $this->marin->debut_sedimentation;
         
         if ($debut) {
-            return \Carbon\Carbon::parse($debut)->diffInDays(now());
+            return Carbon::parse($debut)->diffInDays(now());
         }
         
         return 0;
@@ -897,7 +898,7 @@ public function getDateCompetenceFormatee(): string
             foreach ($affectation['competences'] ?? [] as $competence) {
                 foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
                     if (!empty($csf['date_validation'])) {
-                        $date = \Carbon\Carbon::parse($csf['date_validation']);
+                        $date = Carbon::parse($csf['date_validation']);
                         if (!$derniereDate || $date->gt($derniereDate)) {
                             $derniereDate = $date;
                         }
@@ -905,7 +906,7 @@ public function getDateCompetenceFormatee(): string
                     
                     foreach ($csf['objectifs'] ?? [] as $objectif) {
                         if (!empty($objectif['date_validation'])) {
-                            $date = \Carbon\Carbon::parse($objectif['date_validation']);
+                            $date = Carbon::parse($objectif['date_validation']);
                             if (!$derniereDate || $date->gt($derniereDate)) {
                                 $derniereDate = $date;
                             }

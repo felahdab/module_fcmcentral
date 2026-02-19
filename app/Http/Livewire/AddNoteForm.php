@@ -2,6 +2,8 @@
 
 namespace Modules\FcmCentral\Http\Livewire;
 
+use Log;
+use Exception;
 use Livewire\Component;
 use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
@@ -55,7 +57,7 @@ class AddNoteForm extends Component
 
         try {
             // ✅ Ajouter des logs pour déboguer
-            \Log::info('Tentative de création de note', [
+            Log::info('Tentative de création de note', [
                 'rh_marin_id' => $this->marinId,
                 'type_note_id' => $this->typeNote,
                 'user_id' => auth()->id(),
@@ -79,7 +81,7 @@ class AddNoteForm extends Component
                 'valide_bcf' => $this->valide_bcf,
             ]);
 
-            \Log::info('Note créée avec succès', ['note_id' => $note->id]);
+            Log::info('Note créée avec succès', ['note_id' => $note->id]);
 
             $this->reset(['typeNote', 'libelle', 'lienUrl', 'valide_bcf']);
             $this->date = now()->format('Y-m-d');
@@ -92,9 +94,9 @@ class AddNoteForm extends Component
                 ->success()
                 ->send();
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // ✅ Log détaillé de l'erreur
-            \Log::error('Erreur lors de l\'ajout de la note', [
+            Log::error('Erreur lors de l\'ajout de la note', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),

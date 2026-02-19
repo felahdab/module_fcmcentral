@@ -9,8 +9,8 @@ use Filament\Resources\Pages\Page;
 class MarinDashboard extends Page
 {
     protected static string $resource = MarinResource::class;
-    protected static ?string $navigationIcon = 'heroicon-o-home';
-    protected static string $view = 'fcmcentral::filament.fcmcentral.resources.marin-resource.pages.marin-dashboard';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-home';
+    protected string $view = 'fcmcentral::filament.fcmcentral.resources.marin-resource.pages.marin-dashboard';
     protected static ?string $title = 'Mon Tableau de Bord FCM';
     
     protected static ?string $navigationLabel = 'Tableau de Bord';

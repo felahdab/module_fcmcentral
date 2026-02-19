@@ -2,6 +2,9 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Arr;
 
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -10,11 +13,8 @@ use Filament\Actions\Action;
 
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Fieldset;
 
 use Filament\Pages\Page;
 
@@ -27,10 +27,10 @@ class Configuration extends Page implements HasForms, HasActions
 
     protected static ?string $title = 'Configuration du module FCM Central';
     protected static ?string $navigationLabel = 'Configuration';
-    protected static ?string $navigationGroup = "Administration";
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | \UnitEnum | null $navigationGroup = "Administration";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string $view = 'fcmcentral::filament.fcmcentral.pages.configuration';
+    protected string $view = 'fcmcentral::filament.fcmcentral.pages.configuration';
 
     public ?array $data = [];
     
@@ -52,10 +52,10 @@ class Configuration extends Page implements HasForms, HasActions
             ->action(fn() => $this->save());
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Toggle::make('transmit_user_generated_events_to_remote_fcmcentral_instance')
                     ->label("Transmettre les évènements locaux à une instance distante ?")
                     ->live(),

@@ -1,10 +1,21 @@
 <?php
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages\ListObjectifs;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages\CreateObjectif;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages\EditObjectif;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages;
 use Modules\FcmCentral\Models\{Objectif, Competence, Savoirfaire, CompetenceSavoirfaire};
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -15,37 +26,37 @@ use Filament\Tables\Filters\SelectFilter;
 class ObjectifResource extends Resource
 {
     protected static ?string $model = Objectif::class;
-    protected static ?string $navigationGroup = "Catalogue";
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
-            Forms\Components\TextInput::make('libelle_court')
+        return $schema->components([
+            TextInput::make('libelle_court')
                 ->label('Libellé court')
                 ->required()
                 ->maxLength(150),
 
-            Forms\Components\TextInput::make('code')
+            TextInput::make('code')
                 ->label('Code')
                 ->required()
                 ->maxLength(150),
 
-            Forms\Components\Grid::make(2)->schema([
-                Forms\Components\Placeholder::make('competenceSavoirfaire_actuel')
+            Grid::make(2)->schema([
+                Placeholder::make('competenceSavoirfaire_actuel')
                     ->label('Compétence / Savoir-Faire actuel')
                     ->content(fn ($record) =>
                         $record?->competenceSavoirfaire
                             ? "{$record->competenceSavoirfaire->competence->code} - {$record->competenceSavoirfaire->savoirfaire->code}"
                             : 'Non défini'
                     ),
-                Forms\Components\Placeholder::make('vide')->content('')->label(''),
+                Placeholder::make('vide')->content('')->label(''),
             ]),
 
-            Forms\Components\Placeholder::make('info')
+            Placeholder::make('info')
                 ->content('Pour changer la catégorie, veuillez sélectionner la compétence puis le savoir-faire.'),
 
-            Forms\Components\Select::make('temp_competence_id')
+            Select::make('temp_competence_id')
                 ->label('Nouvelle compétence')
                 ->options(fn () => Competence::orderBy('code')->pluck('code', 'id')->toArray())
                 ->helperText('Veuillez sélectionner la compétence')
@@ -62,7 +73,7 @@ class ObjectifResource extends Resource
                     }
                 }),
 
-                Forms\Components\Select::make('competence_savoirfaire_id')
+                Select::make('competence_savoirfaire_id')
                 ->label('Nouveau savoir-faire')
                 ->options(function (callable $get, $record) {
                     $competenceId = $get('temp_competence_id');
@@ -109,47 +120,47 @@ class ObjectifResource extends Resource
             ->reorderable('ordre')
             ->defaultPaginationPageOption(25)
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('code')
+                TextColumn::make('code')
                     ->label('Code')
                     ->sortable()
                     ->badge()
                     ->color(fn($record) => $record->color ?? 'info')
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('libelle_court')
+                TextColumn::make('libelle_court')
                     ->label('Libellé court')
                     ->limit(100)
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('competenceSavoirfaire.competence.code')
+                TextColumn::make('competenceSavoirfaire.competence.code')
                     ->label('Compétence')
                     ->badge()
                     ->sortable()
                     ->color(fn($record) => $record->competenceSavoirfaire?->competence?->color ?? 'info'),
 
-                Tables\Columns\TextColumn::make('competenceSavoirfaire.savoirfaire.code')
+                TextColumn::make('competenceSavoirfaire.savoirfaire.code')
                     ->label('Savoir Faire')
                     ->badge()
                     ->sortable()
                     ->color(fn($record) => $record->competenceSavoirfaire?->savoirfaire?->color ?? 'info'),
 
-                Tables\Columns\TextColumn::make('competenceSavoirfaire.savoirfaireType.code')
+                TextColumn::make('competenceSavoirfaire.savoirfaireType.code')
                     ->label('Type')
                     ->badge()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -181,8 +192,8 @@ class ObjectifResource extends Resource
                         );
                     }),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
+            ->recordActions([
+                ViewAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-eye')
                     ->modalHeading('Détail')
@@ -191,7 +202,7 @@ class ObjectifResource extends Resource
                         'class' => 'btn-consult',
                     ]),
 
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->iconButton()
                     ->icon('heroicon-m-pencil-square')
                     ->extraAttributes([
@@ -199,8 +210,8 @@ class ObjectifResource extends Resource
                         'class' => 'btn-modif',
                     ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([]),
+            ->toolbarActions([
+                BulkActionGroup::make([]),
             ]);
     }
 
@@ -212,9 +223,9 @@ class ObjectifResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListObjectifs::route('/'),
-            'create' => Pages\CreateObjectif::route('/create'),
-            'edit' => Pages\EditObjectif::route('/{record}/edit'),
+            'index' => ListObjectifs::route('/'),
+            'create' => CreateObjectif::route('/create'),
+            'edit' => EditObjectif::route('/{record}/edit'),
         ];
     }
 }

@@ -2,6 +2,27 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Group;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Hidden;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\ListNotes;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\CreateNote;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\EditNote;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages;
 use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
@@ -9,7 +30,6 @@ use Modules\FcmCentral\Models\Marin;
 
  
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -17,40 +37,40 @@ use Filament\Tables\Table;
 class NoteResource extends Resource
 {
     protected static ?string $model = Note::class;
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationGroup = "Gestion";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
+    protected static string | \UnitEnum | null $navigationGroup = "Gestion";
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Textarea::make('libelle')
+        return $schema
+            ->components([
+                Textarea::make('libelle')
                     ->required()
                     ->label('Libellé')
                     ->rows(4)
                     ->maxLength(1000),
 
-                Forms\Components\Select::make('marin_id')
+                Select::make('marin_id')
                     ->label('Marin')
                     ->relationship('marin', 'nom')
                     ->searchable()
                     ->preload()
                     ->required(),
 
-                Forms\Components\Group::make([
-                    Forms\Components\Select::make('type_note_id')
+                Group::make([
+                    Select::make('type_note_id')
                         ->label('Type de note')
                         ->relationship('typeNote', 'libelle_court')
                         ->searchable()
                         ->preload()
                         ->nullable()
                         ->createOptionForm([
-                            Forms\Components\TextInput::make('code')
+                            TextInput::make('code')
                                 ->required()
                                 ->label('code')
                                 ->maxLength(150),
-                            Forms\Components\Textarea::make('libelle_court')
+                            Textarea::make('libelle_court')
                                 ->required()
                                 ->label('Libellé')
                                 ->rows(3)
@@ -61,30 +81,30 @@ class NoteResource extends Resource
                         }),
                 ])->columnSpan(1),
 
-                Forms\Components\DatePicker::make('date')
+                DatePicker::make('date')
                     ->label('Date')
                     ->default(now())
                     ->nullable(),
 
-                Forms\Components\Select::make('redacteur_id')
+                Select::make('redacteur_id')
                     ->label('Rédacteur')
                     ->relationship('redacteur', 'nom')
                     ->searchable()
                     ->preload()
                     ->required(),
 
-                Forms\Components\Toggle::make('valide_bcf')
+                Toggle::make('valide_bcf')
                     ->label('Validé BCF')
                     ->default(false),
 
-                Forms\Components\TextInput::make('lien_url')
+                TextInput::make('lien_url')
                     ->label('Lien URL')
                     ->url()
                     ->nullable(),
 
                 // Champs cachés pour objet_type et objet_id
-                Forms\Components\Hidden::make('objet_type'),
-                Forms\Components\Hidden::make('objet_id')
+                Hidden::make('objet_type'),
+                Hidden::make('objet_id')
                     ->default(0),
             ]);
     }
@@ -94,17 +114,17 @@ class NoteResource extends Resource
         return $table
             ->defaultSort('date', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('id')
+                TextColumn::make('id')
                     ->label('ID')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
 
-                    Tables\Columns\TextColumn::make('code')
+                    TextColumn::make('code')
                     ->label('Code')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('libelle')
+                TextColumn::make('libelle')
                     ->searchable()
                     ->sortable()
                     ->label('Libellé')
@@ -112,33 +132,33 @@ class NoteResource extends Resource
                     ->wrap(),
                     
 
-                Tables\Columns\TextColumn::make('marin.nom')
+                TextColumn::make('marin.nom')
                     ->label('Marin')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('typeNote.libelle_court')
+                TextColumn::make('typeNote.libelle_court')
                     ->label('Type')
                     ->searchable()
                     ->sortable()
                     ->badge(),
 
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->label('Date')
                     ->date('d/m/Y')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('redacteur.nom')
+                TextColumn::make('redacteur.nom')
                     ->label('Rédacteur')
                     ->searchable()
                     ->toggleable(),
 
-                Tables\Columns\IconColumn::make('valide_bcf')
+                IconColumn::make('valide_bcf')
                     ->label('Validé BCF')
                     ->boolean()
                     ->toggleable(),
 
-                Tables\Columns\TextColumn::make('lien_url')
+                TextColumn::make('lien_url')
                     ->label('Lien')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->url(fn ($record) => $record->lien_url)
@@ -146,28 +166,28 @@ class NoteResource extends Resource
                     ->limit(30),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('type_note_id')
+                SelectFilter::make('type_note_id')
                     ->label('Type de note')
                     ->relationship('typeNote', 'libelle_court'),
 
-                Tables\Filters\SelectFilter::make('marin_id')
+                SelectFilter::make('marin_id')
                     ->label('Marin')
                     ->relationship('marin', 'nom')
                     ->searchable(),
 
-                Tables\Filters\SelectFilter::make('redacteur_id')
+                SelectFilter::make('redacteur_id')
                     ->label('Rédacteur')
                     ->relationship('redacteur', 'nom')
                     ->searchable(),
 
-                Tables\Filters\TernaryFilter::make('valide_bcf')
+                TernaryFilter::make('valide_bcf')
                     ->label('Validé BCF'),
 
-                Tables\Filters\Filter::make('date')
-                    ->form([
-                        Forms\Components\DatePicker::make('date_from')
+                Filter::make('date')
+                    ->schema([
+                        DatePicker::make('date_from')
                             ->label('Date de début'),
-                        Forms\Components\DatePicker::make('date_to')
+                        DatePicker::make('date_to')
                             ->label('Date de fin'),
                     ])
                     ->query(function ($query, array $data) {
@@ -176,14 +196,14 @@ class NoteResource extends Resource
                             ->when($data['date_to'], fn ($query) => $query->whereDate('date', '<=', $data['date_to']));
                     }),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -191,9 +211,9 @@ class NoteResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListNotes::route('/'),
-            'create' => Pages\CreateNote::route('/create'),
-            'edit' => Pages\EditNote::route('/{record}/edit'),
+            'index' => ListNotes::route('/'),
+            'create' => CreateNote::route('/create'),
+            'edit' => EditNote::route('/{record}/edit'),
             //'view' => Pages\ViewNote::route('/{record}'),
         ];
     }

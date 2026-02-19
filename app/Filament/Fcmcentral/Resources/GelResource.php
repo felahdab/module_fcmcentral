@@ -2,12 +2,25 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource\Pages\ListGels;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource\Pages\CreateGel;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource\Pages\EditGel;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource\RelationManagers;
 use Modules\FcmCentral\Models\Etat;
 use Modules\FcmCentral\Models\TypeEtat;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -22,39 +35,39 @@ class GelResource extends Resource
     protected static ?string $label = "Gel" ;
     protected static ?string $plurialLabel = "Gels" ;
 
-    protected static ?string $navigationGroup = "Gestion";
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static string | \UnitEnum | null $navigationGroup = "Gestion";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-        ->schema([
-            Forms\Components\Textarea::make('libelle')
+        return $schema
+        ->components([
+            Textarea::make('libelle')
                 ->required()
                 ->label('Libellé')
                 ->rows(4)
                 ->maxLength(1000),
 
-            Forms\Components\Select::make('marin_id')
+            Select::make('marin_id')
                 ->label('Marin')
                 ->relationship('marin', 'nom')
                 ->searchable()
                 ->preload()
                 ->required(),
 
-                Forms\Components\Select::make('type_etat_id')
+                Select::make('type_etat_id')
                 ->label('Type Gel')
                 ->relationship('typeEtat', 'libelle_court')
                 ->searchable()
                 ->preload()
                 ->nullable()
                 ->createOptionForm([
-                    Forms\Components\TextInput::make('libelle_court')
+                    TextInput::make('libelle_court')
                         ->required()
                         ->label('Libellé court')
                         ->maxLength(150),
-                    Forms\Components\TextInput::make('code')
+                    TextInput::make('code')
                         ->required()
                         ->label('Code')
                         ->maxLength(50),
@@ -65,13 +78,13 @@ class GelResource extends Resource
             
             
 
-            Forms\Components\DatePicker::make('date_debut')
+            DatePicker::make('date_debut')
             ->label('Debut')
             ->default(now())
             ->nullable(),
 
 
-            Forms\Components\DatePicker::make('date_fin')
+            DatePicker::make('date_fin')
             ->label('Fin')
             ->default(now())
             ->nullable(),
@@ -84,41 +97,41 @@ class GelResource extends Resource
         return $table
         ->defaultSort('date_debut', 'desc')
         ->columns([
-            Tables\Columns\TextColumn::make('id')
+            TextColumn::make('id')
                 ->label('ID')
                 ->toggleable(isToggledHiddenByDefault: true)
                 ->searchable(),
 
            
 
-            Tables\Columns\TextColumn::make('marin.nom')
+            TextColumn::make('marin.nom')
                 ->label('Marin')
                 ->searchable()
                 ->sortable(),
 
-            Tables\Columns\TextColumn::make('typeEtat.libelle_court')
+            TextColumn::make('typeEtat.libelle_court')
                 ->label('Type')
                 ->searchable()
                 ->sortable()
                 ->badge(),
 
-            Tables\Columns\TextColumn::make('date_debut')
+            TextColumn::make('date_debut')
                 ->label('Debut')
                 ->date('d/m/Y')
                 ->sortable(),
 
-            Tables\Columns\TextColumn::make('date_fin')
+            TextColumn::make('date_fin')
                 ->label('Fin')
                 ->date('d/m/Y')
                 ->sortable(),    
                 //
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('type_etat_id')
+                SelectFilter::make('type_etat_id')
                 ->label('Type Gel')
                 ->relationship('typeEtat', 'libelle_court'),
 
-            Tables\Filters\SelectFilter::make('marin_id')
+            SelectFilter::make('marin_id')
                 ->label('Marin')
                 ->relationship('marin', 'nom')
                 ->searchable(),
@@ -127,11 +140,11 @@ class GelResource extends Resource
 
             
 
-            Tables\Filters\Filter::make('date_debut')
-                ->form([
-                    Forms\Components\DatePicker::make('date_from')
+            Filter::make('date_debut')
+                ->schema([
+                    DatePicker::make('date_from')
                         ->label('Date de début'),
-                    Forms\Components\DatePicker::make('date_to')
+                    DatePicker::make('date_to')
                         ->label('Date de fin'),
                 ])
                 ->query(function ($query, array $data) {
@@ -140,12 +153,12 @@ class GelResource extends Resource
                         ->when($data['date_to'], fn ($query) => $query->whereDate('date_debut', '<=', $data['date_to']));
                 }),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -160,9 +173,9 @@ class GelResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListGels::route('/'),
-            'create' => Pages\CreateGel::route('/create'),
-            'edit' => Pages\EditGel::route('/{record}/edit'),
+            'index' => ListGels::route('/'),
+            'create' => CreateGel::route('/create'),
+            'edit' => EditGel::route('/{record}/edit'),
         ];
     }
 }

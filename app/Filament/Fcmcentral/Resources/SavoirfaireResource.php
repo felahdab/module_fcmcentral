@@ -2,10 +2,18 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
+use Filament\Schemas\Schema;
+use Modules\FcmCentral\Models\ParcoursType;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\Pages\ListSavoirfaires;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\Pages\CreateSavoirfaire;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\Pages\EditSavoirfaire;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\Pages;
 use Modules\FcmCentral\Models\Savoirfaire;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -26,14 +34,14 @@ class SavoirfaireResource extends Resource
 {
     protected static ?string $model = Savoirfaire::class;
 
-    protected static ?string $navigationGroup = "Catalogue";
-    protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
+    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
@@ -127,7 +135,7 @@ class SavoirfaireResource extends Resource
 
                    SelectFilter::make('parcours_type_id')
                     ->label('Type de parcours')
-                    ->options( \Modules\FcmCentral\Models\ParcoursType::all()->pluck('libelle_court', 'id'))
+                    ->options( ParcoursType::all()->pluck('libelle_court', 'id'))
                     ->query(function ($query, $state) {
                       
                         if ($state['value'] ===null) {
@@ -142,8 +150,8 @@ class SavoirfaireResource extends Resource
                         });
                     }),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make()
+            ->recordActions([
+                ViewAction::make()
                 ->iconButton()
                 ->icon('heroicon-m-eye')
                 ->modalHeading('Détail')
@@ -151,7 +159,7 @@ class SavoirfaireResource extends Resource
                     'title' => 'Consulter',
                     'class' => 'btn-consult',
                     ]),
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                 ->iconButton()
                 ->icon('heroicon-m-pencil-square')
                 ->extraAttributes([
@@ -159,9 +167,9 @@ class SavoirfaireResource extends Resource
                     'class' => 'btn-modif',
                     ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -176,9 +184,9 @@ class SavoirfaireResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSavoirfaires::route('/'),
-            'create' => Pages\CreateSavoirfaire::route('/create'),
-            'edit' => Pages\EditSavoirfaire::route('/{record}/edit'),
+            'index' => ListSavoirfaires::route('/'),
+            'create' => CreateSavoirfaire::route('/create'),
+            'edit' => EditSavoirfaire::route('/{record}/edit'),
         ];
     }
 }

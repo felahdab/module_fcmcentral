@@ -34,9 +34,9 @@ class Savoirfaire extends Model
         "domaine_id",
         "color",
     ];
-    
-    
-    
+
+
+
     protected static function newFactory(): SavoirfaireFactory
     {
         return Savoirfairefactory::new();

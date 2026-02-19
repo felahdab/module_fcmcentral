@@ -2,6 +2,14 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers;
 
+use Filament\Actions\AttachAction;
+use Filament\Actions\Action;
+use Filament\Actions\DetachAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DetachBulkAction;
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -58,9 +66,9 @@ class MarinsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\AttachAction::make()
+                AttachAction::make()
                     ->label('Ajouter un marin')
-                    ->form(fn (Tables\Actions\AttachAction $action): array => [
+                    ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect()
                             ->label('Sélectionner un marin FCM')
                             ->searchable()
@@ -120,7 +128,7 @@ class MarinsRelationManager extends RelationManager
                         $this->recalculerTauxMarin($record);
                     }),
 
-                Tables\Actions\Action::make('recalculer_tous_taux')
+                Action::make('recalculer_tous_taux')
                     ->label('Recalculer tous les taux')
                     ->icon('heroicon-o-calculator')
                     ->color('info')
@@ -141,8 +149,8 @@ class MarinsRelationManager extends RelationManager
                         return $this->getOwnerRecord()->fcmMarins()->count();
                     }),
             ])
-            ->actions([
-                Tables\Actions\Action::make('recalculer_taux_marin')
+            ->recordActions([
+                Action::make('recalculer_taux_marin')
                     ->label('Recalculer')
                     ->icon('heroicon-o-arrow-path')
                     ->size('sm')
@@ -155,11 +163,11 @@ class MarinsRelationManager extends RelationManager
                         $this->recalculerTauxMarin($record);
                     }),
 
-                Tables\Actions\DetachAction::make(),
+                DetachAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('recalculer_taux_selection')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('recalculer_taux_selection')
                         ->label('Recalculer les taux sélectionnés')
                         ->icon('heroicon-o-calculator')
                         ->color('info')
@@ -170,7 +178,7 @@ class MarinsRelationManager extends RelationManager
                             $this->recalculerTauxMarins($records);
                         }),
 
-                    Tables\Actions\DetachBulkAction::make(),
+                    DetachBulkAction::make(),
                 ]),
             ]);
     }
@@ -205,9 +213,9 @@ class MarinsRelationManager extends RelationManager
                     } else {
                         $errors++;
                     }
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $errors++;
-                    \Illuminate\Support\Facades\Log::error('Erreur recalcul taux marin', [
+                    Log::error('Erreur recalcul taux marin', [
                         'marin_id' => $marin->id,
                         'erreur' => $e->getMessage()
                     ]);
@@ -229,7 +237,7 @@ class MarinsRelationManager extends RelationManager
 
             $this->dispatch('$refresh');
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->title('Erreur lors du recalcul global')
                 ->danger()
@@ -265,10 +273,10 @@ class MarinsRelationManager extends RelationManager
 
                 $this->dispatch('$refresh');
             } else {
-                throw new \Exception('Données de parcours invalides');
+                throw new Exception('Données de parcours invalides');
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->title('Erreur lors du recalcul')
                 ->danger()
@@ -303,7 +311,7 @@ class MarinsRelationManager extends RelationManager
                 } else {
                     $errors++;
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $errors++;
             }
         }

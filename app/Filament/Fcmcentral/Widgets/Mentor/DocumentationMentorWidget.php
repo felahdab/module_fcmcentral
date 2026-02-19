@@ -9,7 +9,7 @@ use Modules\FcmCentral\Models\Marin;
 
 class DocumentationMentorWidget extends Widget
 {
-    protected static string $view = 'fcmcentral::filament.fcmcentral.widgets.documentation-mentor-widget';
+    protected string $view = 'fcmcentral::filament.fcmcentral.widgets.documentation-mentor-widget';
     
     protected int | string | array $columnSpan = 'full';
     

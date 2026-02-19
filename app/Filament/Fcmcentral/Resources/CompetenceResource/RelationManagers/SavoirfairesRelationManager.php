@@ -2,8 +2,16 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\RelationManagers;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\AttachAction;
+use Filament\Forms\Components\Select;
+use Filament\Actions\EditAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DetachBulkAction;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -15,14 +23,14 @@ class SavoirfairesRelationManager extends RelationManager
     protected static string $relationship = 'savoirfaires';
     protected static ?string $title = 'Savoir-faire attachés';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('libelle_court')
+        return $schema
+            ->components([
+                TextInput::make('libelle_court')
                     ->required()
                     ->maxLength(150),
-                Forms\Components\TextInput::make('libelle_long')
+                TextInput::make('libelle_long')
                     ->required()
                     ->maxLength(1500),
             ]);
@@ -35,13 +43,13 @@ class SavoirfairesRelationManager extends RelationManager
             ->defaultSort('ordre','asc')
             ->defaultPaginationPageOption(25)
             ->columns([
-                Tables\Columns\TextColumn::make('libelle_court')
+                TextColumn::make('libelle_court')
                     ->label('Libellé court')
                     ->words(8)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('competence.code')
+                TextColumn::make('competence.code')
                     ->label('Competences'),
-                    Tables\Columns\TextColumn::make('competence.parcoursType.code')
+                    TextColumn::make('competence.parcoursType.code')
                     ->label('Type de Parcours'),    
                 
 
@@ -50,12 +58,12 @@ class SavoirfairesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\AttachAction::make()
+                AttachAction::make()
                     ->modalHeading('Attacher savoir-faire')
                     ->color('primary')
-                    ->form(fn (Tables\Actions\AttachAction $action): array => [
+                    ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect(),
-                        Forms\Components\Select::make('mod_acquis')
+                        Select::make('mod_acquis')
                             ->label('Mode acquisition')
                             ->required()
                             ->options([
@@ -64,33 +72,33 @@ class SavoirfairesRelationManager extends RelationManager
                                 'EAD' => 'EAD',
                                 'MIXTE' => 'MIXTE',
                                 ]),                         
-                        Forms\Components\TextInput::make('an_acquis')
+                        TextInput::make('an_acquis')
                             ->label('Année acquisition')
                             ->numeric()
                             ->required(),  
-                        Forms\Components\TextInput::make('coeff')
+                        TextInput::make('coeff')
                             ->label('Coefficient')
                             ->numeric()
                             ->step(0.01),
-                        Forms\Components\TextInput::make('duree')
+                        TextInput::make('duree')
                             ->label('Durée(h)')
                             ->numeric(),     
-                        Forms\Components\TextInput::make('ordre')
+                        TextInput::make('ordre')
                             ->label('Ordre')
                             ->numeric(),  
                 ])
                 
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()
+            ->recordActions([
+                EditAction::make()
                 ->iconButton()
                 ->icon('heroicon-m-pencil-square')
                 ->extraAttributes([
                     'title' => 'Modifier',
                     'class' => 'btn-modif',
                     ])
-                ->form([
-                    Forms\Components\Select::make('mod_acquis')
+                ->schema([
+                    Select::make('mod_acquis')
                         ->label('Mode acquisition')
                         ->required()
                         ->options([
@@ -98,31 +106,31 @@ class SavoirfairesRelationManager extends RelationManager
                             'ECOLE' => 'ECOLE',
                             'EAD' => 'EAD',
                             ]),                         
-                    Forms\Components\TextInput::make('an_acquis')
+                    TextInput::make('an_acquis')
                         ->label('Année acquisition')
                         ->numeric()
                         ->required(),  
-                    Forms\Components\TextInput::make('coeff')
+                    TextInput::make('coeff')
                         ->label('Coefficient')
                         ->numeric()
                         ->step(0.01),
-                    Forms\Components\TextInput::make('duree')
+                    TextInput::make('duree')
                         ->label('Durée(h)')
                         ->numeric(),     
-                    Forms\Components\TextInput::make('ordre')
+                    TextInput::make('ordre')
                         ->label('Ordre')
                         ->numeric(),
                 ]),
-                Tables\Actions\DetachAction::make()
+                DetachAction::make()
                 ->iconButton()
                 ->icon('heroicon-m-arrow-top-right-on-square')
                 ->extraAttributes([
                     'title' => 'Détacher',
                     ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DetachBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DetachBulkAction::make(),
                 ]),
             ]);
     }

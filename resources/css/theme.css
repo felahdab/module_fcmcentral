@@ -1,3 +1,10 @@
-@import '/app/vendor/filament/filament/resources/css/theme.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@config 'tailwind.config.js';
+@source '/app/app/Filament/**/*';
+@source '/app/resources/views/filament/**/*';
+@source '/app/vendor/filament/**/*';
+@source '../../app/Filament/**/*';
+@source '../../app/Livewire/**/*';
+@source '../../resources/views/**/*';

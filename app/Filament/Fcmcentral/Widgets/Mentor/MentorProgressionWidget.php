@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class MentorProgressionWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Progression comparative des marins';
+    protected ?string $heading = 'Progression comparative des marins';
     protected static ?int $sort = 3;
     protected int | string | array $columnSpan = 'full';
     protected static ?string $minHeight = '400px';
@@ -144,7 +144,7 @@ class MentorProgressionWidget extends ChartWidget
     /**
      * Vérifie le statut d'un élément (objectif ou savoir-faire)
      */
-    private function verifierStatut(array $element, string $statutFilter = null): bool
+    private function verifierStatut(array $element, ?string $statutFilter = null): bool
     {
         $etatValid = ($element['etat_valid'] ?? false);
         $dateProposition = $element['date_proposition'] ?? null;

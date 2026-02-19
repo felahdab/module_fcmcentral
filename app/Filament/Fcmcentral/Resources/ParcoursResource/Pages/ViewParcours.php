@@ -14,7 +14,7 @@ use Filament\Notifications\Notification;
 class ViewParcours extends ViewRecord
 {
     protected static string $resource = ParcoursResource::class;
-    protected static string $view = 'fcmcentral::filament.fcmcentral.resources.parcours-resource.pages.view-parcours';
+    protected string $view = 'fcmcentral::filament.fcmcentral.resources.parcours-resource.pages.view-parcours';
 
     public $parcours;
 

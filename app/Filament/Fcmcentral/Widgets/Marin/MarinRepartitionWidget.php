@@ -7,7 +7,7 @@ use Modules\FcmCentral\Models\Marin;
 
 class MarinRepartitionWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Répartition des savoir-faire par type';
+    protected ?string $heading = 'Répartition des savoir-faire par type';
    
     protected int | string | array $columnSpan = [
         'sm' => 2,

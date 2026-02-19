@@ -2,6 +2,7 @@
 
 namespace Modules\FcmCentral\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -710,7 +711,7 @@ class Marin extends BaseMarin
         return $this->getDernierTypeEtat()?->typeEtat?->id;
     }
 
-    public function historiserEtat(string $codeEtat, ?\Carbon\Carbon $dateDebut = null, ?\Carbon\Carbon $dateFin = null ):void
+    public function historiserEtat(string $codeEtat, ?Carbon $dateDebut = null, ?Carbon $dateFin = null ):void
     {
         $typeEtat = TypeEtat::where('code', $codeEtat)->firstOrFail();
         Etat::create([

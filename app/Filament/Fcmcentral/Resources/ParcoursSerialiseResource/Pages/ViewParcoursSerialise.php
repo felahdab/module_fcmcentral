@@ -13,7 +13,7 @@ class ViewParcoursSerialise extends ViewRecord
     protected static string $resource = ParcoursSerialiseResource::class;
     
    // Vue personnalisée
-   protected static string  $view = 'fcmcentral::filament.fcmcentral.resources.parcoursserialise-resource.pages.view-parcoursserialise';
+   protected string  $view = 'fcmcentral::filament.fcmcentral.resources.parcoursserialise-resource.pages.view-parcoursserialise';
    
    public $parcoursserialise;
    public $parcours;

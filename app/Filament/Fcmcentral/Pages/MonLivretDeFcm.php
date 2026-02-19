@@ -2,9 +2,9 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Livewire;
 use Filament\Pages\Page;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Livewire;
 
 use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
 
@@ -13,9 +13,8 @@ use Modules\FcmCentral\Events\UserGeneratedEvent;
 
 class MonLivretDeFcm extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
-    protected static ?string $navigationLabel = "Mon livret FCM";
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
 
     public Marin $marin;
     public ?int $marinId = null;
@@ -42,9 +41,9 @@ class MonLivretDeFcm extends Page
         $this->form->fill();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Livewire::make(LivretFcm::class, [
                 "marinId" => $this->marin->id,
                 "Marin" => Marin::class,

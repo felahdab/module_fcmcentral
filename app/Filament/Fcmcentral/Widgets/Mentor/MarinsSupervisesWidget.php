@@ -2,6 +2,9 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor;
 
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\Action;
+use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -41,16 +44,16 @@ class MarinsSupervisesWidget extends BaseWidget
                 Marin::whereIn('id', $marinIds)->with('lignes_dans_fcm_marin')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('nom')
+                TextColumn::make('nom')
                     ->label('Nom')
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('grade.libelle_long')
+                TextColumn::make('grade.libelle_long')
                     ->label('Grade')
                     ->badge(),
 
-                Tables\Columns\TextColumn::make('cohorte')
+                TextColumn::make('cohorte')
                     ->label('Cohorte')
                     ->state(function (Marin $record): ?string {
                         $fcmMarin = $record->lignes_dans_fcm_marin->first();
@@ -59,14 +62,14 @@ class MarinsSupervisesWidget extends BaseWidget
                     ->badge()
                     ->color('info'),
 
-                    Tables\Columns\TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
+                    TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
                     ->label('Taux')
                     ->sortable()
                     ->suffix('%')
                     ->formatStateUsing(fn ($state) => intval(round($state)))
                     ->placeholder('0'),
 
-                Tables\Columns\TextColumn::make('activites_en_attente')
+                TextColumn::make('activites_en_attente')
                     ->label('En attente')
                     ->state(function (Marin $record): int {
                         return $this->calculateEnAttente($record);
@@ -74,7 +77,7 @@ class MarinsSupervisesWidget extends BaseWidget
                     ->badge()
                     ->color(fn (int $state): string => $state > 0 ? 'warning' : 'success'),
 
-                Tables\Columns\TextColumn::make('derniere_validation')
+                TextColumn::make('derniere_validation')
                     ->label('Dernière validation')
                     ->state(function (Marin $record): ?string {
                         return $this->getDerniereValidation($record);
@@ -82,8 +85,8 @@ class MarinsSupervisesWidget extends BaseWidget
                     ->since()
                     ->placeholder('Aucune validation'),
             ])
-            ->actions([
-                Tables\Actions\Action::make('voir_parcours')
+            ->recordActions([
+                Action::make('voir_parcours')
                     ->label('Voir parcours')
                     ->icon('heroicon-m-eye')
                     // ->url(fn (Marin $record): string =>
@@ -222,7 +225,7 @@ class MarinsSupervisesWidget extends BaseWidget
                 foreach ($savoirfaires as $savoirfaire) {
                     // ✅ Vérifier la date de validation du savoir-faire
                     if (($savoirfaire['etat_valid'] ?? false) === true && !empty($savoirfaire['date_validation'])) {
-                        $dateValidation = \Carbon\Carbon::parse($savoirfaire['date_validation']);
+                        $dateValidation = Carbon::parse($savoirfaire['date_validation']);
                         if (!$derniereDate || $dateValidation->gt($derniereDate)) {
                             $derniereDate = $dateValidation;
                         }
@@ -231,7 +234,7 @@ class MarinsSupervisesWidget extends BaseWidget
                     // ✅ Vérifier les objectifs
                     foreach ($savoirfaire['objectifs'] ?? [] as $objectif) {
                         if (($objectif['etat_valid'] ?? false) === true && !empty($objectif['date_validation'])) {
-                            $dateValidation = \Carbon\Carbon::parse($objectif['date_validation']);
+                            $dateValidation = Carbon::parse($objectif['date_validation']);
                             if (!$derniereDate || $dateValidation->gt($derniereDate)) {
                                 $derniereDate = $dateValidation;
                             }

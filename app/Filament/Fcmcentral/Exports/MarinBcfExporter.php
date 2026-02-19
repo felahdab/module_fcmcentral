@@ -31,7 +31,7 @@ class MarinBcfExporter extends Exporter
                         ->whereHas('typeEtat', fn($q) => $q->where('code', 'FCM_ENP'))
                         ->orderBy('date_debut')
                         ->first()?->date_debut;
-                    return $date ? \Carbon\Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
+                    return $date ? Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
                 }),
 
 
@@ -42,7 +42,7 @@ class MarinBcfExporter extends Exporter
                         ->whereHas('typeEtat', fn($q) => $q->where('code', 'FCM_ACT'))
                         ->orderBy('date_debut')
                         ->first()?->date_debut;
-                    return $date ? \Carbon\Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
+                    return $date ? Carbon::parse($date)->format('d/m/Y') : 'Non renseigné';
             
                 }),
 

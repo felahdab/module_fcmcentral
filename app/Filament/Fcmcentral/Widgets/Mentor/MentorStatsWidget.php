@@ -2,6 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor;
 
+use Illuminate\Support\Collection;
+use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\FcmCentral\Models\Marin;
@@ -50,7 +52,7 @@ class MentorStatsWidget extends BaseWidget
         ];
     }
 
-    private function getMarinsSupervises(): \Illuminate\Support\Collection
+    private function getMarinsSupervises(): Collection
     {
         $currentMarin = Marin::fromCurrentUser();
         if (!$currentMarin) {
@@ -114,7 +116,7 @@ class MentorStatsWidget extends BaseWidget
                     if ($csf['etat_valid'] ?? false) {
                         $valides++;
                         if (!empty($csf['date_validation'])) {
-                            $dateValidation = \Carbon\Carbon::parse($csf['date_validation']);
+                            $dateValidation = Carbon::parse($csf['date_validation']);
                             if ($dateValidation->isCurrentWeek()) {
                                 $validationsSemaine++;
                             }
@@ -130,7 +132,7 @@ class MentorStatsWidget extends BaseWidget
                         if ($objectif['etat_valid'] ?? false) {
                             $valides++;
                             if (!empty($objectif['date_validation'])) {
-                                $dateValidation = \Carbon\Carbon::parse($objectif['date_validation']);
+                                $dateValidation = Carbon::parse($objectif['date_validation']);
                                 if ($dateValidation->isCurrentWeek()) {
                                     $validationsSemaine++;
                                 }
