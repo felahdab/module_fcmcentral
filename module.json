@@ -9,5 +9,6 @@
         "Modules\\FcmCentral\\Providers\\EventServiceProvider",
         "Modules\\FcmCentral\\Providers\\Filament\\FcmcentralPanelProvider"
     ],
-    "files": []
+    "files": [],
+    "version": "0.2.0"
 }
