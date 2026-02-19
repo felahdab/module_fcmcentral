@@ -1456,5 +1456,5 @@ it('permet de creer une note pour un marin en FCM', function () {
 
     $this->assertTrue(Models\Note::where('rh_marin_id', $marin->id)->count() == 1);
 
-})->only();
+});
 
