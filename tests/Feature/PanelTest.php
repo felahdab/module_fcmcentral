@@ -4,8 +4,6 @@ use Carbon\Carbon;
 use Livewire\Livewire;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Artisan;
-
 
 use Tests\TestCase;
 use function Pest\Livewire\livewire;
@@ -16,7 +14,6 @@ use Filament\Pages\Dashboard;
 use Filament\Actions\Testing\TestAction;
 
 use App\Models\User;
-use App\Models\Permission;
 use App\Models\Setting;
 
 use Modules\FcmCommun\Models\Cohorte;
@@ -24,34 +21,17 @@ use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 
 use Modules\FcmCentral\Models;
-use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Models\FcmMarin;
-use Modules\FcmCentral\Models\Parcours;
-use Modules\FcmCentral\Models\Competence;
-use Modules\FcmCentral\Models\Savoirfaire;
-use Modules\FcmCentral\Models\CompetenceSavoirfaire;
-use Modules\FcmCentral\Models\Objectif;
-use Modules\FcmCentral\Models\Affectation;
-use Modules\FcmCentral\Models\ParcoursType;
 
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages\ListCohortes;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\EditParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight;
-use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MarinsSupervisesWidget;
-use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorProgressionWidget;
-use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorStatsWidget;
-use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinEvolutionWidget;
-use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinProgressWidget;
-use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinRepartitionWidget;
-use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin\MarinStatsWidget;
+use Modules\FcmCentral\Filament\Fcmcentral\Widgets;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\Configuration;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
-
 
 uses(RefreshDatabase::class);
 uses(TestCase::class);
@@ -64,14 +44,14 @@ beforeEach(function () {
     $this->admin = User::factory()->create(['admin' => 1]);
     
     $this->createMarin = function() {
-        $marin = Marin::factory()->create(['suivi_en_fcm' => true]);
-        FcmMarin::create(["rh_marin_id" => $marin->id]);
+        $marin = Models\Marin::factory()->create(['suivi_en_fcm' => true]);
+        Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
         return $marin->fresh();
     };
     
     $this->createParcoursAvecDonnees = function() {
         $this->seed(DeasmMasterSeeder::class);
-        return Parcours::first();
+        return Models\Models\Parcours::first();
     };
     
     $this->serializeParcours = function($parcours) {
@@ -187,43 +167,43 @@ it('affiche la liste des cohortes', function() {
 it('a des factories pour tous les modeles', function(){
 
     
-    $competence = Competence::factory()->create(['code' => 'C-TEST-1']);
-    $savoirfaire = Savoirfaire::factory()->create(['code' => 'SF-TEST-1']);
+    $competence = Models\Competence::factory()->create(['code' => 'C-TEST-1']);
+    $savoirfaire = Models\Savoirfaire::factory()->create(['code' => 'SF-TEST-1']);
 
-    $competenceSavoirfaire = CompetenceSavoirfaire::factory()->create([
+    $competenceSavoirfaire = Models\CompetenceSavoirfaire::factory()->create([
         'competence_id' => $competence->id,
         'savoirfaire_id' => $savoirfaire->id,
     ]);
 
-    $objectif = Objectif::factory()->create([
+    $objectif = Models\Objectif::factory()->create([
         'code' => 'OBJ-TEST-1',
         'competence_savoirfaire_id' => $competenceSavoirfaire->id,
     ]);
     
 
-    $affectation = Affectation::factory()->create(['code' => 'AFF-TEST-1']);
+    $affectation = Models\Affectation::factory()->create(['code' => 'AFF-TEST-1']);
     
 
-    $parcours = Parcours::factory()->create([
+    $parcours = Models\Parcours::factory()->create([
         'code' => 'PAR-TEST-1',
         // Si parcours_type_id est NOT NULL, il faut le fournir :
-        'parcours_type_id' => ParcoursType::factory()->create()->id,
+        'parcours_type_id' => Models\ParcoursType::factory()->create()->id,
     ]);
 
     // Affectation
-    expect(Affectation::count())->toBe(1);
+    expect(Models\Affectation::count())->toBe(1);
 
     // Parcours
-    expect(Parcours::count())->toBe(1);
+    expect(Models\Parcours::count())->toBe(1);
 
     // SavoirFaire
-    expect(Savoirfaire::count())->toBe(1);
+    expect(Models\Savoirfaire::count())->toBe(1);
 
     // Competence
-    expect(Competence::count())->toBe(1);
+    expect(Models\Competence::count())->toBe(1);
 
     // CompetenceSavoirFaire
-    expect(CompetenceSavoirfaire::count())->toBe(1);
+    expect(Models\CompetenceSavoirfaire::count())->toBe(1);
 });
 
 
@@ -235,7 +215,7 @@ it('genere un UserGeneratedEvent quand on demande à figer un parcours depuis la
     Event::fake();
     
     // ✅ FIX: Ajouter le code
-    $parcours = Parcours::factory()->create(['code' => 'PAR-TEST-2']);
+    $parcours = Models\Parcours::factory()->create(['code' => 'PAR-TEST-2']);
     $date_de_debut = Carbon::tomorrow();
     
     Livewire::actingAs($this->admin)
@@ -254,7 +234,7 @@ it('genere un UserGeneratedEvent quand on demande à figer un parcours depuis la
 it('genere un UserGeneratedEvent quand on demande à figer un parcours depuis la liste des parcours', function(){
     Event::fake();
     
-    $parcours = Parcours::factory()->create(['code' => 'PAR-TEST-3']);
+    $parcours = Models\Parcours::factory()->create(['code' => 'PAR-TEST-3']);
     
     Livewire::actingAs($this->admin)
         ->test(ListParcours::class)
@@ -271,7 +251,7 @@ it('genere un UserGeneratedEvent quand on demande à figer un parcours depuis la
 it('dispatch manuel fonctionne', function () {
     Event::fake();
 
-    $marin = Marin::factory()->create();
+    $marin = Models\Marin::factory()->create();
 
     event(new UserGeneratedEvent(
         UserGeneratedEventTypes::MARIN_EN_FCM,
@@ -292,18 +272,18 @@ it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', f
     Event::fake();
 
     // Création d'un marin non suivi en FCM
-    $marin = Marin::factory()->create();
+    $marin = Models\Marin::factory()->create();
     // Verification explicite 
-    $marin = Marin::find($marin->id);
+    $marin = Models\Marin::find($marin->id);
     // S'assurer qu'il n'est pas déjà en FCM
-    FcmMarin::where('rh_marin_id', $marin->id)->delete();
+    Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
     $marin->refresh();
     expect($marin->estEnFcm())->toBeFalse();
 
     // Création d'une cohorte, d'un mentor et d'un parcours pour simuler le formulaire
     $cohorte = Cohorte::factory()->create();
-    $mentor = Marin::factory()->create();
-    $parcours = Parcours::factory()->create();
+    $mentor = Models\Marin::factory()->create();
+    $parcours = Models\Parcours::factory()->create();
 
 
     Livewire::actingAs($this->admin)
@@ -329,7 +309,7 @@ it('genere un  UserGeneratedEvent quand on demande a ne plus suivre un marin en 
     Event::fake();
 
    // Création d'un marin non suivi en FCM
-   $fcmMarin = FcmMarin::factory()->create();
+   $fcmMarin = Models\FcmMarin::factory()->create();
    $marin = $fcmMarin->marin;
 
   // dump($marin);
@@ -345,18 +325,14 @@ it('genere un  UserGeneratedEvent quand on demande a ne plus suivre un marin en 
         ->assertHasNoActionErrors();
 
        // dump(Event::dispatched(UserGeneratedEvent::class));
-
-
-       
-       
 });
 
 it('ajoute la date_sedimentation lors de l\'activation FCM', function () {
     //Event::fake();
 
-    $fcmMarin = FcmMarin::factory()->create();
+    $fcmMarin = Models\FcmMarin::factory()->create();
     $marin = $fcmMarin->marin;
-    FcmMarin::where('rh_marin_id', $marin->id)->delete();
+    Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
     $marin->refresh();
     expect($marin->estEnFcm())->toBeFalse();
 
@@ -400,7 +376,7 @@ it('génère un UserGeneratedEvent quand on modifie les jalons FCM', function(){
     Event::fake();
     
     // Création d'un marin non suivi en FCM
-    $fcmMarin = FcmMarin::factory()->create();
+    $fcmMarin = Models\FcmMarin::factory()->create();
    $marin = $fcmMarin->marin;
    
   // dump($marin);
@@ -458,10 +434,10 @@ it('genere un  UserGeneratedEvent quand on assigne une cohorte a un marin suivi 
     Event::fake();
     
     // Création d'un marin non suivi en FCM
-    $fcmMarin = FcmMarin::factory()->create();
+    $fcmMarin = Models\FcmMarin::factory()->create();
    $marin = $fcmMarin->marin;
     // S'assurer qu'il n'est pas déjà en FCM
-    FcmMarin::where('rh_marin_id', $marin->id)->delete();
+    Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
     $marin->refresh();
     expect($marin->estEnFcm())->toBeFalse();
     $cohorte = Models\Cohorte::factory()->create();
@@ -492,14 +468,14 @@ it('genere un  UserGeneratedEvent quand on assigne un mentor a un marin suivi en
     Event::fake();
     
      // Création d'un marin non suivi en FCM
-    $fcmMarin = FcmMarin::factory()->create();
+    $fcmMarin = Models\FcmMarin::factory()->create();
     $marin = $fcmMarin->marin;
     // S'assurer qu'il n'est pas déjà en FCM
-    FcmMarin::where('rh_marin_id', $marin->id)->delete();
+    Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
     $marin->refresh();
     expect($marin->estEnFcm())->toBeFalse();
   
-    $mentor = Marin::factory()->create();
+    $mentor = Models\Marin::factory()->create();
     
     Livewire::actingAs($this->admin)
         ->test(ListMarins::class)
@@ -527,16 +503,16 @@ it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi e
     Event::fake();
     
      // Création d'un marin non suivi en FCM
-    $marin = Marin::factory()->create();
-    $marin = Marin::find($marin->id);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
     $marin->suivi_en_fcm=false;
     $marin->refresh();
     logger()->info($marin);
     expect($marin->suivi_en_fcm)->toBeFalse();
   
-    $parcours = Parcours::factory()->create();
-    $parcours = Parcours::find($parcours->id);
-    logger()->info(Parcours::all());
+    $parcours = Models\Parcours::factory()->create();
+    $parcours = Models\Parcours::find($parcours->id);
+    logger()->info(Models\Parcours::all());
 
     logger()->info("Starting livewire test");
     Livewire::actingAs($this->admin)
@@ -567,21 +543,21 @@ it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi e
 
 it('affiche le livret FCM', function () {
     // Création d'un marin FCM via factory
-    $this->assertTrue(Marin::all()->count() == 0);
-    $fcmMarin = FcmMarin::factory()->create();
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $fcmMarin = Models\FcmMarin::factory()->create();
    $marin = $fcmMarin->marin;
    
   // dump($marin);
    expect($marin->estEnFcm())->toBeTrue();
-    $this->assertTrue(Marin::all()->count() == 1);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
 
     //dump($marin->complementsFcm);
     
     // Seed du parcours
     $this->seed(DeasmMasterSeeder::class);
-    expect(Parcours::count())->toBeGreaterThan(0);
+    expect(Models\Parcours::count())->toBeGreaterThan(0);
 
-    $parcours = Parcours::first();
+    $parcours = Models\Parcours::first();
     
 
     // Création du parcours sérialisé
@@ -630,34 +606,26 @@ it('affiche le livret FCM', function () {
         ->assertSee("Livret du marin")
         ->assertSee($marin->nom)
         ->assertSee($marin->prenom)
-        ->assertSee('C6 - Gerer les munitions pyrotechniques')
-        ;
-
+        ->assertSee('C6 - Gerer les munitions pyrotechniques');
     
 });
 
 
-
-
-
-
-
-
 it('met à jour le parcours en cas de validation', function () {
-    $this->assertSame(0, Marin::count());
+    $this->assertSame(0, Models\Marin::count());
 
-    $marin = Marin::factory()->create();
-    $marin = Marin::find($marin->id);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
 
     $marin->suivi_en_fcm = true;
-    FcmMarin::create(["rh_marin_id" => $marin->id]);
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
 
-    $this->assertSame(1, Marin::count());
+    $this->assertSame(1, Models\Marin::count());
 
     $this->seed(DeasmMasterSeeder::class);
 
-    $this->assertSame(1, Parcours::count());
-    $parcours = Parcours::first();
+    $this->assertSame(1, Models\Parcours::count());
+    $parcours = Models\Parcours::first();
 
     event(new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
@@ -734,17 +702,17 @@ it('met à jour le parcours en cas de validation', function () {
 
 
 it('met à jour le parcours en cas d\'annulation', function () {
-    $this->assertSame(0, Marin::count());
+    $this->assertSame(0, Models\Marin::count());
 
-    $marin = Marin::factory()->create();
-    $marin = Marin::find($marin->id);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
     $marin->suivi_en_fcm = true;
-    FcmMarin::create(["rh_marin_id" => $marin->id]);
-    $this->assertSame(1, Marin::count());
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertSame(1, Models\Marin::count());
 
     $this->seed(DeasmMasterSeeder::class);
-    $this->assertSame(1, Parcours::count());
-    $parcours = Parcours::first();
+    $this->assertSame(1, Models\Parcours::count());
+    $parcours = Models\Parcours::first();
 
     event(new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
@@ -841,17 +809,17 @@ it('met à jour le parcours en cas d\'annulation', function () {
 
 
 it('met à jour le parcours en cas de proposition', function () {
-    $this->assertSame(0, Marin::count());
+    $this->assertSame(0, Models\Marin::count());
 
-    $marin = Marin::factory()->create();
-    $marin = Marin::find($marin->id);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
     $marin->suivi_en_fcm = true;
-    FcmMarin::create(["rh_marin_id" => $marin->id]);
-    $this->assertSame(1, Marin::count());
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertSame(1, Models\Marin::count());
 
     $this->seed(DeasmMasterSeeder::class);
-    $this->assertSame(1, Parcours::count());
-    $parcours = Parcours::first();
+    $this->assertSame(1, Models\Parcours::count());
+    $parcours = Models\Parcours::first();
 
     event(new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
@@ -928,16 +896,16 @@ it('met à jour le parcours en cas de proposition', function () {
 
 
 it('met a jour le parcours en cas de validation d une proposition', function(){
-    $this->assertTrue(Marin::all()->count() == 0);
-    $marin = Marin::factory()->create();
-    $marin = Marin::find($marin->id);
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
     $marin->suivi_en_fcm = true;
-    FcmMarin::create(["rh_marin_id" => $marin->id]);
-    $this->assertTrue(Marin::all()->count() == 1);
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
 
     $this->seed(DeasmMasterSeeder::class);
-    $this->assertTrue(Parcours::count() == 1);
-    $parcours = Parcours::first();
+    $this->assertTrue(Models\Parcours::count() == 1);
+    $parcours = Models\Parcours::first();
 
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
@@ -1034,16 +1002,16 @@ it('met a jour le parcours en cas de validation d une proposition', function(){
 });
 
 it('met a jour le parcours en cas de refus d une proposition', function(){
-    $this->assertTrue(Marin::all()->count() == 0);
-    $marin = Marin::factory()->create();
-    $marin = Marin::find($marin->id);
+    $this->assertTrue(Models\Marin::all()->count() == 0);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
     $marin->suivi_en_fcm = true;
-    FcmMarin::create(["rh_marin_id" => $marin->id]);
-    $this->assertTrue(Marin::all()->count() == 1);
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
 
     $this->seed(DeasmMasterSeeder::class);
-    $this->assertTrue(Parcours::count() == 1);
-    $parcours = Parcours::first();
+    $this->assertTrue(Models\Parcours::count() == 1);
+    $parcours = Models\Parcours::first();
 
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
@@ -1142,15 +1110,15 @@ it('met a jour le parcours en cas de refus d une proposition', function(){
 
 it('valide automatiquement toutes les activites a false quand on valide un savoirfaire', function(){
     // ✅ Création marin avec FcmMarin via factory
-    $marin = Marin::factory()->create();
-    $marin = Marin::find($marin->id);
+    $marin = Models\Marin::factory()->create();
+    $marin = Models\Marin::find($marin->id);
     $marin->suivi_en_fcm = true;
-    FcmMarin::create(["rh_marin_id" => $marin->id]);
-    $this->assertTrue(Marin::all()->count() == 1);
+    Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
+    $this->assertTrue(Models\Marin::all()->count() == 1);
 
     $this->seed(DeasmMasterSeeder::class);
-    $this->assertTrue(Parcours::count() == 1);
-    $parcours = Parcours::first();
+    $this->assertTrue(Models\Parcours::count() == 1);
+    $parcours = Models\Parcours::first();
 
     $event = new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
@@ -1452,14 +1420,41 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
 it('les widgets ne provoquent pas d\'exception quand l\'utilisateur n\'est pas un marin bug #678635', function() {
     // On teste carrément sans authentification.
 
-    $this->assertTrue(MarinsSupervisesWidget::canView() == false);
-    $this->assertTrue(MentorProgressionWidget::CanView() == false);
-    $this->assertTrue(MentorStatsWidget::canView() == false);
+    $this->assertTrue(Widgets\Mentor\MarinsSupervisesWidget::canView() == false);
+    $this->assertTrue(Widgets\Mentor\MentorProgressionWidget::CanView() == false);
+    $this->assertTrue(Widgets\Mentor\MentorStatsWidget::canView() == false);
 
-    $this->assertTrue(MarinEvolutionWidget::canView() == false);
-    $this->assertTrue(MarinProgressWidget::canView() == false);
-    $this->assertTrue(MarinRepartitionWidget::canView() == false);
-    $this->assertTrue(MarinStatsWidget::canView() == false);
+    $this->assertTrue(Widgets\Marin\MarinEvolutionWidget::canView() == false);
+    $this->assertTrue(Widgets\Marin\MarinProgressWidget::canView() == false);
+    $this->assertTrue(Widgets\Marin\MarinRepartitionWidget::canView() == false);
+    $this->assertTrue(Widgets\Marin\MarinStatsWidget::canView() == false);
     
 });
+
+it('permet de creer une note pour un marin en FCM', function () {
+    $marin = Models\Marin::factory()->create();
+
+    $this->assertTrue(Models\Note::where('rh_marin_id', $marin->id)->count() == 0);
+
+    event(new UserGeneratedEvent(
+        UserGeneratedEventTypes::MARIN_EN_FCM,
+        $this->admin->uuid,
+        ObjectClasses::MARIN,
+        $marin->uuid,
+        ['test' => 'data']
+    ));
+
+    Livewire::actingAs($this->admin)
+        ->test(ListMarins::class)
+        ->assertCanSeeTableRecords([$marin])
+        ->callAction(TestAction::make('create-note')->table($marin),
+        [
+            'libelle' =>"libelle",   
+            'marin_id' => $marin->uuid,
+            'date' => now()
+        ]);
+
+    $this->assertTrue(Models\Note::where('rh_marin_id', $marin->id)->count() == 1);
+
+})->only();
 
