@@ -219,7 +219,7 @@ class Marin extends BaseMarin
      * // Dans un scope
      * Marin::dansUnite('TOULON')->get();
      */
-    public function getUnite(): ?string
+    public function getUniteAsString(): ?string
     {
         return $this->unite?->libelle_court ?? $this->unite?->libelle_long;
     }
