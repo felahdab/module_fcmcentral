@@ -1,3 +1,10 @@
+## 0.2.0 (February 19, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.1.2 –> 0.2.0
+- Ajustements pour Filament v4 (donc Skeletor v4.0.0+)
+- Ajout de la version dans module.json
+- Merge branch 'filamentv4-upgrade'
+- Ajustements sur les paramètres de compilation du CSS.
+
 ## 0.1.2 (February 16, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.1.1 –> 0.1.2
 - Implements art #696979 : Rajout permission refuser pour la proposition mentoré (role Mentor)
