@@ -13,6 +13,8 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\Pages\E
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\RelationManagers;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\RelationManagers\CompetenceSavoirfairesRelationManager;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\RelationManagers\CompetencesRelationManager;
+
 
 use Modules\FcmCentral\Models\Affectation;
 use Filament\Forms;
@@ -151,6 +153,7 @@ class AffectationResource extends Resource
     {
         return [
             CompetenceSavoirfairesRelationManager::class,
+            CompetencesRelationManager::class,
         ];
     }
 
