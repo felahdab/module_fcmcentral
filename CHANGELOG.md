@@ -1,3 +1,16 @@
+## 0.2.1 (March 10, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.0 –> 0.2.1
+- Inclusion des tests Mentor en provenance de FcmCommun. Ajustement de la méthode assignerMentor pour qu'elle accepte aussi bien un Marin de Fcm qu'un Marin de RH.
+- Utilisation des actions et filtre dans la page MarinResource.
+- Creation EnFcmFilter
+- Creation AffecterMentorAction
+- Creation AttribuerParcoursAction
+- Creation CreeUneNoteAction
+- Creation LivretPdfAction
+- Creation JalonFcmAction
+- Ceation ToggleFcmAction
+- Création de la DownloadCsvAction
+
 ## 0.2.0 (February 19, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.1.2 –> 0.2.0
 - Ajustements pour Filament v4 (donc Skeletor v4.0.0+)
