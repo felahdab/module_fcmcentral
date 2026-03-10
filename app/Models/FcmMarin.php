@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\FcmCentral\Traits\HasTablePrefix;
 use Modules\FcmCentral\Database\Factories\FcmMarinFactory;
 use Modules\FcmCentral\Models\Marin;
+use Modules\RH\Models\Marin as RHMarin;
 use Modules\FcmCentral\Models\MarinParcours;
 use Modules\FcmCommun\Models\Cohorte;
 
@@ -114,7 +115,7 @@ class FcmMarin extends Model
         $this->load('cohorte');
     }
 
-    public function assignerMentor(Marin $mentor): void
+    public function assignerMentor(Marin | RHMarin $mentor): void
     {
         $this->mentor_id = $mentor->id;
         $this->save();
