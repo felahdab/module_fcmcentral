@@ -86,6 +86,7 @@ class MarinsSupervisesWidget extends BaseWidget
                     ->placeholder('Aucune validation'),
             ])
             ->recordActions([
+                // TODO tache 713885: ajuster l'apparence pour la faire coller avec l'affichage dans la page MarinRessource
                 Action::make('voir_parcours')
                     ->label('Voir parcours')
                     ->icon('heroicon-m-eye')
@@ -94,12 +95,16 @@ class MarinsSupervisesWidget extends BaseWidget
                     //         ? \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(['marinId' => $record->id])
                     //         : '#'
                     // )
+                    // TODO tache 713885: en profiter pour me remplacer ce vilain lien par l'utilisation de la méthode getUrl de la page LivretDeFcmLight.
                     ->url(fn ($record) =>
                         route('filament.FCM Central.resources.marins.livret-de-fcm',
                         ['record' =>$record])
                     )
                     //->openUrlInNewTab()
                     ->visible(fn (Marin $record) => $this->hasParcours($record)),
+
+                    // TODO tache 713885: ajouter un lien vers la FicheBilan du marin, avec la même icone que dans le page MarinResource.
+
 
                 // Tables\Actions\Action::make('valider_activites')
                 //     ->label('Valider')

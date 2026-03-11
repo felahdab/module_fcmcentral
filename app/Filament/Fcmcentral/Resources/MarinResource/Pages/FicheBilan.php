@@ -42,6 +42,12 @@ class FicheBilan extends ViewRecord
         'openJalonModal' => 'ouvrirJalonModal'
     ];
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        // TODO Task 713885: si l'utilisateur est le mentor FCM du marin dont on essaye d'ouvrir la fiche Bilan: donner accès.
+        return parent::canAccess($parameters);
+    }
+
     // ============================================
     // 🔧 LIFECYCLE METHODS
     // ============================================
