@@ -1,3 +1,7 @@
+## 0.2.2 (March 11, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.1 –> 0.2.2
+- Quick fix: largeur du livret de FCM sur la page et retrait de l'action permettant d'ajouter un marin depuis la liste des marins.
+
 ## 0.2.1 (March 10, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.0 –> 0.2.1
 - Inclusion des tests Mentor en provenance de FcmCommun. Ajustement de la méthode assignerMentor pour qu'elle accepte aussi bien un Marin de Fcm qu'un Marin de RH.
