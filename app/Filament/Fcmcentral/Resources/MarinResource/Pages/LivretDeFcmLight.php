@@ -18,6 +18,13 @@ class LivretDeFcmLight extends ViewRecord
     
     protected static string $resource = MarinResource::class;
     protected static ?string $title = 'Livret du marin';
+
+     
+    public static function canAccess(array $parameters = []): bool
+    {
+        // TODO Bugfix 713874: si l'utilisateur est le mentor FCM du marin dont on essaye d'ouvrir le livret de FCM: donner accès.
+        return parent::canAccess($parameters);
+    }
   
     public function getRelationManagers(): array
     {
