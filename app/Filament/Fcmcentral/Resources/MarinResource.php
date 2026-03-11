@@ -70,6 +70,7 @@ class MarinResource extends Resource
      */
     public static function getEloquentQuery(): Builder
     {
+        //TODO tache 713887: retirer la méthode ou l'ajuster.
         $query = parent::getEloquentQuery();
 
         /**
