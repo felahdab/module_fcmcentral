@@ -1,3 +1,13 @@
+## 0.2.3 (March 13, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.2 –> 0.2.3
+- Merge branch 'master' into tuleap-700370-bug-creation-parcours-impossibilite-de-relier-affectation-et-competences
+- Implements artifact #713885: les autorisations d'accès aux pages LivretFcmLight et FicheBilan sont ajustées pour autoriser les accès à certains utilisateurs sans aucune permission en raison de leur inscription en FCM ou du fait qu'ils sont Mentor de quelqu'un en FCM. Un test unitaire vérifie ce point. Le widget Mentor affiche des icones cohérentes avec les icones déjà utilisées dans la liste des marins.
+- Merge branch 'master' into tuleap-713885-ajuster-le-widget-marinssuperviseswidget-et-la-page-fichebilan
+- Implements artifact #713887: la méthode getEloquentQuery de la MarinRessource est devenue inutile puisque le filtrage des Marins est fait dès le scope du modèle Marin du module RH.
+- Merge branch 'master' into tuleap-713887-ajuster-ou-supprimer-la-methode-geteloquentquery-de-la-marinressource-de-fcmcentral
+- Implements artifact #713874: le mentor a accès au livret de FCM de ses mentorés sans avoir besoin de permission particulière.
+- Correction par rector for Filament v4.
+
 ## 0.2.2 (March 11, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.1 –> 0.2.2
 - Quick fix: largeur du livret de FCM sur la page et retrait de l'action permettant d'ajouter un marin depuis la liste des marins.
