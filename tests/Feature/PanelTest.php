@@ -32,7 +32,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Pages\Configuration;
 
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
-
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\FicheBilan;
 use Modules\RH\Models\Unite;
 
 uses(RefreshDatabase::class);
@@ -1397,7 +1397,7 @@ it('permet de creer une note pour un marin en FCM', function () {
 
 });
 
-it('permet au mentor d acceeder au livret de FCM de son mentore sans permission particuliere', function () {
+it('permet au mentor d acceeder au livret de FCM et à la fiche bilan de son mentore sans permission particuliere', function () {
     /** Pour ce test, on a besoin de 2 marins, affectés à la même unité. L'un des 2 marins est placé en FCM
      * avec un parcours, et l'autre est désigné comme mentor.
      * Pour le mentor, on créé en plus un user qui lui est associé et avec lequel on fait les actions à tester.
@@ -1459,6 +1459,10 @@ it('permet au mentor d acceeder au livret de FCM de son mentore sans permission 
     // Test de l'affichage du livret via Livewire
     Livewire::actingAs($user)
         ->test(LivretDeFcmLight::class, ['record' => $marin->id])
+        ->assertSuccessful();
+
+    Livewire::actingAs($user)
+        ->test(FicheBilan::class, ['record' => $marin->id])
         ->assertSuccessful();
         
 });

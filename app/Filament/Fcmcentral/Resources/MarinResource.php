@@ -26,6 +26,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\FicheBilan;
+use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Actions\DownloadCsvAction;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Actions\ToggleFcmAction;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Actions\JalonFcmAction;
@@ -45,6 +46,7 @@ class MarinResource extends Resource
     public static function canCreate(): bool
     {
         return false;
+        static::canAccess();
     }
 
     /**
@@ -256,10 +258,20 @@ class MarinResource extends Resource
                         'title' => 'Livret FCM',
                         'class' => 'btn-livret',
                     ])
-                    ->visible(fn ($record) => $record->complementsFcm?->donnees_du_parcours &&
-                        auth()->check() &&
-                        auth()->user()->can("fcmcentral::livret.voir"))
-                    ->url(fn ($record) => static::getUrl('livret-de-fcm', ['record' => $record->id])),
+                    ->visible(fn ($record) => LivretDeFcmLight::canAccess(['record' => $record]))
+                    ->url(fn ($record) => LivretDeFcmLight::getUrl(['record' => $record->id])),
+
+                Action::make('mon-livret-de-fcm')
+                    ->iconButton()
+                    ->icon('heroicon-m-book-open')
+                    ->color('info')
+                    ->tooltip('Livret FCM')
+                    ->extraAttributes([
+                        'title' => 'Livret FCM',
+                        'class' => 'btn-livret',
+                    ])
+                    ->visible(fn ($record) => $record->id == Marin::fromCurrentUser()?->id && MonLivretDeFcm::canAccess())
+                    ->url(fn ($record) => MonLivretDeFcm::getUrl()),
 
                 Action::make('fiche-bilan')
                     ->iconButton()

@@ -2,22 +2,22 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
+use Exception;
 use Carbon\Carbon;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Forms;
 use Filament\Notifications\Notification;
+use Livewire\Attributes\Computed;
+
+use Modules\FcmCommun\Services\CalculHeuresParcoursService;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+
+use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Modules\FcmCentral\Models\User;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Models\Note;
-use Modules\FcmCentral\Models\TypeNote;
-use Modules\FcmCentral\Models\Etat;
-use Modules\FcmCentral\Models\TypeEtat;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
-use Livewire\Attributes\Computed;
-use Modules\FcmCommun\Services\CalculHeuresParcoursService;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
-use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 
 class FicheBilan extends ViewRecord
 {
@@ -42,12 +42,6 @@ class FicheBilan extends ViewRecord
         'openJalonModal' => 'ouvrirJalonModal'
     ];
 
-    public static function canAccess(array $parameters = []): bool
-    {
-        // TODO Task 713885: si l'utilisateur est le mentor FCM du marin dont on essaye d'ouvrir la fiche Bilan: donner accès.
-        return parent::canAccess($parameters);
-    }
-
     // ============================================
     // 🔧 LIFECYCLE METHODS
     // ============================================
@@ -62,36 +56,55 @@ class FicheBilan extends ViewRecord
     // 🔐 CONTRÔLES D'ACCÈS
     // ============================================
 
+    /** La neutralisation des méthodes authorizeRecourseAccess et authorizeAccess renvoie tout le controle d'accès à la méthode
+     *  canAccess. Le comportement de la page est alors identique aux pages non intégrées à des Ressource.
+     */
+    public static function authorizeResourceAccess(): void
+    {
+        return;
+    }
+
+    protected function authorizeAccess(): void
+    {
+        return ;
+    }
+
     public static function canAccess(array $parameters = []): bool
     {
-        if (!auth()->check()) return false;
+        $marin_a_voir = $parameters["record"];
+        $marin = Marin::fromCurrentUser();
 
-        if (! array_key_exists("record", $parameters)) return false;
+        if ($marin != null) 
+        {
+            /** L'utilisateur a une fiche de Marin. Il peut donc peut-être être mentor. */
+            $marin = cast_as_eloquent_descendant($marin, Marin::class);
+            
+            if ($marin->est_mentor_de($marin_a_voir))
+            {
+                return true;
+            }
 
-        $marinId = $parameters["record"]->id;
+            if ($marin->id == $marin_a_voir->id)
+            {
+                return true;
+            }
+        }
 
-        $marin_a_voir = Marin::find($marinId);
-        if (! $marin_a_voir)
-            return false;
-
-        if (! auth()->user()->can("fcmcentral::ficheBilan.voir")){
+        /** A ce moment là, on fait un test basé sur la resource pour préserver le rôle des permissions liées à la Policy associée au
+        * modèle Marin pour l'accès à cette page. On le fait ici par exclusion: si l'utilisateur n'a pas la permission, il est refusé.
+        */
+        if ( ! static::getResource()::canView($marin_a_voir))
+        {
             return false;
         }
-        
-        if ( auth()->user()->can("fcmcentral::voir_tous_les_marins") )
+
+        // Mais même s'il a accès à la liste des marins, il faut encore qu'il ait le droit de voir les fiches bilan.
+        // Cela permet de donner accès à la liste sans pour autant donner accès à la fiche Bilan.
+        if (auth()->user()->can("fcmcentral::ficheBilan.voir")){
             return true;
+        }
 
-        $currentMarin = Marin::fromCurrentUser();
-        if ($currentMarin == null) return false;
-
-        if ($currentMarin->id == $marin_a_voir->id) return true; // On autorise le marin à voir sa propre fiche Bilan.
-    
-        // Vérifier si c'est le mentor de CE marin
-        $isMentor = FcmMarin::where('mentor_id', $currentMarin->id)
-            ->where('rh_marin_id', $marinId)
-            ->exists();
-   
-        return $isMentor;
+        return false;
     }
 
 
