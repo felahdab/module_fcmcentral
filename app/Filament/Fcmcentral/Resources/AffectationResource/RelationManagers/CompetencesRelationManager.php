@@ -1,8 +1,18 @@
 <?php
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\RelationManagers;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\CreateAction;
+use Illuminate\Support\Str;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -13,29 +23,29 @@ class CompetencesRelationManager extends RelationManager
     protected static string $relationship = 'competences';
     protected static ?string $title = 'Compétences';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('code')
+        return $schema
+            ->components([
+                TextInput::make('code')
                     ->required()
                     ->label('Code')
                     ->maxLength(150),
-                Forms\Components\TextInput::make('libelle_court')
+                TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
                     ->maxLength(150),
-                Forms\Components\Textarea::make('libelle_long')
+                Textarea::make('libelle_long')
                     ->label('Libellé long')
                     ->rows(3),
-                Forms\Components\Select::make('parcours_type_id')
+                Select::make('parcours_type_id')
                     ->relationship('parcoursType', 'libelle_court')
                     ->label('Type de Parcours')
                     ->required(),
-                Forms\Components\Select::make('color')
+                Select::make('color')
                     ->options(OutilsHelper::selectColors())
                     ->label('Couleur du Badge'),
-                Forms\Components\TextInput::make('ordre')
+                TextInput::make('ordre')
                     ->numeric()
                     ->default(1),
             ]);
@@ -45,41 +55,41 @@ class CompetencesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('code')
+                TextColumn::make('code')
                     ->label('Code')
                     ->badge()
                     ->color(fn($record) => $record->color ?? 'info')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('libelle_court')
+                TextColumn::make('libelle_court')
                     ->label('Libellé')
                     ->limit(50)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('parcoursType.libelle_court')
+                TextColumn::make('parcoursType.libelle_court')
                     ->label('Type Parcours'),
-                Tables\Columns\TextColumn::make('savoirfaires_count')
+                TextColumn::make('savoirfaires_count')
                     ->counts('savoirfaires')
                     ->label('SF')
                     ->badge()
                     ->color('info'),
-                Tables\Columns\TextColumn::make('ordre')
+                TextColumn::make('ordre')
                     ->sortable(),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->label('Créer une compétence')
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['uuid'] = \Illuminate\Support\Str::uuid()->toString();
+                    ->mutateDataUsing(function (array $data): array {
+                        $data['uuid'] = Str::uuid()->toString();
                         return $data;
                     }),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->reorderable('ordre')
