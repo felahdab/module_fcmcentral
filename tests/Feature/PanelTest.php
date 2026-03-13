@@ -33,6 +33,8 @@ use Modules\FcmCentral\Filament\Fcmcentral\Pages\Configuration;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
 
+use Modules\RH\Models\Unite;
+
 uses(RefreshDatabase::class);
 uses(TestCase::class);
 
@@ -42,70 +44,7 @@ beforeEach(function () {
     Filament::setCurrentPanel(Filament::getPanel('FCM Central'));
     
     $this->admin = User::factory()->create(['admin' => 1]);
-    
-    $this->createMarin = function() {
-        $marin = Models\Marin::factory()->create(['suivi_en_fcm' => true]);
-        Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
-        return $marin->fresh();
-    };
-    
-    $this->createParcoursAvecDonnees = function() {
-        $this->seed(DeasmMasterSeeder::class);
-        return Models\Models\Parcours::first();
-    };
-    
-    $this->serializeParcours = function($parcours) {
-        event(new UserGeneratedEvent(
-            event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
-            user_uuid: $this->admin->uuid,
-            object_class: ObjectClasses::PARCOURS,
-            object_uuid: $parcours->uuid,
-            detail: [
-                "version" => 1,
-                "date_de_debut" => Carbon::tomorrow(),
-            ]
-        ));
-    };
-    
-    $this->assignerParcoursAMarin = function($marin, $parcours) {
-        event(new UserGeneratedEvent(
-            event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
-            user_uuid: $this->admin->uuid,
-            object_class: ObjectClasses::MARIN,
-            object_uuid: $marin->uuid,
-            detail: ["parcours" => $parcours->uuid]
-        ));
-        
-        // Recharger pour être sûr que complements_fcm existe
-        $marin->refresh();
-    };
-    
-    $this->findElementInParcours = function($parcoursMarin, $type, $uuid) {
-        foreach ($parcoursMarin['affectations'] ?? [] as $affectation) {
-            if ($type === 'affectation' && $affectation['uuid'] === $uuid) {
-                return $affectation;
-            }
-            
-            foreach ($affectation['competences'] ?? [] as $competence) {
-                if ($type === 'competence' && $competence['uuid'] === $uuid) {
-                    return $competence;
-                }
-                
-                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
-                    if ($type === 'competenceSavoirfaire' && $csf['uuid'] === $uuid) {
-                        return $csf;
-                    }
-                    
-                    foreach ($csf['objectifs'] ?? [] as $objectif) {
-                        if ($type === 'objectif' && $objectif['uuid'] === $uuid) {
-                            return $objectif;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    };
+
 });
 
 // ========================================
@@ -1458,3 +1397,69 @@ it('permet de creer une note pour un marin en FCM', function () {
 
 });
 
+it('permet au mentor d acceeder au livret de FCM de son mentore sans permission particuliere', function () {
+    /** Pour ce test, on a besoin de 2 marins, affectés à la même unité. L'un des 2 marins est placé en FCM
+     * avec un parcours, et l'autre est désigné comme mentor.
+     * Pour le mentor, on créé en plus un user qui lui est associé et avec lequel on fait les actions à tester.
+     */
+    $unite = Unite::factory()->create();
+    $marin = Models\Marin::factory()->create(["unite_id" => $unite->id]);
+    $mentor = Models\Marin::factory()->create(["unite_id" => $unite->id]);
+    $user = $mentor->createUser();
+    $mentor->refresh();
+    $this->assertTrue($user->marin->id == $mentor->id);
+
+    /** On configure le marin (en FCM, parcours, attribution mentor) */
+    event(new UserGeneratedEvent(
+        UserGeneratedEventTypes::MARIN_EN_FCM,
+        $this->admin->uuid,
+        ObjectClasses::MARIN,
+        $marin->uuid,
+        ['test' => 'data']
+    ));
+    
+    // Seed du parcours
+    $this->seed(DeasmMasterSeeder::class);
+    $parcours = Models\Parcours::first();
+
+    // Création du parcours sérialisé
+    event(new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+        user_uuid: $this->admin->uuid,
+        object_class: ObjectClasses::PARCOURS,
+        object_uuid: $parcours->uuid,
+        detail: [
+            "version" => 1,
+            "date_de_debut"=> Carbon::tomorrow(),
+        ]
+    ));
+
+    event(new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
+        user_uuid: $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid: $marin->uuid,
+        detail: [
+            "parcours" => $parcours->uuid,
+        ]
+    ));
+
+    event(new UserGeneratedEvent(
+        event_type: UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
+        user_uuid: $this->admin->uuid,
+        object_class: ObjectClasses::MARIN,
+        object_uuid: $marin->uuid,
+        detail: [
+            "mentor" => $mentor->uuid
+        ]
+    ));
+
+    /** Voilà: on a 2 marins, dont 1 en FCM avec un parcours, et l'autre mentor du premier et associé au user $user. */
+   
+    // Test de l'affichage du livret via Livewire
+    Livewire::actingAs($user)
+        ->test(LivretDeFcmLight::class, ['record' => $marin->id])
+        ->assertSuccessful();
+        
+});
+    
