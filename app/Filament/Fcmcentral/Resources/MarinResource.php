@@ -65,45 +65,6 @@ class MarinResource extends Resource
         return "0";
     }
 
-    /**
-     * Filtrage automatique selon les droits
-     */
-    public static function getEloquentQuery(): Builder
-    {
-        //TODO tache 713887: retirer la méthode ou l'ajuster.
-        $query = parent::getEloquentQuery();
-
-        /**
-         * Si l'utilisateur n'est pas authentifié, on renvoie une requête qui bloque tout accès.
-         */
-        if (!auth()->check())
-        {
-            return $query->whereRaw('1=0');
-        }
-
-        /**
-         * A partir de ce point, on sait que l'utilisateur est authentifié.
-         */
-
-        
-        // Les admins voient tout
-        if (auth()->user()->can("fcmcentral::voir_tous_les_marins")){
-            return $query;
-        }
-
-        $currentMarin = Marin::fromCurrentUser();
-
-        if ($currentMarin && $currentMarin->est_mentor) {
-            $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
-                ->pluck('rh_marin_id');
-            
-            return $query->whereIn('id', $marinIds);
-        }
-    
-        // Par défaut, query vide
-        return $query->whereRaw('1 = 0');
-    }
-
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
