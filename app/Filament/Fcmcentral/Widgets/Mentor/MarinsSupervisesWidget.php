@@ -11,6 +11,8 @@ use Filament\Widgets\TableWidget as BaseWidget;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
 use Illuminate\Support\Facades\Log;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\FicheBilan;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight;
 
 class MarinsSupervisesWidget extends BaseWidget
 {
@@ -87,31 +89,25 @@ class MarinsSupervisesWidget extends BaseWidget
             ])
             ->recordActions([
                 Action::make('voir_parcours')
-                    ->label('Voir parcours')
-                    ->icon('heroicon-m-eye')
-                    // ->url(fn (Marin $record): string =>
-                    //     $this->hasParcours($record)
-                    //         ? \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(['marinId' => $record->id])
-                    //         : '#'
-                    // )
-                    ->url(fn ($record) =>
-                        route('filament.FCM Central.resources.marins.livret-de-fcm',
-                        ['record' =>$record])
-                    )
-                    //->openUrlInNewTab()
+                    ->iconButton()
+                    ->icon('heroicon-m-book-open')
+                    ->color('info')
+                    ->url(fn($record) => LivretDeFcmLight::getUrl(['record' => $record], panel: "FCM Central" ))
                     ->visible(fn (Marin $record) => $this->hasParcours($record)),
 
-                // Tables\Actions\Action::make('valider_activites')
-                //     ->label('Valider')
-                //     ->icon('heroicon-m-check-circle')
-                //     ->color('success')
-                //     ->visible(fn (Marin $record): bool =>
-                //         $this->calculateEnAttente($record) > 0 && $this->hasParcours($record)
-                //     )
-                //     ->url(fn (Marin $record): string =>
-                //         \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl(['marinId' => $record->id])
-                //     )
-                //     ->openUrlInNewTab(),
+                Action::make('voir_fiche_bilan')
+                    ->iconButton()
+                    ->icon('heroicon-m-chart-bar-square')
+                    ->color('warning')
+                    ->extraAttributes([
+                        'title' => 'Fiche Bilan FCM',
+                        'class' => 'btn-bilan',
+                    ])
+                    ->url(fn($record) => FicheBilan::getUrl(['record' => $record], panel: "FCM Central" ))
+                    ->visible(fn (Marin $record) => true || FicheBilan::canAccess(['record' => $record])),
+
+
+
             ])
             ->defaultSort('nom')
             ->striped()
