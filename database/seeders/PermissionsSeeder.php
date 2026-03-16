@@ -119,7 +119,7 @@ class PermissionsSeeder extends Seeder
         ]);
 
         Permission::firstOrCreate([
-            "name" => "fcmcentral::ficheBilan.notevoir",
+            "name" => "fcmcentral::note.voir",
             "guard_name" => "web"
         ]);
 
