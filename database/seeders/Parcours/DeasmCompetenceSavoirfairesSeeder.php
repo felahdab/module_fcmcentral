@@ -1,604 +1,104 @@
 <?php
- 
+
 namespace Modules\FcmCentral\Database\Seeders\Parcours;
- 
+
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
- 
+use Modules\FcmCentral\Models\CompetenceSavoirfaire;
+use Modules\FcmCentral\Models\Competence;
+use Modules\FcmCentral\Models\Savoirfaire;
+use Modules\FcmCentral\Models\SavoirfaireType;
+
 class DeasmCompetenceSavoirfairesSeeder extends Seeder
 {
-    /**
-     * Seeder généré automatiquement pour fcmcentral_activite_savoirfaire
-     * Parcours ID: 104
-     * Généré le: {\Carbon\Carbon::now()->format('Y-m-d H:i:s')}
-     */
-    public function run()
+    public function run(): void
     {
-        // Désactiver les contraintes de clés étrangères
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        $competences      = Competence::pluck('id', 'code');
+        $savoirfaires     = Savoirfaire::pluck('id', 'code');
+        $savoirfaireTypes = SavoirfaireType::pluck('id', 'code');
 
-        // Recuperer data
-        $competences = DB::table('fcmcentral_competences')->pluck('id','code');
-        $savoirfaires = DB::table('fcmcentral_savoirfaires')->pluck('id','code');
-        $savoirfaireTypes = DB::table('fcmcentral_savoirfaire_types')->pluck('id','code');
-        
-        $i=1;
-    
-        $data = [
+        $i = 1;
 
-            // AN 1
-          // [
-          //   // 'uuid' => Str::uuid()->toString(),
-          //   'competence_id' => $competences['C1'],
-          //   'savoirfaire_id' => $savoirfaires['C0-SF0'],
-          //   'savoirfaire_type_id' => $savoirfaireTypes['C'],
-          //   'libelle_court' => '',
-          //   'ordre' => $i++,
-          //   'heures' => 0,
-          //   'jours' => 365,
-          //   'created_at' => now(),
-          //   'updated_at' => now(),
-          // ],
+        $rows = [
+            // AN 2
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c1c1sf1', 'competence' => 'C1', 'sf' => 'C1-SF1', 'type' => 'C', 'libelle_court' => '',                              'heures' => 19,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c1c1sf2', 'competence' => 'C1', 'sf' => 'C1-SF2', 'type' => 'C', 'libelle_court' => '',                              'heures' => 8.5,  'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c1c1sf3', 'competence' => 'C1', 'sf' => 'C1-SF3', 'type' => 'C', 'libelle_court' => '',                              'heures' => 4,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf1', 'competence' => 'C2', 'sf' => 'C2-SF1', 'type' => 'C', 'libelle_court' => '',                              'heures' => 42,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf2', 'competence' => 'C2', 'sf' => 'C2-SF2', 'type' => 'C', 'libelle_court' => '',                              'heures' => 25,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf3', 'competence' => 'C2', 'sf' => 'C2-SF3', 'type' => 'C', 'libelle_court' => '',                              'heures' => 6,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf4', 'competence' => 'C2', 'sf' => 'C2-SF4', 'type' => 'C', 'libelle_court' => '',                              'heures' => 15,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf5', 'competence' => 'C2', 'sf' => 'C2-SF5', 'type' => 'S', 'libelle_court' => 'FCM/THEORIE LAS NIVEAU 3',     'heures' => 35,   'jours' => 5],
 
+            // AN 3
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf1', 'competence' => 'C3', 'sf' => 'C3-SF1', 'type' => 'C', 'libelle_court' => '',                              'heures' => 16,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf2', 'competence' => 'C3', 'sf' => 'C3-SF2', 'type' => 'C', 'libelle_court' => '',                              'heures' => 10,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf3', 'competence' => 'C3', 'sf' => 'C3-SF3', 'type' => 'C', 'libelle_court' => '',                              'heures' => 4.75, 'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf4', 'competence' => 'C3', 'sf' => 'C3-SF4', 'type' => 'C', 'libelle_court' => '',                              'heures' => 2,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf5', 'competence' => 'C3', 'sf' => 'C3-SF5', 'type' => 'S', 'libelle_court' => 'FCM/LSM NIVEAU 2 + ELAB + ENVIRO + MENACE SOUM', 'heures' => 70, 'jours' => 10],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf1', 'competence' => 'C4', 'sf' => 'C4-SF1', 'type' => 'C', 'libelle_court' => '',                              'heures' => 10,   'jours' => 0],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf2', 'competence' => 'C4', 'sf' => 'C4-SF2', 'type' => 'C', 'libelle_court' => '',                              'heures' => 5,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf3', 'competence' => 'C4', 'sf' => 'C4-SF3', 'type' => 'C', 'libelle_court' => '',                              'heures' => 20,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa2c4c4sf3', 'competence' => 'C4', 'sf' => 'C4-SF3', 'type' => 'S', 'libelle_court' => 'FCM/LSM NIVEAU 3',              'heures' => 0,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf4', 'competence' => 'C4', 'sf' => 'C4-SF4', 'type' => 'C', 'libelle_court' => '',                              'heures' => 6,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf5', 'competence' => 'C4', 'sf' => 'C4-SF5', 'type' => 'C', 'libelle_court' => '',                              'heures' => 9,    'jours' => 0],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf6', 'competence' => 'C4', 'sf' => 'C4-SF6', 'type' => 'S', 'libelle_court' => 'FCM/LSM NIVEAU 3',              'heures' => 0,    'jours' => null],
 
-          // AN 2
-          [
-            //'uuid' => Str::uuid()->toString(),
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c1c1sf1',
-            'competence_id' => $competences['C1'],
-            'savoirfaire_id' => $savoirfaires['C1-SF1'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 19,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c1c1sf2',
-            'competence_id' => $competences['C1'],
-            'savoirfaire_id' => $savoirfaires['C1-SF2'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 8.5,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c1c1sf3',
-            'competence_id' => $competences['C1'],
-            'savoirfaire_id' => $savoirfaires['C1-SF3'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 4,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf1',
-            'competence_id' => $competences['C2'],
-            'savoirfaire_id' => $savoirfaires['C2-SF1'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 42,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf2',
-            'competence_id' => $competences['C2'],
-            'savoirfaire_id' => $savoirfaires['C2-SF2'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 25,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf3',
-            'competence_id' => $competences['C2'],
-            'savoirfaire_id' => $savoirfaires['C2-SF3'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 6,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf4',
-            'competence_id' => $competences['C2'],
-            'savoirfaire_id' => $savoirfaires['C2-SF4'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 15,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c2c2sf5',
-            'competence_id' => $competences['C2'],
-            'savoirfaire_id' => $savoirfaires['C2-SF5'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/THEORIE LAS NIVEAU 3',
-            'ordre' => $i++,
-            'heures' => 35,
-            'jours' => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
+            // AN 4
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf7', 'competence' => 'C4', 'sf' => 'C4-SF7', 'type' => 'C', 'libelle_court' => 'Evaluation bord CASM',          'heures' => 4,    'jours' => 0.5],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa2c4c4sf7', 'competence' => 'C4', 'sf' => 'C4-SF7', 'type' => 'S', 'libelle_court' => 'TP DIVENT',                     'heures' => 7,    'jours' => 1],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c5c5sf1', 'competence' => 'C5', 'sf' => 'C5-SF1', 'type' => 'S', 'libelle_court' => 'FCM/SDC-LDT',                   'heures' => 35,   'jours' => 5],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c5c5sf2', 'competence' => 'C5', 'sf' => 'C5-SF2', 'type' => 'S', 'libelle_court' => 'FCM/ANGLAIS NIVEAU 2',          'heures' => 35,   'jours' => 5],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c5c5sf3', 'competence' => 'C5', 'sf' => 'C5-SF3', 'type' => 'S', 'libelle_court' => 'FCM/ANGLAIS NIVEAU 3',          'heures' => 35,   'jours' => 5],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf1', 'competence' => 'C6', 'sf' => 'C6-SF1', 'type' => 'EAD', 'libelle_court' => 'EAD LOG',                     'heures' => 10,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf2', 'competence' => 'C6', 'sf' => 'C6-SF2', 'type' => 'EAD', 'libelle_court' => '',                            'heures' => 0,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf3', 'competence' => 'C6', 'sf' => 'C6-SF3', 'type' => 'EAD', 'libelle_court' => 'FCM GESTION DE MUNITIONS',    'heures' => 16,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf4', 'competence' => 'C6', 'sf' => 'C6-SF4', 'type' => 'EAD', 'libelle_court' => 'FCM GESTION DE MUNITIONS',    'heures' => 0,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf5', 'competence' => 'C6', 'sf' => 'C6-SF5', 'type' => 'S',   'libelle_court' => 'FCM/LOG NIVEAU 3 (+ SIGLE EMB)', 'heures' => 0, 'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf6', 'competence' => 'C6', 'sf' => 'C6-SF6', 'type' => 'S',   'libelle_court' => 'FCM/LOG NIVEAU 3 (+ SIGLE EMB)', 'heures' => 0, 'jours' => null],
 
-
-          // An 3 
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf1',
-            'competence_id' => $competences['C3'],
-            'savoirfaire_id' => $savoirfaires['C3-SF1'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 16,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf2',
-            'competence_id' => $competences['C3'],
-            'savoirfaire_id' => $savoirfaires['C3-SF2'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 10,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf3',
-            'competence_id' => $competences['C3'],
-            'savoirfaire_id' => $savoirfaires['C3-SF3'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 4.75,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf4',
-            'competence_id' => $competences['C3'],
-            'savoirfaire_id' => $savoirfaires['C3-SF4'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 2,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c3c3sf5',
-            'competence_id' => $competences['C3'],
-            'savoirfaire_id' => $savoirfaires['C3-SF5'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/LSM NIVEAU 2 + ELAB + ENVIRO + MENACE SOUM',
-            'ordre' => $i++,
-            'heures' => 70,
-            'jours' => 10,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf1',
-            'competence_id' => $competences['C4'],
-            'savoirfaire_id' => $savoirfaires['C4-SF1'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 10,
-            'jours' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf2',
-            'competence_id' => $competences['C4'],
-            'savoirfaire_id' => $savoirfaires['C4-SF2'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 5,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf3',
-            'competence_id' => $competences['C4'],
-            'savoirfaire_id' => $savoirfaires['C4-SF3'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 20,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa2c4c4sf3',
-            'competence_id' => $competences['C4'],
-            'savoirfaire_id' => $savoirfaires['C4-SF3'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/LSM NIVEAU 3',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf4',
-            'competence_id' => $competences['C4'],
-            'savoirfaire_id' => $savoirfaires['C4-SF4'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 6,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf5',
-            'competence_id' => $competences['C4'],
-            'savoirfaire_id' => $savoirfaires['C4-SF5'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 9,
-            'jours' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf6',
-            'competence_id' => $competences['C4'],
-            'savoirfaire_id' => $savoirfaires['C4-SF6'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/LSM NIVEAU 3',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-
-
-          // An 4
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c4c4sf7',
-            'competence_id' => $competences['C4'],
-            'savoirfaire_id' => $savoirfaires['C4-SF7'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => 'Évaluation bord CASM',
-            'ordre' => $i++,
-            'heures' => 4,
-            'jours' => 0.5,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa2c4c4sf7',
-            'competence_id' => $competences['C4'],
-            'savoirfaire_id' => $savoirfaires['C4-SF7'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'TP DIVENT',
-            'ordre' => $i++,
-            'heures' => 7,
-            'jours' => 1,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c5c5sf1',
-            'competence_id' => $competences['C5'],
-            'savoirfaire_id' => $savoirfaires['C5-SF1'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/SDC-LDT',
-            'ordre' => $i++,
-            'heures' => 35,
-            'jours' => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c5c5sf2',
-            'competence_id' => $competences['C5'],
-            'savoirfaire_id' => $savoirfaires['C5-SF2'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/ANGLAIS NIVEAU 2',
-            'ordre' => $i++,
-            'heures' => 35,
-            'jours' => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c5c5sf3',
-            'competence_id' => $competences['C5'],
-            'savoirfaire_id' => $savoirfaires['C5-SF3'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/ANGLAIS NIVEAU 3 ',
-            'ordre' => $i++,
-            'heures' => 35,
-            'jours' => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf1',
-            'competence_id' => $competences['C6'],
-            'savoirfaire_id' => $savoirfaires['C6-SF1'],
-            'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
-            'libelle_court' => 'EAD LOG',
-            'ordre' => $i++,
-            'heures' => 10,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf2',
-            'competence_id' => $competences['C6'],
-            'savoirfaire_id' => $savoirfaires['C6-SF2'],
-            'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf3',
-            'competence_id' => $competences['C6'],
-            'savoirfaire_id' => $savoirfaires['C6-SF3'],
-            'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
-            'libelle_court' => 'FCM GESTION DE MUNITIONS',
-            'ordre' => $i++,
-            'heures' => 16,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf4',
-            'competence_id' => $competences['C6'],
-            'savoirfaire_id' => $savoirfaires['C6-SF4'],
-            'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
-            'libelle_court' => 'FCM GESTION DE MUNITIONS',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf5',
-            'competence_id' => $competences['C6'],
-            'savoirfaire_id' => $savoirfaires['C6-SF5'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/LOG NIVEAU 3 (+ SIGLE EMB)',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c6c6sf6',
-            'competence_id' => $competences['C6'],
-            'savoirfaire_id' => $savoirfaires['C6-SF6'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/LOG NIVEAU 3 (+ SIGLE EMB)',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-
-
-          // An 5
-          
-          
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c7c7sf1',
-            'competence_id' => $competences['C7'],
-            'savoirfaire_id' => $savoirfaires['C7-SF1'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 4,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c7c7sf2',
-            'competence_id' => $competences['C7'],
-            'savoirfaire_id' => $savoirfaires['C7-SF2'],
-            'savoirfaire_type_id' => $savoirfaireTypes['C'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 15,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c7c7sf3',
-            'competence_id' => $competences['C7'],
-            'savoirfaire_id' => $savoirfaires['C7-SF3'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'STAGE FCM/LSM NIVEAU 3',
-            'ordre' => $i++,
-            'heures' => 70,
-            'jours' => 10,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf1',
-            'competence_id' => $competences['C8'],
-            'savoirfaire_id' => $savoirfaires['C8-SF1'],
-            'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
-            'libelle_court' => 'EAD LOG',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf2',
-            'competence_id' => $competences['C8'],
-            'savoirfaire_id' => $savoirfaires['C8-SF2'],
-            'savoirfaire_type_id' => $savoirfaireTypes['EAD'],
-            'libelle_court' => 'ATRIUM',
-            'ordre' => $i++,
-            'heures' => 35,
-            'jours' => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa2c8c8sf2',
-            'competence_id' => $competences['C8'],
-            'savoirfaire_id' => $savoirfaires['C8-SF2'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/MCO ELECTRONIQUE NIVEAU2',
-            'ordre' => $i++,
-            'heures' => 35,
-            'jours' => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf3',
-            'competence_id' => $competences['C8'],
-            'savoirfaire_id' => $savoirfaires['C8-SF3'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/LOG NIVEAU 3 (+ SIGLE EMB)',
-            'ordre' => $i++,
-            'heures' => 34,
-            'jours' => 5,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf4',
-            'competence_id' => $competences['C8'],
-            'savoirfaire_id' => $savoirfaires['C8-SF4'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/LOG NIVEAU 3 (+ SIGLE EMB)',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf5',
-            'competence_id' => $competences['C8'],
-            'savoirfaire_id' => $savoirfaires['C8-SF5'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/INFOR + FIBRES + LINUX NIVEAU 3 ',
-            'ordre' => $i++,
-            'heures' => 28,
-            'jours' => 4,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf6',
-            'competence_id' => $competences['C8'],
-            'savoirfaire_id' => $savoirfaires['C8-SF6'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => 'FCM/INFOR + FIBRES + LINUX NIVEAU 3',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf7',
-            'competence_id' => $competences['C8'],
-            'savoirfaire_id' => $savoirfaires['C8-SF7'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          [
-            'uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf8',
-            'competence_id' => $competences['C8'],
-            'savoirfaire_id' => $savoirfaires['C8-SF8'],
-            'savoirfaire_type_id' => $savoirfaireTypes['S'],
-            'libelle_court' => '',
-            'ordre' => $i++,
-            'heures' => 0,
-            'jours' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-          ],
-          
-
-          // AN 6
-          // [
-          //   'uuid' => Str::uuid()->toString(),
-          //   'competence_id' => $competences['C9'],
-          //   'savoirfaire_id' => $savoirfaires['C9-SF1'],
-          //   'savoirfaire_type_id' => $savoirfaireTypes['S'],
-          //   'libelle_court' => 'EXA TC',
-          //   'ordre' => $i++,
-          //   'heures' => 70,
-          //   'jours' => 10,
-          //   'created_at' => now(),
-          //   'updated_at' => now(),
-          // ],
-          
+            // AN 5
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c7c7sf1', 'competence' => 'C7', 'sf' => 'C7-SF1', 'type' => 'C',   'libelle_court' => '',                             'heures' => 4,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c7c7sf2', 'competence' => 'C7', 'sf' => 'C7-SF2', 'type' => 'C',   'libelle_court' => '',                             'heures' => 15,   'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c7c7sf3', 'competence' => 'C7', 'sf' => 'C7-SF3', 'type' => 'S',   'libelle_court' => 'STAGE FCM/LSM NIVEAU 3',       'heures' => 70,   'jours' => 10],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf1', 'competence' => 'C8', 'sf' => 'C8-SF1', 'type' => 'EAD', 'libelle_court' => 'EAD LOG',                     'heures' => 0,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf2', 'competence' => 'C8', 'sf' => 'C8-SF2', 'type' => 'EAD', 'libelle_court' => 'ATRIUM',                      'heures' => 35,   'jours' => 5],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa2c8c8sf2', 'competence' => 'C8', 'sf' => 'C8-SF2', 'type' => 'S',   'libelle_court' => 'FCM/MCO ELECTRONIQUE NIVEAU2', 'heures' => 35,   'jours' => 5],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf3', 'competence' => 'C8', 'sf' => 'C8-SF3', 'type' => 'S',   'libelle_court' => 'FCM/LOG NIVEAU 3 (+ SIGLE EMB)', 'heures' => 34, 'jours' => 5],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf4', 'competence' => 'C8', 'sf' => 'C8-SF4', 'type' => 'S',   'libelle_court' => 'FCM/LOG NIVEAU 3 (+ SIGLE EMB)', 'heures' => 0,  'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf5', 'competence' => 'C8', 'sf' => 'C8-SF5', 'type' => 'S',   'libelle_court' => 'FCM/INFOR + FIBRES + LINUX NIVEAU 3', 'heures' => 28, 'jours' => 4],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf6', 'competence' => 'C8', 'sf' => 'C8-SF6', 'type' => 'S',   'libelle_court' => 'FCM/INFOR + FIBRES + LINUX NIVEAU 3', 'heures' => 0,  'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf7', 'competence' => 'C8', 'sf' => 'C8-SF7', 'type' => 'S',   'libelle_court' => '',                             'heures' => 0,    'jours' => null],
+            ['uuid' => 'deasm1b1-1234-5678-cosf-11aa1c8c8sf8', 'competence' => 'C8', 'sf' => 'C8-SF8', 'type' => 'S',   'libelle_court' => '',                             'heures' => 0,    'jours' => null],
         ];
-       
-        
-        // Utiliser insertOrIgnore pour éviter les doublons
-        collect($data)->chunk(50)->each(function ($chunk) {
-            DB::table('fcmcentral_competence_savoirfaires')->insertOrIgnore($chunk->toArray());
-        });
-        
-        // Réactiver les contraintes
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        
-        $this->command->info('✅ fcmcentral_competence_savoirfaires: ' . count($data) . ' enregistrements traités');
+
+        $count = 0;
+
+        foreach ($rows as $row) {
+            $competenceId     = $competences[$row['competence']] ?? null;
+            $savoirfaireId    = $savoirfaires[$row['sf']] ?? null;
+            $savoirfaireTypeId = $savoirfaireTypes[$row['type']] ?? null;
+
+            if (! $competenceId || ! $savoirfaireId || ! $savoirfaireTypeId) {
+                $this->command->warn("⚠️  Données manquantes pour [{$row['uuid']}] — ignoré.");
+                continue;
+            }
+
+            CompetenceSavoirfaire::firstOrCreate(
+                ['uuid' => $row['uuid']],
+                [
+                    'competence_id'       => $competenceId,
+                    'savoirfaire_id'      => $savoirfaireId,
+                    'savoirfaire_type_id' => $savoirfaireTypeId,
+                    'libelle_court'       => $row['libelle_court'],
+                    'ordre'               => $i++,
+                    'heures'              => $row['heures'],
+                    'jours'               => $row['jours'],
+                ]
+            );
+
+            $count++;
+        }
+
+        $this->command->info("✅ fcmcentral_competence_savoirfaires: {$count} enregistrements traités");
     }
 }

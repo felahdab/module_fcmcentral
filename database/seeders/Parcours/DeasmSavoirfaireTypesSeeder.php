@@ -3,16 +3,14 @@
 namespace Modules\FcmCentral\Database\Seeders\Parcours;
  
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Modules\FcmCentral\Models\SavoirfaireType;
  
 class DeasmSavoirfaireTypesSeeder extends Seeder
 {
   
     public function run()
     {
-        // Désactiver les contraintes de clés étrangères
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        
         
         $data = [
             [ 
@@ -44,15 +42,14 @@ class DeasmSavoirfaireTypesSeeder extends Seeder
             ],
         ];
         
-        // Utiliser insertOrIgnore pour éviter les doublons
-        // collect($data)->chunk(50)->each(function ($chunk) {
-        //     DB::table('fcmcentral_parcours')->insertOrIgnore($chunk->toArray());
-        // });
-
-        DB::table('fcmcentral_savoirfaire_types')->insertOrIgnore($data);
+       foreach ($data as $item) {
+        SavoirfaireType::firstOrCreate(
+            ['code' => $item ['code']],
+            $item
+        );
+       }
         
-        // Réactiver les contraintes
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+      
         
         $this->command->info('✅ fcmcentral_savoirfaire_types: ' . count($data) . ' enregistrements traités');
     }

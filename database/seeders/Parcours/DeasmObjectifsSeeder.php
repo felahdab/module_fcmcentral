@@ -4,8 +4,13 @@
 namespace Modules\FcmCentral\Database\Seeders\Parcours;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Modules\FcmCentral\Models\Objectif;
+use Modules\FcmCentral\Models\Savoirfaire;
+use Modules\FcmCentral\Models\Competence;
+use Modules\FcmCentral\Models\CompetenceSavoirfaire;
+use Modules\FcmCentral\Models\SavoirfaireType;
+
+
 
 class DeasmObjectifsSeeder extends Seeder
 {
@@ -18,8 +23,7 @@ class DeasmObjectifsSeeder extends Seeder
    
     public function run()
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-
+       
 
 $array = [
     // An 2
@@ -379,68 +383,53 @@ $array = [
 
 ];
 
-// Récupérer les IDs nécessaires
-$savoirfaires = DB::table('fcmcentral_savoirfaires')->pluck('id', 'code');
-$competences = DB::table('fcmcentral_competences')->pluck('id', 'code');
-$competenceSavoirfaires = DB::table('fcmcentral_competence_savoirfaires')->get()->keyBy(function($item) {
-    return $item->savoirfaire_id . '-' . $item->competence_id;
-});
-
-// On récupère les types de savoir-faire (id => code)
-$savoirfaireTypes = DB::table('fcmcentral_savoirfaire_types')->pluck('code', 'id');
-
-
-$data = [];
-$i = 1;
-
-foreach ($array as $item) {
-    $sf_id = $savoirfaires[$item['sf']] ?? null;
-    $competence_id = $competences[$item['competence']] ?? null;
-    $objectif = $item['code'];
-    $pivot_id = null;
-
-    if ($sf_id && $competence_id) {
-        $key = $sf_id . '-' . $competence_id;
-        $code = $item['sf'] . '-' . $item['competence'] . '-' . $objectif; // code lisible
-        $pivot = $competenceSavoirfaires[$key] ?? null;
-        $pivot_id = $pivot?->id ?? null;
-
-        // Vérifie le type du savoir-faire via la table pivot
-        if ($pivot && isset($pivot->savoirfaire_type_id)) {
-            $typeCode = $savoirfaireTypes[$pivot->savoirfaire_type_id] ?? null;
-            if ($typeCode !== 'C') {
-                continue; // On saute si ce n'est pas du compagnonnage
-            }
-        } else {
-            continue; // Pas de pivot ou pas de type, on saute
-        }
+    // Pré-chargement des relations
+    $savoirfaires = Savoirfaire::pluck('id', 'code');
+    $competences = Competence::pluck('id', 'code');
+    $savoirfaireTypeC = SavoirfaireType::where('code', 'C')->value('id');
+    
+    // Pivot indexé par "savoirfaire_id-competence_id"
+    $pivots = CompetenceSavoirfaire::all()->keyBy(fn($p) => $p->savoirfaire_id . '-' . $p->competence_id);
+    
+    $i = 1;
+    $count = 0;
+    
+    foreach ($array as $item) {
+    $sfId = $savoirfaires[$item['sf']] ?? null;
+    $competenceId = $competences[$item['competence']] ?? null;
+    
+    if (! $sfId || ! $competenceId) {
+    $this->command->warn("⚠️ SF [{$item['sf']}] ou Compétence [{$item['competence']}] introuvable — ignoré.");
+    continue;
+    }
+    
+    $pivotKey = $sfId . '-' . $competenceId;
+    $pivot = $pivots[$pivotKey] ?? null;
+    
+    // On ne traite que les savoir-faire de type Compagnonnage (code = 'C')
+    if (! $pivot || ($pivot->savoirfaire_type_id !== $savoirfaireTypeC)) {
+    continue;
+    }
+    
+    $code = $item['sf'] . '-' . $item['competence'] . '-' . $item['code'];
+    
+    Objectif::firstOrCreate(
+    ['uuid' => $item['uuid']],
+    [
+    'code' => $code,
+    'competence_savoirfaire_id' => $pivot->id,
+    'libelle_court' => $item['libelle_court'],
+    'libelle_long' => null,
+    'coeff' => null,
+    'ordre' => $i++,
+    ]
+    );
+    
+    $count++;
+    }
+    
+    $this->command->info("✅ fcmcentral_objectifs: {$count} enregistrements traités");
     }
 
-    if ($pivot_id) {
-        $data[] = [
-            //'uuid' => Str::uuid()->toString(),
-            'uuid' => $item['uuid'],
-            'code' => $code,
-            'competence_savoirfaire_id' => $pivot_id,
-            'libelle_court' => $item['libelle_court'],
-            'libelle_long' => null,
-            'coeff' => null,
-            'ordre' => $i++,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-    }
-}
-
-
-
-// Insertion en batch
-collect($data)->chunk(50)->each(function ($chunk) {
-    DB::table('fcmcentral_objectifs')->insertOrIgnore($chunk->toArray());
-});
-
-DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-$this->command->info('✅ fcmcentral_objectifs: ' . count($data) . ' enregistrements traités');
-}
 }
 

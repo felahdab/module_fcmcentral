@@ -3,16 +3,14 @@
 namespace Modules\FcmCentral\Database\Seeders\Parcours;
  
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Modules\FcmCentral\Models\ParcoursType;
  
 class DeasmParcoursTypesSeeder extends Seeder
 {
   
     public function run()
     {
-        // Désactiver les contraintes de clés étrangères
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+       
         
         $data = [
             [ 
@@ -35,15 +33,12 @@ class DeasmParcoursTypesSeeder extends Seeder
             ],
         ];
         
-        // Utiliser insertOrIgnore pour éviter les doublons
-        // collect($data)->chunk(50)->each(function ($chunk) {
-        //     DB::table('fcmcentral_parcours')->insertOrIgnore($chunk->toArray());
-        // });
-
-        DB::table('fcmcentral_parcours_types')->insertOrIgnore($data);
-        
-        // Réactiver les contraintes
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+       foreach ($data as $item){
+        ParcoursType::firstOrCreate(
+            ['code' => $item['code']],
+            $item
+        );
+       }
         
         $this->command->info('✅ fcmcentral_parcours_types: ' . count($data) . ' enregistrements traités');
     }
