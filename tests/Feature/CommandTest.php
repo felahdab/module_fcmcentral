@@ -4,7 +4,6 @@ use Tests\TestCase;
 use Modules\FcmCentral\Models\Parcours;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\FcmCentral\Models;
-use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 
