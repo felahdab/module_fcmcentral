@@ -807,7 +807,7 @@ it('met à jour le parcours en cas de proposition', function () {
     }
 
     $this->assertTrue($objectif_propose_trouve, "L'objectif proposé doit être trouvé dans le parcours");
-})->only();
+});
 
 it('met a jour le parcours en cas de validation d une proposition', function(){
     $this->assertTrue(Models\Marin::all()->count() == 0);
