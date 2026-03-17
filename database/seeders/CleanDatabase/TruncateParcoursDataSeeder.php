@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Database\Seeders\Parcours;
+namespace Modules\FcmCentral\Database\Seeders\CleanDatabase;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -15,12 +15,12 @@ use Modules\FcmCentral\Models\ParcoursType;
 use Modules\FcmCentral\Models\Domaine;
 use Modules\FcmCentral\Models\SavoirfaireType;
 
-class DeasmTruncateSeeder extends Seeder
+class TruncateParcoursDataSeeder extends Seeder
 {
     /**
-     * Vide toutes les tables du parcours Deasm.
+     * Vide toutes les tables de définition des parcours de FCM, sans distinction.
      *
-     *   php artisan module:seed FcmCentral --class=Parcours\\DeasmTruncateSeeder
+     *   php artisan module:seed FcmCentral --class=CleanDatabase\\TruncateParcoursDataSeeder
      */
     public function run(): void
     {
