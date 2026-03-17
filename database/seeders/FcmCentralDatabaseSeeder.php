@@ -2,7 +2,6 @@
 
 namespace Modules\FcmCentral\Database\Seeders;
 
-
 use Illuminate\Database\Seeder;
 
 class FcmCentralDatabaseSeeder extends Seeder
@@ -16,7 +15,8 @@ class FcmCentralDatabaseSeeder extends Seeder
             SettingSeeder::class,
             PermissionsSeeder::class,
             RolesSeeder::class,
-            TypeEtatSeeder::class
+            TypeEtatSeeder::class,
+            DomainesSeeder::class
         ]);
     }
 }
