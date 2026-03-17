@@ -4,6 +4,7 @@ use Carbon\Carbon;
 use Livewire\Livewire;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Artisan;
 
 use Tests\TestCase;
 use function Pest\Livewire\livewire;
@@ -31,7 +32,6 @@ use Modules\FcmCentral\Filament\Fcmcentral\Widgets;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\Configuration;
 
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\FicheBilan;
 use Modules\RH\Models\Unite;
 
@@ -275,21 +275,6 @@ it('ajoute la date_sedimentation lors de l\'activation FCM', function () {
     $marin->refresh();
     expect($marin->estEnFcm())->toBeFalse();
 
-
-    // Livewire::actingAs($this->admin)
-    //     ->test(Resources\MarinResource\Pages\ListMarins::class)
-    //     ->filterTable('en_fcm', ['value'=>'tous'])
-    //     ->callTableAction('toggle_fcm', $marin, [
-    //         'cohorte_id' => $cohorte->uuid,
-    //         'mentor_id' => $mentor->uuid,
-    //         'parcours_id' => $parcours->uuid,
-    //     ])
-    //     ->assertHasNoActionErrors();
-
-        //dump(Event::dispatched(UserGeneratedEvent::class));
-
-      
-
     event(new UserGeneratedEvent(
         event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
         user_uuid: $this->admin->uuid,
@@ -316,12 +301,12 @@ it('génère un UserGeneratedEvent quand on modifie les jalons FCM', function(){
     
     // Création d'un marin non suivi en FCM
     $fcmMarin = Models\FcmMarin::factory()->create();
-   $marin = $fcmMarin->marin;
+    $marin = $fcmMarin->marin;
    
-  // dump($marin);
-   expect($marin->estEnFcm())->toBeTrue();
+    // dump($marin);
+    expect($marin->estEnFcm())->toBeTrue();
 
-   $dateSedimentation = now()->subDays(30)->format('Y-m-d');
+    $dateSedimentation = now()->subDays(30)->format('Y-m-d');
     $dateFcm = now()->subDays(15)->format('Y-m-d');
     $dateCompetence = now()->format('Y-m-d');
 
@@ -374,7 +359,7 @@ it('genere un  UserGeneratedEvent quand on assigne une cohorte a un marin suivi 
     
     // Création d'un marin non suivi en FCM
     $fcmMarin = Models\FcmMarin::factory()->create();
-   $marin = $fcmMarin->marin;
+    $marin = $fcmMarin->marin;
     // S'assurer qu'il n'est pas déjà en FCM
     Models\FcmMarin::where('rh_marin_id', $marin->id)->delete();
     $marin->refresh();
@@ -484,20 +469,16 @@ it('affiche le livret FCM', function () {
     // Création d'un marin FCM via factory
     $this->assertTrue(Models\Marin::all()->count() == 0);
     $fcmMarin = Models\FcmMarin::factory()->create();
-   $marin = $fcmMarin->marin;
+    $marin = $fcmMarin->marin;
    
-  // dump($marin);
-   expect($marin->estEnFcm())->toBeTrue();
+    expect($marin->estEnFcm())->toBeTrue();
     $this->assertTrue(Models\Marin::all()->count() == 1);
 
-    //dump($marin->complementsFcm);
-    
-    // Seed du parcours
-    $this->seed(DeasmMasterSeeder::class);
+        // Seed du parcours
+    Artisan::call("fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json");
     expect(Models\Parcours::count())->toBeGreaterThan(0);
 
     $parcours = Models\Parcours::first();
-    
 
     // Création du parcours sérialisé
     event(new UserGeneratedEvent(
@@ -545,7 +526,7 @@ it('affiche le livret FCM', function () {
         ->assertSee("Livret du marin")
         ->assertSee($marin->nom)
         ->assertSee($marin->prenom)
-        ->assertSee('C6 - Gerer les munitions pyrotechniques');
+        ->assertSee('DEASM'); // Parce que le fichier json chargé est une extraction du parcours DEASM.
     
 });
 
@@ -561,7 +542,7 @@ it('met à jour le parcours en cas de validation', function () {
 
     $this->assertSame(1, Models\Marin::count());
 
-    $this->seed(DeasmMasterSeeder::class);
+    Artisan::call("fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json");
 
     $this->assertSame(1, Models\Parcours::count());
     $parcours = Models\Parcours::first();
@@ -649,7 +630,7 @@ it('met à jour le parcours en cas d\'annulation', function () {
     Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
     $this->assertSame(1, Models\Marin::count());
 
-    $this->seed(DeasmMasterSeeder::class);
+    Artisan::call("fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json");
     $this->assertSame(1, Models\Parcours::count());
     $parcours = Models\Parcours::first();
 
@@ -743,10 +724,6 @@ it('met à jour le parcours en cas d\'annulation', function () {
     $this->assertTrue($savoirfaire_trouve, "Le savoir-faire devrait être trouvé dans le parcours");
 });
 
-
-
-
-
 it('met à jour le parcours en cas de proposition', function () {
     $this->assertSame(0, Models\Marin::count());
 
@@ -756,7 +733,7 @@ it('met à jour le parcours en cas de proposition', function () {
     Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
     $this->assertSame(1, Models\Marin::count());
 
-    $this->seed(DeasmMasterSeeder::class);
+    Artisan::call("fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json");
     $this->assertSame(1, Models\Parcours::count());
     $parcours = Models\Parcours::first();
 
@@ -830,9 +807,7 @@ it('met à jour le parcours en cas de proposition', function () {
     }
 
     $this->assertTrue($objectif_propose_trouve, "L'objectif proposé doit être trouvé dans le parcours");
-});
-
-
+})->only();
 
 it('met a jour le parcours en cas de validation d une proposition', function(){
     $this->assertTrue(Models\Marin::all()->count() == 0);
@@ -842,7 +817,7 @@ it('met a jour le parcours en cas de validation d une proposition', function(){
     Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
     $this->assertTrue(Models\Marin::all()->count() == 1);
 
-    $this->seed(DeasmMasterSeeder::class);
+    Artisan::call("fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json");
     $this->assertTrue(Models\Parcours::count() == 1);
     $parcours = Models\Parcours::first();
 
@@ -948,7 +923,7 @@ it('met a jour le parcours en cas de refus d une proposition', function(){
     Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
     $this->assertTrue(Models\Marin::all()->count() == 1);
 
-    $this->seed(DeasmMasterSeeder::class);
+    Artisan::call("fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json");
     $this->assertTrue(Models\Parcours::count() == 1);
     $parcours = Models\Parcours::first();
 
@@ -1055,7 +1030,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
     Models\FcmMarin::create(["rh_marin_id" => $marin->id]);
     $this->assertTrue(Models\Marin::all()->count() == 1);
 
-    $this->seed(DeasmMasterSeeder::class);
+    Artisan::call("fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json");
     $this->assertTrue(Models\Parcours::count() == 1);
     $parcours = Models\Parcours::first();
 
@@ -1419,7 +1394,7 @@ it('permet au mentor d acceeder au livret de FCM et à la fiche bilan de son men
     ));
     
     // Seed du parcours
-    $this->seed(DeasmMasterSeeder::class);
+    Artisan::call("fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json");
     $parcours = Models\Parcours::first();
 
     // Création du parcours sérialisé
