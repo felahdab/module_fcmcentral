@@ -4,7 +4,6 @@ namespace Modules\FcmCentral\Database\Seeders;
 
 
 use Illuminate\Database\Seeder;
-use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
 
 class FcmCentralDatabaseSeeder extends Seeder
 {
@@ -15,12 +14,8 @@ class FcmCentralDatabaseSeeder extends Seeder
     {
         $this->call([
             SettingSeeder::class,
-            
-            
-            DeasmMasterSeeder::class,
             PermissionsSeeder::class,
             RolesSeeder::class,
-            //TestMarinsRolesSeeder::class, # ce seeder peut être utilisé par le développeur en ligne de commande.
             TypeEtatSeeder::class
         ]);
     }

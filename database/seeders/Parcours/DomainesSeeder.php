@@ -5,7 +5,7 @@ namespace Modules\FcmCentral\Database\Seeders\Parcours;
 use Illuminate\Database\Seeder;
 use Modules\FcmCentral\Models\Domaine;
 
-class DeasmDomainesSeeder extends Seeder
+class DomainesSeeder extends Seeder
 {
     public function run(): void
     {
