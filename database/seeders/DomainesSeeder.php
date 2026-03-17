@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Database\Seeders\Parcours;
+namespace Modules\FcmCentral\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\FcmCentral\Models\Domaine;
