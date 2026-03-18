@@ -12,8 +12,10 @@ use Modules\FcmCentral\Models\Savoirfaire;
 use Modules\FcmCentral\Models\Competence;
 use Modules\FcmCentral\Models\Affectation;
 use Modules\FcmCentral\Models\ParcoursType;
-use Modules\FcmCentral\Models\Domaine;
 use Modules\FcmCentral\Models\SavoirfaireType;
+
+use Modules\FcmCentral\Models\Domaine;
+use Modules\FcmCentral\Models\TypeEtat;
 
 class TruncateParcoursDataSeeder extends Seeder
 {
@@ -36,8 +38,10 @@ class TruncateParcoursDataSeeder extends Seeder
         Competence::query()->delete();
         Affectation::query()->delete();
         ParcoursType::query()->delete();
-        Domaine::query()->delete();
         SavoirfaireType::query()->delete();
+
+        TypeEtat::query()->delete();
+        Domaine::query()->delete();
 
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
