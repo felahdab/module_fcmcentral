@@ -15,6 +15,6 @@ class SettingSeeder extends Seeder
      */
     public function run()
     {
-        Setting::create(["key" => "fcmcentral"]);
+        Setting::firstOrCreate(["key" => "fcmcentral"]);
     }
 }
