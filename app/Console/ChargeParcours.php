@@ -151,17 +151,20 @@ class ChargeParcours extends Command implements PromptsForMissingInput
          */
         foreach(Arr::get($affectation, "competences") as $competence)
         {
-            $this->chargeCompetenceEnBase($aff, $competence, $force);
+            $this->chargeCompetenceEnBase($aff, $competence, $force, $parcours->parcours_type_id);
         }
     }
 
-    public function chargeCompetenceEnBase(Affectation $affectation, $competence, $force=false)
+    public function chargeCompetenceEnBase(Affectation $affectation, $competence, $force = false)
     {
+        // ✅ Récupère le parcours_type_id depuis le parcours lié à l'affectation
+        $parcours = $affectation->parcours()->first();
+        $parcoursTypeId = $parcours?->parcours_type_id;
+
         $comp = Competence::where("uuid", $uuid = Arr::get($competence, "uuid"))->first();
         if ($comp != null)
         {
-            if (! $force)
-            {
+            if (!$force) {
                 $this->fail("Une compétence avec l'uuid {$uuid} existe déjà!");
             }
             $this->warn("Une compétence avec l'uuid {$uuid} existe déjà ! On poursuit la mise à jour.");
@@ -174,25 +177,23 @@ class ChargeParcours extends Command implements PromptsForMissingInput
             $this->info("Creation de la compétence {$uuid}");
             $comp = Competence::firstOrCreate(
                 ["uuid" => $competence["uuid"]],
-                Arr::except($competence, ["id", "competenceSavoirfaires"])
+                array_merge(
+                    Arr::except($competence, ["id", "competenceSavoirfaires"]),
+                    ['parcours_type_id' => $parcoursTypeId] // ✅
+                )
             );
         }
-        /**
-         * Quand on arrive là, on a bien la compétence en base. Il reste à faire 2 choses:
-         * - l'associer à l'affectation qu'on est en train de charger
-         * - charger les competencesSavoirfaires
-         */
+
         $comp->affectation()->associate($affectation);
+        $comp->parcours_type_id = $parcoursTypeId; // ✅ force la mise à jour
         $comp->save();
-        
-        /**
-         * On a associé l'affectation au parcours en reprenant son ordre. On charge les compétences:
-         */
+
         foreach(Arr::get($competence, "competenceSavoirfaires") as $competenceSavoirfaire)
         {
             $this->chargeCompetenceSavoirfaireEnBase($comp, $competenceSavoirfaire, $force);
         }
     }
+
 
     public function chargeCompetenceSavoirfaireEnBase(Competence $competence, $competenceSavoirfaire, $force = false)
     {
