@@ -1,3 +1,14 @@
+## 0.2.4 (March 20, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.3 –> 0.2.4
+- Implements art #721824 ; Correction de ChargeParcours suite a l'apparation d'un nouveau parcours Prendre en compte du parcoursType dans les competences
+- Ajustements complémentaires des seeder restant: reprise des données depuis l'instance de production alfan.
+- Déplacement et renommage du TruncateSeeder.
+- Utilisation de la commande de chargement des parcours pour les tests de mise à jour du parcours du marin.
+- Remontée du seeder des domaines au niveau du module. Ce seeder n'est pas spécifique au parcours DEASM.
+- Implements art #709741 : Modification Seeder
+- Implements artifact #716620: rajoute la permission fcmcentral::note.voir au seeder du module.
+- Correction du chemin de publication de la documentation du module.
+
 ## 0.2.3 (March 13, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.2 –> 0.2.3
 - Merge branch 'master' into tuleap-700370-bug-creation-parcours-impossibilite-de-relier-affectation-et-competences
