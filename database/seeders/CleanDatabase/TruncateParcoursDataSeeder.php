@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Database\Seeders\Parcours;
+namespace Modules\FcmCentral\Database\Seeders\CleanDatabase;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -12,15 +12,17 @@ use Modules\FcmCentral\Models\Savoirfaire;
 use Modules\FcmCentral\Models\Competence;
 use Modules\FcmCentral\Models\Affectation;
 use Modules\FcmCentral\Models\ParcoursType;
-use Modules\FcmCentral\Models\Domaine;
 use Modules\FcmCentral\Models\SavoirfaireType;
 
-class DeasmTruncateSeeder extends Seeder
+use Modules\FcmCentral\Models\Domaine;
+use Modules\FcmCentral\Models\TypeEtat;
+
+class TruncateParcoursDataSeeder extends Seeder
 {
     /**
-     * Vide toutes les tables du parcours Deasm.
+     * Vide toutes les tables de définition des parcours de FCM, sans distinction.
      *
-     *   php artisan module:seed FcmCentral --class=Parcours\\DeasmTruncateSeeder
+     *   php artisan module:seed FcmCentral --class=CleanDatabase\\TruncateParcoursDataSeeder
      */
     public function run(): void
     {
@@ -36,8 +38,10 @@ class DeasmTruncateSeeder extends Seeder
         Competence::query()->delete();
         Affectation::query()->delete();
         ParcoursType::query()->delete();
-        Domaine::query()->delete();
         SavoirfaireType::query()->delete();
+
+        TypeEtat::query()->delete();
+        Domaine::query()->delete();
 
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 

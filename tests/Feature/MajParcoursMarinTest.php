@@ -3,8 +3,7 @@
 use Tests\TestCase;
 use App\Models\User;
 use Modules\FcmCentral\Models\Marin;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Artisan;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
@@ -12,13 +11,7 @@ use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Models\MarinParcours;
-use Modules\FcmCentral\Models\Affectation;
-use Modules\FcmCentral\Models\Competence;
-use Modules\FcmCentral\Models\CompetenceSavoirfaire;
-use Modules\FcmCentral\Models\Objectif;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\FcmCentral\Models;
-use Modules\FcmCentral\Database\Seeders\Parcours\DeasmMasterSeeder;
 use Carbon\Carbon;
 
 uses(RefreshDatabase::class);
@@ -106,7 +99,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
         $this->assertTrue(Marin::all()->count() == 2);
    
         // Seed du parcours
-        $this->seed(DeasmMasterSeeder::class);
+        Artisan::call("fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json");
         expect(Parcours::count())->toBeGreaterThan(0);
    
         $parcours = Parcours::first();
