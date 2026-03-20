@@ -151,7 +151,7 @@ class ChargeParcours extends Command implements PromptsForMissingInput
          */
         foreach(Arr::get($affectation, "competences") as $competence)
         {
-            $this->chargeCompetenceEnBase($aff, $competence, $force, $parcours->parcours_type_id);
+            $this->chargeCompetenceEnBase($aff, $competence, $force);
         }
     }
 
