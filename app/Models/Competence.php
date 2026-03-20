@@ -28,6 +28,7 @@ class Competence extends Model
         "libelle_long",
         "libelle_court",
         "parcours_type_id",
+        "affectation_id",
         "ordre",
         "color",
     ];

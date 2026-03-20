@@ -58,8 +58,9 @@ class CreationParcoursSerialiseListener
                 'affectations' => function ($q) {
                     $q->orderBy('fcmcentral_affectation_parcours.ordre');
                 },
-                'affectations.competences' => function ($q) {
-                    $q->orderBy('ordre');
+                'affectations.competences' => function ($q) use ($parcours) {
+                    $q->where('parcours_type_id', $parcours->parcours_type_id)
+                    ->orderBy('ordre');
                 },
                 'affectations.competences.competenceSavoirfaires' => function ($q) {
                     $q->orderBy('ordre');

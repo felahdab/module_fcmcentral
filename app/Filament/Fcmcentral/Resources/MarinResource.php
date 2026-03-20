@@ -173,7 +173,7 @@ class MarinResource extends Resource
                     ),
                 TextColumn::make('complementsFcm.cohorte.libelle_court')
                     ->label('Cohorte')
-                    ->searchable()
+                    //->searchable()
                     ->toggleable()
                     ->placeholder('Non assignée'),
 
@@ -183,7 +183,7 @@ class MarinResource extends Resource
                         ($record->getMentor()->grade?->libelle_court ?? '') . ' ' . $record->getMentor()->nom :
                         'Non assigné'
                     )
-                    ->searchable()
+                   // ->searchable()
                     ->placeholder('Non assigné')
                     ->badge()
                     ->color(fn ($record) => $record->getMentor() ? 'success' : 'gray')

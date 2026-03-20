@@ -68,7 +68,7 @@ class ParcoursSerialiseResource extends Resource
                 // Section "Parcours Serialisés"
                 Section::make('Composition du PPA')
                     ->schema([    
-                        Placeholder::make('')
+                        Placeholder::make('composition_ppa')
                         ->content(fn ($record) => view('fcmcentral::filament.fcmcentral.livewire.parcours.parcours-details',[
                             //'parcours' =>json_decode($record?->parcours ?? '{}', true),
                             'parcours' =>$record->parcours ,

@@ -76,18 +76,21 @@ class LivretDeFcmLight extends ViewRecord
     
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                Section::make(fn() => 'Livret de ' . ($this->record->nom.' '. $this->record->prenom) )
-                    ->schema([    
-                        Livewire::make(LivretFcm::class, [
-                            "marinId" => $this->record->id,
-                            "Marin" => Marin::class,
-                            "UserGeneratedEvent" => UserGeneratedEvent::class,
-                            "PermissionPrefix" => "fcmcentral"
-                        ]),
-                    ])->columnSpan(2)
-            ]);
+        return $schema        
+        ->columns(1)
+        ->components([
+            Section::make(fn() => 'Livret de ' . ($this->record->nom.' '. $this->record->prenom) )
+                //->columns(4)
+                //->columnSpanFull()
+                ->schema([    
+                    Livewire::make(LivretFcm::class, [
+                        "marinId" => $this->record->id,
+                        "Marin" => Marin::class,
+                        "UserGeneratedEvent" => UserGeneratedEvent::class,
+                        "PermissionPrefix" => "fcmcentral"
+                    ]),
+                ])
+            ]);    
     }
  
     protected function getFooterWidgets(): array

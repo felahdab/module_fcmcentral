@@ -71,6 +71,19 @@ class Affectation extends Model
         );
     }
 
+    public function objectifs()
+    {
+        return $this->hasManyThrough(
+            \Modules\FcmCentral\Models\Objectif::class,
+            \Modules\FcmCentral\Models\CompetenceSavoirfaire::class,
+            'competence_id',
+            'competence_savoirfaire_id',
+            'id',
+            'id'
+        )->whereRaw('1=0'); // ✅ toujours vide — juste pour satisfaire Filament
+    }
+
+
 
     // public function competences(): BelongsToMany
     // {

@@ -3,77 +3,71 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
 
 use Carbon\Carbon;
-
-use Filament\Actions;
 use Filament\Actions\Action;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\TextInput;
-
 use Filament\Forms\Components\DatePicker;
-
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCentral\Services\ParcoursService;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
-use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCentral\Models\ParcoursType;
+use Modules\FcmCentral\Services\ParcoursService;
 
 class EditParcours extends EditRecord
 {
     protected static string $resource = ParcoursResource::class;
-    protected static ?string $title = 'Modifier parcours';
-
-    protected function getHeaderWidgets(): array
-    {
-        return [
-            // ParcoursResource\Widgets\NbVersionsParcoursWidget::class,
-        ];
-    }
+    protected static ?string $title   = 'Modifier parcours';
 
     protected function getHeaderActions(): array
     {
         $parcours_service = new ParcoursService();
 
         return [
-           // Actions\DeleteAction::make(),
+            Action::make('view')
+                ->label('Voir le parcours')
+                ->icon('heroicon-m-queue-list')
+                ->color('info')
+                ->url(fn () => ParcoursResource::getUrl('view', ['record' => $this->record])),
+
             Action::make('figer')
                 ->requiresConfirmation()
-                ->visible(fn() => auth()->user()->can("fcmcentral::parcours.figer"))
-                ->modalHeading(fn($record) => 'Figer le Parcours : '.$record->libelle_court)
-                ->modalDescription('En figeant le parcours, à compter de la date saisie, tous les parcours individualisés des marins suivant ce PPA seront mis à jour. Cette action est irreversible.')
+                ->visible(fn () => auth()->user()->can('fcmcentral::parcours.figer'))
+                ->modalHeading(fn ($record) => 'Figer : ' . $record->libelle_court)
+                ->modalDescription('Action irréversible.')
                 ->schema([
-                    TextInput::make('version')
-                        ->label('Version')
-                        ->numeric()
-                        ->required()
-                        ->disabled()
-                        ->dehydrated(),
-                    DatePicker::make('date de debut')
-                        ->minDate(Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())))
+                    TextInput::make('version')->label('Version')->numeric()->required()->disabled()->dehydrated(),
+                    DatePicker::make('date_de_debut')->label('Date de début')
+                        ->minDate(Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord()))),
                 ])
-                ->fillForm(function ($record) use ($parcours_service){
-                    return 
-                    [
-                        'date de debut' => Carbon::now()->tomorrow()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())),
-                        'version' => $record->getLatestSerializedVersion() + 1,
-                    ];
-                })
-                ->action(function (array $data, $record) use ($parcours_service) {
-
-                    $event = new UserGeneratedEvent(
-                        UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
-                        auth()->user()->uuid,
-                        ObjectClasses::PARCOURS,
-                        $record->uuid,
-                        [
-                            "date_de_debut" => $data["date de debut"], 
-                            "version"=> $data["version"], 
-                        ]
-                    );
-
-                    event($event);
-                }),
+                ->fillForm(fn ($record) => [
+                    'date_de_debut' => Carbon::now()->tomorrow()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())),
+                    'version'       => $record->getLatestSerializedVersion() + 1,
+                ])
+                ->action(fn (array $data, $record) => event(new UserGeneratedEvent(
+                    UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+                    auth()->user()->uuid,
+                    ObjectClasses::PARCOURS,
+                    $record->uuid,
+                    ['date_de_debut' => $data['date_de_debut'], 'version' => $data['version']]
+                ))),
         ];
+    }
+
+    public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    {
+        return $schema
+            ->columns(1)
+            ->components([
+                TextInput::make('code')->label('Code')->required()->maxLength(150),
+                TextInput::make('libelle_court')->label('Libellé court')->required()->maxLength(150),
+                TextInput::make('libelle_long')->label('Libellé long')->required()->maxLength(1500),
+                Select::make('parcours_type_id')
+                    ->label('Type de parcours')
+                    ->options(ParcoursType::orderBy('libelle_court')->pluck('libelle_court', 'id'))
+                    ->required()
+                    ->searchable(),
+            ]);
     }
 }

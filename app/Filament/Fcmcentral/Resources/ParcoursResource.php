@@ -11,6 +11,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\List
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\CreateParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ViewParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\EditParcours;
+
 use Carbon\Carbon;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
@@ -24,7 +25,8 @@ use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\AffectationsRelationManager;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\CompetencesRelationManager;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers\SavoirfairesRelationManager;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursType;
@@ -179,6 +181,8 @@ class ParcoursResource extends Resource
             ]);
     }
 
+
+    
     
     /**
      * Obtenir la première date possible pour une nouvelle version
@@ -200,9 +204,13 @@ class ParcoursResource extends Resource
     public static function getRelations(): array
     {
         return [
-            AffectationsRelationManager::class
+            AffectationsRelationManager::class,
+            CompetencesRelationManager::class,
+            SavoirfairesRelationManager::class,
+           
         ];
     }
+
 
     public static function getPages(): array
     {
@@ -211,6 +219,8 @@ class ParcoursResource extends Resource
             'create' => CreateParcours::route('/create'),
             'view' => ViewParcours::route('/{record}/view'),
             'edit' => EditParcours::route('/{record}/edit'),
+            
+    
         ];
     }
 }

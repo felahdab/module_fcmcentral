@@ -54,7 +54,9 @@ class ParcoursSerialise extends ParcoursSerialiseBase
         ->withTimestamps();
     }
 
-    public function parcours()
+
+    //nom different car ca cree un bug
+    public function parcoursModel()
     {
         return $this->belongsTo(Parcours::class, "parcours_id", "id");
     }

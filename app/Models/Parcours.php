@@ -60,6 +60,35 @@ class Parcours extends Model
             ->orderBy('fcmcentral_affectation_parcours.ordre'); 
     }
 
+    public function competences()
+    {
+        $affectationIds = $this->affectations()->pluck('fcmcentral_affectations.id');
+
+        return $this->hasMany(
+            \Modules\FcmCentral\Models\Competence::class,
+            'affectation_id'
+        )
+        ->whereIn('affectation_id', $affectationIds)
+        ->where('parcours_type_id', $this->parcours_type_id);
+    }
+
+
+    public function competenceSavoirfaires()
+    {
+        $affectationIds = $this->affectations()->pluck('fcmcentral_affectations.id');
+        
+        $competenceIds = \Modules\FcmCentral\Models\Competence::whereIn('affectation_id', $affectationIds)
+            ->where('parcours_type_id', $this->parcours_type_id)
+            ->pluck('id');
+
+        return $this->hasMany(
+            \Modules\FcmCentral\Models\CompetenceSavoirfaire::class,
+            'competence_id'
+        )->whereIn('competence_id', $competenceIds);
+    }
+
+
+
 
     ////////////////////
     /// Serialisation //

@@ -41,6 +41,7 @@ use App\Http\Middleware\SetTenantCookieMiddleware;
 use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 use App\Filament\Pages\UserPreferences;
 
+
 class FcmcentralPanelProvider extends PanelProvider
 {
     use UsesSkeletorPrefixAndMultitenancyTrait;
@@ -83,6 +84,8 @@ class FcmcentralPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            
+           
             ->topNavigation()
             ->theme(Theme::make('fcmcentral-theme')->html(asset('css/fanlab/fcmcentral/module-fcmcentral.css')))
             // Taille panel

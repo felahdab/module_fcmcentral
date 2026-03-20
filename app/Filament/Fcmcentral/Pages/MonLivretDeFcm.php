@@ -15,6 +15,7 @@ class MonLivretDeFcm extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
     protected string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
+    
 
     public Marin $marin;
     public ?int $marinId = null;
@@ -43,7 +44,9 @@ class MonLivretDeFcm extends Page
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components([
+        return $schema
+        ->columns(1)
+        ->components([
             Livewire::make(LivretFcm::class, [
                 "marinId" => $this->marin->id,
                 "Marin" => Marin::class,
@@ -55,7 +58,7 @@ class MonLivretDeFcm extends Page
 
     public function getTitle(): string
     {
-        return "Livret FCM de {$this->marin->nom} {$this->marin->prenom}";
+        return "Livret  FCM de {$this->marin->nom} {$this->marin->prenom}";
     }
 }
 

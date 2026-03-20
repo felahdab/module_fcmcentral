@@ -26,10 +26,35 @@ class ViewParcours extends ViewRecord
 
     public function getFullParcours(int $id): ?Parcours
     {
+        // return Parcours::with([
+        //     'affectations.competences.competenceSavoirfaires.objectifs',
+        //     'parcoursType'
+        // ])->find($id);
+
+
+        $parcours = Parcours::find($id);
+        if (!$parcours) return null;
+    
         return Parcours::with([
-            'affectations.competences.competenceSavoirfaires.objectifs',
-            'parcoursType'
+            'affectations' => function ($query) {
+                $query->orderBy('fcmcentral_affectation_parcours.ordre');
+            },
+            'affectations.competences' => function ($query) use ($parcours) {
+                $query->where('parcours_type_id', $parcours->parcours_type_id)
+                      ->orderBy('ordre');
+            },
+            'affectations.competences.competenceSavoirfaires' => function ($query) {
+                $query->orderBy('ordre'); // ✅
+            },
+            'affectations.competences.competenceSavoirfaires.savoirfaire',
+            'affectations.competences.competenceSavoirfaires.savoirfaireType',
+            'affectations.competences.competenceSavoirfaires.objectifs' => function ($query) {
+                $query->orderBy('ordre'); // ✅
+            },
+            'parcoursType',
         ])->find($id);
+    
+
     }
 
 
