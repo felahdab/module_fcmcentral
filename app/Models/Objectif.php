@@ -26,6 +26,7 @@ class Objectif extends Model
         'libelle_long',
         'libelle_court',
         'coeff',
+        'heures',
         'ordre',
     ];
 
