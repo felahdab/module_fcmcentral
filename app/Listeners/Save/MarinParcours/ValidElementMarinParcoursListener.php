@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 class ValidElementMarinParcoursListener
 {
     public string $comment = '';
+    public Carbon $dateValidation;
 
     public function handle(UserGeneratedEvent $event): void
     {
@@ -31,6 +32,12 @@ class ValidElementMarinParcoursListener
 
         $data = $event->detail ?? [];
         $this->comment = $this->sanitizeComment($data['commentaire'] ?? '');
+
+        // Date pour antidater
+        $this->dateValidation = !empty($data['date']) 
+        ? Carbon::parse($data['date']) 
+        : Carbon::parse($event->event_date ?? now());
+
 
         $valideur = User::where('uuid', $event->user_uuid)->first();
         $valideurName = $valideur 
@@ -339,7 +346,8 @@ RefaireEtatParcoursService::refonte($parcoursMarin);
     {
         $element['etat_valid'] = true;
         $element['commentaire'] = $this->comment;
-        $element['date_validation'] = Carbon::now()->toDateTimeString();
+       // $element['date_validation'] = Carbon::now()->toDateTimeString();
+        $element['date_validation'] = $this->dateValidation->toDateTimeString();
         $element['valideur'] = $displayName;
         $element['date_proposition'] = null;
         
