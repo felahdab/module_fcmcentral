@@ -37,15 +37,18 @@ class CompetenceResource extends Resource
                 TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
-                    ->maxLength(150),
+                    //->maxLength(150)
+                    ,
                 TextInput::make('libelle_long')
                     ->required()
                     ->label('Libellé long')
-                    ->maxLength(1500),
+                    //->maxLength(1500)
+                    ,
                 TextInput::make('code')
                     ->required()
                     ->label('Code')
-                    ->maxLength(150),    
+                    //->maxLength(150)
+                    ,    
                 Select::make('parcours_type_id')
                     ->relationship(name: 'parcoursType', titleAttribute: 'libelle_court')
                     ->label('Type de Parcours')
@@ -76,7 +79,7 @@ class CompetenceResource extends Resource
                     ->searchable(),       
                 TextColumn::make('libelle_court')
                     ->label('Libellé court')
-                    ->limit(50)
+                    //->limit(50)
                     ->sortable()
                     ->searchable()
                     ->description(fn ($record) => substr($record->libelle_long,0,40).'...')

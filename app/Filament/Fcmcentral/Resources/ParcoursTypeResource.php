@@ -52,15 +52,15 @@ class ParcoursTypeResource extends Resource
             ->components([
                 TextInput::make('code')
                 ->required()
-                ->maxLength(150)
+                //->maxLength(150)
                 ->label('code'),
                 TextInput::make('libelle_court')
                 ->required()
-                ->maxLength(150)
+                //->maxLength(150)
                 ->label('Libellé court'),
             TextInput::make('libelle_long')
                 ->required()
-                ->maxLength(1500)
+                //->maxLength(1500)
                 ->label('Libellé long'),
             Select::make('color')
                 ->options(OutilsHelper::selectColors())
@@ -90,7 +90,7 @@ class ParcoursTypeResource extends Resource
                
             TextColumn::make('libelle_court')
                 ->label('Libellé court')
-                ->limit(50)
+                //->limit(50)
                 ->sortable()
                 ->searchable()
                 ->description(fn ($record) => substr($record->libelle_long,0,40).'...')

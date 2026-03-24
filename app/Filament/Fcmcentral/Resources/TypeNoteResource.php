@@ -50,12 +50,14 @@ class TypeNoteResource extends Resource
                 TextInput::make('code')
                     ->required()
                     ->label('Code')
-                    ->maxLength(150),
+                    //->maxLength(150)
+                    ,
 
                 TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
-                    ->maxLength(150),
+                    //->maxLength(150)
+                    ,
                
             ]);
     }

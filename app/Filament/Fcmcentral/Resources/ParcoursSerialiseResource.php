@@ -45,17 +45,17 @@ class ParcoursSerialiseResource extends Resource
                 TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
-                    ->maxLength(150)
+                    //->maxLength(150)
                     ->disabled(),
                 TextInput::make('libelle_long')
                     ->required()
                     ->label('Libellé long')
-                    ->maxLength(1500)
+                    //->maxLength(1500)
                     ->disabled(),
                 TextInput::make('version')
                     ->required()
                     ->label('Version')
-                    ->maxLength(5)
+                    //->maxLength(5)
                     ->default(1)
                     ->disabled(),
                 DatePicker::make('date_debut')

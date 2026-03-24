@@ -35,12 +35,12 @@ class CohorteResource extends Resource
         return $schema
             ->components([
                 TextInput::make('libelle_court')
-                    ->maxLength(255)
+                    //->maxLength(255)
                     ->default(null)
                     ->label('Libellé court')
                     ->required(),
                 TextInput::make('libelle_long')
-                    ->maxLength(255)
+                   // ->maxLength(255)
                     ->default(null)
                     ->label('Libellé long')
                     ->required(),

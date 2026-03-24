@@ -45,15 +45,18 @@ class SavoirfaireResource extends Resource
                 TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
-                    ->maxLength(150),
+                    //->maxLength(150)
+                    ,
                 TextInput::make('libelle_long')
                     ->required()
                     ->label('Libellé long')
-                    ->maxLength(1500),
+                   // ->maxLength(1500)
+                   ,
                 TextInput::make('code')
                     ->required()
                     ->label('Code')
-                    ->maxLength(150),        
+                    //->maxLength(150)
+                    ,        
                 Select::make('domaine_id')
                     ->label('Domaine')
                     ->required()
@@ -69,10 +72,12 @@ class SavoirfaireResource extends Resource
                 //     ->maxLength(1000), 
                 TextInput::make('same')
                     ->label('same')
-                    ->maxLength(255), 
+                    //->maxLength(255)
+                    , 
                 TextInput::make('code_sicomp')
                     ->label('Code OCTAVE')
-                    ->maxLength(255), 
+                    //->maxLength(255)
+                    , 
                 Select::make('color')
                     ->options(OutilsHelper::selectColors())
                     ->label('Couleur du Badge'),             
@@ -101,7 +106,7 @@ class SavoirfaireResource extends Resource
                    
                 TextColumn::make('libelle_court')
                     ->label('Libellé court')
-                    ->limit(50)
+                    //->limit(50)
                     ->sortable()
                     ->searchable()
                     ->description(fn ($record) => substr($record->libelle_long,0,40).'...')

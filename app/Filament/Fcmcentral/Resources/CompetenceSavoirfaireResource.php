@@ -64,7 +64,8 @@ class CompetenceSavoirfaireResource extends Resource
 
                 TextInput::make('libelle_court')
                     ->label('Intitulé')
-                    ->maxLength(255),
+                    //->maxLength(255)
+                    ,
 
                 Select::make('savoirfaire_type_id')
                     ->label('Type de Savoir-faire')

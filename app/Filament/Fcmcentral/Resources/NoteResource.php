@@ -49,7 +49,8 @@ class NoteResource extends Resource
                     ->required()
                     ->label('Libellé')
                     ->rows(4)
-                    ->maxLength(1000),
+                    //->maxLength(1000)
+                    ,
 
                 Select::make('marin_id')
                     ->label('Marin')
@@ -69,12 +70,14 @@ class NoteResource extends Resource
                             TextInput::make('code')
                                 ->required()
                                 ->label('code')
-                                ->maxLength(150),
+                                //->maxLength(150)
+                                ,
                             Textarea::make('libelle_court')
                                 ->required()
                                 ->label('Libellé')
                                 ->rows(3)
-                                ->maxLength(150),
+                                //->maxLength(150)
+                                ,
                         ])
                         ->createOptionUsing(function (array $data) {
                             return TypeNote::create($data)->id;
@@ -128,7 +131,7 @@ class NoteResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Libellé')
-                    ->limit(100)
+                    //->limit(100)
                     ->wrap(),
                     
 
@@ -163,7 +166,8 @@ class NoteResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->url(fn ($record) => $record->lien_url)
                     ->openUrlInNewTab()
-                    ->limit(30),
+                    //->limit(30)
+                    ,
             ])
             ->filters([
                 SelectFilter::make('type_note_id')

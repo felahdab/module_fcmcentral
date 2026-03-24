@@ -47,7 +47,8 @@ class GelResource extends Resource
                 ->required()
                 ->label('Libellé')
                 ->rows(4)
-                ->maxLength(1000),
+                //->maxLength(1000)
+                ,
 
             Select::make('marin_id')
                 ->label('Marin')
@@ -66,11 +67,13 @@ class GelResource extends Resource
                     TextInput::make('libelle_court')
                         ->required()
                         ->label('Libellé court')
-                        ->maxLength(150),
+                        //->maxLength(150)
+                        ,
                     TextInput::make('code')
                         ->required()
                         ->label('Code')
-                        ->maxLength(50),
+                        //->maxLength(50)
+                        ,
                 ])
                 ->createOptionUsing(function (array $data) {
                     return TypeEtat::create($data)->id;
