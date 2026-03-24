@@ -137,6 +137,8 @@ class SavoirfairesRelationManager extends RelationManager
                                 TextInput::make('code')->label('Code')->required(),
                                 TextInput::make('libelle_court')->label('Libellé court')->required(),
                                 Textarea::make('libelle_long')->label('Libellé long')->rows(2),
+                                TextInput::make('heures')->label('Heures')->numeric(),
+                                
                             ]),
                     ]))
                     ->action(function (array $data) use ($competenceIds): void {
@@ -173,6 +175,7 @@ class SavoirfairesRelationManager extends RelationManager
                                 'code'          => $obj['code'],
                                 'libelle_court' => $obj['libelle_court'] ?? '',
                                 'libelle_long'  => $obj['libelle_long'] ?? null,
+                                'heures'        => $obj['heures'] ?? null,
                             ]);
                         }
                     }),
@@ -191,6 +194,7 @@ class SavoirfairesRelationManager extends RelationManager
                         'jours'               => $record->jours,
                         'objectifs'           => $record->objectifs->map(fn ($obj) => [
                             'code'          => $obj->code,
+                            'heures'          => $obj->heures,
                             'libelle_court' => $obj->libelle_court,
                             'libelle_long'  => $obj->libelle_long,
                         ])->toArray(),
@@ -248,6 +252,7 @@ class SavoirfairesRelationManager extends RelationManager
                                 TextInput::make('code')->label('Code')->required(),
                                 TextInput::make('libelle_court')->label('Libellé court')->required(),
                                 Textarea::make('libelle_long')->label('Libellé long')->rows(2),
+                                TextInput::make('heures')->label('Heures')->numeric(),
                             ]),
                     ])
                     ->action(function (\Illuminate\Database\Eloquent\Model $record, array $data): void {
@@ -268,6 +273,7 @@ class SavoirfairesRelationManager extends RelationManager
                                 'code'          => $obj['code'],
                                 'libelle_court' => $obj['libelle_court'] ?? '',
                                 'libelle_long'  => $obj['libelle_long'] ?? null,
+                                'heures'  => $obj['heures'] ?? null,
                             ]);
                         }
             

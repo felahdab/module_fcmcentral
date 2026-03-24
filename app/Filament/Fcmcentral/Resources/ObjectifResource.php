@@ -49,7 +49,8 @@ class ObjectifResource extends Resource
                         TextInput::make('code')
                             ->label('Code')
                             ->required()
-                            //->maxLength(150),
+                            //->maxLength(150)
+                            ,
 
                         TextInput::make('heures')
                             ->label('Heures')
