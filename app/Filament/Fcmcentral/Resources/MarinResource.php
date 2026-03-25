@@ -243,14 +243,14 @@ class MarinResource extends Resource
                 SelectFilter::make('unite_id')
                 ->label('Unité')
                 ->options(
-                    Unite::query()->orderBy('libelle_court')->pluck('libelle_long', 'id')
+                    Unite::query()->orderBy('libelle_long')->pluck('libelle_long', 'id')
                 ),
 
                 // ✅ Filtre par Lieu de l'unité (relation imbriquée)
                 SelectFilter::make('lieu_unite')
                     ->label('Lieu')
                     ->options(
-                        LieuUnite::query()->orderBy('libelle_court')->pluck('libelle_long', 'id')
+                        LieuUnite::query()->orderBy('libelle_long')->pluck('libelle_long', 'id')
                     )
                     ->query(function (Builder $query, array $data): Builder {
                         if (empty($data['value'])) {
