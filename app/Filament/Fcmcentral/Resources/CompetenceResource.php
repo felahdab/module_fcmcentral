@@ -29,6 +29,7 @@ class CompetenceResource extends Resource
     protected static ?string $model = Competence::class;
     protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-star';
+    protected static ?int $navigationSort = 5;
 
     public static function form(Schema $schema): Schema
     {

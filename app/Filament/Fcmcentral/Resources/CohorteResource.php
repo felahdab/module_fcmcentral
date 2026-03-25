@@ -25,6 +25,7 @@ class CohorteResource extends Resource
     protected static string | \UnitEnum | null $navigationGroup = "Gestion";
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
     
+
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
