@@ -21,6 +21,9 @@ use Modules\RH\Models\Specialite;
 
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\FcmMarin;
+use Modules\RH\Models\Unite;
+use Modules\RH\Models\LieuUnite;
+
 
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\RechercheAnnuairePage;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
@@ -235,7 +238,29 @@ class MarinResource extends Resource
                 SelectFilter::make('specialite_id')
                     ->label('Spécialité')
                     ->options(Specialite::query()->orderBy('libelle_court')->pluck('libelle_court', 'id')),
-                    
+                
+                // ✅ Filtre par Unité
+                SelectFilter::make('unite_id')
+                ->label('Unité')
+                ->options(
+                    Unite::query()->orderBy('libelle_court')->pluck('libelle_long', 'id')
+                ),
+
+                // ✅ Filtre par Lieu de l'unité (relation imbriquée)
+                SelectFilter::make('lieu_unite')
+                    ->label('Lieu')
+                    ->options(
+                        LieuUnite::query()->orderBy('libelle_court')->pluck('libelle_long', 'id')
+                    )
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['value'])) {
+                            return $query;
+                        }
+                        return $query->whereHas('unite', fn (Builder $q) =>
+                            $q->where('lieu_unite_id', $data['value'])
+                        );
+                    }),
+
             ])
 
             
