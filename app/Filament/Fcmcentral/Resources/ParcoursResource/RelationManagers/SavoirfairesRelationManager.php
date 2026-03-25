@@ -110,6 +110,10 @@ class SavoirfairesRelationManager extends RelationManager
                         TextInput::make('nouvelle_libelle_court')
                             ->label('Libellé court')
                             ->hidden(fn ($get) => $get('savoirfaire_id') !== null),
+                        
+                        TextInput::make('nouvelle_libelle_long')
+                            ->label('Libellé long')
+                            ->hidden(fn ($get) => $get('savoirfaire_id') !== null),
 
                         Select::make('savoirfaire_type_id')
                             ->label('Type')
@@ -118,7 +122,8 @@ class SavoirfairesRelationManager extends RelationManager
                             ->searchable()
                             ->live(),
 
-                        TextInput::make('libelle_court')->label('Libellé contexte')->maxLength(255),
+                        TextInput::make('libelle_court')->label('Libellé contexte'),
+                        //TextInput::make('libelle_long')->label('Libellé long'),
                         TextInput::make('heures')->label('Heures')->numeric(),
                         TextInput::make('jours')->label('Jours')->numeric(),
 
@@ -136,7 +141,7 @@ class SavoirfairesRelationManager extends RelationManager
                             ->schema([
                                 TextInput::make('code')->label('Code')->required(),
                                 TextInput::make('libelle_court')->label('Libellé court')->required(),
-                                Textarea::make('libelle_long')->label('Libellé long')->rows(2),
+                                //Textarea::make('libelle_long')->label('Libellé long')->rows(2),
                                 TextInput::make('heures')->label('Heures')->numeric(),
                                 
                             ]),
@@ -150,6 +155,7 @@ class SavoirfairesRelationManager extends RelationManager
                                 'uuid'          => Str::uuid(),
                                 'code'          => $data['nouvelle_code'] ?? '',
                                 'libelle_court' => $data['nouvelle_libelle_court'] ?? '',
+                                'libelle_long' => $data['nouvelle_libelle_long'] ?? '',
                                 'competence_id' => $data['competence_id'],
                             ]);
                         }
@@ -163,6 +169,7 @@ class SavoirfairesRelationManager extends RelationManager
                             'savoirfaire_id'      => $savoirfaire->id,
                             'savoirfaire_type_id' => $data['savoirfaire_type_id'] ?? null,
                             'libelle_court'       => $data['libelle_court'] ?? null,
+                            //'libelle_long'       => $data['libelle_long'] ?? null,
                             'heures'              => $data['heures'] ?? null,
                             'jours'               => $data['jours'] ?? null,
                         ]);
@@ -188,17 +195,22 @@ class SavoirfairesRelationManager extends RelationManager
                     ->fillForm(fn (\Illuminate\Database\Eloquent\Model $record) => [
                         'competence_id'       => $record->competence_id,
                         'savoirfaire_id'      => $record->savoirfaire_id,
+                        'sf_code'             => $record->savoirfaire?->code,
+                        'sf_libelle_court'    => $record->savoirfaire?->libelle_court,
+                        'sf_libelle_long'     => $record->savoirfaire?->libelle_long,
                         'savoirfaire_type_id' => $record->savoirfaire_type_id,
                         'libelle_court'       => $record->libelle_court,
+                        'libelle_long'        => $record->libelle_long,
                         'heures'              => $record->heures,
                         'jours'               => $record->jours,
                         'objectifs'           => $record->objectifs->map(fn ($obj) => [
                             'code'          => $obj->code,
-                            'heures'          => $obj->heures,
+                            'heures'        => $obj->heures,
                             'libelle_court' => $obj->libelle_court,
                             'libelle_long'  => $obj->libelle_long,
                         ])->toArray(),
                     ])
+                    
                     
                     ->schema([
                         Select::make('competence_id')
@@ -214,7 +226,7 @@ class SavoirfairesRelationManager extends RelationManager
                             )
                             ->required()
                             ->searchable(),
-            
+                    
                         Select::make('savoirfaire_id')
                             ->label('Savoir-faire')
                             ->options(fn ($get) =>
@@ -227,18 +239,34 @@ class SavoirfairesRelationManager extends RelationManager
                             )
                             ->searchable()
                             ->live(),
-            
+                    
+                        // ✅ Édition directe du savoir-faire sélectionné
+                        TextInput::make('sf_code')
+                            ->label('Code du savoir-faire')
+                            ->required()
+                            ->helperText('Modifie directement le code du savoir-faire'),
+                    
+                        TextInput::make('sf_libelle_court')
+                            ->label('Libellé court du savoir-faire')
+                            ->required(),
+                    
+                        TextInput::make('sf_libelle_long')
+                            ->label('Libellé long du savoir-faire'),
+                    
                         Select::make('savoirfaire_type_id')
                             ->label('Type')
                             ->options(SavoirfaireType::orderBy('libelle_court')->pluck('libelle_court', 'id'))
                             ->required()
                             ->searchable()
                             ->live(),
-            
-                        TextInput::make('libelle_court')->label('Libellé contexte')->maxLength(255),
+                    
+                        TextInput::make('libelle_court')
+                            ->label('Libellé contexte')
+                            ->helperText('Intitulé spécifique au parcours (ex : stage embarqué, poste tenu…). Laissez vide pour utiliser le libellé du savoir-faire.'),
+                    
                         TextInput::make('heures')->label('Heures')->numeric(),
                         TextInput::make('jours')->label('Jours')->numeric(),
-            
+                    
                         Repeater::make('objectifs')
                             ->label('Objectifs')
                             ->addActionLabel('+ Ajouter un objectif')
@@ -255,16 +283,30 @@ class SavoirfairesRelationManager extends RelationManager
                                 TextInput::make('heures')->label('Heures')->numeric(),
                             ]),
                     ])
+                    
                     ->action(function (\Illuminate\Database\Eloquent\Model $record, array $data): void {
+
+                        // ✅ Mise à jour du savoir-faire lui-même
+                        if ($data['savoirfaire_id']) {
+                            Savoirfaire::where('id', $data['savoirfaire_id'])->update([
+                                'code'          => $data['sf_code'],
+                                'libelle_court' => $data['sf_libelle_court'],
+                                'libelle_long'  => $data['sf_libelle_long'] ?? null,
+                            ]);
+                        }
+                    
+                        // ✅ Mise à jour du pivot CSF
                         $record->update([
                             'competence_id'       => $data['competence_id'],
                             'savoirfaire_id'      => $data['savoirfaire_id'],
                             'savoirfaire_type_id' => $data['savoirfaire_type_id'] ?? null,
                             'libelle_court'       => $data['libelle_court'] ?? null,
+                            'libelle_long'        => $data['libelle_long'] ?? null,
                             'heures'              => $data['heures'] ?? null,
                             'jours'               => $data['jours'] ?? null,
                         ]);
-            
+                    
+                        // ✅ Recréation des objectifs
                         $record->objectifs()->delete();
                         foreach ($data['objectifs'] ?? [] as $obj) {
                             if (empty($obj['code'])) continue;
@@ -273,15 +315,16 @@ class SavoirfairesRelationManager extends RelationManager
                                 'code'          => $obj['code'],
                                 'libelle_court' => $obj['libelle_court'] ?? '',
                                 'libelle_long'  => $obj['libelle_long'] ?? null,
-                                'heures'  => $obj['heures'] ?? null,
+                                'heures'        => $obj['heures'] ?? null,
                             ]);
                         }
-            
+                    
                         \Filament\Notifications\Notification::make()
                             ->title('Savoir-faire mis à jour')
                             ->success()
                             ->send();
                     }),
+                    
             
                 \Filament\Actions\Action::make('delete')
                     ->icon('heroicon-m-trash')
