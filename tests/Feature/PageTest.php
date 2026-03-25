@@ -19,6 +19,9 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
 use function Pest\Livewire\livewire;
 use function Pest\Laravel\{actingAs};
 
+use Modules\FcmCentral\Models\Parcours;
+use Illuminate\Support\Facades\Artisan;
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use Livewire\Livewire;
@@ -179,6 +182,15 @@ it('affiche la page liste des parcours', function() {
 it('affiche la page création de parcours', function() {
     $this->actingAs($this->admin)
         ->get(ParcoursResource::getUrl('create'))
+        ->assertSuccessful();
+});
+
+it('affiche la page edit d un parcours', function () {
+    Artisan::call('fcmcentral:charge-parcours Modules/FcmCentral/tests/Feature/parcours_deasm.json');
+    $parcours = Parcours::first();
+
+    $this->actingAs($this->admin)
+        ->get(ParcoursResource::getUrl('edit', ['record' => $parcours]))
         ->assertSuccessful();
 });
 
