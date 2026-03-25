@@ -30,46 +30,39 @@ class MarinProgressWidget extends Widget
     public function getProgressData(): array
     {
         $marin = $this->getMarin();
-        
+
         if (!$marin || !$marin->complements_fcm) {
             return ['progress' => 0, 'completed' => 0, 'total' => 0];
         }
 
-        $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
-        
+        $donneesParcours = $marin->complements_fcm->donnees_du_parcours;
+
+        if (!$donneesParcours) {
+            return ['progress' => 0, 'completed' => 0, 'total' => 0];
+        }
+
+        $parcours = $donneesParcours->parcoursmarin ?? null;
+
         if (!$parcours) {
             return ['progress' => 0, 'completed' => 0, 'total' => 0];
         }
 
-        // ✅ Calculer sur les heures
-        $heuresTotal = 0;
+        // ✅ Heures pré-calculées par mettreAJourHeures (dans les listeners)
+        $heuresTotal    = 0;
         $heuresValidees = 0;
-        
         foreach ($parcours['affectations'] ?? [] as $affectation) {
-            foreach ($affectation['competences'] ?? [] as $competence) {
-                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
-                    $heures = 0;
-                    if (isset($csf['heures']) && is_numeric($csf['heures'])) {
-                        $heures = (float) $csf['heures'];
-                    } elseif (isset($csf['jours']) && is_numeric($csf['jours'])) {
-                        $heures = (float) $csf['jours'] * 7;
-                    }
-
-                    $heuresTotal += $heures;
-
-                    if ($csf['etat_valid'] ?? false) {
-                        $heuresValidees += $heures;
-                    }
-                }
-            }
+            $heuresTotal    += $affectation['heures_total']    ?? 0;
+            $heuresValidees += $affectation['heures_validees'] ?? 0;
         }
 
+        // ✅ Même calcul live que le livret → cohérence garantie
         $progress = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
 
         return [
-            'progress' => $progress,
-            'completed' => round($heuresValidees, 2),
-            'total' => round($heuresTotal, 2)
+            'progress'  => (int) $progress,
+            'completed' => round($heuresValidees, 0),
+            'total'     => round($heuresTotal, 0),
         ];
     }
+
 }

@@ -70,75 +70,68 @@ class MarinStatsWidget extends BaseWidget
         ];
     }
 
-    private function calculateStats($parcours): array
+    private function calculateStats(array $parcours): array
     {
         $nbAffectations = count($parcours['affectations'] ?? []);
-       
-        $heuresTotal = 0;
+
+        // ✅ Heures globales : lire les valeurs déjà calculées par CalculHeuresParcoursService
+        $heuresTotal    = 0;
         $heuresValidees = 0;
-        $heuresStage = 0;
+        foreach ($parcours['affectations'] ?? [] as $affectation) {
+            $heuresTotal    += $affectation['heures_total']    ?? 0;
+            $heuresValidees += $affectation['heures_validees'] ?? 0;
+        }
+
+        // ✅ Répartition par type + dernière validation (non fournis par le service)
+        $heuresStage         = 0;
         $heuresCompagnonnage = 0;
-        $heuresEad = 0;
-       
-        $derniereValidation = null;
-       
+        $heuresEad           = 0;
+        $derniereValidation  = null;
+
         foreach ($parcours['affectations'] ?? [] as $affectation) {
             foreach ($affectation['competences'] ?? [] as $competence) {
                 foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
-                    // ✅ Récupérer les heures
-                    $heures = $this->getHeures($csf);
-                    $heuresTotal += $heures;
 
-                    // ✅ Heures validées
-                    if ($csf['etat_valid'] ?? false) {
-                        $heuresValidees += $heures;
+                    $heures = CalculHeuresParcoursService::getHeures($csf);
 
-                        // ✅ Dernière validation
-                        if (!empty($csf['date_validation'])) {
-                            $dateValidation = Carbon::parse($csf['date_validation']);
-                            if (!$derniereValidation || $dateValidation->gt($derniereValidation)) {
-                                $derniereValidation = $dateValidation;
+                    $type = $csf['savoirfaire_type']['code']
+                        ?? $csf['savoirfaireType']['code']
+                        ?? $csf['type_code']
+                        ?? null;
+
+                    if ($type === 'S')                          $heuresStage         += $heures;
+                    elseif ($type === 'C')                      $heuresCompagnonnage += $heures;
+                    elseif (in_array($type, ['E', 'EAD', 'D'])) $heuresEad           += $heures;
+
+                    // Dernière validation (CSF ou objectifs enfants)
+                    $elementsAControler = array_merge([$csf], $csf['objectifs'] ?? []);
+                    foreach ($elementsAControler as $el) {
+                        if (($el['etat_valid'] ?? false) && !empty($el['date_validation'])) {
+                            $date = Carbon::parse($el['date_validation']);
+                            if (!$derniereValidation || $date->gt($derniereValidation)) {
+                                $derniereValidation = $date;
                             }
                         }
                     }
-
-                    // ✅ Répartition par type
-                    $type = $csf['savoirfaire_type']['code'] ??
-                            $csf['savoirfaireType']['code'] ??
-                            $csf['type_code'] ?? null;
-
-                    if ($type === 'S') $heuresStage += $heures;
-                    elseif ($type === 'C') $heuresCompagnonnage += $heures;
-                    elseif (in_array($type, ['E', 'EAD', 'D'])) $heuresEad += $heures;
                 }
             }
         }
 
-        // ✅ Taux global (basé sur les heures)
+        // ✅ Taux basé sur les heures (compagnonnage = objectifs) via le service
         $tauxGlobal = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
 
         return [
-            'affectations' => $nbAffectations,
-            'heures_total' => round($heuresTotal, 0),
-            'heures_validees' => round($heuresValidees, 0),
-            'heures_stage' => round($heuresStage, 0),
-            'heures_compagnonnage' => round($heuresCompagnonnage, 0),
-            'heures_ead' => round($heuresEad, 0),
-            'taux_global' => $tauxGlobal,
+            'affectations'        => $nbAffectations,
+            'heures_total'        => round($heuresTotal, 0),
+            'heures_validees'     => round($heuresValidees, 0),
+            'heures_stage'        => round($heuresStage, 0),
+            'heures_compagnonnage'=> round($heuresCompagnonnage, 0),
+            'heures_ead'          => round($heuresEad, 0),
+            'taux_global'         => $tauxGlobal,
             'derniere_validation' => $derniereValidation ? $derniereValidation->diffForHumans() : 'Aucune',
         ];
     }
 
-    private function getHeures(array $csf): float
-    {
-        if (isset($csf['heures']) && is_numeric($csf['heures'])) {
-            return (float) $csf['heures'];
-        }
-       
-        if (isset($csf['jours']) && is_numeric($csf['jours'])) {
-            return (float) $csf['jours'] * 7;
-        }
-       
-        return 0;
-    }
+
+    
 }

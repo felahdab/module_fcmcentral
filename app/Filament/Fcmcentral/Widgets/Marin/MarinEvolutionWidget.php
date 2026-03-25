@@ -5,6 +5,7 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin;
 use Filament\Widgets\ChartWidget;
 use Modules\FcmCentral\Models\Marin;
 use Carbon\Carbon;
+use Modules\FcmCommun\Services\CalculHeuresParcoursService;
 
 class MarinEvolutionWidget extends ChartWidget
 {
@@ -31,37 +32,50 @@ class MarinEvolutionWidget extends ChartWidget
     protected function getData(): array
     {
         $marin = $this->getMarin();
-        
+
         if (!$marin || !$marin->complements_fcm) {
             return ['datasets' => [], 'labels' => []];
         }
 
         $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
-        
+
         if (!$parcours) {
             return ['datasets' => [], 'labels' => []];
         }
 
-        // ✅ Collecter les heures par mois
         $monthly = [];
 
         foreach ($parcours['affectations'] ?? [] as $affectation) {
             foreach ($affectation['competences'] ?? [] as $competence) {
                 foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
-                    if (empty($csf['date_validation'])) continue;
-                    if (!($csf['etat_valid'] ?? false)) continue;
 
-                    $date = Carbon::parse($csf['date_validation'])->startOfMonth();
-                    $key = $date->format('Y-m');
+                    $isCompagnonnage = ($csf['savoirfaire_type']['code'] ?? null) === 'C';
 
-                    $heures = 0;
-                    if (isset($csf['heures']) && is_numeric($csf['heures'])) {
-                        $heures = (float) $csf['heures'];
-                    } elseif (isset($csf['jours']) && is_numeric($csf['jours'])) {
-                        $heures = (float) $csf['jours'] * 7;
+                    if ($isCompagnonnage) {
+                        // ✅ Compagnonnage : granularité objectif (cohérent avec le service)
+                        $objectifs   = $csf['objectifs'] ?? [];
+                        $nbObjectifs = count($objectifs);
+
+                        foreach ($objectifs as $objectif) {
+                            if (empty($objectif['date_validation'])) continue;
+                            if (!($objectif['etat_valid'] ?? false)) continue;
+
+                            $hObj = CalculHeuresParcoursService::getHeures($objectif);
+                            if ($hObj == 0 && $nbObjectifs > 0) {
+                                $hObj = CalculHeuresParcoursService::getHeures($csf) / $nbObjectifs;
+                            }
+
+                            $key = Carbon::parse($objectif['date_validation'])->startOfMonth()->format('Y-m');
+                            $monthly[$key] = ($monthly[$key] ?? 0) + $hObj;
+                        }
+                    } else {
+                        // ✅ Autres types : granularité CSF
+                        if (empty($csf['date_validation'])) continue;
+                        if (!($csf['etat_valid'] ?? false)) continue;
+
+                        $key = Carbon::parse($csf['date_validation'])->startOfMonth()->format('Y-m');
+                        $monthly[$key] = ($monthly[$key] ?? 0) + CalculHeuresParcoursService::getHeures($csf);
                     }
-
-                    $monthly[$key] = ($monthly[$key] ?? 0) + $heures;
                 }
             }
         }
@@ -72,31 +86,29 @@ class MarinEvolutionWidget extends ChartWidget
 
         ksort($monthly);
 
-        // ✅ Cumuler les heures
         $labels = [];
-        $data = [];
-        $cumul = 0;
+        $data   = [];
+        $cumul  = 0;
 
         foreach ($monthly as $key => $heures) {
-            $cumul += $heures;
+            $cumul   += $heures;
             $labels[] = Carbon::createFromFormat('Y-m', $key)->translatedFormat('M Y');
-            $data[] = round($cumul, 2);
+            $data[]   = round($cumul, 2);
         }
 
         return [
-            'datasets' => [
-                [
-                    'label' => 'Heures validées (cumul)',
-                    'data' => $data,
-                    'borderColor' => 'rgb(34, 197, 94)',
-                    'backgroundColor' => 'rgba(34, 197, 94, 0.2)',
-                    'fill' => true,
-                    'tension' => 0.4,
-                ],
-            ],
+            'datasets' => [[
+                'label'           => 'Heures validées (cumul)',
+                'data'            => $data,
+                'borderColor'     => 'rgb(34, 197, 94)',
+                'backgroundColor' => 'rgba(34, 197, 94, 0.2)',
+                'fill'            => true,
+                'tension'         => 0.4,
+            ]],
             'labels' => $labels,
         ];
     }
+
 
     protected function getType(): string
     {

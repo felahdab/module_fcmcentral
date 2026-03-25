@@ -108,6 +108,7 @@ class MentorProgressionWidget extends ChartWidget
      * Calcule les statistiques de progression, validés, proposés, non validés
      * sur la structure parcours['affectations']['competences']['competencesSavoirfaires']['objectifs']
      */
+    
     private function calculerStatistiques(array $parcours): array
     {
         $total = 0;
