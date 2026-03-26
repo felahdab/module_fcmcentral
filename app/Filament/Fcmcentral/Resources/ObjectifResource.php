@@ -43,7 +43,7 @@ class ObjectifResource extends Resource
                     TextInput::make('libelle_court')
                         ->label('Libellé')
                         ->required()
-                        //->maxLength(150)
+                        ->maxLength(500)
                         ->columnSpanFull(),
 
                     Grid::make(3)->schema([

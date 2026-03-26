@@ -45,7 +45,7 @@ class SavoirfaireResource extends Resource
                 TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
-                    //->maxLength(150)
+                    ->maxLength(500)
                     ,
                 TextInput::make('libelle_long')
                     ->required()

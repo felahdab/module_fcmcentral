@@ -47,7 +47,7 @@ class AffectationResource extends Resource
             ->components([
                 TextInput::make('libelle_court')
                     ->required()
-                    //->maxLength(150)
+                    ->maxLength(500)
                     ->label('Libellé court'),
                 TextInput::make('libelle_long')
                     ->required()
