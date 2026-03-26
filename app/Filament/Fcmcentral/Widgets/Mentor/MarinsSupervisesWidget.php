@@ -24,8 +24,9 @@ class MarinsSupervisesWidget extends BaseWidget
     {
         // Ce widget ne doit être visible que si l'utilisateur est un mentor.
         $currentMarin = Marin::fromCurrentUser();
+       
         if ( $currentMarin == null ) return false;
-
+        
         return $currentMarin->est_mentor ;
     }
 
