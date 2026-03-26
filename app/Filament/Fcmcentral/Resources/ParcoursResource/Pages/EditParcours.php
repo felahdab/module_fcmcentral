@@ -14,6 +14,7 @@ use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
 use Modules\FcmCentral\Models\ParcoursType;
 use Modules\FcmCentral\Services\ParcoursService;
+use Filament\Forms\Components\FileUpload;
 
 class EditParcours extends EditRecord
 {
@@ -68,6 +69,15 @@ class EditParcours extends EditRecord
                     ->options(ParcoursType::orderBy('libelle_court')->pluck('libelle_court', 'id'))
                     ->required()
                     ->searchable(),
+                FileUpload::make('livret_pdf')
+                    ->label('Livret PDF')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->disk('public')
+                    ->directory('fcmcentral/parcours/livrets')
+                    ->visibility('public')
+                    ->downloadable()
+                    ->openable()
+                    ->columnSpanFull(),    
             ]);
     }
 }

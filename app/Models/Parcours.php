@@ -27,6 +27,7 @@ class Parcours extends Model
         'parcours_type_id',
         'ordre',
         'color',
+        'livret_pdf',
     ];
 
     // protected $casts = [
@@ -86,6 +87,15 @@ class Parcours extends Model
             'competence_id'
         )->whereIn('competence_id', $competenceIds);
     }
+
+    /// PDF
+    public function getLivretPdfUrlAttribute(): ?string
+    {
+        return $this->livret_pdf
+            ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->livret_pdf)
+            : null;
+    }
+    
 
 
 

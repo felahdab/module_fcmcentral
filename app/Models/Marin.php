@@ -792,4 +792,21 @@ class Marin extends BaseMarin
 
     }
 
+
+    /**
+     * Raccourci vers le Parcours du marin via ses compléments FCM
+     *
+     * 
+     */
+    public function getParcoursAttribute(): ?\Modules\FcmCentral\Models\Parcours
+{
+    return $this->complementsFcm
+        ?->donnees_du_parcours          // getDonneesDuParcoursAttribute → MarinParcours
+        ?->parcours_serialise           // belongsTo ParcoursSerialise
+        ?->parcoursModel;               // belongsTo Parcours (nom spécifique pour éviter le bug)
+}
+
+
+
+
 }

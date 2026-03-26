@@ -30,6 +30,8 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationMa
 use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursType;
+
+use Filament\Forms\Components\FileUpload;
  
 use Modules\FcmCentral\Services\ParcoursService;
 
@@ -48,7 +50,7 @@ class ParcoursResource extends Resource
                 TextInput::make('libelle_court')
                     ->required()
                     ->label('Libellé court')
-                    //->maxLength(150)
+                    ->maxLength(500)
                     ,
                     
                 TextInput::make('libelle_long')
@@ -65,7 +67,19 @@ class ParcoursResource extends Resource
                     ->label('Type de Parcours')
                     ->required()
                     ->searchable()
-                    ->options(ParcoursType::all()->pluck('libelle_court','id')),    
+                    ->options(ParcoursType::all()->pluck('libelle_court','id')), 
+                    
+                    FileUpload::make('livret_pdf')
+                    ->label('Livret PDF')
+                    ->acceptedFileTypes(['application/pdf'])
+                    ->disk('public')
+                    ->directory('livrets')
+                    ->visibility('public')
+                    ->downloadable()
+                    ->openable()
+                    ->columnSpanFull(),
+            
+       
 
             ]);
     }
