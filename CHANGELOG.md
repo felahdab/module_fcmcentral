@@ -1,3 +1,23 @@
+## 0.2.5 (March 27, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.4 –> 0.2.5
+- Correction de style avec php-cs-fixer.
+- Ajustements divers: - retrait de la policy StoredEventPolicy: les StoredEvent n'ont pas vocation à être manipulés comme des ressources communes - modification de la gestion des droits d'accès à la page ListStoredEvent (journal est évènements): il suffit d'avoir la permission fcmcentral::voir_journal_des_evenements pour y accéder) - création d'un scope local pour les Stored Event afin de pouvoir filtrer les évènements en tenant compte de l'unité d'affectation du marin concerné - application de ce scope depuis la StoredEventRessource.
+- Implements art #722830 : Page historique nouvelle version
+- Implements art #722830 ; Creation resource StoredEvent journaux de logs  + policy
+- Implements art #725422 : Modification + migrate Voir le commandant car BUG sur le chemin upload
+- Implements art #725762 : Migration pour augmentation de nombre de caracteres dans le parcours pour les liblelle court et long Retouche des resources avec limite pour le libelle court a 500
+- Implements art #725061 Ajout de nouvelles regles pour les Test Unitaires
+- Implements art #696257 : classement des resources dans le group Catalogue
+- Implements art #721560 : correction Bug savoir faire dans nouveau creation parcours
+- Implements art #721560 : modification order court =>long
+- Implements art #721560 : rajout filtre unite et lieu unite dans MarinResource
+- Implements art #721560 ; refonte des calculs pour le taux avec les heures (prise encompte des horaires dans objectifs)
+- Implements art #721560 : suppressions des limites caracteres dans les resources
+- Implements art #721560 : Mise a jour RelationManager dans ParcoursResource pour rajout Heures + corection bug dans ObjectifResource
+- Implements art #721560 : modification de la Ressource et du Model Objectifs
+- Implements art #721560 : creation de la migration update pour les heures objectifs pensez a faire module:migrate FcmCentral
+- Implements art #722821 : Modification du listener pour antidater une validation
+
 ## 0.2.4 (March 20, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.3 –> 0.2.4
 - Implements art #721824 ; Correction de ChargeParcours suite a l'apparation d'un nouveau parcours Prendre en compte du parcoursType dans les competences
