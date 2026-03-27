@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class TypeNotePolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::typeNote';
+    protected $slug = 'fcmcentral::typeNote';
 }

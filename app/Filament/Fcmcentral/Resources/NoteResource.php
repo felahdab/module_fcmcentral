@@ -2,44 +2,38 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\TextInput;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Hidden;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Filters\Filter;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\ListNotes;
+use Filament\Tables\Table;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\CreateNote;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\EditNote;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\ListNotes;
 use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
-use Modules\FcmCentral\Models\Marin;
-
- 
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 
 class NoteResource extends Resource
 {
     protected static ?string $model = Note::class;
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
-    protected static string | \UnitEnum | null $navigationGroup = "Gestion";
-
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
+    protected static string|\UnitEnum|null $navigationGroup = 'Gestion';
 
     public static function form(Schema $schema): Schema
     {
@@ -49,8 +43,8 @@ class NoteResource extends Resource
                     ->required()
                     ->label('Libellé')
                     ->rows(4)
-                    //->maxLength(1000)
-                    ,
+                // ->maxLength(1000)
+                ,
 
                 Select::make('marin_id')
                     ->label('Marin')
@@ -70,14 +64,14 @@ class NoteResource extends Resource
                             TextInput::make('code')
                                 ->required()
                                 ->label('code')
-                                //->maxLength(150)
-                                ,
+                            // ->maxLength(150)
+                            ,
                             Textarea::make('libelle_court')
                                 ->required()
                                 ->label('Libellé')
                                 ->rows(3)
-                                //->maxLength(150)
-                                ,
+                            // ->maxLength(150)
+                            ,
                         ])
                         ->createOptionUsing(function (array $data) {
                             return TypeNote::create($data)->id;
@@ -109,7 +103,8 @@ class NoteResource extends Resource
                 Hidden::make('objet_type'),
                 Hidden::make('objet_id')
                     ->default(0),
-            ]);
+            ])
+        ;
     }
 
     public static function table(Table $table): Table
@@ -122,7 +117,7 @@ class NoteResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
 
-                    TextColumn::make('code')
+                TextColumn::make('code')
                     ->label('Code')
                     ->searchable()
                     ->sortable(),
@@ -131,9 +126,8 @@ class NoteResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Libellé')
-                    //->limit(100)
+                    // ->limit(100)
                     ->wrap(),
-                    
 
                 TextColumn::make('marin.nom')
                     ->label('Marin')
@@ -166,8 +160,8 @@ class NoteResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->url(fn ($record) => $record->lien_url)
                     ->openUrlInNewTab()
-                    //->limit(30)
-                    ,
+                // ->limit(30)
+                ,
             ])
             ->filters([
                 SelectFilter::make('type_note_id')
@@ -197,7 +191,8 @@ class NoteResource extends Resource
                     ->query(function ($query, array $data) {
                         return $query
                             ->when($data['date_from'], fn ($query) => $query->whereDate('date', '>=', $data['date_from']))
-                            ->when($data['date_to'], fn ($query) => $query->whereDate('date', '<=', $data['date_to']));
+                            ->when($data['date_to'], fn ($query) => $query->whereDate('date', '<=', $data['date_to']))
+                        ;
                     }),
             ])
             ->recordActions([
@@ -209,7 +204,8 @@ class NoteResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+        ;
     }
 
     public static function getPages(): array
@@ -218,7 +214,7 @@ class NoteResource extends Resource
             'index' => ListNotes::route('/'),
             'create' => CreateNote::route('/create'),
             'edit' => EditNote::route('/{record}/edit'),
-            //'view' => Pages\ViewNote::route('/{record}'),
+            // 'view' => Pages\ViewNote::route('/{record}'),
         ];
     }
 }

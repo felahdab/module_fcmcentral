@@ -1,10 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\FcmCentral\Api\v1\CohorteFCMController;
 use Modules\FcmCentral\Api\v1\EvenementFCMController;
 use Modules\FcmCentral\Api\v1\HistoriqueFCMController;
 use Modules\FcmCentral\Api\v1\ParcoursFCMController;
-use Modules\FcmCentral\Api\v1\CohorteFCMController;
 
 /*
  *--------------------------------------------------------------------------
@@ -24,5 +24,4 @@ Route::middleware(['forcejson', 'auth:sanctum'])->prefix('v1')->group(function (
     Route::get('parcours/{parcours}', [ParcoursFCMController::class, 'description'])->name('get_parcours_description');
     Route::get('tous_parcours_serialises', [ParcoursFCMController::class, 'get_tous_parcours_serialises'])->name('get_tous_parcours_serialises');
     Route::get('cohortes', [CohorteFCMController::class, 'index'])->name('get_toutes_cohortes');
-    
 });

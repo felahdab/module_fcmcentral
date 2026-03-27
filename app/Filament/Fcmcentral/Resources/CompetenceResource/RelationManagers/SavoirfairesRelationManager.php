@@ -2,21 +2,17 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\RelationManagers;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\AttachAction;
-use Filament\Forms\Components\Select;
-use Filament\Actions\EditAction;
-use Filament\Actions\DetachAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
-use Filament\Forms;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SavoirfairesRelationManager extends RelationManager
 {
@@ -33,14 +29,15 @@ class SavoirfairesRelationManager extends RelationManager
                 TextInput::make('libelle_long')
                     ->required()
                     ->maxLength(1500),
-            ]);
+            ])
+        ;
     }
 
     public function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('libelle_court')
-            ->defaultSort('ordre','asc')
+            ->defaultSort('ordre', 'asc')
             ->defaultPaginationPageOption(25)
             ->columns([
                 TextColumn::make('libelle_court')
@@ -49,13 +46,10 @@ class SavoirfairesRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('competence.code')
                     ->label('Competences'),
-                    TextColumn::make('competence.parcoursType.code')
-                    ->label('Type de Parcours'),    
-                
-
+                TextColumn::make('competence.parcoursType.code')
+                    ->label('Type de Parcours'),
             ])
             ->filters([
-                //
             ])
             ->headerActions([
                 AttachAction::make()
@@ -71,67 +65,67 @@ class SavoirfairesRelationManager extends RelationManager
                                 'ECOLE' => 'ECOLE',
                                 'EAD' => 'EAD',
                                 'MIXTE' => 'MIXTE',
-                                ]),                         
+                            ]),
                         TextInput::make('an_acquis')
                             ->label('Année acquisition')
                             ->numeric()
-                            ->required(),  
+                            ->required(),
                         TextInput::make('coeff')
                             ->label('Coefficient')
                             ->numeric()
                             ->step(0.01),
                         TextInput::make('duree')
                             ->label('Durée(h)')
-                            ->numeric(),     
+                            ->numeric(),
                         TextInput::make('ordre')
                             ->label('Ordre')
-                            ->numeric(),  
-                ])
-                
+                            ->numeric(),
+                    ]),
             ])
             ->recordActions([
                 EditAction::make()
-                ->iconButton()
-                ->icon('heroicon-m-pencil-square')
-                ->extraAttributes([
-                    'title' => 'Modifier',
-                    'class' => 'btn-modif',
+                    ->iconButton()
+                    ->icon('heroicon-m-pencil-square')
+                    ->extraAttributes([
+                        'title' => 'Modifier',
+                        'class' => 'btn-modif',
                     ])
-                ->schema([
-                    Select::make('mod_acquis')
-                        ->label('Mode acquisition')
-                        ->required()
-                        ->options([
-                            'COMPAGNONNAGE' => 'COMPAGNONNAGE',
-                            'ECOLE' => 'ECOLE',
-                            'EAD' => 'EAD',
-                            ]),                         
-                    TextInput::make('an_acquis')
-                        ->label('Année acquisition')
-                        ->numeric()
-                        ->required(),  
-                    TextInput::make('coeff')
-                        ->label('Coefficient')
-                        ->numeric()
-                        ->step(0.01),
-                    TextInput::make('duree')
-                        ->label('Durée(h)')
-                        ->numeric(),     
-                    TextInput::make('ordre')
-                        ->label('Ordre')
-                        ->numeric(),
-                ]),
+                    ->schema([
+                        Select::make('mod_acquis')
+                            ->label('Mode acquisition')
+                            ->required()
+                            ->options([
+                                'COMPAGNONNAGE' => 'COMPAGNONNAGE',
+                                'ECOLE' => 'ECOLE',
+                                'EAD' => 'EAD',
+                            ]),
+                        TextInput::make('an_acquis')
+                            ->label('Année acquisition')
+                            ->numeric()
+                            ->required(),
+                        TextInput::make('coeff')
+                            ->label('Coefficient')
+                            ->numeric()
+                            ->step(0.01),
+                        TextInput::make('duree')
+                            ->label('Durée(h)')
+                            ->numeric(),
+                        TextInput::make('ordre')
+                            ->label('Ordre')
+                            ->numeric(),
+                    ]),
                 DetachAction::make()
-                ->iconButton()
-                ->icon('heroicon-m-arrow-top-right-on-square')
-                ->extraAttributes([
-                    'title' => 'Détacher',
+                    ->iconButton()
+                    ->icon('heroicon-m-arrow-top-right-on-square')
+                    ->extraAttributes([
+                        'title' => 'Détacher',
                     ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make(),
                 ]),
-            ]);
+            ])
+        ;
     }
 }

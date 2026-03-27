@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class ParcoursSerialisePolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::parcoursSerialise';
+    protected $slug = 'fcmcentral::parcoursSerialise';
 }

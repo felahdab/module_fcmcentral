@@ -2,9 +2,9 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource;
 
 class ListParcoursSerialises extends ListRecords
 {

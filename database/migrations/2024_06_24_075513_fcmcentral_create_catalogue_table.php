@@ -1,25 +1,21 @@
 <?php
 
-use Illuminate\Database\PostgresConnection;
-use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\MySqlConnection;
+use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-
         if (DB::connection() instanceof PostgresConnection) {
             $default_value = DB::raw('(gen_random_uuid())');
-        }
-        elseif (DB::connection() instanceof MySqlConnection){
+        } elseif (DB::connection() instanceof MySqlConnection) {
             $default_value = DB::raw('(UUID())');
         }
 
@@ -54,7 +50,6 @@ return new class extends Migration
             $table->foreign('domaine_id')->references('id')->on('fcmcentral_domaines')->onDelete('cascade');
             $table->timestamps();
         });
-
     }
 
     /**
@@ -64,6 +59,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('fcmcentral_savoirfaires');
         Schema::dropIfExists('fcmcentral_competences');
-
     }
 };

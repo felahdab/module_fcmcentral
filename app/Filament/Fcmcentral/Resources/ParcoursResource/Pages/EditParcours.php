@@ -5,58 +5,24 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Page
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Filament\Schemas\Schema;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
 use Modules\FcmCentral\Models\ParcoursType;
 use Modules\FcmCentral\Services\ParcoursService;
-use Filament\Forms\Components\FileUpload;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 
 class EditParcours extends EditRecord
 {
     protected static string $resource = ParcoursResource::class;
-    protected static ?string $title   = 'Modifier parcours';
+    protected static ?string $title = 'Modifier parcours';
 
-    protected function getHeaderActions(): array
-    {
-        $parcours_service = new ParcoursService();
-
-        return [
-            Action::make('view')
-                ->label('Voir le parcours')
-                ->icon('heroicon-m-queue-list')
-                ->color('info')
-                ->url(fn () => ParcoursResource::getUrl('view', ['record' => $this->record])),
-
-            Action::make('figer')
-                ->requiresConfirmation()
-                ->visible(fn () => auth()->user()->can('fcmcentral::parcours.figer'))
-                ->modalHeading(fn ($record) => 'Figer : ' . $record->libelle_court)
-                ->modalDescription('Action irréversible.')
-                ->schema([
-                    TextInput::make('version')->label('Version')->numeric()->required()->disabled()->dehydrated(),
-                    DatePicker::make('date_de_debut')->label('Date de début')
-                        ->minDate(Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord()))),
-                ])
-                ->fillForm(fn ($record) => [
-                    'date_de_debut' => Carbon::now()->tomorrow()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())),
-                    'version'       => $record->getLatestSerializedVersion() + 1,
-                ])
-                ->action(fn (array $data, $record) => event(new UserGeneratedEvent(
-                    UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
-                    auth()->user()->uuid,
-                    ObjectClasses::PARCOURS,
-                    $record->uuid,
-                    ['date_de_debut' => $data['date_de_debut'], 'version' => $data['version']]
-                ))),
-        ];
-    }
-
-    public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
             ->columns(1)
@@ -77,7 +43,43 @@ class EditParcours extends EditRecord
                     ->visibility('public')
                     ->downloadable()
                     ->openable()
-                    ->columnSpanFull(),    
-            ]);
+                    ->columnSpanFull(),
+            ])
+        ;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        $parcours_service = new ParcoursService();
+
+        return [
+            Action::make('view')
+                ->label('Voir le parcours')
+                ->icon('heroicon-m-queue-list')
+                ->color('info')
+                ->url(fn () => ParcoursResource::getUrl('view', ['record' => $this->record])),
+
+            Action::make('figer')
+                ->requiresConfirmation()
+                ->visible(fn () => auth()->user()->can('fcmcentral::parcours.figer'))
+                ->modalHeading(fn ($record) => 'Figer : '.$record->libelle_court)
+                ->modalDescription('Action irréversible.')
+                ->schema([
+                    TextInput::make('version')->label('Version')->numeric()->required()->disabled()->dehydrated(),
+                    DatePicker::make('date_de_debut')->label('Date de début')
+                        ->minDate(Carbon::now()->today()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord()))),
+                ])
+                ->fillForm(fn ($record) => [
+                    'date_de_debut' => Carbon::now()->tomorrow()->max($parcours_service->firstPossibleNewVersionDate($this->getRecord())),
+                    'version' => $record->getLatestSerializedVersion() + 1,
+                ])
+                ->action(fn (array $data, $record) => event(new UserGeneratedEvent(
+                    UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE,
+                    auth()->user()->uuid,
+                    ObjectClasses::PARCOURS,
+                    $record->uuid,
+                    ['date_de_debut' => $data['date_de_debut'], 'version' => $data['version']]
+                ))),
+        ];
     }
 }

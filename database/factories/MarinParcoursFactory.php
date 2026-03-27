@@ -3,8 +3,8 @@
 namespace Modules\FcmCentral\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\FcmCentral\Models\MarinParcours;
 use Modules\FcmCentral\Models\FcmMarin;
+use Modules\FcmCentral\Models\MarinParcours;
 use Modules\FcmCentral\Models\ParcoursSerialise;
 
 class MarinParcoursFactory extends Factory
@@ -24,55 +24,55 @@ class MarinParcoursFactory extends Factory
     }
 
     /**
-     * Avec un FcmMarin spécifique
+     * Avec un FcmMarin spécifique.
      */
     public function pourFcmMarin(FcmMarin|int $fcmMarin): static
     {
         $fcmMarinId = $fcmMarin instanceof FcmMarin ? $fcmMarin->id : $fcmMarin;
-        
+
         return $this->state(fn (array $attributes) => [
             'fcmmarin_id' => $fcmMarinId,
         ]);
     }
 
     /**
-     * Avec un ParcoursSerialise spécifique
+     * Avec un ParcoursSerialise spécifique.
      */
-    public function pourParcoursSerialise(ParcoursSerialise|int $parcoursSerialise): static
+    public function pourParcoursSerialise(int|ParcoursSerialise $parcoursSerialise): static
     {
-        $parcoursSerialiseId = $parcoursSerialise instanceof ParcoursSerialise 
-            ? $parcoursSerialise->id 
+        $parcoursSerialiseId = $parcoursSerialise instanceof ParcoursSerialise
+            ? $parcoursSerialise->id
             : $parcoursSerialise;
-        
+
         return $this->state(fn (array $attributes) => [
             'parcoursserialise_id' => $parcoursSerialiseId,
         ]);
     }
 
     /**
-     * Avec des taux spécifiques
+     * Avec des taux spécifiques.
      */
     public function avecTaux(?int $global = null, ?int $stage = null, ?int $activite = null): static
     {
         return $this->state(function (array $attributes) use ($global, $stage, $activite) {
             $state = [];
-            
-            if ($global !== null) {
+
+            if (null !== $global) {
                 $state['taux_global'] = $global;
             }
-            if ($stage !== null) {
+            if (null !== $stage) {
                 $state['taux_stage'] = $stage;
             }
-            if ($activite !== null) {
+            if (null !== $activite) {
                 $state['taux_activite'] = $activite;
             }
-            
+
             return $state;
         });
     }
 
     /**
-     * Parcours complété à 100%
+     * Parcours complété à 100%.
      */
     public function complete(): static
     {
@@ -85,7 +85,7 @@ class MarinParcoursFactory extends Factory
     }
 
     /**
-     * Parcours en cours (50%)
+     * Parcours en cours (50%).
      */
     public function enCours(): static
     {
@@ -98,7 +98,7 @@ class MarinParcoursFactory extends Factory
     }
 
     /**
-     * Parcours non commencé (0%)
+     * Parcours non commencé (0%).
      */
     public function nonCommence(): static
     {
@@ -111,7 +111,7 @@ class MarinParcoursFactory extends Factory
     }
 
     /**
-     * Avec une structure de parcours marin personnalisée
+     * Avec une structure de parcours marin personnalisée.
      */
     public function avecParcoursMarinData(array $data): static
     {
@@ -121,14 +121,14 @@ class MarinParcoursFactory extends Factory
     }
 
     /**
-     * Avec N affectations
+     * Avec N affectations.
      */
     public function avecNAffectations(int $count): static
     {
         return $this->state(function (array $attributes) use ($count) {
             $affectations = [];
-            
-            for ($i = 1; $i <= $count; $i++) {
+
+            for ($i = 1; $i <= $count; ++$i) {
                 $affectations[] = [
                     'id' => $i,
                     'uuid' => $this->faker->uuid(),
@@ -148,14 +148,14 @@ class MarinParcoursFactory extends Factory
     }
 
     /**
-     * Avec N objectifs
+     * Avec N objectifs.
      */
     public function avecNObjectifs(int $count): static
     {
         return $this->state(function (array $attributes) use ($count) {
             $objectifs = [];
-            
-            for ($i = 1; $i <= $count; $i++) {
+
+            for ($i = 1; $i <= $count; ++$i) {
                 $objectifs[] = [
                     'id' => $i,
                     'uuid' => $this->faker->uuid(),
@@ -196,7 +196,7 @@ class MarinParcoursFactory extends Factory
     }
 
     /**
-     * Structure par défaut du parcours marin
+     * Structure par défaut du parcours marin.
      */
     private function generateDefaultParcoursMarinStructure(): array
     {
@@ -239,7 +239,7 @@ class MarinParcoursFactory extends Factory
     }
 
     /**
-     * Structure d'un parcours marin complété
+     * Structure d'un parcours marin complété.
      */
     private function generateCompletedParcoursMarinStructure(): array
     {
@@ -290,7 +290,7 @@ class MarinParcoursFactory extends Factory
     }
 
     /**
-     * Structure d'un parcours marin en cours
+     * Structure d'un parcours marin en cours.
      */
     private function generateInProgressParcoursMarinStructure(): array
     {

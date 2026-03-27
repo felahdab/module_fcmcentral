@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class ParcoursPolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::parcours';
+    protected $slug = 'fcmcentral::parcours';
 }

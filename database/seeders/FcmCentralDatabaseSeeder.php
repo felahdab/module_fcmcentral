@@ -16,7 +16,7 @@ class FcmCentralDatabaseSeeder extends Seeder
             PermissionsSeeder::class,
             RolesSeeder::class,
             TypeEtatSeeder::class,
-            DomainesSeeder::class
+            DomainesSeeder::class,
         ]);
     }
 }

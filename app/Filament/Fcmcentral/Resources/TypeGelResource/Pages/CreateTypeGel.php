@@ -2,9 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeGelResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeGelResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeGelResource;
 
 class CreateTypeGel extends CreateRecord
 {

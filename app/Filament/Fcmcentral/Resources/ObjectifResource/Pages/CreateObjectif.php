@@ -2,9 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource;
 
 class CreateObjectif extends CreateRecord
 {

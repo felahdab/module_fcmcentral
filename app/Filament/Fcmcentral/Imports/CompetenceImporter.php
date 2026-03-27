@@ -2,10 +2,10 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Imports;
 
-use Modules\FcmCentral\Models\Competence;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Modules\FcmCentral\Models\Competence;
 
 class CompetenceImporter extends Importer
 {
@@ -43,7 +43,6 @@ class CompetenceImporter extends Importer
                 ->integer()
                 ->rules(['nullable', 'integer']),
         ];
-
     }
 
     public function resolveRecord(): ?Competence
@@ -53,23 +52,22 @@ class CompetenceImporter extends Importer
         //     'email' => $this->data['email'],
         // ]);
 
-       // return new Competence();
-       $code = $this->data['code'] ?? null;
+        // return new Competence();
+        $code = $this->data['code'] ?? null;
 
-       if (! $code) {
-           return new Competence();
-       }
+        if (!$code) {
+            return new Competence();
+        }
 
-       return Competence::firstOrNew(['code' => $code]);
-
+        return Competence::firstOrNew(['code' => $code]);
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Import des compétences terminé : ' . number_format($import->successful_rows) . ' ' . str('ligne')->plural($import->successful_rows) . ' importée(s).';
+        $body = 'Import des compétences terminé : '.number_format($import->successful_rows).' '.str('ligne')->plural($import->successful_rows).' importée(s).';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' en échec.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' en échec.';
         }
 
         return $body;

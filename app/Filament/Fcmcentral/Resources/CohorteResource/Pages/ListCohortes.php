@@ -3,9 +3,8 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource;
 
 class ListCohortes extends ListRecords
 {

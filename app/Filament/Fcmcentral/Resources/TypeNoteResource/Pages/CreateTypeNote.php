@@ -2,9 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeNoteResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeNoteResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeNoteResource;
 
 class CreateTypeNote extends CreateRecord
 {

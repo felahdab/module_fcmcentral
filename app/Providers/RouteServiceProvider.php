@@ -2,8 +2,8 @@
 
 namespace Modules\FcmCentral\Providers;
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -36,7 +36,8 @@ class RouteServiceProvider extends ServiceProvider
     {
         Route::middleware('web')
             ->prefix(config('skeletor.prefixe_instance'))
-            ->group(module_path('FcmCentral', 'routes/web.php'));
+            ->group(module_path('FcmCentral', 'routes/web.php'))
+        ;
     }
 
     /**
@@ -47,7 +48,8 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapApiRoutes(): void
     {
         Route::middleware('api')
-            ->prefix(config('skeletor.prefixe_instance'). '/api/fcmcentral')
-            ->name('api.')->group(module_path('FcmCentral', '/routes/api.php'));
+            ->prefix(config('skeletor.prefixe_instance').'/api/fcmcentral')
+            ->name('api.')->group(module_path('FcmCentral', '/routes/api.php'))
+        ;
     }
 }

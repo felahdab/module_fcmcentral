@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class AffectationPolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::affectation';
+    protected $slug = 'fcmcentral::affectation';
 }

@@ -3,8 +3,8 @@
 namespace Modules\FcmCentral\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\FcmCentral\Models\ParcoursSerialise;
 use Modules\FcmCentral\Models\Parcours;
+use Modules\FcmCentral\Models\ParcoursSerialise;
 
 class ParcoursSerialiseFactory extends Factory
 {
@@ -24,7 +24,7 @@ class ParcoursSerialiseFactory extends Factory
     }
 
     /**
-     * Version clôturée
+     * Version clôturée.
      */
     public function cloturee(): static
     {
@@ -34,7 +34,7 @@ class ParcoursSerialiseFactory extends Factory
     }
 
     /**
-     * Version active (non clôturée)
+     * Version active (non clôturée).
      */
     public function active(): static
     {
@@ -44,7 +44,7 @@ class ParcoursSerialiseFactory extends Factory
     }
 
     /**
-     * Avec une version spécifique
+     * Avec une version spécifique.
      */
     public function version(int $version): static
     {
@@ -54,7 +54,7 @@ class ParcoursSerialiseFactory extends Factory
     }
 
     /**
-     * Avec une date de début spécifique
+     * Avec une date de début spécifique.
      */
     public function dateDebut(string $date): static
     {
@@ -64,19 +64,19 @@ class ParcoursSerialiseFactory extends Factory
     }
 
     /**
-     * Avec un parcours spécifique
+     * Avec un parcours spécifique.
      */
-    public function pourParcours(Parcours|int $parcours): static
+    public function pourParcours(int|Parcours $parcours): static
     {
         $parcoursId = $parcours instanceof Parcours ? $parcours->id : $parcours;
-        
+
         return $this->state(fn (array $attributes) => [
             'parcours_id' => $parcoursId,
         ]);
     }
 
     /**
-     * Avec une structure de parcours complète
+     * Avec une structure de parcours complète.
      */
     public function avecStructureComplete(): static
     {
@@ -86,7 +86,7 @@ class ParcoursSerialiseFactory extends Factory
     }
 
     /**
-     * Avec une structure minimale
+     * Avec une structure minimale.
      */
     public function avecStructureMinimale(): static
     {
@@ -96,13 +96,13 @@ class ParcoursSerialiseFactory extends Factory
     }
 
     /**
-     * Avec plusieurs objectifs
+     * Avec plusieurs objectifs.
      */
     public function avecNObjectifs(int $count): static
     {
         return $this->state(function (array $attributes) use ($count) {
             $parcours = $attributes['parcours'] ?? $this->generateDefaultParcoursStructure();
-            
+
             if (empty($parcours['affectations'])) {
                 $parcours['affectations'] = [[
                     'id' => $this->faker->randomNumber(),
@@ -129,7 +129,7 @@ class ParcoursSerialiseFactory extends Factory
             }
 
             $objectifs = [];
-            for ($i = 1; $i <= $count; $i++) {
+            for ($i = 1; $i <= $count; ++$i) {
                 $objectifs[] = [
                     'id' => $this->faker->randomNumber(),
                     'uuid' => $this->faker->uuid(),
@@ -158,7 +158,7 @@ class ParcoursSerialiseFactory extends Factory
     }
 
     /**
-     * Structure par défaut du parcours
+     * Structure par défaut du parcours.
      */
     private function generateDefaultParcoursStructure(): array
     {
@@ -175,12 +175,12 @@ class ParcoursSerialiseFactory extends Factory
     }
 
     /**
-     * Structure minimale avec une affectation
+     * Structure minimale avec une affectation.
      */
     private function generateMinimalParcoursStructure(): array
     {
         $structure = $this->generateDefaultParcoursStructure();
-        
+
         $structure['affectations'] = [
             [
                 'id' => $this->faker->randomNumber(),
@@ -190,19 +190,19 @@ class ParcoursSerialiseFactory extends Factory
                 'color' => $this->faker->hexColor(),
                 'pivot' => ['ordre' => 1],
                 'competences' => [],
-            ]
+            ],
         ];
 
         return $structure;
     }
 
     /**
-     * Structure complète avec affectations, compétences, savoir-faire et objectifs
+     * Structure complète avec affectations, compétences, savoir-faire et objectifs.
      */
     private function generateCompleteParcoursStructure(): array
     {
         $structure = $this->generateDefaultParcoursStructure();
-        
+
         $structure['affectations'] = [
             [
                 'id' => $this->faker->randomNumber(),

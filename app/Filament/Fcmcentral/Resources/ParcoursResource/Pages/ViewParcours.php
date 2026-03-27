@@ -5,18 +5,12 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Page
 use Filament\Resources\Pages\ViewRecord;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
 use Modules\FcmCentral\Models\Parcours;
-use Modules\FcmCentral\Models\Affectation;
-use Modules\FcmCentral\Models\Competence;
-use Modules\FcmCentral\Models\CompetenceSavoirfaire;
-use Modules\FcmCentral\Models\Objectif;
-use Filament\Notifications\Notification;
 
 class ViewParcours extends ViewRecord
 {
+    public $parcours;
     protected static string $resource = ParcoursResource::class;
     protected string $view = 'fcmcentral::filament.fcmcentral.resources.parcours-resource.pages.view-parcours';
-
-    public $parcours;
 
     public function mount($record): void
     {
@@ -31,17 +25,19 @@ class ViewParcours extends ViewRecord
         //     'parcoursType'
         // ])->find($id);
 
-
         $parcours = Parcours::find($id);
-        if (!$parcours) return null;
-    
+        if (!$parcours) {
+            return null;
+        }
+
         return Parcours::with([
             'affectations' => function ($query) {
                 $query->orderBy('fcmcentral_affectation_parcours.ordre');
             },
             'affectations.competences' => function ($query) use ($parcours) {
                 $query->where('parcours_type_id', $parcours->parcours_type_id)
-                      ->orderBy('ordre');
+                    ->orderBy('ordre')
+                ;
             },
             'affectations.competences.competenceSavoirfaires' => function ($query) {
                 $query->orderBy('ordre'); // ✅
@@ -53,17 +49,5 @@ class ViewParcours extends ViewRecord
             },
             'parcoursType',
         ])->find($id);
-    
-
     }
-
-
-
-
-
-
-
-
-    
 }
-

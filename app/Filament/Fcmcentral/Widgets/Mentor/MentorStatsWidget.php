@@ -2,17 +2,17 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor;
 
-use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Modules\FcmCentral\Models\Marin;
+use Illuminate\Support\Collection;
 use Modules\FcmCentral\Models\FcmMarin;
+use Modules\FcmCentral\Models\Marin;
 
 class MentorStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
-    protected int | string | array $columnSpan = 'full';
+    protected array|int|string $columnSpan = 'full';
 
     public static function canView(): bool
     {
@@ -40,7 +40,7 @@ class MentorStatsWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('warning'),
 
-            Stat::make('Progression moyenne', $stats['progression_moyenne'] . '%')
+            Stat::make('Progression moyenne', $stats['progression_moyenne'].'%')
                 ->description('Moyenne de tous vos marins')
                 ->descriptionIcon('heroicon-m-chart-bar')
                 ->color('success'),
@@ -61,11 +61,13 @@ class MentorStatsWidget extends BaseWidget
 
         $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
             ->pluck('rh_marin_id')
-            ->toArray();
+            ->toArray()
+        ;
 
         return Marin::whereIn('id', $marinIds)
             ->with('lignes_dans_fcm_marin')
-            ->get();
+            ->get()
+        ;
     }
 
     private function calculerMentorStats($marins): array
@@ -76,12 +78,14 @@ class MentorStatsWidget extends BaseWidget
         $validationsSemaine = 0;
 
         foreach ($marins as $marin) {
-            if (!$marin->complements_fcm) continue;
-            
+            if (!$marin->complements_fcm) {
+                continue;
+            }
+
             // ✅ Passer le parcours en paramètre
             $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? [];
             $stats = $this->calculerStatistiques($parcours);
-            
+
             $progressions[] = $stats['progress'];
             $propose += $stats['proposes'];
             $validationsSemaine += $stats['validations_semaine'];
@@ -99,7 +103,7 @@ class MentorStatsWidget extends BaseWidget
 
     /**
      * Calcule les statistiques de progression, validés, proposés, non validés
-     * sur la structure parcours['affectations']['competences']['competencesSavoirfaires']['objectifs']
+     * sur la structure parcours['affectations']['competences']['competencesSavoirfaires']['objectifs'].
      */
     private function calculerStatistiques(array $parcours): array
     {
@@ -111,35 +115,35 @@ class MentorStatsWidget extends BaseWidget
         foreach ($parcours['affectations'] ?? [] as $affectation) {
             foreach ($affectation['competences'] ?? [] as $competence) {
                 foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
-                    $total++;
-                   
+                    ++$total;
+
                     if ($csf['etat_valid'] ?? false) {
-                        $valides++;
+                        ++$valides;
                         if (!empty($csf['date_validation'])) {
                             $dateValidation = Carbon::parse($csf['date_validation']);
                             if ($dateValidation->isCurrentWeek()) {
-                                $validationsSemaine++;
+                                ++$validationsSemaine;
                             }
                         }
                     }
                     if (!empty($csf['date_proposition'])) {
-                        $proposes++;
+                        ++$proposes;
                     }
 
                     foreach ($csf['objectifs'] ?? [] as $objectif) {
-                        $total++;
-                       
+                        ++$total;
+
                         if ($objectif['etat_valid'] ?? false) {
-                            $valides++;
+                            ++$valides;
                             if (!empty($objectif['date_validation'])) {
                                 $dateValidation = Carbon::parse($objectif['date_validation']);
                                 if ($dateValidation->isCurrentWeek()) {
-                                    $validationsSemaine++;
+                                    ++$validationsSemaine;
                                 }
                             }
                         }
                         if (!empty($objectif['date_proposition'])) {
-                            $proposes++;
+                            ++$proposes;
                         }
                     }
                 }
@@ -154,7 +158,7 @@ class MentorStatsWidget extends BaseWidget
             'valides' => $valides,
             'proposes' => $proposes,
             'validations_semaine' => $validationsSemaine,
-            'non_valides' => $total - $valides
+            'non_valides' => $total - $valides,
         ];
     }
 }

@@ -2,15 +2,15 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Marin;
 
-use Modules\FcmCommun\Services\CalculHeuresParcoursService;
 use Filament\Widgets\Widget;
 use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCommun\Services\CalculHeuresParcoursService;
 
 class MarinProgressWidget extends Widget
 {
     protected string $view = 'fcmcentral::filament.fcmcentral.widgets.marin-progress-widget';
-    
-    protected int | string | array $columnSpan = 'full';
+
+    protected array|int|string $columnSpan = 'full';
 
     protected static ?int $sort = 1;
 
@@ -22,9 +22,10 @@ class MarinProgressWidget extends Widget
     public static function canView(): bool
     {
         $marin = Marin::fromCurrentUser();
+
         // TODO: faut-il limiter davantage l'accès ? Certains marin disposant
         // d'un parcours doivent-ils être empéchés de voir ce widget ?
-        return $marin?->complements_fcm?->donnees_du_parcours != null;
+        return null != $marin?->complements_fcm?->donnees_du_parcours;
     }
 
     public function getProgressData(): array
@@ -48,10 +49,10 @@ class MarinProgressWidget extends Widget
         }
 
         // ✅ Heures pré-calculées par mettreAJourHeures (dans les listeners)
-        $heuresTotal    = 0;
+        $heuresTotal = 0;
         $heuresValidees = 0;
         foreach ($parcours['affectations'] ?? [] as $affectation) {
-            $heuresTotal    += $affectation['heures_total']    ?? 0;
+            $heuresTotal += $affectation['heures_total'] ?? 0;
             $heuresValidees += $affectation['heures_validees'] ?? 0;
         }
 
@@ -59,10 +60,9 @@ class MarinProgressWidget extends Widget
         $progress = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcours);
 
         return [
-            'progress'  => (int) $progress,
+            'progress' => (int) $progress,
             'completed' => round($heuresValidees, 0),
-            'total'     => round($heuresTotal, 0),
+            'total' => round($heuresTotal, 0),
         ];
     }
-
 }

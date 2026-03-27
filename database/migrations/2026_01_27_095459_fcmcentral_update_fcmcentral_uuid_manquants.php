@@ -1,14 +1,13 @@
 <?php
 
-use Illuminate\Database\PostgresConnection;
-use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\MySqlConnection;
+use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,28 +15,25 @@ return new class extends Migration
     {
         if (DB::connection() instanceof PostgresConnection) {
             $default_value = DB::raw('(gen_random_uuid())');
-        }
-        elseif (DB::connection() instanceof MySqlConnection){
+        } elseif (DB::connection() instanceof MySqlConnection) {
             $default_value = DB::raw('(UUID())');
         }
         // Ajout du champ uuid
         Schema::table('fcmcentral_savoirfaire_types', function (Blueprint $table) use ($default_value) {
             $table->uuid('uuid')->default($default_value)->after('id');
         });
-        Schema::table('fcmcentral_parcours_types', function (Blueprint $table)  use ($default_value) {
+        Schema::table('fcmcentral_parcours_types', function (Blueprint $table) use ($default_value) {
             $table->uuid('uuid')->default($default_value)->after('id');
         });
-        Schema::table('fcmcentral_type_etats', function (Blueprint $table)  use ($default_value) {
+        Schema::table('fcmcentral_type_etats', function (Blueprint $table) use ($default_value) {
             $table->uuid('uuid')->default($default_value)->after('id');
         });
-        Schema::table('fcmcentral_type_notes', function (Blueprint $table)  use ($default_value) {
+        Schema::table('fcmcentral_type_notes', function (Blueprint $table) use ($default_value) {
             $table->uuid('uuid')->default($default_value)->after('id');
         });
-        Schema::table('fcmcentral_domaines', function (Blueprint $table)  use ($default_value) {
+        Schema::table('fcmcentral_domaines', function (Blueprint $table) use ($default_value) {
             $table->uuid('uuid')->default($default_value)->after('id');
         });
-
-
     }
 
     /**
@@ -60,6 +56,5 @@ return new class extends Migration
         Schema::table('fcmcentral_domaines', function (Blueprint $table) {
             $table->dropColumn('uuid');
         });
-
     }
 };

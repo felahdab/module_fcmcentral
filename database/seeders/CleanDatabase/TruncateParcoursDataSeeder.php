@@ -4,17 +4,16 @@ namespace Modules\FcmCentral\Database\Seeders\CleanDatabase;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Modules\FcmCentral\Models\Objectif;
-use Modules\FcmCentral\Models\CompetenceSavoirfaire;
-use Modules\FcmCentral\Models\AffectationParcours;
-use Modules\FcmCentral\Models\Parcours;
-use Modules\FcmCentral\Models\Savoirfaire;
-use Modules\FcmCentral\Models\Competence;
 use Modules\FcmCentral\Models\Affectation;
-use Modules\FcmCentral\Models\ParcoursType;
-use Modules\FcmCentral\Models\SavoirfaireType;
-
+use Modules\FcmCentral\Models\AffectationParcours;
+use Modules\FcmCentral\Models\Competence;
+use Modules\FcmCentral\Models\CompetenceSavoirfaire;
 use Modules\FcmCentral\Models\Domaine;
+use Modules\FcmCentral\Models\Objectif;
+use Modules\FcmCentral\Models\Parcours;
+use Modules\FcmCentral\Models\ParcoursType;
+use Modules\FcmCentral\Models\Savoirfaire;
+use Modules\FcmCentral\Models\SavoirfaireType;
 use Modules\FcmCentral\Models\TypeEtat;
 
 class TruncateParcoursDataSeeder extends Seeder

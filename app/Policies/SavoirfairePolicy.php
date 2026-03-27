@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class SavoirfairePolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::savoirfaire';
+    protected $slug = 'fcmcentral::savoirfaire';
 }

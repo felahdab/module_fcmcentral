@@ -2,26 +2,17 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Actions;
 
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Response;
-
+use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-
-use Filament\Actions\Action;
-
-use Modules\FcmCommun\Services\CalculHeuresParcoursService;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Modules\FcmCentral\Models\TypeEtat;
 use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
 use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
-
-use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Models\Cohorte;
-use Modules\FcmCentral\Models\Parcours;
 
 class JalonFcmAction extends Action
 {
@@ -36,17 +27,17 @@ class JalonFcmAction extends Action
                 Section::make('Jalons FCM')
                     ->schema([
                         // DATE SÉDIMENTATION
-                    
+
                         Forms\Components\DatePicker::make('date_sedimentation')
                             ->label('Date de début d\'entrée en FCM')
-                            
+
                             ->default(fn ($record) => $record->complementsFcm?->date_sedimentation)
                             ->required(),
-            
+
                         // DATE FCM
                         Forms\Components\DatePicker::make('date_fcm')
-                        ->label('Date de fin de sédimentation')
-                        ->default(fn ($record) => $record->complementsFcm?->date_fcm),
+                            ->label('Date de fin de sédimentation')
+                            ->default(fn ($record) => $record->complementsFcm?->date_fcm),
 
                         Forms\Components\Checkbox::make('date_fcm_non_renseignee')
                             ->label('Date non renseignée')
@@ -55,7 +46,6 @@ class JalonFcmAction extends Action
                                     $set('date_fcm', null);
                                 }
                             }),
-
 
                         Forms\Components\DatePicker::make('date_competence')
                             ->label('Date de vert compétence')
@@ -70,7 +60,7 @@ class JalonFcmAction extends Action
                             }),
                     ])
                     ->columns(1),
-            
+
                 // ✅ SECTION GEL avec toggle
                 Section::make('Gestion du Gel')
                     ->description(function ($record) {
@@ -78,8 +68,10 @@ class JalonFcmAction extends Action
                         if ($gelEnCours) {
                             $debut = $gelEnCours->date_debut->format('d/m/Y');
                             $type = $gelEnCours->typeEtat?->libelle_court ?? '';
+
                             return "🔴 **Mise en gel**  depuis le {$debut}";
                         }
+
                         return '🟢 Marin en FCM';
                     })
                     ->schema([
@@ -107,7 +99,7 @@ class JalonFcmAction extends Action
                                     $set('motif_gel', '');
                                 }
                             }),
-            
+
                         // ✅ CRÉATION D'UN NOUVEAU GEL
                         Fieldset::make('Nouveau gel')
                             ->visible(fn (Get $get, $record) => $get('action_gel') && !$record->gelActif())
@@ -131,34 +123,36 @@ class JalonFcmAction extends Action
                                 //             ->maxLength(50),
                                 //     ])
                                 //     ->createOptionUsing(fn (array $data) => \Modules\FcmCentral\Models\TypeEtat::create($data)->id),
-                                
-                                    Forms\Components\DatePicker::make('date_debut_gel')
+
+                                Forms\Components\DatePicker::make('date_debut_gel')
                                     ->label('Date de début de la mise en gel')
                                     ->required()
                                     ->default(now()),
-            
+
                                 Forms\Components\Textarea::make('motif_gel')
                                     ->label('Motif de la mise en gel')
                                     ->rows(3),
                             ]),
-            
+
                         // ✅ CLÔTURE DU GEL EN COURS
                         Fieldset::make('Clôture du gel')
-                            ->visible(fn (Get $get, $record) => $get('action_gel') && $record->gelActif() !== null)
+                            ->visible(fn (Get $get, $record) => $get('action_gel') && null !== $record->gelActif())
                             ->schema([
                                 Placeholder::make('info_gel_actif')
                                     ->label('Gel actif')
                                     ->content(function ($record) {
                                         $gel = $record->gelActif();
-                                        if (!$gel) return '';
-                                        
+                                        if (!$gel) {
+                                            return '';
+                                        }
+
                                         $debut = $gel->date_debut->format('d/m/Y');
                                         $type = $gel->typeEtat?->libelle_court ?? 'Gel';
                                         $motif = $gel->libelle ? " - {$gel->libelle}" : '';
-                                        
+
                                         return "**Mise en gel** depuis le {$debut}{$motif}";
                                     }),
-            
+
                                 Forms\Components\DatePicker::make('date_fin_gel')
                                     ->label('Date de fin de la mise en gel')
                                     ->required()
@@ -171,59 +165,50 @@ class JalonFcmAction extends Action
             ->action(function ($record, array $data) {
                 // DATE SÉDIMENTATION
                 if (($record->complementsFcm?->date_sedimentation ?? null) != ($data['date_sedimentation'] ?? null)) {
-                    
-
                     event(new UserGeneratedEvent(
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
                         $record->uuid,
-                        ["date_sedimentation" => $data['date_sedimentation']]
+                        ['date_sedimentation' => $data['date_sedimentation']]
                     ));
                 }
-                
+
                 // DATE FCM
-                if (($record->complementsFcm?->date_fcm?? null) != ($data['date_fcm'] ?? null)) {
-
-
+                if (($record->complementsFcm?->date_fcm ?? null) != ($data['date_fcm'] ?? null)) {
                     event(new UserGeneratedEvent(
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
                         $record->uuid,
-                        ["date_fcm" => $data['date_fcm']]
+                        ['date_fcm' => $data['date_fcm']]
                     ));
                 }
-                
+
                 // DATE COMPÉTENCE
-                if (($record->complementsFcm?->date_competence?? null) != ($data['date_competence'] ?? null)) {
-
-                    
+                if (($record->complementsFcm?->date_competence ?? null) != ($data['date_competence'] ?? null)) {
                     event(new UserGeneratedEvent(
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
                         $record->uuid,
-                        ["date_competence" => $data['date_competence']]
+                        ['date_competence' => $data['date_competence']]
                     ));
                 }
 
-
-            
                 // ✅ GESTION DU GEL (seulement si toggle activé)
                 if (!empty($data['date_debut_gel'])) {
-                    //ddd($record, $data);
+                    // ddd($record, $data);
 
                     $typeGel = null;
                     $libelleCourt = null;
                     $uuidEtatType = null;
-                    
-                    //$typeGel = \Modules\FcmCentral\Models\TypeEtat::find($data['type_gel_id']);
-                    $typeGel = \Modules\FcmCentral\Models\TypeEtat::first();
-                    
+
+                    // $typeGel = \Modules\FcmCentral\Models\TypeEtat::find($data['type_gel_id']);
+                    $typeGel = TypeEtat::first();
+
                     $libelleCourt = $typeGel?->libelle_court;
                     $uuidEtatType = $typeGel?->uuid;
-                    
 
                     event(new UserGeneratedEvent(
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
@@ -238,9 +223,9 @@ class JalonFcmAction extends Action
                         ]
                     ));
                 }
-                
+
                 if (!empty($data['date_fin_gel'])) {
-                    $gelActif= $record->gelActif();
+                    $gelActif = $record->gelActif();
                     event(new UserGeneratedEvent(
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                         auth()->user()->uuid,
@@ -252,8 +237,7 @@ class JalonFcmAction extends Action
                         ]
                     ));
                 }
-                
-            });
+            })
+        ;
     }
-
 }

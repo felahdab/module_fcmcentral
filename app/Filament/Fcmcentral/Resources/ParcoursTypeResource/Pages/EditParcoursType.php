@@ -3,9 +3,8 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource\Pages;
 
 use Filament\Actions\DeleteAction;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource;
-use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursTypeResource;
 
 class EditParcoursType extends EditRecord
 {

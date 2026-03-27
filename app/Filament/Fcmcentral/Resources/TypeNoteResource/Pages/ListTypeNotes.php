@@ -3,9 +3,8 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeNoteResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeNoteResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\TypeNoteResource;
 
 class ListTypeNotes extends ListRecords
 {

@@ -2,23 +2,19 @@
 
 namespace Modules\FcmCentral\Listeners\Save;
 
-use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use Filament\Notifications\Notification;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Illuminate\Support\Facades\Log;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\TypeEtat;
-use Modules\FcmCentral\Models\FcmMarin;
-use Carbon\Carbon;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 
 class DefinirJalonFcmListener
 {
     /**
      * Gere l'evenement.
-     *
-     * @param UserGeneratedEvent $event;
-     * @return void
      */
     public function handle(UserGeneratedEvent $event): void
     {
@@ -37,7 +33,7 @@ class DefinirJalonFcmListener
 
             // ✅ DATE SÉDIMENTATION (peut être null)
             if (array_key_exists('date_sedimentation', $data)) {
-                if ($data['date_sedimentation'] === null) {
+                if (null === $data['date_sedimentation']) {
                     Log::info('Date Sedimentation mise à null');
                     $fcmMarin->date_sedimentation = null;
                 } else {
@@ -48,7 +44,7 @@ class DefinirJalonFcmListener
 
             // ✅ DATE FCM (peut être null)
             if (array_key_exists('date_fcm', $data)) {
-                if ($data['date_fcm'] === null) {
+                if (null === $data['date_fcm']) {
                     Log::info('Date FCM mise à null');
                     $fcmMarin->date_fcm = null;
                 } else {
@@ -59,7 +55,7 @@ class DefinirJalonFcmListener
 
             // ✅ DATE COMPÉTENCE (peut être null)
             if (array_key_exists('date_competence', $data)) {
-                if ($data['date_competence'] === null) {
+                if (null === $data['date_competence']) {
                     Log::info('Date Competence mise à null');
                     $fcmMarin->date_competence = null;
                 } else {
@@ -71,15 +67,14 @@ class DefinirJalonFcmListener
             // ✅ GESTION DU GEL
             if (array_key_exists('date_debut_gel', $data) && $data['date_debut_gel']) {
                 // Créer un nouveau gel
-                //dd($data);
+                // dd($data);
                 /**
                  * On a prévu de s'appuyer sur un modèle pour anticiper des évolutions futures.
-                 * 
                  */
                 $etatTypeId = TypeEtat::where('uuid', $data['type_gel_uuid'])->first()?->id;
-                //$etatTypeId = TypeEtat::where('uuid', $data['type_gel_uuid'])->first()?->id;
+                // $etatTypeId = TypeEtat::where('uuid', $data['type_gel_uuid'])->first()?->id;
                 $marin->etats()->create([
-                    'type_etat_id' =>  $etatTypeId ?? null,
+                    'type_etat_id' => $etatTypeId ?? null,
                     'libelle' => $data['motif_gel'] ?? '',
                     'date_debut' => Carbon::parse($data['date_debut_gel']),
                     'date_fin' => null,
@@ -98,11 +93,10 @@ class DefinirJalonFcmListener
                 }
             }
 
-
             $fcmMarin->save();
 
             $notification = UserGeneratedEventNotifications::getMess(
-                UserGeneratedEventNotifications::DEFINIR_JALON_FCM, 
+                UserGeneratedEventNotifications::DEFINIR_JALON_FCM,
                 $marin->nom
             );
 
@@ -111,12 +105,12 @@ class DefinirJalonFcmListener
                 ->title($notification['title'])
                 ->success()
                 ->body($notification['message'])
-                ->send();
+                ->send()
+            ;
         } elseif ($marin) {
-            Log::warning('Aucun fcmMarin trouvé pour le marin UUID :' . $marin->uuid);
+            Log::warning('Aucun fcmMarin trouvé pour le marin UUID :'.$marin->uuid);
         } else {
-            Log::warning('Aucun Marin trouvé UUID :' . $event->object_uuid);
+            Log::warning('Aucun Marin trouvé UUID :'.$event->object_uuid);
         }
     }
 }
-

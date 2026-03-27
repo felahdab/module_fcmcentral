@@ -2,13 +2,12 @@
 
 namespace Modules\FcmCentral\Http\Livewire;
 
-use Log;
-use Exception;
+use Filament\Notifications\Notification;
 use Livewire\Component;
+use Log;
+use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
-use Modules\FcmCentral\Models\Marin;
-use Filament\Notifications\Notification;
 
 class AddNoteForm extends Component
 {
@@ -19,7 +18,7 @@ class AddNoteForm extends Component
     public $date;
     public $lienUrl = '';
     public $valide_bcf = false;
-   
+
     protected $rules = [
         'typeNote' => 'required|exists:fcmcentral_type_notes,id', // ✅ Corriger le nom de table
         'libelle' => 'required|min:10|max:1000',
@@ -45,7 +44,7 @@ class AddNoteForm extends Component
     {
         $this->marinId = $marinId;
         $this->date = now()->format('Y-m-d');
-       
+
         if (!Marin::find($marinId)) {
             abort(404, 'Marin introuvable');
         }
@@ -57,7 +56,7 @@ class AddNoteForm extends Component
 
         try {
             // ✅ Ajouter des logs pour déboguer
-            Log::info('Tentative de création de note', [
+            \Log::info('Tentative de création de note', [
                 'rh_marin_id' => $this->marinId,
                 'type_note_id' => $this->typeNote,
                 'user_id' => auth()->id(),
@@ -67,7 +66,7 @@ class AddNoteForm extends Component
                     'date' => $this->date,
                     'lien_url' => $this->lienUrl,
                     'valide_bcf' => $this->valide_bcf,
-                ]
+                ],
             ]);
 
             $note = Note::create([
@@ -76,27 +75,27 @@ class AddNoteForm extends Component
                 'libelle' => trim($this->libelle),
                 'date' => $this->date,
                 'lien_url' => $this->lienUrl ?: null,
-                //'redacteur_id' => auth()->id(),
+                // 'redacteur_id' => auth()->id(),
                 'redacteur_id' => $this->redacteurId,
                 'valide_bcf' => $this->valide_bcf,
             ]);
 
-            Log::info('Note créée avec succès', ['note_id' => $note->id]);
+            \Log::info('Note créée avec succès', ['note_id' => $note->id]);
 
             $this->reset(['typeNote', 'libelle', 'lienUrl', 'valide_bcf']);
             $this->date = now()->format('Y-m-d');
-        
+
             $this->dispatch('note-added');
             $this->dispatch('close-modal', id: 'ajouterNote');
-        
+
             Notification::make()
                 ->title('Note ajoutée avec succès!')
                 ->success()
-                ->send();
-
-        } catch (Exception $e) {
+                ->send()
+            ;
+        } catch (\Exception $e) {
             // ✅ Log détaillé de l'erreur
-            Log::error('Erreur lors de l\'ajout de la note', [
+            \Log::error('Erreur lors de l\'ajout de la note', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -105,17 +104,17 @@ class AddNoteForm extends Component
                     'rh_marin_id' => $this->marinId,
                     'type_note_id' => $this->typeNote,
                     'user_id' => auth()->id(),
-                ]
+                ],
             ]);
-        
+
             Notification::make()
                 ->title('Erreur lors de l\'ajout de la note')
-                ->body('Détail : ' . $e->getMessage())
+                ->body('Détail : '.$e->getMessage())
                 ->danger()
-                ->send();
+                ->send()
+            ;
         }
     }
-
 
     public function cancel()
     {
@@ -133,9 +132,10 @@ class AddNoteForm extends Component
         $redacteurs = Marin::orderBy('nom')
             ->get()
             ->mapWithKeys(function ($marin) {
-                return [$marin->id => $marin->grade?->libelle_court . ' ' . $marin->prenom . ' ' . $marin->nom];
+                return [$marin->id => $marin->grade?->libelle_court.' '.$marin->prenom.' '.$marin->nom];
             })
-            ->toArray();
+            ->toArray()
+        ;
 
         return view('fcmcentral::filament.fcmcentral.livewire.add-note-form', [
             'typesNotes' => $typesNotes,
@@ -143,6 +143,4 @@ class AddNoteForm extends Component
             'redacteurs' => $redacteurs, // ✅ Passe la variable à la vue
         ]);
     }
-
-
 }

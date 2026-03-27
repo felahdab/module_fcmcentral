@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class CompetencePolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::competence';
+    protected $slug = 'fcmcentral::competence';
 }

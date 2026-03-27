@@ -2,32 +2,33 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor;
 
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\Action;
 use Carbon\Carbon;
-use Filament\Tables;
+use Filament\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Models\FcmMarin;
 use Illuminate\Support\Facades\Log;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\FicheBilan;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight;
+use Modules\FcmCentral\Models\FcmMarin;
+use Modules\FcmCentral\Models\Marin;
 
 class MarinsSupervisesWidget extends BaseWidget
 {
     protected static ?string $heading = 'Marins supervisés';
     protected static ?int $sort = 2;
-    protected int | string | array $columnSpan = 'full';
+    protected array|int|string $columnSpan = 'full';
 
     public static function canView(): bool
     {
         // Ce widget ne doit être visible que si l'utilisateur est un mentor.
         $currentMarin = Marin::fromCurrentUser();
-       
-        if ( $currentMarin == null ) return false;
-        
-        return $currentMarin->est_mentor ;
+
+        if (null == $currentMarin) {
+            return false;
+        }
+
+        return $currentMarin->est_mentor;
     }
 
     public function table(Table $table): Table
@@ -40,7 +41,8 @@ class MarinsSupervisesWidget extends BaseWidget
 
         $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
             ->pluck('rh_marin_id')
-            ->toArray();
+            ->toArray()
+        ;
 
         return $table
             ->query(
@@ -60,12 +62,13 @@ class MarinsSupervisesWidget extends BaseWidget
                     ->label('Cohorte')
                     ->state(function (Marin $record): ?string {
                         $fcmMarin = $record->lignes_dans_fcm_marin->first();
+
                         return $fcmMarin?->cohorte?->libelle_long ?? 'Non assigné';
                     })
                     ->badge()
                     ->color('info'),
 
-                    TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
+                TextColumn::make('complements_fcm.donnees_du_parcours.taux_global')
                     ->label('Taux')
                     ->sortable()
                     ->suffix('%')
@@ -93,7 +96,7 @@ class MarinsSupervisesWidget extends BaseWidget
                     ->iconButton()
                     ->icon('heroicon-m-book-open')
                     ->color('info')
-                    ->url(fn($record) => LivretDeFcmLight::getUrl(['record' => $record], panel: "FCM Central" ))
+                    ->url(fn ($record) => LivretDeFcmLight::getUrl(['record' => $record], panel: 'FCM Central'))
                     ->visible(fn (Marin $record) => $this->hasParcours($record)),
 
                 Action::make('voir_fiche_bilan')
@@ -104,16 +107,14 @@ class MarinsSupervisesWidget extends BaseWidget
                         'title' => 'Fiche Bilan FCM',
                         'class' => 'btn-bilan',
                     ])
-                    ->url(fn($record) => FicheBilan::getUrl(['record' => $record], panel: "FCM Central" ))
+                    ->url(fn ($record) => FicheBilan::getUrl(['record' => $record], panel: 'FCM Central'))
                     ->visible(fn (Marin $record) => true || FicheBilan::canAccess(['record' => $record])),
-
-
-
             ])
             ->defaultSort('nom')
             ->striped()
             ->paginated([5, 10, 25])
-            ->defaultPaginationPageOption(10);
+            ->defaultPaginationPageOption(10)
+        ;
     }
 
     private function hasParcours(Marin $marin): bool
@@ -136,22 +137,22 @@ class MarinsSupervisesWidget extends BaseWidget
         foreach ($parcours['affectations'] ?? [] as $affectation) {
             foreach ($affectation['competences'] ?? [] as $competence) {
                 // ✅ Essayer les deux variantes de clés
-                $savoirfaires = $competence['competenceSavoirfaires'] 
-                    ?? $competence['competencesSavoirfaires'] 
+                $savoirfaires = $competence['competenceSavoirfaires']
+                    ?? $competence['competencesSavoirfaires']
                     ?? [];
 
                 foreach ($savoirfaires as $savoirfaire) {
                     // ✅ Compter aussi les savoir-faire
-                    $total++;
+                    ++$total;
                     if (($savoirfaire['etat_valid'] ?? false) === true) {
-                        $completed++;
+                        ++$completed;
                     }
 
                     // ✅ Compter les objectifs
                     foreach ($savoirfaire['objectifs'] ?? [] as $objectif) {
-                        $total++;
+                        ++$total;
                         if (($objectif['etat_valid'] ?? false) === true) {
-                            $completed++;
+                            ++$completed;
                         }
                     }
                 }
@@ -159,28 +160,30 @@ class MarinsSupervisesWidget extends BaseWidget
         }
 
         $progress = $total > 0 ? round(($completed / $total) * 100) : 0;
-        
+
         // ✅ Debug
         Log::info("Progression {$marin->nom}: total={$total}, completed={$completed}, progress={$progress}%");
 
         return [
             'progress' => $progress,
             'completed' => $completed,
-            'total' => $total
+            'total' => $total,
         ];
     }
 
     private function calculateEnAttente(Marin $marin): int
     {
-        if (!$this->hasParcours($marin)) return 0;
+        if (!$this->hasParcours($marin)) {
+            return 0;
+        }
 
         $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin;
         $enAttente = 0;
 
         foreach ($parcours['affectations'] ?? [] as $affectation) {
             foreach ($affectation['competences'] ?? [] as $competence) {
-                $savoirfaires = $competence['competenceSavoirfaires'] 
-                    ?? $competence['competencesSavoirfaires'] 
+                $savoirfaires = $competence['competenceSavoirfaires']
+                    ?? $competence['competencesSavoirfaires']
                     ?? [];
 
                 foreach ($savoirfaires as $savoirfaire) {
@@ -188,7 +191,7 @@ class MarinsSupervisesWidget extends BaseWidget
                     $estProposee = !empty($savoirfaire['date_proposition']);
                     $estValidee = ($savoirfaire['etat_valid'] ?? false) === true;
                     if ($estProposee && !$estValidee) {
-                        $enAttente++;
+                        ++$enAttente;
                     }
 
                     // ✅ Vérifier les objectifs
@@ -196,7 +199,7 @@ class MarinsSupervisesWidget extends BaseWidget
                         $estProposee = !empty($objectif['date_proposition']);
                         $estValidee = ($objectif['etat_valid'] ?? false) === true;
                         if ($estProposee && !$estValidee) {
-                            $enAttente++;
+                            ++$enAttente;
                         }
                     }
                 }
@@ -208,15 +211,17 @@ class MarinsSupervisesWidget extends BaseWidget
 
     private function getDerniereValidation(Marin $marin): ?string
     {
-        if (!$this->hasParcours($marin)) return null;
+        if (!$this->hasParcours($marin)) {
+            return null;
+        }
 
         $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin;
         $derniereDate = null;
 
         foreach ($parcours['affectations'] ?? [] as $affectation) {
             foreach ($affectation['competences'] ?? [] as $competence) {
-                $savoirfaires = $competence['competenceSavoirfaires'] 
-                    ?? $competence['competencesSavoirfaires'] 
+                $savoirfaires = $competence['competenceSavoirfaires']
+                    ?? $competence['competencesSavoirfaires']
                     ?? [];
 
                 foreach ($savoirfaires as $savoirfaire) {

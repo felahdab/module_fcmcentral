@@ -3,15 +3,15 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor;
 
 use Filament\Widgets\ChartWidget;
-use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Models\FcmMarin;
 use Illuminate\Support\Facades\Log;
+use Modules\FcmCentral\Models\FcmMarin;
+use Modules\FcmCentral\Models\Marin;
 
 class MentorProgressionWidget extends ChartWidget
 {
     protected ?string $heading = 'Progression comparative des marins';
     protected static ?int $sort = 3;
-    protected int | string | array $columnSpan = 'full';
+    protected array|int|string $columnSpan = 'full';
     protected static ?string $minHeight = '400px';
 
     public static function canView(): bool
@@ -33,11 +33,13 @@ class MentorProgressionWidget extends ChartWidget
 
         $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
             ->pluck('rh_marin_id')
-            ->toArray();
+            ->toArray()
+        ;
 
         $marins = Marin::whereIn('id', $marinIds)
             ->with('lignes_dans_fcm_marin')
-            ->get();
+            ->get()
+        ;
 
         $labels = [];
         $progressions = [];
@@ -46,24 +48,27 @@ class MentorProgressionWidget extends ChartWidget
             // ✅ Vérifications renforcées
             if (!$marin->complements_fcm) {
                 Log::warning("Marin {$marin->id} n'a pas de complements_fcm");
+
                 continue;
             }
 
             if (!$marin->complements_fcm->donnees_du_parcours) {
                 Log::warning("Marin {$marin->id} n'a pas de donnees_du_parcours");
+
                 continue;
             }
 
             $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? [];
-            
+
             if (empty($parcours)) {
                 Log::warning("Marin {$marin->id} a un parcoursmarin vide");
+
                 continue;
             }
 
             $stats = $this->calculerStatistiques($parcours);
-            
-            $labels[] = $marin->nom . ' ' . $marin->prenom;
+
+            $labels[] = $marin->nom.' '.$marin->prenom;
             $progressions[] = $stats['progress'];
         }
 
@@ -104,11 +109,38 @@ class MentorProgressionWidget extends ChartWidget
         return 'bar';
     }
 
+    protected function getOptions(): array
+    {
+        return [
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                    'max' => 100,
+                    'title' => [
+                        'display' => true,
+                        'text' => 'Progression (%)',
+                    ],
+                ],
+            ],
+            'plugins' => [
+                'legend' => [
+                    'display' => false,
+                ],
+                'tooltip' => [
+                    'callbacks' => [
+                        'label' => 'function(context) {
+                            return context.parsed.y + "% de progression";
+                        }',
+                    ],
+                ],
+            ],
+        ];
+    }
+
     /**
      * Calcule les statistiques de progression, validés, proposés, non validés
-     * sur la structure parcours['affectations']['competences']['competencesSavoirfaires']['objectifs']
+     * sur la structure parcours['affectations']['competences']['competencesSavoirfaires']['objectifs'].
      */
-    
     private function calculerStatistiques(array $parcours): array
     {
         $total = 0;
@@ -118,14 +150,22 @@ class MentorProgressionWidget extends ChartWidget
         foreach ($parcours['affectations'] ?? [] as $affectation) {
             foreach ($affectation['competences'] ?? [] as $competence) {
                 foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
-                    $total++;
-                    if ($this->verifierStatut($csf, 'valides')) $valides++;
-                    if ($this->verifierStatut($csf, 'proposes')) $proposes++;
+                    ++$total;
+                    if ($this->verifierStatut($csf, 'valides')) {
+                        ++$valides;
+                    }
+                    if ($this->verifierStatut($csf, 'proposes')) {
+                        ++$proposes;
+                    }
 
                     foreach ($csf['objectifs'] ?? [] as $objectif) {
-                        $total++;
-                        if ($this->verifierStatut($objectif, 'valides')) $valides++;
-                        if ($this->verifierStatut($objectif, 'proposes')) $proposes++;
+                        ++$total;
+                        if ($this->verifierStatut($objectif, 'valides')) {
+                            ++$valides;
+                        }
+                        if ($this->verifierStatut($objectif, 'proposes')) {
+                            ++$proposes;
+                        }
                     }
                 }
             }
@@ -143,50 +183,22 @@ class MentorProgressionWidget extends ChartWidget
     }
 
     /**
-     * Vérifie le statut d'un élément (objectif ou savoir-faire)
+     * Vérifie le statut d'un élément (objectif ou savoir-faire).
      */
     private function verifierStatut(array $element, ?string $statutFilter = null): bool
     {
         $etatValid = ($element['etat_valid'] ?? false);
         $dateProposition = $element['date_proposition'] ?? null;
 
-        $estValide = ($etatValid === true);
+        $estValide = (true === $etatValid);
         $estPropose = !empty($dateProposition) && !$estValide;
         $nonValide = !$estValide && !$estPropose;
 
-        return match($statutFilter) {
+        return match ($statutFilter) {
             'valides' => $estValide,
             'proposes' => $estPropose,
             'non_valides' => $nonValide,
             default => true
         };
-    }
-
-    protected function getOptions(): array
-    {
-        return [
-            'scales' => [
-                'y' => [
-                    'beginAtZero' => true,
-                    'max' => 100,
-                    'title' => [
-                        'display' => true,
-                        'text' => 'Progression (%)'
-                    ]
-                ]
-            ],
-            'plugins' => [
-                'legend' => [
-                    'display' => false,
-                ],
-                'tooltip' => [
-                    'callbacks' => [
-                        'label' => 'function(context) {
-                            return context.parsed.y + "% de progression";
-                        }'
-                    ]
-                ]
-            ],
-        ];
     }
 }

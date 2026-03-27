@@ -3,13 +3,12 @@
 namespace Modules\FcmCentral\Services;
 
 use Illuminate\Support\Facades\File;
-
-use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Listeners\Save\CreationParcoursSerialiseListener;
+use Modules\FcmCentral\Models\Parcours;
 
 class SauveChargeParcoursService
 {
-    public function __construct(public CreationParcoursSerialiseListener $listener){}
+    public function __construct(public CreationParcoursSerialiseListener $listener) {}
 
     public function sauvegarde(Parcours $parcours, string $filename)
     {
@@ -26,7 +25,7 @@ class SauveChargeParcoursService
             },
             'affectations.competences.competenceSavoirfaires.savoirfaire',
             'affectations.competences.competenceSavoirfaires.savoirfaireType',
-            'affectations.competences.competenceSavoirfaires.objectifs' // si objectifs relation existe
+            'affectations.competences.competenceSavoirfaires.objectifs', // si objectifs relation existe
         ]);
 
         // Construire la structure sérialisée
@@ -37,14 +36,7 @@ class SauveChargeParcoursService
         File::put($filename, $fileContent);
     }
 
-    public function charge_from_file(string $filename)
-    {
+    public function charge_from_file(string $filename) {}
 
-    }
-
-    public function charge_from_content(string $content)
-    {
-        
-    }
-
+    public function charge_from_content(string $content) {}
 }

@@ -2,9 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource;
 
 class CreateSavoirfaire extends CreateRecord
 {

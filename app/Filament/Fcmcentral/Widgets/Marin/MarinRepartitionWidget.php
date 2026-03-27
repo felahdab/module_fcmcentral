@@ -8,23 +8,23 @@ use Modules\FcmCentral\Models\Marin;
 class MarinRepartitionWidget extends ChartWidget
 {
     protected ?string $heading = 'Répartition des savoir-faire par type';
-   
-    protected int | string | array $columnSpan = [
+
+    protected array|int|string $columnSpan = [
         'sm' => 2,
         'md' => 2,
         'lg' => 2,
         'xl' => 2,
     ];
-   
+
     protected static ?int $sort = 4;
 
     public static function canView(): bool
     {
-       // $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
+        // $marin = \Modules\FcmCentral\Models\Marin::fromCurrentUser();
         // TODO: faut-il limiter davantage l'accès ? Certains marin disposant
         // d'un parcours doivent-ils être empéchés de voir ce widget ?
-       // return $marin?->complements_fcm?->donnees_du_parcours != null;
-       return false;
+        // return $marin?->complements_fcm?->donnees_du_parcours != null;
+        return false;
     }
 
     public function getMarin(): ?Marin
@@ -35,7 +35,7 @@ class MarinRepartitionWidget extends ChartWidget
     protected function getData(): array
     {
         $marin = $this->getMarin();
-       
+
         if (!$marin || !$marin->complements_fcm) {
             return [
                 'datasets' => [],
@@ -44,7 +44,7 @@ class MarinRepartitionWidget extends ChartWidget
         }
 
         $parcours = $marin->complements_fcm->donnees_du_parcours->parcoursmarin ?? null;
-       
+
         if (!$parcours) {
             return [
                 'datasets' => [],
@@ -87,45 +87,6 @@ class MarinRepartitionWidget extends ChartWidget
         return 'bar';
     }
 
-    private function calculateRepartition(array $parcours): array
-    {
-        $labels = [];
-        $dataStage = [];
-        $dataCompagnonnage = [];
-        $dataEad = [];
-
-        foreach ($parcours['affectations'] ?? [] as $affectation) {
-            $labels[] = $affectation['libelle_court'] ??
-                        $affectation['code'] ??
-                        substr($affectation['uuid'] ?? 'AFF', 0, 10);
-
-            $countS = $countC = $countE = 0;
-
-            foreach ($affectation['competences'] ?? [] as $competence) {
-                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
-                    $type = $csf['savoirfaire_type']['code'] ??
-                            $csf['savoirfaireType']['code'] ??
-                            $csf['type_code'] ?? null;
-
-                    if ($type === 'S') $countS++;
-                    elseif ($type === 'C') $countC++;
-                    elseif (in_array($type, ['E', 'EAD', 'D'])) $countE++;
-                }
-            }
-
-            $dataStage[] = $countS;
-            $dataCompagnonnage[] = $countC;
-            $dataEad[] = $countE;
-        }
-
-        return [
-            'labels' => $labels,
-            'stage' => $dataStage,
-            'compagnonnage' => $dataCompagnonnage,
-            'ead' => $dataEad,
-        ];
-    }
-
     protected function getOptions(): array
     {
         return [
@@ -146,7 +107,7 @@ class MarinRepartitionWidget extends ChartWidget
                     'title' => [
                         'display' => true,
                         'text' => 'Affectations',
-                        'font' => ['weight' => 'bold']
+                        'font' => ['weight' => 'bold'],
                     ],
                 ],
                 'y' => [
@@ -154,14 +115,57 @@ class MarinRepartitionWidget extends ChartWidget
                     'title' => [
                         'display' => true,
                         'text' => 'Nombre de savoir-faire',
-                        'font' => ['weight' => 'bold']
+                        'font' => ['weight' => 'bold'],
                     ],
                     'beginAtZero' => true,
                     'ticks' => [
                         'stepSize' => 1,
                     ],
-                ]
+                ],
             ],
+        ];
+    }
+
+    private function calculateRepartition(array $parcours): array
+    {
+        $labels = [];
+        $dataStage = [];
+        $dataCompagnonnage = [];
+        $dataEad = [];
+
+        foreach ($parcours['affectations'] ?? [] as $affectation) {
+            $labels[] = $affectation['libelle_court']
+                        ?? $affectation['code']
+                        ?? substr($affectation['uuid'] ?? 'AFF', 0, 10);
+
+            $countS = $countC = $countE = 0;
+
+            foreach ($affectation['competences'] ?? [] as $competence) {
+                foreach ($competence['competenceSavoirfaires'] ?? [] as $csf) {
+                    $type = $csf['savoirfaire_type']['code']
+                            ?? $csf['savoirfaireType']['code']
+                            ?? $csf['type_code'] ?? null;
+
+                    if ('S' === $type) {
+                        ++$countS;
+                    } elseif ('C' === $type) {
+                        ++$countC;
+                    } elseif (in_array($type, ['E', 'EAD', 'D'])) {
+                        ++$countE;
+                    }
+                }
+            }
+
+            $dataStage[] = $countS;
+            $dataCompagnonnage[] = $countC;
+            $dataEad[] = $countE;
+        }
+
+        return [
+            'labels' => $labels,
+            'stage' => $dataStage,
+            'compagnonnage' => $dataCompagnonnage,
+            'ead' => $dataEad,
         ];
     }
 }

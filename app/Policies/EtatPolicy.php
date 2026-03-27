@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class EtatPolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::etat';
+    protected $slug = 'fcmcentral::etat';
 }

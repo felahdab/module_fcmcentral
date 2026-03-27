@@ -2,21 +2,13 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Actions;
 
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Response;
-
-use Filament\Forms;
 use Filament\Actions\Action;
+use Filament\Forms;
 use Filament\Forms\Components\Select;
-
-use Modules\FcmCommun\Services\CalculHeuresParcoursService;
-use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
-
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Models\Cohorte;
-use Modules\FcmCentral\Models\Parcours;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 
 class AffecterMentorAction extends Action
 {
@@ -34,7 +26,7 @@ class AffecterMentorAction extends Action
                             ->orderBy('nom')
                             ->get()
                             ->mapWithKeys(fn ($m) => [
-                                $m->uuid => ($m->grade?->libelle_court ?? '') . ' ' . $m->prenom . ' ' . $m->nom
+                                $m->uuid => ($m->grade?->libelle_court ?? '').' '.$m->prenom.' '.$m->nom,
                             ])
                     )
                     ->searchable(),
@@ -46,16 +38,16 @@ class AffecterMentorAction extends Action
                 // if (!empty($data['retirer_mentor'])) {
                 //     $record->complementsFcm->update(['mentor_id' => null]);
                 // } elseif (!empty($data['mentor_id'])) {
-                    if(!empty($data['mentor_id'])) {
+                if (!empty($data['mentor_id'])) {
                     event(new UserGeneratedEvent(
                         UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
                         $record->uuid,
-                        ["mentor" => $data["mentor_id"]]
+                        ['mentor' => $data['mentor_id']]
                     ));
                 }
-            });
+            })
+        ;
     }
-
 }

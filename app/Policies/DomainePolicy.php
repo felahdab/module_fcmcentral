@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class DomainePolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::domaine';
+    protected $slug = 'fcmcentral::domaine';
 }

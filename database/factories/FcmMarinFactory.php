@@ -1,16 +1,17 @@
 <?php
+
 // filepath: Modules/FcmCentral/database/factories/FcmMarinFactory.php
- 
+
 namespace Modules\FcmCentral\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\FcmCentral\Models\FcmMarin;
-use Modules\RH\Models\Marin;
 use Modules\FcmCommun\Models\Cohorte;
+use Modules\RH\Models\Marin;
 
 /**
  * @extends Factory<FcmMarin>
-*/
+ */
 class FcmMarinFactory extends Factory
 {
     /**
@@ -138,9 +139,6 @@ class FcmMarinFactory extends Factory
         ]);
     }
 }
-
-
-
 
 // // Dans vos tests
 

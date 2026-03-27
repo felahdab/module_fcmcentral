@@ -2,34 +2,31 @@
 
 namespace Modules\FcmCentral\Listeners\Save;
 
-use Exception;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Filament\Notifications\Notification;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Modules\FcmCentral\Helpers\OutilsHelper;
+use Modules\FcmCentral\Models\MarinParcours;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\ParcoursSerialise;
-use Modules\FcmCentral\Models\MarinParcours;
-use Modules\FcmCentral\Helpers\OutilsHelper;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCommun\Jobs\MajPpaMarinfcm;
 use Modules\FcmCommun\Services\MigrationParcoursMarinService;
 
 class CreationParcoursSerialiseListener
 {
-    
     public function __construct(
         private MigrationParcoursMarinService $migrationService
     ) {}
 
-    
     /**
      * Gere l'evenement.
      */
     public function handle(UserGeneratedEvent $event): void
     {
-        if (! $event->isOfType(UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE)) {
+        if (!$event->isOfType(UserGeneratedEventTypes::CREATION_PARCOURS_SERIALISE)) {
             return;
         }
 
@@ -38,8 +35,9 @@ class CreationParcoursSerialiseListener
         try {
             $parcours = Parcours::where('uuid', $event->object_uuid)->first();
 
-            if (! $parcours) {
+            if (!$parcours) {
                 Log::error("Parcours non trouvé avec UUID: {$event->object_uuid}");
+
                 return;
             }
 
@@ -47,7 +45,7 @@ class CreationParcoursSerialiseListener
             $date = $data['date_de_debut'] ?? now()->toDateString();
             $version = $data['version'] ?? $parcours->getLatestSerializedVersion() + 1;
 
-            Log::info("=== DÉBUT CRÉATION PARCOURS SÉRIALISÉ ===", [
+            Log::info('=== DÉBUT CRÉATION PARCOURS SÉRIALISÉ ===', [
                 'parcours_id' => $parcours->id,
                 'parcours_code' => $parcours->code,
                 'version' => $version,
@@ -60,7 +58,8 @@ class CreationParcoursSerialiseListener
                 },
                 'affectations.competences' => function ($q) use ($parcours) {
                     $q->where('parcours_type_id', $parcours->parcours_type_id)
-                    ->orderBy('ordre');
+                        ->orderBy('ordre')
+                    ;
                 },
                 'affectations.competences.competenceSavoirfaires' => function ($q) {
                     $q->orderBy('ordre');
@@ -69,7 +68,7 @@ class CreationParcoursSerialiseListener
                 'affectations.competences.competenceSavoirfaires.savoirfaireType',
                 'affectations.competences.competenceSavoirfaires.objectifs' => function ($q) {
                     $q->orderBy('ordre');
-                }
+                },
             ]);
 
             // Construire la structure sérialisée
@@ -80,15 +79,15 @@ class CreationParcoursSerialiseListener
 
             // Enregistrer la sérialisation
             $nouveauParcoursSerialise = ParcoursSerialise::create([
-                'parcours_id'   => $parcours->id,
-                'parcours'      => $serializedData,
-                'date_debut'    => $date,
+                'parcours_id' => $parcours->id,
+                'parcours' => $serializedData,
+                'date_debut' => $date,
                 'libelle_court' => OutilsHelper::sanitizeForAlpine($parcours->libelle_court),
-                'libelle_long'  => OutilsHelper::sanitizeForAlpine($parcours->libelle_long),
-                'version'       => $version,
+                'libelle_long' => OutilsHelper::sanitizeForAlpine($parcours->libelle_long),
+                'version' => $version,
             ]);
 
-            Log::info("✅ Nouveau ParcoursSerialise créé", [
+            Log::info('✅ Nouveau ParcoursSerialise créé', [
                 'id' => $nouveauParcoursSerialise->id,
                 'uuid' => $nouveauParcoursSerialise->uuid,
                 'version' => $version,
@@ -99,7 +98,8 @@ class CreationParcoursSerialiseListener
             $anciensVersions = ParcoursSerialise::where('parcours_id', $parcours->id)
                 ->where('version', '<', $version)
                 ->orderBy('version')
-                ->get();
+                ->get()
+            ;
 
             Log::info('🔍 Recherche anciennes versions', [
                 'parcours_id' => $parcours->id,
@@ -112,11 +112,12 @@ class CreationParcoursSerialiseListener
             if ($anciensVersions->isNotEmpty()) {
                 // ✅ Récupérer les IDs des anciennes versions de CE PARCOURS
                 $anciennesVersionIds = $anciensVersions->pluck('id');
-                
+
                 // ✅ Récupérer SEULEMENT les MarinParcours liés à ces versions spécifiques
                 $marinParcoursList = MarinParcours::whereIn('parcoursserialise_id', $anciennesVersionIds)
                     ->with(['fcmMarin.marin', 'parcours_serialise'])
-                    ->get();
+                    ->get()
+                ;
 
                 Log::info('📋 MarinParcours à traiter', [
                     'parcours_id' => $parcours->id,
@@ -133,19 +134,21 @@ class CreationParcoursSerialiseListener
                     $marinUuid = $marinParcours->marin?->uuid ?? $marinParcours->fcmMarin?->marin?->uuid ?? null;
 
                     if (!$marinUuid) {
-                        Log::warning("⚠️ UUID marin introuvable", [
+                        Log::warning('⚠️ UUID marin introuvable', [
                             'marin_parcours_id' => $marinParcours->id,
                         ]);
+
                         continue;
                     }
 
                     // ✅ Vérifier que le parcoursSerialise appartient bien à CE parcours
                     if ($marinParcours->parcours_serialise?->parcours_id !== $parcours->id) {
-                        Log::warning("⚠️ MarinParcours ne correspond pas au parcours", [
+                        Log::warning('⚠️ MarinParcours ne correspond pas au parcours', [
                             'marin_parcours_id' => $marinParcours->id,
                             'parcours_id_attendu' => $parcours->id,
                             'parcours_id_trouve' => $marinParcours->parcours_serialise?->parcours_id,
                         ]);
+
                         continue;
                     }
 
@@ -178,7 +181,7 @@ class CreationParcoursSerialiseListener
                     // }
                 }
 
-                Log::info("📊 Backups terminés", [
+                Log::info('📊 Backups terminés', [
                     'nb_backups_reussis' => $nbBackups,
                     'nb_total' => $marinParcoursList->count(),
                 ]);
@@ -187,7 +190,7 @@ class CreationParcoursSerialiseListener
                 foreach ($anciensVersions as $ancienneVersion) {
                     $ancienneVersion->date_fin = $date;
                     $ancienneVersion->save();
-                    
+
                     Log::info('🔒 Version clôturée', [
                         'parcours_id' => $parcours->id,
                         'version' => $ancienneVersion->version,
@@ -202,25 +205,24 @@ class CreationParcoursSerialiseListener
                         Log::info('🧪 Mode TEST - Migration synchrone via service');
                         $this->migrationService->migrerVersNouvelleVersion($nouveauParcoursSerialise->uuid);
                     } else {
-    
-                    Log::info('🚀 Dispatch job MAJ PPA (migration avec service)', [
-                        'parcours_id' => $parcours->id,
-                        'nouveau_parcours_serialise_uuid' => $nouveauParcoursSerialise->uuid,
-                        'nb_marins' => $marinParcoursList->count(),
-                    ]);
-                    
-                    MajPpaMarinfcm::dispatchSync($nouveauParcoursSerialise->uuid);
-                    
-                    Log::info('✅ Job MAJ PPA terminé');
-                }
+                        Log::info('🚀 Dispatch job MAJ PPA (migration avec service)', [
+                            'parcours_id' => $parcours->id,
+                            'nouveau_parcours_serialise_uuid' => $nouveauParcoursSerialise->uuid,
+                            'nb_marins' => $marinParcoursList->count(),
+                        ]);
+
+                        MajPpaMarinfcm::dispatchSync($nouveauParcoursSerialise->uuid);
+
+                        Log::info('✅ Job MAJ PPA terminé');
+                    }
                 }
             } else {
-                Log::info("ℹ️ Aucune version existante pour ce parcours");
+                Log::info('ℹ️ Aucune version existante pour ce parcours');
             }
 
             DB::commit();
 
-            Log::info("=== ✅ FIN CRÉATION PARCOURS SÉRIALISÉ ===", [
+            Log::info('=== ✅ FIN CRÉATION PARCOURS SÉRIALISÉ ===', [
                 'parcours_id' => $parcours->id,
                 'nouvelle_version' => $version,
             ]);
@@ -234,12 +236,12 @@ class CreationParcoursSerialiseListener
                 ->title($notification['title'] ?? 'Parcours sérialisé')
                 ->success()
                 ->body($notification['message'] ?? "Version {$version} créée avec succès")
-                ->send();
-
-        } catch (Exception $e) {
+                ->send()
+            ;
+        } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error("❌ ERREUR SÉRIALISATION PARCOURS", [
+            Log::error('❌ ERREUR SÉRIALISATION PARCOURS', [
                 'uuid' => $event->object_uuid,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -248,18 +250,19 @@ class CreationParcoursSerialiseListener
             Notification::make()
                 ->title('Erreur de sérialisation')
                 ->danger()
-                ->body('Impossible de sérialiser le parcours: ' . $e->getMessage())
-                ->send();
+                ->body('Impossible de sérialiser le parcours: '.$e->getMessage())
+                ->send()
+            ;
         }
     }
 
     /**
-     * Construit la structure complète du parcours
+     * Construit la structure complète du parcours.
      */
     public function buildCompleteParcoursData(Parcours $parcours): array
     {
         $result = [
-            //'id' => $parcours->id,
+            // 'id' => $parcours->id,
             'uuid' => $parcours->uuid,
             'code' => $parcours->code,
             'libelle_court' => OutilsHelper::sanitizeForAlpine($parcours->libelle_court),
@@ -271,14 +274,14 @@ class CreationParcoursSerialiseListener
                 'ordre' => $parcours->parcoursType->ordre,
                 'color' => $parcours->parcoursType->color,
                 'code' => $parcours->parcoursType->code,
-             ],
+            ],
             'color' => $parcours->color,
             'affectations' => [],
         ];
 
         foreach ($parcours->affectations as $aff) {
             $affData = [
-                //'id' => $aff->id,
+                // 'id' => $aff->id,
                 'uuid' => $aff->uuid,
                 'code' => $aff->code,
                 'libelle_court' => OutilsHelper::sanitizeForAlpine($aff->libelle_court),
@@ -292,7 +295,7 @@ class CreationParcoursSerialiseListener
 
             foreach ($aff->competences as $competence) {
                 $compData = [
-                    //'id' => $competence->id,
+                    // 'id' => $competence->id,
                     'uuid' => $competence->uuid,
                     'code' => $competence->code,
                     'libelle_court' => OutilsHelper::sanitizeForAlpine($competence->libelle_court),
@@ -308,7 +311,7 @@ class CreationParcoursSerialiseListener
                     $color_ob = ($sf && $sf->color) ? $sf->color : $competence->color;
 
                     $csfData = [
-                       // 'id' => $csf->id,
+                        // 'id' => $csf->id,
                         'uuid' => $csf->uuid ?? null,
                         'ordre' => $csf->ordre ?? null,
                         'heures' => $csf->heures ?? null,
@@ -317,7 +320,7 @@ class CreationParcoursSerialiseListener
                         'libelle_long' => OutilsHelper::sanitizeForAlpine($csf->libelle_long) ?? null,
                         'savoirfaire' => null,
                         'savoirfaire_type' => $csf->savoirfaireType ? [
-                            //'id' => $csf->savoirfaireType->id,
+                            // 'id' => $csf->savoirfaireType->id,
                             'uuid' => $csf->savoirfaireType->uuid,
                             'code' => $csf->savoirfaireType->code ?? null,
                             'libelle_court' => OutilsHelper::sanitizeForAlpine($csf->savoirfaireType->libelle_court) ?? null,
@@ -327,7 +330,7 @@ class CreationParcoursSerialiseListener
 
                     if ($sf) {
                         $csfData['savoirfaire'] = [
-                            //'id' => $sf->id,
+                            // 'id' => $sf->id,
                             'uuid' => $sf->uuid,
                             'code' => $sf->code,
                             'libelle_court' => OutilsHelper::sanitizeForAlpine($sf->libelle_court),
@@ -340,7 +343,7 @@ class CreationParcoursSerialiseListener
                     if ($csf->relationLoaded('objectifs')) {
                         $objs = $csf->objectifs->sortBy('ordre')->map(function ($o) use ($color_ob) {
                             return [
-                                //'id' => $o->id,
+                                // 'id' => $o->id,
                                 'uuid' => $o->uuid,
                                 'libelle_court' => OutilsHelper::sanitizeForAlpine($o->libelle_court),
                                 'description' => OutilsHelper::sanitizeForAlpine($o->description) ?? null,
@@ -377,6 +380,7 @@ class CreationParcoursSerialiseListener
                 }
             }
         }
+
         return $count;
     }
 }

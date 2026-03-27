@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class CohortePolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::cohorte';
+    protected $slug = 'fcmcentral::cohorte';
 }

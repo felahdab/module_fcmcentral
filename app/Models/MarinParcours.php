@@ -2,27 +2,23 @@
 
 namespace Modules\FcmCentral\Models;
 
-use Modules\FcmCommun\Models\MarinParcours as BaseModel;
-use Modules\FcmCentral\Traits\HasTablePrefix;
-
-use Modules\FcmCentral\Models\FcmMarin;
-use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Models\ParcoursSerialise;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\FcmCentral\Database\Factories\MarinParcoursFactory;
+use Modules\FcmCentral\Traits\HasTablePrefix;
+use Modules\FcmCommun\Models\MarinParcours as BaseModel;
 
 class MarinParcours extends BaseModel
 {
     use HasFactory;
     use HasTablePrefix;
-    
-/*
-    public function parcoursSerialise() 
-    {
-        return $this->belongsTo(ParcoursSerialise::class, 'parcours_id');
-    }
 
- */   
+    /*
+        public function parcoursSerialise()
+        {
+            return $this->belongsTo(ParcoursSerialise::class, 'parcours_id');
+        }
+
+     */
     public function ligne_dans_fcm_marins()
     {
         return $this->belongsTo(FcmMarin::class, 'fcmmarin_id');
@@ -30,7 +26,7 @@ class MarinParcours extends BaseModel
 
     public function parcours_serialise()
     {
-        return $this->belongsTo(ParcoursSerialise::class, "parcoursserialise_id");
+        return $this->belongsTo(ParcoursSerialise::class, 'parcoursserialise_id');
     }
 
     public function fcmMarin()
@@ -47,16 +43,11 @@ class MarinParcours extends BaseModel
             'id',                   // Clef locale Marin
             'fcmmarin_id',          // Clef locale MarinPArcours
             'rh_marin_id',          // Clef locale FcmMarin
-
-
-
         );
     }
 
-    protected static function newFactory():MarinParcoursFactory
+    protected static function newFactory(): MarinParcoursFactory
     {
         return MarinParcoursFactory::new();
     }
-
-   
 }

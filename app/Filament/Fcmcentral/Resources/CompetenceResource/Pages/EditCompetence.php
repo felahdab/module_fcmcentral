@@ -2,9 +2,9 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\CompetenceResource;
 
 class EditCompetence extends EditRecord
 {
@@ -14,7 +14,7 @@ class EditCompetence extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-           // Actions\DeleteAction::make(),
+            // Actions\DeleteAction::make(),
         ];
     }
 }

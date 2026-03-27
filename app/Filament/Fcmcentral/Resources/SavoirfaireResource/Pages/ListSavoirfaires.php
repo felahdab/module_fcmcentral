@@ -3,9 +3,8 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\SavoirfaireResource;
 
 class ListSavoirfaires extends ListRecords
 {

@@ -14,15 +14,16 @@ class ParcoursFactory extends Factory
     public function definition()
     {
         static $counter = 1;
-        $libelle = "Parcours";
+        $libelle = 'Parcours';
+
         return [
-            'uuid'          => $this->faker->uuid,
-            'code'          => 'PAR-' . $counter,
-            'libelle_court' => strtoupper(Str::limit($libelle, 3, '')) . ' ' . $counter,
-            'libelle_long'  => $libelle . ' ' . $counter++ . ' : n°' . $this->faker->numberBetween(1, 11) . ', ' . $this->faker->sentence(6),
+            'uuid' => $this->faker->uuid,
+            'code' => 'PAR-'.$counter,
+            'libelle_court' => strtoupper(Str::limit($libelle, 3, '')).' '.$counter,
+            'libelle_long' => $libelle.' '.$counter++.' : n°'.$this->faker->numberBetween(1, 11).', '.$this->faker->sentence(6),
             'parcours_type_id' => ParcoursType::factory(),
-            'ordre'         => $counter,
-            'color'         => $this->faker->safeHexColor,
+            'ordre' => $counter,
+            'color' => $this->faker->safeHexColor,
         ];
     }
 }

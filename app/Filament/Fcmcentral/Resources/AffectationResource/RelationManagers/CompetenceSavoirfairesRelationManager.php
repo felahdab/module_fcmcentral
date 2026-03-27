@@ -2,21 +2,19 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\RelationManagers;
 
-use Filament\Schemas\Schema;
 use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Forms;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Str;
+use Modules\FcmCentral\Models\CompetenceSavoirfaire;
 use Modules\FcmCentral\Models\Savoirfaire;
 use Modules\FcmCentral\Models\SavoirfaireType;
-use Modules\FcmCentral\Models\CompetenceSavoirfaire;
-use Illuminate\Support\Str;
 
 class CompetenceSavoirfairesRelationManager extends RelationManager
 {
@@ -27,40 +25,43 @@ class CompetenceSavoirfairesRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema
-        ->components([
-            Select::make('competence_id')
-                ->label('Compétence')
-                ->options(fn() => $this->ownerRecord->competences->pluck('libelle_court', 'id')->toArray())
-                ->reactive()
-                ->required()
-                ->afterStateUpdated(fn ($state, callable $set) => $set('savoirfaire_id', null)),
+            ->components([
+                Select::make('competence_id')
+                    ->label('Compétence')
+                    ->options(fn () => $this->ownerRecord->competences->pluck('libelle_court', 'id')->toArray())
+                    ->reactive()
+                    ->required()
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('savoirfaire_id', null)),
 
-            Select::make('savoirfaire_id')
-                ->label('Savoir faire')
-                ->options(fn (callable $get) => (function () use ($get) {
-                    $compId = $get('competence_id');
-                    if (! $compId) {
-                        return []; // aucune option tant que compétence non choisie
-                    }
-                    return Savoirfaire::where('competence_id', $compId)
-                        ->orderBy('ordre')
-                        ->pluck('libelle_court', 'id')
-                        ->toArray();
-                })())
-                ->searchable()
-                ->required()
-                ->disabled(fn (callable $get) => ! (bool) $get('competence_id')),
+                Select::make('savoirfaire_id')
+                    ->label('Savoir faire')
+                    ->options(fn (callable $get) => (function () use ($get) {
+                        $compId = $get('competence_id');
+                        if (!$compId) {
+                            return []; // aucune option tant que compétence non choisie
+                        }
 
-            Select::make('savoirfaire_type_id')
-                ->label('Type de Savoir-faire')
-                ->options(fn() => SavoirfaireType::pluck('libelle_court', 'id')->toArray())
-                ->searchable(),
+                        return Savoirfaire::where('competence_id', $compId)
+                            ->orderBy('ordre')
+                            ->pluck('libelle_court', 'id')
+                            ->toArray()
+                        ;
+                    })())
+                    ->searchable()
+                    ->required()
+                    ->disabled(fn (callable $get) => !(bool) $get('competence_id')),
 
-            TextInput::make('libelle_court')->label('Intitulé')->maxLength(255),
-            TextInput::make('ordre')->label('Ordre')->numeric()->default(1),
-            TextInput::make('heures')->label('Heures')->numeric(),
-            TextInput::make('jours')->label('Jours')->numeric(),
-        ]);
+                Select::make('savoirfaire_type_id')
+                    ->label('Type de Savoir-faire')
+                    ->options(fn () => SavoirfaireType::pluck('libelle_court', 'id')->toArray())
+                    ->searchable(),
+
+                TextInput::make('libelle_court')->label('Intitulé')->maxLength(255),
+                TextInput::make('ordre')->label('Ordre')->numeric()->default(1),
+                TextInput::make('heures')->label('Heures')->numeric(),
+                TextInput::make('jours')->label('Jours')->numeric(),
+            ])
+        ;
     }
 
     public function table(Table $table): Table
@@ -79,7 +80,7 @@ class CompetenceSavoirfairesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->label('Ajouter Savoir faire')
-                    ->mutateDataUsing(fn(array $data) => $data + ['uuid' => Str::uuid()->toString()])
+                    ->mutateDataUsing(fn (array $data) => $data + ['uuid' => Str::uuid()->toString()])
                     ->after(function (CompetenceSavoirfaire $record) {
                         // hook si nécessaire
                     }),
@@ -87,9 +88,7 @@ class CompetenceSavoirfairesRelationManager extends RelationManager
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
-            ]);
+            ])
+        ;
     }
 }
-
-
-

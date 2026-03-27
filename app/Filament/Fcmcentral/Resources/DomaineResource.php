@@ -2,37 +2,27 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages\ListDomaines;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages\CreateDomaine;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages\EditDomaine;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\RelationManagers;
-use Modules\FcmCentral\Models\Domaine;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-
-
- 
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages\ListDomaines;
 use Modules\FcmCentral\Helpers\OutilsHelper;
+use Modules\FcmCentral\Models\Domaine;
 
 class DomaineResource extends Resource
 {
     protected static ?string $model = Domaine::class;
-    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\UnitEnum|null $navigationGroup = 'Catalogue';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?int $navigationSort = 7;
 
     public static function form(Schema $schema): Schema
@@ -48,40 +38,39 @@ class DomaineResource extends Resource
                    // ->maxLength(1500)
                     ->label('Libellé long'),
                 TextInput::make('code')
-                   
+
                     ->label('Code')
-                    //->maxLength(150)
-                    ,    
+                // ->maxLength(150)
+                ,
                 Select::make('color')
                     ->options(OutilsHelper::selectColors())
-                    ->label('Couleur du Badge'),         
-            ]);
+                    ->label('Couleur du Badge'),
+            ])
+        ;
     }
 
     public static function table(Table $table): Table
     {
         return $table
-        ->defaultSort('ordre','asc')
-        ->reorderable('ordre') 
+            ->defaultSort('ordre', 'asc')
+            ->reorderable('ordre')
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->toggleable(isToggledHiddenByDefault: true),
-                    TextColumn::make('code')
+                TextColumn::make('code')
                     ->label('Code')
                     ->sortable()
                     ->searchable()
                     ->badge()
-                    ->color(fn($record)=>$record->color ??  $record->competence->color ?? 'info') 
-                    ,  
-                   
+                    ->color(fn ($record) => $record->color ?? $record->competence->color ?? 'info'),
+
                 TextColumn::make('libelle_court')
                     ->label('Libellé court')
-                    //->limit(50)
+                    // ->limit(50)
                     ->sortable()
                     ->searchable()
-                    ->description(fn ($record) => substr($record->libelle_long,0,40).'...')
-                ,
+                    ->description(fn ($record) => substr($record->libelle_long, 0, 40).'...'),
                 TextColumn::make('savoirfaires_count')
                     ->counts('savoirfaires')
                     ->label('Nb Savoir-faire')
@@ -97,7 +86,6 @@ class DomaineResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
             ])
             ->recordActions([
                 ViewAction::make()
@@ -120,13 +108,13 @@ class DomaineResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+        ;
     }
 
     public static function getRelations(): array
     {
         return [
-          
         ];
     }
 

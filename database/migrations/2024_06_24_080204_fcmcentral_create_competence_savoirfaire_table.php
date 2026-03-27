@@ -1,35 +1,31 @@
 <?php
 
-use Illuminate\Database\PostgresConnection;
-use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\MySqlConnection;
+use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
-    {   
-
-
+    {
         if (DB::connection() instanceof PostgresConnection) {
             $default_value = DB::raw('(gen_random_uuid())');
-        }
-        elseif (DB::connection() instanceof MySqlConnection){
+        } elseif (DB::connection() instanceof MySqlConnection) {
             $default_value = DB::raw('(UUID())');
         }
 
         // Savoir-faire affectés à une année (avec options personnalisées)
-        Schema::create('fcmcentral_competence_savoirfaires', function (Blueprint $table) use ($default_value)  {
+        Schema::create('fcmcentral_competence_savoirfaires', function (Blueprint $table) use ($default_value) {
             $table->id();
             $table->uuid('uuid')->default($default_value);
             $table->unsignedBigInteger('competence_id');
             $table->unsignedBigInteger('savoirfaire_id');
             $table->unsignedBigInteger('savoirfaire_type_id')->nullable();
-            
-            $table->decimal('heures',6,2)->nullable();
-            $table->decimal('jours',6,2)->nullable();
+
+            $table->decimal('heures', 6, 2)->nullable();
+            $table->decimal('jours', 6, 2)->nullable();
             $table->string('libelle_court')->nullable();
             $table->integer('ordre')->default(0);
             $table->json('data')->nullable();
@@ -46,4 +42,3 @@ return new class extends Migration
         Schema::dropIfExists('fcmcentral_competence_savoirfaire');
     }
 };
-

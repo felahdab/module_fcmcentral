@@ -2,33 +2,16 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Actions;
 
-use Log;
-use Exception;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Response;
-
+use Filament\Actions\Action;
 use Filament\Forms;
-use Filament\Schemas\Components\Fieldset;
-
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\TextArea;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
+use Filament\Forms\Components\TextArea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-
-use Filament\Actions\Action;
-
-use Modules\FcmCommun\Services\CalculHeuresParcoursService;
-use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
-
-use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Filament\Schemas\Components\Utilities\Get;
 use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Models\Cohorte;
-use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Models\Note;
 
 class CreerUneNoteAction extends Action
@@ -50,20 +33,20 @@ class CreerUneNoteAction extends Action
             ->modalSubmitActionLabel('Créer la note')
             ->modalCancelActionLabel('Annuler')
             ->schema([
-                Textarea::make('libelle')
+                TextArea::make('libelle')
                     ->required()
                     ->label('Contenu de la note')
                     ->rows(4)
                     ->maxLength(1000)
                     ->placeholder('Saisissez le contenu de votre note...'),
-            
+
                 Hidden::make('marin_id')
                     ->default(fn ($record) => $record->id),
-            
+
                 Placeholder::make('marin_selected')
                     ->label('Marin concerné')
-                    ->content(fn ($record) => $record->grade?->libelle_court . ' ' . $record->prenom . ' ' . $record->nom),
-            
+                    ->content(fn ($record) => $record->grade?->libelle_court.' '.$record->prenom.' '.$record->nom),
+
                 /*
                 Forms\Components\Select::make('type_note_id')
                     ->label('Type de note')
@@ -86,12 +69,12 @@ class CreerUneNoteAction extends Action
                         return \Modules\FcmCentral\Models\TypeNote::create($data)->id;
                     }),
                 */
-            
+
                 DatePicker::make('date')
                     ->label('Date')
                     ->default(now())
                     ->nullable(),
-            
+
                 /*
                 Forms\Components\Select::make('redacteur_id')
                     ->label('Rédacteur')
@@ -110,62 +93,62 @@ class CreerUneNoteAction extends Action
                         return $currentMarin ? $currentMarin->id : auth()->user()->id;
                     }),
                 */
-            
+
                 /*
                 Forms\Components\Toggle::make('valide_bcf')
                     ->label('Validé BCF')
                     ->default(false)
                     ->visible(fn () => auth()->user()->can("fcmcentral::note.valider")),
                 */
-            
+
                 TextInput::make('lien_url')
                     ->label('Lien URL (optionnel)')
                     ->url()
                     ->nullable()
                     ->placeholder('https://...'),
-            
+
                 Hidden::make('objet_type')
                     ->default('marin'),
-            
+
                 Hidden::make('objet_id')
                     ->default(fn ($record) => $record->id),
             ])
             ->action(function ($record, array $data) {
                 try {
-                    Log::info('Tentative de création de note', [
+                    \Log::info('Tentative de création de note', [
                         'record_id' => $record->id,
                         'data' => $data,
                     ]);
-            
+
                     // Détermination du rédacteur (user connecté)
                     $currentMarin = Marin::fromCurrentUser();
-                   // $redacteurId =  auth()->user()->id;
-                  
-                   $redacteur = auth()->user()->display_name;
-                  // dd( $redacteur);
+                    // $redacteurId =  auth()->user()->id;
+
+                    $redacteur = auth()->user()->display_name;
+                    // dd( $redacteur);
                     // Créer la note
                     $note = Note::create([
                         'libelle' => $data['libelle'],
                         'rh_marin_id' => $record->id,
-                        //'marin_id' => $record->complementsFcm->id,
+                        // 'marin_id' => $record->complementsFcm->id,
                         'type_note_id' => $data['type_note_id'] ?? null, // Champ commenté
                         'date' => $data['date'] ?? now(),
-                        //'redacteur_id' => $redacteurId, // Utilisateur connecté
+                        // 'redacteur_id' => $redacteurId, // Utilisateur connecté
                         'redacteur' => $redacteur,
                         'valide_bcf' => false, // Champ commenté mais valeur prise en compte
                         'lien_url' => $data['lien_url'] ?? null,
                         'objet_type' => 'marin',
                         'objet_id' => $record->id,
                     ]);
-            
+
                     Notification::make()
                         ->title('Note créée avec succès')
                         ->body("La note pour {$record->prenom} {$record->nom} a été créée.")
                         ->success()
-                        ->send();
-            
-                } catch (Exception $e) {
-                    Log::error('Erreur lors de la création de la note', [
+                        ->send()
+                    ;
+                } catch (\Exception $e) {
+                    \Log::error('Erreur lors de la création de la note', [
                         'message' => $e->getMessage(),
                         'file' => $e->getFile(),
                         'line' => $e->getLine(),
@@ -173,14 +156,15 @@ class CreerUneNoteAction extends Action
                         'record_id' => $record->id,
                         'data' => $data,
                     ]);
-            
+
                     Notification::make()
                         ->title('Erreur lors de la création')
                         ->body('Une erreur est survenue lors de la création de la note.')
                         ->danger()
-                        ->send();
+                        ->send()
+                    ;
                 }
-            });
+            })
+        ;
     }
-
 }

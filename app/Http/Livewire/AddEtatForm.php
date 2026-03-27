@@ -3,28 +3,24 @@
 namespace Modules\FcmCentral\Http\Livewire;
 
 use Carbon\Carbon;
-use Log;
-use Exception;
-use Livewire\Component;
-use Modules\FcmCentral\Models\Etat;
-use Modules\FcmCentral\Models\TypeEtat;
-use Modules\FcmCentral\Models\Marin;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource;
 use Filament\Notifications\Notification;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Modules\FcmCentral\Models\Etat;
+use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCentral\Models\TypeEtat;
 
 class AddEtatForm extends Component
 {
     public $marinId;
     public $typeEtatId = '';
     public $dateDebut;
-    public $dateFin = null;
-    public $etatId = null;
-    
+    public $dateFin;
+    public $etatId;
+
     protected $listeners = [
-        'loadEtatForEdit' => 'loadEtat'
+        'loadEtatForEdit' => 'loadEtat',
     ];
-    
 
     protected $rules = [
         'typeEtatId' => 'required|exists:fcmcentral_type_etats,id',
@@ -44,7 +40,7 @@ class AddEtatForm extends Component
     #[Computed]
     public function canCreateEtat(): bool
     {
-        return auth()->user()->can("fcmcentral::etat.create");
+        return auth()->user()->can('fcmcentral::etat.create');
     }
 
     public function mount($marinId, $etatId = null)
@@ -63,15 +59,13 @@ class AddEtatForm extends Component
 
     public function loadEtat($etatId)
     {
-
         $this->etatId = $etatId;
         $etat = Etat::find($etatId);
-        
+
         if ($etat && $etat->rh_marin_id == $this->marinId) {
             $this->typeEtatId = $etat->type_etat_id;
             $this->dateDebut = $etat->date_debut ? Carbon::parse($etat->date_debut)->format('Y-m-d') : now()->format('Y-m-d');
             $this->dateFin = $etat->date_fin ? Carbon::parse($etat->date_fin)->format('Y-m-d') : null;
-    
         }
     }
 
@@ -82,7 +76,6 @@ class AddEtatForm extends Component
         $this->dispatch('close-modal', id: 'ajouterEtat');
     }
 
-
     public function save()
     {
         if (!$this->canCreateEtat) {
@@ -90,7 +83,9 @@ class AddEtatForm extends Component
                 ->title('Accès refusé')
                 ->body('Vous n\'avez pas les droits pour effectuer cette action')
                 ->danger()
-                ->send();
+                ->send()
+            ;
+
             return;
         }
 
@@ -108,12 +103,13 @@ class AddEtatForm extends Component
                     'date_fin' => $this->dateFin,
                 ]);
 
-                Log::info('État Gel modifié', ['etat_id' => $etat->id]);
+                \Log::info('État Gel modifié', ['etat_id' => $etat->id]);
 
                 Notification::make()
                     ->title('État Gel modifié avec succès!')
                     ->success()
-                    ->send();
+                    ->send()
+                ;
             } else {
                 // Création
                 $etatActuel = $marin->etats()->latest('date_debut')->first();
@@ -123,17 +119,18 @@ class AddEtatForm extends Component
 
                 $typeEtat = TypeEtat::find($this->typeEtatId);
                 $marin->historiserEtat(
-                    $typeEtat->code, 
-                    Carbon::parse($this->dateDebut), 
+                    $typeEtat->code,
+                    Carbon::parse($this->dateDebut),
                     $this->dateFin ? Carbon::parse($this->dateFin) : null
                 );
 
-                Log::info('Nouvel État Gel créé', ['marin_id' => $this->marinId]);
+                \Log::info('Nouvel État Gel créé', ['marin_id' => $this->marinId]);
 
                 Notification::make()
                     ->title('Etat Gel ajouté avec succès!')
                     ->success()
-                    ->send();
+                    ->send()
+                ;
             }
 
             $this->reset(['typeEtatId', 'dateDebut', 'dateFin', 'etatId']);
@@ -141,9 +138,8 @@ class AddEtatForm extends Component
 
             $this->dispatch('etat-added');
             $this->dispatch('close-modal', id: 'ajouterEtat');
-
-        } catch (Exception $e) {
-            Log::error('Erreur lors de l\'opération sur l\'état gel', [
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de l\'opération sur l\'état gel', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -151,9 +147,10 @@ class AddEtatForm extends Component
 
             Notification::make()
                 ->title('Erreur lors de l\'opération')
-                ->body('Détail : ' . $e->getMessage())
+                ->body('Détail : '.$e->getMessage())
                 ->danger()
-                ->send();
+                ->send()
+            ;
         }
     }
 

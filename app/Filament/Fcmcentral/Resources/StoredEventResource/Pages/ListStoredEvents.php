@@ -2,11 +2,11 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\StoredEventResource\Pages;
 
+use App\Models\User;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\User;
-use Modules\RH\Models\Marin as RHMarin;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\StoredEventResource;
+use Modules\RH\Models\Marin as RHMarin;
 
 class ListStoredEvents extends ListRecords
 {
@@ -15,20 +15,14 @@ class ListStoredEvents extends ListRecords
     /** La neutralisation des méthodes authorizeRecourseAccess et authorizeAccess renvoie tout le controle d'accès à la méthode
      *  canAccess. Le comportement de la page est alors identique aux pages non intégrées à des Ressource.
      */
-    public static function authorizeResourceAccess(): void
-    {
-        return;
-    }
-
-    protected function authorizeAccess(): void
-    {
-        return ;
-    }
+    public static function authorizeResourceAccess(): void {}
 
     public static function canAccess(array $parameters = []): bool
     {
         return auth()->user()->can('fcmcentral::voir_journal_des_evenements');
     }
+
+    protected function authorizeAccess(): void {}
 
     protected function getHeaderActions(): array
     {
@@ -41,11 +35,11 @@ class ListStoredEvents extends ListRecords
 
         if (filled($search)) {
             $query->where(function (Builder $q) use ($search) {
-
                 // Recherche par nom d'utilisateur → retrouve les user_uuid
                 $userUuids = User::where('display_name', 'like', "%{$search}%")
                     ->orWhere('nom', 'like', "%{$search}%")
-                    ->pluck('uuid');
+                    ->pluck('uuid')
+                ;
 
                 if ($userUuids->isNotEmpty()) {
                     $q->orWhereIn('user_uuid', $userUuids);
@@ -54,7 +48,8 @@ class ListStoredEvents extends ListRecords
                 // Recherche par nom de marin (objet concerné)
                 $marinUuids = RHMarin::where('nom', 'like', "%{$search}%")
                     ->orWhere('prenom', 'like', "%{$search}%")
-                    ->pluck('uuid');
+                    ->pluck('uuid')
+                ;
 
                 if ($marinUuids->isNotEmpty()) {
                     $q->orWhereIn('object_uuid', $marinUuids);
@@ -65,7 +60,8 @@ class ListStoredEvents extends ListRecords
 
                 // Recherche sur le commentaire dans detail (JSON)
                 $q->orWhereJsonContains('detail->commentaire', $search)
-                  ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(detail, '$.commentaire')) LIKE ?", ["%{$search}%"]);
+                    ->orWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(detail, '$.commentaire')) LIKE ?", ["%{$search}%"])
+                ;
             });
         }
 

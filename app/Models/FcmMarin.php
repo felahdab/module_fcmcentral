@@ -1,21 +1,20 @@
 <?php
+
 namespace Modules\FcmCentral\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Modules\FcmCentral\Traits\HasTablePrefix;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\FcmCentral\Database\Factories\FcmMarinFactory;
-use Modules\FcmCentral\Models\Marin;
-use Modules\RH\Models\Marin as RHMarin;
-use Modules\FcmCentral\Models\MarinParcours;
+use Modules\FcmCentral\Traits\HasTablePrefix;
 use Modules\FcmCommun\Models\Cohorte;
-
+use Modules\RH\Models\Marin as RHMarin;
 
 class FcmMarin extends Model
 {
-    use HasTablePrefix, HasFactory;
+    use HasTablePrefix;
+    use HasFactory;
 
     protected $fillable = [
         'rh_marin_id',
@@ -25,7 +24,7 @@ class FcmMarin extends Model
         'date_sedimentation',
         'date_fcm',
         'date_competence',
-        'gel'
+        'gel',
     ];
 
     protected $casts = [
@@ -56,18 +55,14 @@ class FcmMarin extends Model
             'fcmmarin_id',
             'parcoursserialise_id'
         )->withPivot('id', 'taux_global', 'taux_stage', 'taux_activite', 'parcoursmarin')
-         ->withTimestamps();
+            ->withTimestamps()
+        ;
     }
 
     public function lignesDansMarinParcours()
     {
         return $this->hasMany(MarinParcours::class, 'fcmmarin_id');
     }
-
-    
-
-
-
 
     // Attributs calculés
     public function getDonneesDuParcoursAttribute()
@@ -88,7 +83,7 @@ class FcmMarin extends Model
 
     public function hasParcours(): bool
     {
-        return $this->donnees_du_parcours !== null;
+        return null !== $this->donnees_du_parcours;
     }
 
     public function getTauxGlobal(): ?float
@@ -115,7 +110,7 @@ class FcmMarin extends Model
         $this->load('cohorte');
     }
 
-    public function assignerMentor(Marin | RHMarin $mentor): void
+    public function assignerMentor(Marin|RHMarin $mentor): void
     {
         $this->mentor_id = $mentor->id;
         $this->save();
@@ -150,12 +145,6 @@ class FcmMarin extends Model
         $this->assignerMentor($mentor);
     }
 
-    // Factory
-    protected static function newFactory()
-    {
-        return FcmMarinFactory::new();
-    }
-
     // Scopes
     public function scopeCohorte(Builder $query, Cohorte $cohorte): void
     {
@@ -181,32 +170,37 @@ class FcmMarin extends Model
     public function getInfosFcm(): array
     {
         return [
-            'marin'        => $this->marin?->fullNameAndGrade,
-            'cohorte'      => $this->cohorte?->libelle_court,
-            'mentor'       => $this->mentor?->fullNameAndGrade,
-            'taux_global'  => $this->getTauxGlobal(),
-            'taux_stage'   => $this->getTauxStage(),
-            'taux_activite'=> $this->getTauxActivite(),
+            'marin' => $this->marin?->fullNameAndGrade,
+            'cohorte' => $this->cohorte?->libelle_court,
+            'mentor' => $this->mentor?->fullNameAndGrade,
+            'taux_global' => $this->getTauxGlobal(),
+            'taux_stage' => $this->getTauxStage(),
+            'taux_activite' => $this->getTauxActivite(),
             'has_parcours' => $this->hasParcours(),
-            'has_mentor'   => $this->hasMentor(),
-            'has_cohorte'  => $this->hasCohorte(),
+            'has_mentor' => $this->hasMentor(),
+            'has_cohorte' => $this->hasCohorte(),
         ];
     }
 
-
     // Jalon FCM Marin
     public function getJalonFcmLibelle(): ?string
-{
-    if ($this->date_sedimentation && !$this->date_fcm && !$this->date_competence) {
-        return 'SED';
-    }
-    if ($this->date_sedimentation && $this->date_fcm && !$this->date_competence) {
-        return 'FCM';
-    }
-    if ($this->date_sedimentation && $this->date_fcm && $this->date_competence) {
-        return 'FIN';
-    }
-    return null;
-}
+    {
+        if ($this->date_sedimentation && !$this->date_fcm && !$this->date_competence) {
+            return 'SED';
+        }
+        if ($this->date_sedimentation && $this->date_fcm && !$this->date_competence) {
+            return 'FCM';
+        }
+        if ($this->date_sedimentation && $this->date_fcm && $this->date_competence) {
+            return 'FIN';
+        }
 
+        return null;
+    }
+
+    // Factory
+    protected static function newFactory()
+    {
+        return FcmMarinFactory::new();
+    }
 }

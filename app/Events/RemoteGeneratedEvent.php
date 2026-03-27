@@ -2,7 +2,4 @@
 
 namespace Modules\FcmCentral\Events;
 
-class RemoteGeneratedEvent extends UserGeneratedEvent
-{
-   
-}
+class RemoteGeneratedEvent extends UserGeneratedEvent {}

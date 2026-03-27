@@ -1,17 +1,18 @@
 <?php
+
 // filepath: Modules/FcmCentral/Database/Seeders/TestRolesUsersSeeder.php
 
 namespace Modules\FcmCentral\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Modules\RH\Models\Marin;
-use Modules\RH\Models\Grade;
-use Modules\RH\Models\Specialite;
-use Modules\RH\Models\Brevet;
-use Modules\RH\Models\Unite;
+use Illuminate\Database\Seeder;
 use Modules\FcmCentral\Models\FcmMarin;
+use Modules\RH\Models\Brevet;
+use Modules\RH\Models\Grade;
+use Modules\RH\Models\Marin;
+use Modules\RH\Models\Specialite;
+use Modules\RH\Models\Unite;
+use Spatie\Permission\Models\Role;
 
 class TestMarinsRolesSeeder extends Seeder
 {
@@ -151,7 +152,7 @@ class TestMarinsRolesSeeder extends Seeder
 
             // Preparer champ data role
             $marinData = ['status' => 'uuid_confirmed'];
-            if ($data['role'] === 'fcmcentral::marin'){
+            if ('fcmcentral::marin' === $data['role']) {
                 $marinData['fcm'] = ['en_fcm' => true];
             }
 

@@ -2,14 +2,14 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
 use Filament\Schemas\Components\Wizard\Step;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Repeater;
 use Illuminate\Support\Str;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
 use Modules\FcmCentral\Models\Affectation;
 use Modules\FcmCentral\Models\ParcoursType;
 
@@ -22,7 +22,6 @@ class CreateParcours extends CreateRecord
     protected function getSteps(): array
     {
         return [
-
             // ── ÉTAPE 1 : Infos ──────────────────────────────────────────
             Step::make('Parcours')
                 ->icon('heroicon-o-rectangle-stack')
@@ -67,15 +66,15 @@ class CreateParcours extends CreateRecord
 
                             TextInput::make('nouvelle_code')
                                 ->label('Ou créer — Code')
-                                ->hidden(fn ($get) => $get('affectation_id') !== null),
+                                ->hidden(fn ($get) => null !== $get('affectation_id')),
 
                             TextInput::make('nouvelle_libelle_court')
                                 ->label('Libellé court')
-                                ->hidden(fn ($get) => $get('affectation_id') !== null),
+                                ->hidden(fn ($get) => null !== $get('affectation_id')),
 
                             TextInput::make('nouvelle_libelle_long')
                                 ->label('Libellé long')
-                                ->hidden(fn ($get) => $get('affectation_id') !== null),
+                                ->hidden(fn ($get) => null !== $get('affectation_id')),
                         ]),
                 ]),
         ];
@@ -84,7 +83,7 @@ class CreateParcours extends CreateRecord
     protected function afterCreate(): void
     {
         $parcours = $this->record;
-        $data     = $this->data;
+        $data = $this->data;
 
         $affectationIds = [];
 
@@ -92,12 +91,14 @@ class CreateParcours extends CreateRecord
             if (!empty($aff['affectation_id'])) {
                 $affectationIds[] = $aff['affectation_id'];
             } else {
-                if (empty($aff['nouvelle_code']) && empty($aff['nouvelle_libelle_court'])) continue;
+                if (empty($aff['nouvelle_code']) && empty($aff['nouvelle_libelle_court'])) {
+                    continue;
+                }
                 $affectationIds[] = Affectation::create([
-                    'uuid'          => Str::uuid(),
-                    'code'          => $aff['nouvelle_code'] ?? '',
+                    'uuid' => Str::uuid(),
+                    'code' => $aff['nouvelle_code'] ?? '',
                     'libelle_court' => $aff['nouvelle_libelle_court'] ?? '',
-                    'libelle_long'  => $aff['nouvelle_libelle_long'] ?? null,
+                    'libelle_long' => $aff['nouvelle_libelle_long'] ?? null,
                 ])->id;
             }
         }

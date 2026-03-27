@@ -1,21 +1,18 @@
 <?php
 
-use Illuminate\Database\PostgresConnection;
-use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\MySqlConnection;
+use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
-    {   
-
+    {
         if (DB::connection() instanceof PostgresConnection) {
             $default_value = DB::raw('(gen_random_uuid())');
-        }
-        elseif (DB::connection() instanceof MySqlConnection){
+        } elseif (DB::connection() instanceof MySqlConnection) {
             $default_value = DB::raw('(UUID())');
         }
 
@@ -27,8 +24,8 @@ return new class extends Migration
             $table->unsignedBigInteger('competence_savoirfaire_id');
             $table->string('libelle_court')->nullable();
             $table->string('libelle_long')->nullable();
-            //$table->string('duree')->nullable();
-            $table->decimal('coeff',5,2)->nullable();
+            // $table->string('duree')->nullable();
+            $table->decimal('coeff', 5, 2)->nullable();
             $table->integer('ordre')->default(0);
             $table->timestamps();
 

@@ -4,7 +4,6 @@ namespace Modules\FcmCentral\Helpers;
 
 class OutilsHelper
 {
-    
     public static function selectColors(): array
     {
         return [
@@ -13,8 +12,8 @@ class OutilsHelper
             'gray' => 'Gris',
             'warning' => 'Orange',
             'danger' => 'Rouge',
-            'brown'    => 'Marron',
-            'purple'    => 'Violet',
+            'brown' => 'Marron',
+            'purple' => 'Violet',
         ];
     }
 
@@ -26,18 +25,17 @@ class OutilsHelper
 
         // Remplace les caractères problématiques
         $text = str_replace(
-            //["'", '"', "\n", "\r", "\t", "\\", "`"],
-            //["&apos;", "&quot;", " ", "", " ", "", ""],
-            [ '"', "\n", "\r", "\t", "\\", "`"],
-            [ "&quot;", " ", "", " ", "", ""],
+            // ["'", '"', "\n", "\r", "\t", "\\", "`"],
+            // ["&apos;", "&quot;", " ", "", " ", "", ""],
+            ['"', "\n", "\r", "\t", '\\', '`'],
+            ['&quot;', ' ', '', ' ', '', ''],
             $text
         );
-       
+
         // Supprime les caractères de contrôle
         $text = preg_replace('/[\x00-\x1F\x7F]/u', '', $text);
-       
+
         // Limite la longueur si nécessaire
         return trim(substr($text, 0, 1000));
     }
-
 }

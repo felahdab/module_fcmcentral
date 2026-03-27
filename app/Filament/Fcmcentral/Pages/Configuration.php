@@ -2,38 +2,34 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Utilities\Get;
-use Illuminate\Support\Arr;
-
+use App\Models\Setting;
+use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\Action;
-
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
-
-use App\Models\Setting;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Arr;
 
 class Configuration extends Page implements HasForms, HasActions
 {
     use InteractsWithForms;
     use InteractsWithActions;
 
+    public ?array $data = [];
+
     protected static ?string $title = 'Configuration du module FCM Central';
     protected static ?string $navigationLabel = 'Configuration';
-    protected static string | \UnitEnum | null $navigationGroup = "Administration";
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\UnitEnum|null $navigationGroup = 'Administration';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     protected string $view = 'fcmcentral::filament.fcmcentral.pages.configuration';
 
-    public ?array $data = [];
-    
     public function mount(): void
     {
         $this->data = array_merge(Setting::forKey('fcmcentral')->data ?? [], Setting::forKey('fcmcommun')->data ?? []);
@@ -44,12 +40,13 @@ class Configuration extends Page implements HasForms, HasActions
     {
         return auth()->check() && auth()->user()->can('fcmcentral::change_configuration_module');
     }
-    
+
     public function validateConfigurationAction()
     {
         return Action::make('validateConfigurationAction')
             ->label('Valider')
-            ->action(fn() => $this->save());
+            ->action(fn () => $this->save())
+        ;
     }
 
     public function form(Schema $schema): Schema
@@ -57,7 +54,7 @@ class Configuration extends Page implements HasForms, HasActions
         return $schema
             ->components([
                 Toggle::make('transmit_user_generated_events_to_remote_fcmcentral_instance')
-                    ->label("Transmettre les évènements locaux à une instance distante ?")
+                    ->label('Transmettre les évènements locaux à une instance distante ?')
                     ->live(),
                 Fieldset::make('remote_transmit_settings')
                     ->label('Paramètres de transmission à distance')
@@ -85,22 +82,23 @@ class Configuration extends Page implements HasForms, HasActions
                             ->required(),
                     ]),
             ])
-            ->statePath('data');
+            ->statePath('data')
+        ;
     }
-    
+
     public function save(): void
     {
         $formdata = $this->form->getState();
         $fcmcentralsettings = [];
-        $fcmcentralsettings['transmit_user_generated_events_to_remote_fcmcentral_instance'] = Arr::get($formdata, 'transmit_user_generated_events_to_remote_fcmcentral_instance') ;
-        $fcmcentralsettings['url_of_remote_fcmcentral_instance'] = Arr::get($formdata, 'url_of_remote_fcmcentral_instance') ;
-        $fcmcentralsettings['token_for_remote_fcmcentral_instance'] = Arr::get($formdata, 'token_for_remote_fcmcentral_instance') ;
+        $fcmcentralsettings['transmit_user_generated_events_to_remote_fcmcentral_instance'] = Arr::get($formdata, 'transmit_user_generated_events_to_remote_fcmcentral_instance');
+        $fcmcentralsettings['url_of_remote_fcmcentral_instance'] = Arr::get($formdata, 'url_of_remote_fcmcentral_instance');
+        $fcmcentralsettings['token_for_remote_fcmcentral_instance'] = Arr::get($formdata, 'token_for_remote_fcmcentral_instance');
         Setting::forKey('fcmcentral')->updateSetting($fcmcentralsettings);
 
         $fcmcommunsettings = [];
-        $fcmcommunsettings['retreive_cohortes_from_distant_fcmcentral_module'] = Arr::get($formdata, 'retreive_cohortes_from_distant_fcmcentral_module') ;
-        $fcmcommunsettings['cohortes_url_of_remote_fcmcentral_instance'] = Arr::get($formdata, 'cohortes_url_of_remote_fcmcentral_instance') ;
-        $fcmcommunsettings['cohorte_token_for_remote_fcmcentral_instance'] = Arr::get($formdata, 'cohorte_token_for_remote_fcmcentral_instance') ;
+        $fcmcommunsettings['retreive_cohortes_from_distant_fcmcentral_module'] = Arr::get($formdata, 'retreive_cohortes_from_distant_fcmcentral_module');
+        $fcmcommunsettings['cohortes_url_of_remote_fcmcentral_instance'] = Arr::get($formdata, 'cohortes_url_of_remote_fcmcentral_instance');
+        $fcmcommunsettings['cohorte_token_for_remote_fcmcentral_instance'] = Arr::get($formdata, 'cohorte_token_for_remote_fcmcentral_instance');
         Setting::forKey('fcmcommun')->updateSetting($fcmcommunsettings);
     }
 }

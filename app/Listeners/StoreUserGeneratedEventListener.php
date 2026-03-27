@@ -2,28 +2,21 @@
 
 namespace Modules\FcmCentral\Listeners;
 
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
-
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCommun\DataObjects\RemoteGeneratedEvent;
-
 use Modules\FcmCentral\Models\StoredEvent;
+use Modules\FcmCommun\DataObjects\RemoteGeneratedEvent;
 
 class StoreUserGeneratedEventListener
 {
     /**
      * Create the event listener.
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct() {}
 
     /**
      * Handle the event.
      */
-    public function handle(UserGeneratedEvent|RemoteGeneratedEvent $event): void
+    public function handle(RemoteGeneratedEvent|UserGeneratedEvent $event): void
     {
         StoredEvent::createFromUserGeneratedEvent($event);
     }

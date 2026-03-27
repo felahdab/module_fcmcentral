@@ -2,15 +2,15 @@
 
 namespace Modules\FcmCentral\Listeners\Save\MarinParcours;
 
-use Filament\Notifications\Notification;
 use App\Models\User;
 use Carbon\Carbon;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
-use Modules\FcmCommun\Services\CalculHeuresParcoursService;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
-use Illuminate\Support\Facades\Log;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventNotifications;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
+use Modules\FcmCommun\Services\CalculHeuresParcoursService;
 
 class ProposElementMarinParcoursListener
 {
@@ -24,7 +24,8 @@ class ProposElementMarinParcoursListener
 
         $marin = Marin::where('uuid', $event->object_uuid)->first();
         if (!$marin) {
-            Log::error('Marin non trouvé: ' . $event->object_uuid);
+            Log::error('Marin non trouvé: '.$event->object_uuid);
+
             return;
         }
 
@@ -33,26 +34,29 @@ class ProposElementMarinParcoursListener
 
         $proposeur = User::where('uuid', $event->user_uuid)->first();
         $proposeurName = $proposeur
-            ? ($proposeur->display_name ?? trim($proposeur->nom . ' ' . $proposeur->prenom))
+            ? ($proposeur->display_name ?? trim($proposeur->nom.' '.$proposeur->prenom))
             : 'PROPOSEUR INCONNU';
 
         $donnees_du_parcours = $marin->complements_fcm->donnees_du_parcours ?? null;
         if (!$donnees_du_parcours) {
-            Log::error('Données du parcours non trouvées pour le marin: ' . $marin->uuid);
+            Log::error('Données du parcours non trouvées pour le marin: '.$marin->uuid);
+
             return;
         }
 
         $parcoursMarin = $donnees_du_parcours->parcoursmarin ?? null;
         if (!is_array($parcoursMarin)) {
-            Log::error('Parcours marin non trouvé ou invalide: ' . $marin->uuid);
+            Log::error('Parcours marin non trouvé ou invalide: '.$marin->uuid);
+
             return;
         }
 
         $type = $data['type_element'] ?? null;
         $uuid = $data['uuid_element'] ?? null;
-       
+
         if (!$type || !$uuid) {
-            Log::error('Payload invalide pour proposition: ' . json_encode($data));
+            Log::error('Payload invalide pour proposition: '.json_encode($data));
+
             return;
         }
 
@@ -68,7 +72,7 @@ class ProposElementMarinParcoursListener
         CalculHeuresParcoursService::mettreAJourHeures($parcoursMarin);
 
         // Sauvegarde
-        //$donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
+        // $donnees_du_parcours->taux_global = $parcoursMarin['taux_global'] ?? 0;
         $donnees_du_parcours->taux_global = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcoursMarin) ?? 0;
         $donnees_du_parcours->parcoursmarin = $parcoursMarin;
         $donnees_du_parcours->save();
@@ -83,20 +87,22 @@ class ProposElementMarinParcoursListener
             ->title($notification['title'])
             ->success()
             ->body($notification['message'])
-            ->send();
+            ->send()
+        ;
     }
 
     protected function sanitizeComment(string $comment): string
     {
-        if (trim($comment) === '') {
+        if ('' === trim($comment)) {
             return '';
         }
-       
+
         $comment = strip_tags($comment);
         $comment = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $comment);
         $comment = preg_replace('/\s+/', ' ', $comment);
+
         return addslashes(trim($comment));
-        //return trim($comment);
+        // return trim($comment);
     }
 
     protected function dispatchProposition(array &$parcoursMarin, string $type, string $uuid, string $displayName): bool
@@ -104,18 +110,19 @@ class ProposElementMarinParcoursListener
         switch ($type) {
             case 'affectation':
                 return $this->proposeAffectation($parcoursMarin, $uuid, $displayName);
-           
+
             case 'competence':
                 return $this->proposeCompetence($parcoursMarin, $uuid, $displayName);
-           
+
             case 'savoirfaire':
                 return $this->proposeSavoirFaire($parcoursMarin, $uuid, $displayName);
-           
+
             case 'objectif':
                 return $this->proposeObjectif($parcoursMarin, $uuid, $displayName);
-           
+
             default:
                 Log::warning("Type inconnu pour proposition: {$type}");
+
                 return false;
         }
     }
@@ -130,10 +137,11 @@ class ProposElementMarinParcoursListener
             if (($affectation['uuid'] ?? null) === $uuid) {
                 $this->updateElement($affectation, $displayName);
                 Log::info("✅ Affectation proposée: {$uuid}");
+
                 return true;
             }
         }
-       
+
         return false;
     }
 
@@ -152,11 +160,12 @@ class ProposElementMarinParcoursListener
                 if (($competence['uuid'] ?? null) === $uuid) {
                     $this->updateElement($competence, $displayName);
                     Log::info("✅ Compétence proposée: {$uuid}");
+
                     return true;
                 }
             }
         }
-       
+
         return false;
     }
 
@@ -178,16 +187,17 @@ class ProposElementMarinParcoursListener
 
                 foreach ($competence['competenceSavoirfaires'] as &$csf) {
                     $pivotUuid = $this->buildCsfPivotUuid($csf);
-                   
+
                     if (($csf['uuid'] ?? null) === $uuid || $pivotUuid === $uuid) {
                         $this->updateElement($csf, $displayName);
                         Log::info("✅ Savoir-faire proposé: {$uuid}");
+
                         return true;
                     }
                 }
             }
         }
-       
+
         return false;
     }
 
@@ -214,35 +224,37 @@ class ProposElementMarinParcoursListener
 
                     foreach ($csf['objectifs'] as &$objectif) {
                         $objUuid = $objectif['uuid'] ?? ("obj_{$csf['id']}_{$objectif['id']}" ?? null);
-                       
+
                         if ($objUuid === $uuid || ($objectif['uuid'] ?? null) === $uuid) {
                             $this->updateElement($objectif, $displayName);
                             Log::info("✅ Objectif proposé: {$uuid}");
+
                             return true;
                         }
                     }
                 }
             }
         }
-       
+
         return false;
     }
 
     protected function buildCsfPivotUuid(array $csf): ?string
     {
         $pivot = $csf['pivot'] ?? null;
-       
+
         if ($pivot) {
             $pivotPart = $pivot['uuid'] ?? ($pivot['id'] ?? null);
             if ($pivotPart && !empty($csf['uuid'])) {
-                return $csf['uuid'] . '_' . $pivotPart;
+                return $csf['uuid'].'_'.$pivotPart;
             }
+
             return $csf['uuid'] ?? null;
         }
 
         // Legacy: csf avec savoirfaire['uuid'] + id
         if (!empty($csf['savoirfaire']['uuid']) && isset($csf['id'])) {
-            return $csf['savoirfaire']['uuid'] . '_' . $csf['id'];
+            return $csf['savoirfaire']['uuid'].'_'.$csf['id'];
         }
 
         return $csf['uuid'] ?? null;
@@ -253,7 +265,7 @@ class ProposElementMarinParcoursListener
         $element['commentaire_proposition'] = $this->comment;
         $element['date_proposition'] = Carbon::now()->toDateTimeString();
         $element['etat_propos'] = true;
-       
+
         Log::debug('Élément proposé avec succès');
     }
 }

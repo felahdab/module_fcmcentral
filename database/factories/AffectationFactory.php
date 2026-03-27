@@ -13,14 +13,15 @@ class AffectationFactory extends Factory
     public function definition()
     {
         static $counter = 1;
-        $libelle = "Affectation";
+        $libelle = 'Affectation';
+
         return [
-            'uuid'          => $this->faker->uuid,
-            'code'          => 'AFF-' . $counter,
-            'libelle_court' => strtoupper(Str::limit($libelle, 3, '')) . ' ' . $counter,
-            'libelle_long'  => $libelle . ' ' . $counter++ . ' : n°' . $this->faker->numberBetween(1, 11) . ', ' . $this->faker->sentence(6),
-            'ordre'         => $counter,
-            'color'         => $this->faker->safeHexColor,
+            'uuid' => $this->faker->uuid,
+            'code' => 'AFF-'.$counter,
+            'libelle_court' => strtoupper(Str::limit($libelle, 3, '')).' '.$counter,
+            'libelle_long' => $libelle.' '.$counter++.' : n°'.$this->faker->numberBetween(1, 11).', '.$this->faker->sentence(6),
+            'ordre' => $counter,
+            'color' => $this->faker->safeHexColor,
         ];
     }
 }

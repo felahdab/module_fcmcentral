@@ -2,9 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource;
-use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource;
 
 class EditParcoursSerialise extends EditRecord
 {

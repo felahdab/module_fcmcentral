@@ -3,9 +3,8 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource\Pages;
 
 use Filament\Actions\CreateAction;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\GelResource;
 
 class ListGels extends ListRecords
 {

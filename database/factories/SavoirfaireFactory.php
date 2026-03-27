@@ -13,18 +13,19 @@ class SavoirfaireFactory extends Factory
     public function definition()
     {
         static $counter = 1;
-        $libelle = "Savoir Faire";
+        $libelle = 'Savoir Faire';
+
         return [
-            'uuid'          => $this->faker->uuid,
-            'code'          => 'SF-' . $counter,
-            'libelle_court' => strtoupper(Str::limit($libelle, 3, '')) . ' ' . $counter,
-            'libelle_long'  => $libelle . ' ' . $counter++ . ' : n°' . $this->faker->numberBetween(1, 11) . ', ' . $this->faker->sentence(6),
-            'code_sicomp'   => $this->faker->optional()->bothify('SICOMP-###'),
-            'same'          => $this->faker->optional()->word,
-            'ordre'         => $counter,
+            'uuid' => $this->faker->uuid,
+            'code' => 'SF-'.$counter,
+            'libelle_court' => strtoupper(Str::limit($libelle, 3, '')).' '.$counter,
+            'libelle_long' => $libelle.' '.$counter++.' : n°'.$this->faker->numberBetween(1, 11).', '.$this->faker->sentence(6),
+            'code_sicomp' => $this->faker->optional()->bothify('SICOMP-###'),
+            'same' => $this->faker->optional()->word,
+            'ordre' => $counter,
             'competence_id' => null,
-            'domaine_id'    => null,
-            'color'         => $this->faker->safeHexColor,
+            'domaine_id' => null,
+            'color' => $this->faker->safeHexColor,
         ];
     }
 }

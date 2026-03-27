@@ -2,9 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\DomaineResource;
 
 class CreateDomaine extends CreateRecord
 {

@@ -2,27 +2,19 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\RelationManagers;
 
-use Filament\Actions\AttachAction;
 use Filament\Actions\Action;
-use Filament\Actions\DetachAction;
-use Filament\Actions\BulkActionGroup;
+use Filament\Actions\AttachAction;
 use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
-use Exception;
-use Illuminate\Support\Facades\Log;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\KeyValue;
-use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCommun\Services\CalculHeuresParcoursService;
 
@@ -33,28 +25,30 @@ class MarinsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-        ->recordTitleAttribute('')
-        ->modifyQueryUsing(fn (Builder $query) => $query->with([
-            'marin',
-            'marin.grade',
-            'marin.specialite',
-            'marin.unite'
-        ]))
-        ->columns([
-            TextColumn::make('marin.display_name')
-                ->label('Marin')
-                ->searchable(['nom', 'prenom'])
-                ->sortable()
-                ->formatStateUsing(function ($record) {
-                    $marin = $record->marin;
-                    if (!$marin) return 'N/A';
-                   
-                    $grade = $marin->grade?->libelle_court ?? '';
-                    $nom = $marin->nom ?? '';
-                    $prenom = $marin->prenom ?? '';
-                   
-                    return trim("$grade $prenom $nom");
-                }),
+            ->recordTitleAttribute('')
+            ->modifyQueryUsing(fn (Builder $query) => $query->with([
+                'marin',
+                'marin.grade',
+                'marin.specialite',
+                'marin.unite',
+            ]))
+            ->columns([
+                TextColumn::make('marin.display_name')
+                    ->label('Marin')
+                    ->searchable(['nom', 'prenom'])
+                    ->sortable()
+                    ->formatStateUsing(function ($record) {
+                        $marin = $record->marin;
+                        if (!$marin) {
+                            return 'N/A';
+                        }
+
+                        $grade = $marin->grade?->libelle_court ?? '';
+                        $nom = $marin->nom ?? '';
+                        $prenom = $marin->prenom ?? '';
+
+                        return trim("{$grade} {$prenom} {$nom}");
+                    }),
 
                 TextColumn::make('pivot.taux_global')
                     ->label('Taux Global')
@@ -63,7 +57,6 @@ class MarinsRelationManager extends RelationManager
                     ->color(fn ($state) => $state >= 80 ? 'success' : ($state >= 50 ? 'warning' : 'danger')),
             ])
             ->filters([
-                //
             ])
             ->headerActions([
                 AttachAction::make()
@@ -77,29 +70,35 @@ class MarinsRelationManager extends RelationManager
                                     ->with(['marin', 'marin.grade', 'marin.unite'])
                                     ->whereHas('marin', function ($query) use ($search) {
                                         $query->where('nom', 'like', "%{$search}%")
-                                              ->orWhere('prenom', 'like', "%{$search}%");
+                                            ->orWhere('prenom', 'like', "%{$search}%")
+                                        ;
                                     })
                                     ->limit(50)
                                     ->get()
                                     ->mapWithKeys(function ($fcmMarin) {
                                         $marin = $fcmMarin->marin;
-                                        $label = ($marin->grade?->libelle_court ?? '') . ' ' .
-                                                $marin->prenom . ' ' .
-                                                $marin->nom .
-                                                ($marin->unite ? ' (' . $marin->unite->libelle_court . ')' : '');
+                                        $label = ($marin->grade?->libelle_court ?? '').' '
+                                                .$marin->prenom.' '
+                                                .$marin->nom
+                                                .($marin->unite ? ' ('.$marin->unite->libelle_court.')' : '');
+
                                         return [$fcmMarin->id => trim($label)];
                                     })
-                                    ->toArray();
+                                    ->toArray()
+                                ;
                             })
                             ->getOptionLabelUsing(function ($value): ?string {
                                 $fcmMarin = FcmMarin::with(['marin', 'marin.grade', 'marin.unite'])->find($value);
-                                if (!$fcmMarin || !$fcmMarin->marin) return null;
-                               
+                                if (!$fcmMarin || !$fcmMarin->marin) {
+                                    return null;
+                                }
+
                                 $marin = $fcmMarin->marin;
-                                return ($marin->grade?->libelle_court ?? '') . ' ' .
-                                       $marin->prenom . ' ' .
-                                       $marin->nom .
-                                       ($marin->unite ? ' (' . $marin->unite->libelle_court . ')' : '');
+
+                                return ($marin->grade?->libelle_court ?? '').' '
+                                       .$marin->prenom.' '
+                                       .$marin->nom
+                                       .($marin->unite ? ' ('.$marin->unite->libelle_court.')' : '');
                             })
                             ->placeholder('Rechercher un marin...'),
 
@@ -158,7 +157,7 @@ class MarinsRelationManager extends RelationManager
                     ->tooltip('Recalculer les taux pour ce marin')
                     ->requiresConfirmation()
                     ->modalHeading('Recalcul des taux du marin')
-                    ->modalDescription(fn ($record) => 'Recalculer les taux pour ' . $record->marin->nom . ' ?')
+                    ->modalDescription(fn ($record) => 'Recalculer les taux pour '.$record->marin->nom.' ?')
                     ->action(function ($record) {
                         $this->recalculerTauxMarin($record);
                     }),
@@ -180,11 +179,12 @@ class MarinsRelationManager extends RelationManager
 
                     DetachBulkAction::make(),
                 ]),
-            ]);
+            ])
+        ;
     }
 
     /**
-     * Recalcule les taux pour tous les marins du parcours
+     * Recalcule les taux pour tous les marins du parcours.
      */
     protected function recalculerTousLesTaux(): void
     {
@@ -203,52 +203,55 @@ class MarinsRelationManager extends RelationManager
                     if ($parcoursMarin) {
                         // ✅ Mise à jour des heures
                         CalculHeuresParcoursService::mettreAJourHeures($parcoursMarin);
-                        
+
                         // ✅ Calcul du taux de validation (% d'éléments validés)
                         $pivotData->taux_global = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcoursMarin);
                         $pivotData->parcoursmarin = json_encode($parcoursMarin);
                         $pivotData->save();
 
-                        $success++;
+                        ++$success;
                     } else {
-                        $errors++;
+                        ++$errors;
                     }
-                } catch (Exception $e) {
-                    $errors++;
+                } catch (\Exception $e) {
+                    ++$errors;
                     Log::error('Erreur recalcul taux marin', [
                         'marin_id' => $marin->id,
-                        'erreur' => $e->getMessage()
+                        'erreur' => $e->getMessage(),
                     ]);
                 }
             }
 
-            $message = "Recalcul terminé : $success succès";
+            $message = "Recalcul terminé : {$success} succès";
             if ($errors > 0) {
-                $message .= ", $errors erreurs";
+                $message .= ", {$errors} erreurs";
             }
 
             Notification::make()
                 ->title('Recalcul des taux terminé')
-                ->success($errors === 0)
-                //->danger($errors > 0)
+                ->success(0 === $errors)
+                // ->danger($errors > 0)
                 ->body($message)
                 ->persistent()
-                ->send();
+                ->send()
+            ;
 
             $this->dispatch('$refresh');
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Notification::make()
                 ->title('Erreur lors du recalcul global')
                 ->danger()
-                ->body('Une erreur s\'est produite : ' . $e->getMessage())
+                ->body('Une erreur s\'est produite : '.$e->getMessage())
                 ->persistent()
-                ->send();
+                ->send()
+            ;
         }
     }
 
     /**
-     * Recalcule les taux pour un marin spécifique
+     * Recalcule les taux pour un marin spécifique.
+     *
+     * @param mixed $marin
      */
     protected function recalculerTauxMarin($marin): void
     {
@@ -259,7 +262,7 @@ class MarinsRelationManager extends RelationManager
             if ($parcoursMarin) {
                 // ✅ Mise à jour des heures
                 CalculHeuresParcoursService::mettreAJourHeures($parcoursMarin);
-                
+
                 // ✅ Calcul du taux de validation (% d'éléments validés)
                 $pivotData->taux_global = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcoursMarin);
                 $pivotData->parcoursmarin = json_encode($parcoursMarin);
@@ -268,25 +271,28 @@ class MarinsRelationManager extends RelationManager
                 Notification::make()
                     ->title('Taux recalculés avec succès')
                     ->success()
-                    ->body('Taux mis à jour pour ' . $marin->marin->nom)
-                    ->send();
+                    ->body('Taux mis à jour pour '.$marin->marin->nom)
+                    ->send()
+                ;
 
                 $this->dispatch('$refresh');
             } else {
-                throw new Exception('Données de parcours invalides');
+                throw new \Exception('Données de parcours invalides');
             }
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Notification::make()
                 ->title('Erreur lors du recalcul')
                 ->danger()
-                ->body('Impossible de recalculer les taux pour ' . $marin->marin->nom)
-                ->send();
+                ->body('Impossible de recalculer les taux pour '.$marin->marin->nom)
+                ->send()
+            ;
         }
     }
 
     /**
-     * Recalcule les taux pour plusieurs marins sélectionnés
+     * Recalcule les taux pour plusieurs marins sélectionnés.
+     *
+     * @param mixed $marins
      */
     protected function recalculerTauxMarins($marins): void
     {
@@ -301,29 +307,29 @@ class MarinsRelationManager extends RelationManager
                 if ($parcoursMarin) {
                     // ✅ Mise à jour des heures
                     CalculHeuresParcoursService::mettreAJourHeures($parcoursMarin);
-                    
+
                     // ✅ Calcul du taux de validation (% d'éléments validés)
                     $pivotData->taux_global = CalculHeuresParcoursService::calculerPourcentageEtatValid($parcoursMarin);
                     $pivotData->parcoursmarin = json_encode($parcoursMarin);
                     $pivotData->save();
-                    
-                    $success++;
+
+                    ++$success;
                 } else {
-                    $errors++;
+                    ++$errors;
                 }
-            } catch (Exception $e) {
-                $errors++;
+            } catch (\Exception $e) {
+                ++$errors;
             }
         }
 
-        $message = "Recalcul terminé : $success succès";
+        $message = "Recalcul terminé : {$success} succès";
         if ($errors > 0) {
-            $message .= ", $errors erreurs";
+            $message .= ", {$errors} erreurs";
         }
 
         Notification::make()
             ->title('Recalcul des taux sélectionnés')
-            ->success($errors === 0)
+            ->success(0 === $errors)
             ->warning($errors > 0)
             ->body($message)
             ->send();

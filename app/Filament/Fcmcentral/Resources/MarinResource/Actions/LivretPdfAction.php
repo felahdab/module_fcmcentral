@@ -3,7 +3,6 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Actions;
 
 use Filament\Actions\Action;
-
 use Modules\FcmCommun\Services\LivretPdfService;
 
 class LivretPdfAction extends Action
@@ -24,7 +23,7 @@ class LivretPdfAction extends Action
                 }, "livret-fcm-{$record->nom}-{$record->prenom}.pdf", [
                     'Content-Type' => 'application/pdf',
                 ]);
-            });
+            })
+        ;
     }
-
 }

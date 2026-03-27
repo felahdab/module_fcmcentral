@@ -1,21 +1,20 @@
 <?php
+
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\AffectationResource\RelationManagers;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\CreateAction;
-use Illuminate\Support\Str;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Forms;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use Modules\FcmCentral\Helpers\OutilsHelper;
 
 class CompetencesRelationManager extends RelationManager
@@ -48,7 +47,8 @@ class CompetencesRelationManager extends RelationManager
                 TextInput::make('ordre')
                     ->numeric()
                     ->default(1),
-            ]);
+            ])
+        ;
     }
 
     public function table(Table $table): Table
@@ -58,7 +58,7 @@ class CompetencesRelationManager extends RelationManager
                 TextColumn::make('code')
                     ->label('Code')
                     ->badge()
-                    ->color(fn($record) => $record->color ?? 'info')
+                    ->color(fn ($record) => $record->color ?? 'info')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('libelle_court')
@@ -80,6 +80,7 @@ class CompetencesRelationManager extends RelationManager
                     ->label('Créer une compétence')
                     ->mutateDataUsing(function (array $data): array {
                         $data['uuid'] = Str::uuid()->toString();
+
                         return $data;
                     }),
             ])
@@ -93,7 +94,7 @@ class CompetencesRelationManager extends RelationManager
                 ]),
             ])
             ->reorderable('ordre')
-            ->defaultSort('ordre', 'asc');
+            ->defaultSort('ordre', 'asc')
+        ;
     }
 }
-

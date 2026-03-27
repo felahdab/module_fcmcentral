@@ -2,16 +2,15 @@
 
 namespace Modules\FcmCentral\Console;
 
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
-
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
-use function Laravel\Prompts\search;
-
+use Illuminate\Support\Facades\File;
 use Modules\FcmCentral\Models\Parcours;
 use Modules\FcmCentral\Services\SauveChargeParcoursService;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
+
+use function Laravel\Prompts\search;
 
 class SauvegardeParcours extends Command implements PromptsForMissingInput
 {
@@ -33,6 +32,26 @@ class SauvegardeParcours extends Command implements PromptsForMissingInput
         parent::__construct();
     }
 
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        $parcours_uuid = $this->argument('parcours_uuid');
+        $force = $this->option('force');
+
+        $parcours = Parcours::where('uuid', $parcours_uuid)->first();
+        if (null == $parcours) {
+            $this->fail("Le parcours indiqué n'existe pas!");
+        }
+        $filename = $this->argument('filename');
+        if (File::exists($filename) && !$force) {
+            $this->fail("Le fichier de destination existe déjà. Rajouter --force si vous souhaitez l'écraser.");
+        }
+
+        $this->service->sauvegarde($parcours, $filename);
+    }
+
     protected function promptForMissingArgumentsUsing(): array
     {
         return [
@@ -45,28 +64,6 @@ class SauvegardeParcours extends Command implements PromptsForMissingInput
             ),
             'filename' => 'Veuillez indiquer le nom du fichier dans lequel enregistrer la sauvegarde.',
         ];
-    }
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
-    {
-        $parcours_uuid = $this->argument('parcours_uuid');
-        $force=$this->option('force');
-
-        $parcours = Parcours::where('uuid', $parcours_uuid)->first();
-        if ($parcours == null)
-        {
-            $this->fail("Le parcours indiqué n'existe pas!");
-        }
-        $filename = $this->argument('filename');
-        if (File::exists($filename) && ! $force)
-        {
-            $this->fail("Le fichier de destination existe déjà. Rajouter --force si vous souhaitez l'écraser.");
-        }
-        
-        $this->service->sauvegarde($parcours, $filename);
     }
 
     protected function getOptions()
@@ -83,5 +80,4 @@ class SauvegardeParcours extends Command implements PromptsForMissingInput
             ['filename', InputArgument::REQUIRED, 'Le nom du fichier de destination.'],
         ];
     }
-
 }

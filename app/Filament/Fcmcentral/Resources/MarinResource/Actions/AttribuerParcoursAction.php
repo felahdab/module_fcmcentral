@@ -4,17 +4,15 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Actions
 
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
-use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\ParcoursSerialise;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 
 class AttribuerParcoursAction extends Action
 {
     public static function make(?string $name = null): static
     {
-
-        
         return parent::make($name)
             ->modalHeading('Gestion du parcours')
             ->modalDescription(fn ($record) => $record->fullNameAndGrade)
@@ -30,11 +28,12 @@ class AttribuerParcoursAction extends Action
                             ->map(fn ($group) => $group->first())
                             ->values()
                             ->mapWithKeys(fn ($ps) => [
-                                $ps->parcoursModel?->uuid => ($ps->libelle_court ?? $ps->parcoursModel?->libelle_court ?? '?') . ' (v' . $ps->version . ')'
+                                $ps->parcoursModel?->uuid => ($ps->libelle_court ?? $ps->parcoursModel?->libelle_court ?? '?').' (v'.$ps->version.')',
                             ])
-                            ->toArray();
+                            ->toArray()
+                        ;
                     })
-                    
+
                     ->searchable(),
             ])
             ->action(function ($record, array $data) {
@@ -44,9 +43,10 @@ class AttribuerParcoursAction extends Action
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
                         $record->uuid,
-                        ["parcours" => $data["parcours_id"]] // ✅ UUID du Parcours
+                        ['parcours' => $data['parcours_id']] // ✅ UUID du Parcours
                     ));
                 }
-            });
+            })
+        ;
     }
 }

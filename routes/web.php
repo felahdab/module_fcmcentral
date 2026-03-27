@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\FcmCentral\Http\Controllers\FcmCentralController;
-use Modules\FcmCentral\Http\Controllers\ExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +19,5 @@ use Modules\FcmCentral\Http\Controllers\ExportController;
 // })->name('fcmcentral.debug2');
 
 Route::group([], function () {
-    //Route::resource('fcmcentral', FcmCentralController::class)->names('fcmcentral');
-   
-
+    // Route::resource('fcmcentral', FcmCentralController::class)->names('fcmcentral');
 });

@@ -2,168 +2,174 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages\ListObjectifs;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages\CreateObjectif;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages\EditObjectif;
-use Modules\FcmCentral\Models\{Objectif, Competence, Savoirfaire, CompetenceSavoirfaire};
-use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Filters\SelectFilter;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages\CreateObjectif;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages\EditObjectif;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ObjectifResource\Pages\ListObjectifs;
+use Modules\FcmCentral\Models\Competence;
+use Modules\FcmCentral\Models\CompetenceSavoirfaire;
+use Modules\FcmCentral\Models\Objectif;
+use Modules\FcmCentral\Models\Savoirfaire;
 
 class ObjectifResource extends Resource
 {
     protected static ?string $model = Objectif::class;
-    protected static string | \UnitEnum | null $navigationGroup = "Catalogue";
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\UnitEnum|null $navigationGroup = 'Catalogue';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?int $navigationSort = 9;
 
     public static function form(Schema $schema): Schema
     {
         return $schema
-        ->columns(1)
-        ->components([
-
-            // ─── Section 1 : Identification ───────────────────────────
-            Section::make('Identification')
-                ->description('Informations principales de l\'objectif')
-                ->schema([
-                    TextInput::make('libelle_court')
-                        ->label('Libellé')
-                        ->required()
-                        ->maxLength(500)
-                        ->columnSpanFull(),
-
-                    Grid::make(3)->schema([
-                        TextInput::make('code')
-                            ->label('Code')
+            ->columns(1)
+            ->components([
+                // ─── Section 1 : Identification ───────────────────────────
+                Section::make('Identification')
+                    ->description('Informations principales de l\'objectif')
+                    ->schema([
+                        TextInput::make('libelle_court')
+                            ->label('Libellé')
                             ->required()
-                            //->maxLength(150)
+                            ->maxLength(500)
+                            ->columnSpanFull(),
+
+                        Grid::make(3)->schema([
+                            TextInput::make('code')
+                                ->label('Code')
+                                ->required()
+                            // ->maxLength(150)
                             ,
 
-                        TextInput::make('heures')
-                            ->label('Heures')
-                            ->numeric()
-                            ->step(0.5)
-                            ->minValue(0)
-                            ->suffix('h')
-                            ->placeholder('ex : 7.5'),
+                            TextInput::make('heures')
+                                ->label('Heures')
+                                ->numeric()
+                                ->step(0.5)
+                                ->minValue(0)
+                                ->suffix('h')
+                                ->placeholder('ex : 7.5'),
 
-                        TextInput::make('ordre')
-                            ->label('Ordre')
-                            ->numeric()
-                            ->minValue(0),
+                            TextInput::make('ordre')
+                                ->label('Ordre')
+                                ->numeric()
+                                ->minValue(0),
+                        ]),
                     ]),
-                ]),
 
-            // ─── Section 2 : Rattachement actuel ──────────────────────
-            Section::make('Rattachement actuel')
-                ->description('Compétence et savoir-faire auxquels cet objectif est rattaché')
-                ->schema([
-                    Grid::make(3)->schema([
-                        Placeholder::make('competence_actuelle')
-                            ->label('Compétence')
-                            ->content(fn ($record) =>
-                                $record?->competenceSavoirfaire?->competence
-                                    ? "{$record->competenceSavoirfaire->competence->code}"
-                                    : '—'
-                            ),
+                // ─── Section 2 : Rattachement actuel ──────────────────────
+                Section::make('Rattachement actuel')
+                    ->description('Compétence et savoir-faire auxquels cet objectif est rattaché')
+                    ->schema([
+                        Grid::make(3)->schema([
+                            Placeholder::make('competence_actuelle')
+                                ->label('Compétence')
+                                ->content(
+                                    fn ($record) => $record?->competenceSavoirfaire?->competence
+                                        ? "{$record->competenceSavoirfaire->competence->code}"
+                                        : '—'
+                                ),
 
-                        Placeholder::make('savoirfaire_actuel')
-                            ->label('Savoir-faire')
-                            ->content(fn ($record) =>
-                                $record?->competenceSavoirfaire?->savoirfaire
-                                    ? "{$record->competenceSavoirfaire->savoirfaire->code}"
-                                    : '—'
-                            ),
+                            Placeholder::make('savoirfaire_actuel')
+                                ->label('Savoir-faire')
+                                ->content(
+                                    fn ($record) => $record?->competenceSavoirfaire?->savoirfaire
+                                        ? "{$record->competenceSavoirfaire->savoirfaire->code}"
+                                        : '—'
+                                ),
 
-                        Placeholder::make('type_actuel')
-                            ->label('Type')
-                            ->content(fn ($record) =>
-                                $record?->competenceSavoirfaire?->savoirfaireType?->libelle_court
-                                    ?? '—'
-                            ),
-                    ]),
-                ])
-                ->collapsed(false),
+                            Placeholder::make('type_actuel')
+                                ->label('Type')
+                                ->content(
+                                    fn ($record) => $record?->competenceSavoirfaire?->savoirfaireType?->libelle_court
+                                        ?? '—'
+                                ),
+                        ]),
+                    ])
+                    ->collapsed(false),
 
-            // ─── Section 3 : Changer le rattachement ──────────────────
-            Section::make('Changer le rattachement')
-                ->description('Sélectionnez une compétence puis le savoir-faire cible. Laissez vide pour ne pas modifier.')
-                ->schema([
-                    Grid::make(2)->schema([
-                        Select::make('temp_competence_id')
-                            ->label('Nouvelle compétence')
-                            ->placeholder('— Sélectionner —')
-                            ->options(fn () =>
-                                Competence::orderBy('code')
-                                    ->pluck('code', 'id')
-                                    ->toArray()
-                            )
-                            ->helperText('Filtre les savoir-faire disponibles ci-dessous')
-                            ->live()
-                            ->dehydrated(false)
-                            ->afterStateUpdated(function (callable $set, $state) {
-                                $set('competence_savoirfaire_id', null);
+                // ─── Section 3 : Changer le rattachement ──────────────────
+                Section::make('Changer le rattachement')
+                    ->description('Sélectionnez une compétence puis le savoir-faire cible. Laissez vide pour ne pas modifier.')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            Select::make('temp_competence_id')
+                                ->label('Nouvelle compétence')
+                                ->placeholder('— Sélectionner —')
+                                ->options(
+                                    fn () => Competence::orderBy('code')
+                                        ->pluck('code', 'id')
+                                        ->toArray()
+                                )
+                                ->helperText('Filtre les savoir-faire disponibles ci-dessous')
+                                ->live()
+                                ->dehydrated(false)
+                                ->afterStateUpdated(function (callable $set, $state) {
+                                    $set('competence_savoirfaire_id', null);
 
-                                if ($state) {
-                                    $firstSf = CompetenceSavoirfaire::where('competence_id', $state)
-                                        ->whereHas('savoirfaireType', fn($q) => $q->where('code', 'C'))
-                                        ->first();
-                                    $set('competence_savoirfaire_id', $firstSf?->id);
-                                }
-                            }),
+                                    if ($state) {
+                                        $firstSf = CompetenceSavoirfaire::where('competence_id', $state)
+                                            ->whereHas('savoirfaireType', fn ($q) => $q->where('code', 'C'))
+                                            ->first()
+                                        ;
+                                        $set('competence_savoirfaire_id', $firstSf?->id);
+                                    }
+                                }),
 
-                        Select::make('competence_savoirfaire_id')
-                            ->label('Savoir-faire (type Compagnonnage uniquement)')
-                            ->placeholder('— Sélectionner d\'abord une compétence —')
-                            ->options(function (callable $get, $record) {
-                                $competenceId = $get('temp_competence_id');
+                            Select::make('competence_savoirfaire_id')
+                                ->label('Savoir-faire (type Compagnonnage uniquement)')
+                                ->placeholder('— Sélectionner d\'abord une compétence —')
+                                ->options(function (callable $get, $record) {
+                                    $competenceId = $get('temp_competence_id');
 
-                                // Pas de compétence choisie → afficher ceux du rattachement actuel
-                                if (!$competenceId && $record?->competenceSavoirfaire) {
+                                    // Pas de compétence choisie → afficher ceux du rattachement actuel
+                                    if (!$competenceId && $record?->competenceSavoirfaire) {
+                                        return CompetenceSavoirfaire::with(['competence', 'savoirfaire', 'savoirfaireType'])
+                                            ->where('competence_id', $record->competenceSavoirfaire->competence_id)
+                                            ->whereHas('savoirfaireType', fn ($q) => $q->where('code', 'C'))
+                                            ->get()
+                                            ->mapWithKeys(fn ($item) => [
+                                                $item->id => "{$item->competence->code} — {$item->savoirfaire->code}",
+                                            ])
+                                            ->toArray()
+                                        ;
+                                    }
+
+                                    if (!$competenceId) {
+                                        return [];
+                                    }
+
                                     return CompetenceSavoirfaire::with(['competence', 'savoirfaire', 'savoirfaireType'])
-                                        ->where('competence_id', $record->competenceSavoirfaire->competence_id)
-                                        ->whereHas('savoirfaireType', fn($q) => $q->where('code', 'C'))
+                                        ->where('competence_id', $competenceId)
+                                        ->whereHas('savoirfaireType', fn ($q) => $q->where('code', 'C'))
                                         ->get()
-                                        ->mapWithKeys(fn($item) => [
-                                            $item->id => "{$item->competence->code} — {$item->savoirfaire->code}"
+                                        ->mapWithKeys(fn ($item) => [
+                                            $item->id => "{$item->competence->code} — {$item->savoirfaire->code}",
                                         ])
-                                        ->toArray();
-                                }
-
-                                if (!$competenceId) return [];
-
-                                return CompetenceSavoirfaire::with(['competence', 'savoirfaire', 'savoirfaireType'])
-                                    ->where('competence_id', $competenceId)
-                                    ->whereHas('savoirfaireType', fn($q) => $q->where('code', 'C'))
-                                    ->get()
-                                    ->mapWithKeys(fn($item) => [
-                                        $item->id => "{$item->competence->code} — {$item->savoirfaire->code}"
-                                    ])
-                                    ->toArray();
-                            })
-                            ->helperText('Seuls les savoir-faire de type Compagnonnage (C) sont listés')
-                            ->live()
-                            ->searchable()
-                            ->required(),
-                    ]),
-                ])
-                ->collapsible()
-                ->collapsed(fn ($record) => $record !== null), // fermé par défaut en édition
-        ]);
+                                        ->toArray()
+                                    ;
+                                })
+                                ->helperText('Seuls les savoir-faire de type Compagnonnage (C) sont listés')
+                                ->live()
+                                ->searchable()
+                                ->required(),
+                        ]),
+                    ])
+                    ->collapsible()
+                    ->collapsed(fn ($record) => null !== $record), // fermé par défaut en édition
+            ])
+        ;
     }
 
     public static function table(Table $table): Table
@@ -182,12 +188,12 @@ class ObjectifResource extends Resource
                     ->label('Code')
                     ->sortable()
                     ->badge()
-                    ->color(fn($record) => $record->color ?? 'info')
+                    ->color(fn ($record) => $record->color ?? 'info')
                     ->searchable(),
 
                 TextColumn::make('libelle_court')
                     ->label('Libellé')
-                    //->limit(80)
+                    // ->limit(80)
                     ->sortable()
                     ->searchable(),
 
@@ -201,13 +207,13 @@ class ObjectifResource extends Resource
                     ->label('Compétence')
                     ->badge()
                     ->sortable()
-                    ->color(fn($record) => $record->competenceSavoirfaire?->competence?->color ?? 'info'),
+                    ->color(fn ($record) => $record->competenceSavoirfaire?->competence?->color ?? 'info'),
 
                 TextColumn::make('competenceSavoirfaire.savoirfaire.code')
                     ->label('Savoir-faire')
                     ->badge()
                     ->sortable()
-                    ->color(fn($record) => $record->competenceSavoirfaire?->savoirfaire?->color ?? 'info'),
+                    ->color(fn ($record) => $record->competenceSavoirfaire?->savoirfaire?->color ?? 'info'),
 
                 TextColumn::make('competenceSavoirfaire.savoirfaireType.code')
                     ->label('Type')
@@ -228,12 +234,12 @@ class ObjectifResource extends Resource
                 SelectFilter::make('competence')
                     ->label('Compétence')
                     ->options(fn () => Competence::orderBy('code')->pluck('code', 'id')->toArray())
-                    ->query(fn (Builder $query, array $data): Builder =>
-                        $query->when(
+                    ->query(
+                        fn (Builder $query, array $data): Builder => $query->when(
                             $data['value'] ?? null,
                             fn (Builder $q, $value) => $q->whereHas(
                                 'competenceSavoirfaire',
-                                fn($q) => $q->where('competence_id', $value)
+                                fn ($q) => $q->where('competence_id', $value)
                             )
                         )
                     ),
@@ -241,12 +247,12 @@ class ObjectifResource extends Resource
                 SelectFilter::make('savoirfaire')
                     ->label('Savoir-faire')
                     ->options(fn () => Savoirfaire::orderBy('code')->pluck('code', 'id')->toArray())
-                    ->query(fn (Builder $query, array $data): Builder =>
-                        $query->when(
+                    ->query(
+                        fn (Builder $query, array $data): Builder => $query->when(
                             $data['value'] ?? null,
                             fn (Builder $q, $value) => $q->whereHas(
                                 'competenceSavoirfaire',
-                                fn($q) => $q->where('savoirfaire_id', $value)
+                                fn ($q) => $q->where('savoirfaire_id', $value)
                             )
                         )
                     ),
@@ -265,7 +271,8 @@ class ObjectifResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([]),
-            ]);
+            ])
+        ;
     }
 
     public static function getRelations(): array

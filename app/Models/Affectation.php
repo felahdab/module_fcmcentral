@@ -2,57 +2,48 @@
 
 namespace Modules\FcmCentral\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
 use Modules\FcmCentral\Database\Factories\AffectationFactory;
-
 use Modules\FcmCentral\Traits\HasTablePrefix;
-
 
 class Affectation extends Model
 {
     use HasFactory;
     use HasTablePrefix;
 
-
-
     /**
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        "uuid",
-        "code",
-        "libelle_long",
-        "libelle_court",
-        "ordre",
-        "color",
+        'uuid',
+        'code',
+        'libelle_long',
+        'libelle_court',
+        'ordre',
+        'color',
     ];
 
-    protected static function newFactory(): AffectationFactory
-    {
-        return AffectationFactory::new();
-    }
-
-
-    ////////////////////
-    /// Parcours      //
-    ////////////////////
+    // //////////////////
+    // / Parcours      //
+    // //////////////////
 
     // Relation avec Parcours (ManyToMAny)
     public function parcours(): BelongsToMany
     {
         return $this->belongsToMany(
-            Parcours::class, 
-            'fcmcentral_affectation_parcours', 
-            'affectation_id', 
-            'parcours_id')
-        ->withPivot('ordre')
-        ->withTimestamps();
+            Parcours::class,
+            'fcmcentral_affectation_parcours',
+            'affectation_id',
+            'parcours_id'
+        )
+            ->withPivot('ordre')
+            ->withTimestamps()
+        ;
     }
 
-    // Relation avec Competences 
+    // Relation avec Competences
     public function competences()
     {
         return $this->hasMany(Competence::class, 'affectation_id');
@@ -74,8 +65,8 @@ class Affectation extends Model
     public function objectifs()
     {
         return $this->hasManyThrough(
-            \Modules\FcmCentral\Models\Objectif::class,
-            \Modules\FcmCentral\Models\CompetenceSavoirfaire::class,
+            Objectif::class,
+            CompetenceSavoirfaire::class,
             'competence_id',
             'competence_savoirfaire_id',
             'id',
@@ -83,7 +74,10 @@ class Affectation extends Model
         )->whereRaw('1=0'); // ✅ toujours vide — juste pour satisfaire Filament
     }
 
-
+    protected static function newFactory(): AffectationFactory
+    {
+        return AffectationFactory::new();
+    }
 
     // public function competences(): BelongsToMany
     // {
@@ -91,6 +85,4 @@ class Affectation extends Model
     //     ->withPivot('ordre', 'same')
     //     ->withTimestamps();
     // }
-
-
 }

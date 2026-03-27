@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class NotePolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::note';
+    protected $slug = 'fcmcentral::note';
 }

@@ -6,5 +6,5 @@ use App\Policies\GenericSkeletorPolicy;
 
 class MarinPolicy extends GenericSkeletorPolicy
 {
-   protected $slug='fcmcentral::marin';
+    protected $slug = 'fcmcentral::marin';
 }

@@ -2,31 +2,31 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Livewire;
 use Filament\Pages\Page;
-
-use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
-
-use Modules\FcmCentral\Models\Marin;
+use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Schema;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Modules\FcmCentral\Models\Marin;
+use Modules\FcmCommun\Http\Livewire\LivretFcmLight as LivretFcm;
 
 class MonLivretDeFcm extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
-    protected string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
-    
-
     public Marin $marin;
     public ?int $marinId = null;
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
+    protected string $view = 'fcmcentral::filament.fcmcentral.pages.mon-livret-de-fcm';
 
     public static function canAccess(array $parameters = []): bool
     {
         $currentMarin = Marin::fromCurrentUser();
-        if (! $currentMarin) return false;
+        if (!$currentMarin) {
+            return false;
+        }
 
-        if ($currentMarin->complements_fcm?->donnees_du_parcours) return true;
-        
+        if ($currentMarin->complements_fcm?->donnees_du_parcours) {
+            return true;
+        }
+
         return false;
     }
 
@@ -45,15 +45,16 @@ class MonLivretDeFcm extends Page
     public function form(Schema $schema): Schema
     {
         return $schema
-        ->columns(1)
-        ->components([
-            Livewire::make(LivretFcm::class, [
-                "marinId" => $this->marin->id,
-                "Marin" => Marin::class,
-                "UserGeneratedEvent" => UserGeneratedEvent::class,
-                "PermissionPrefix" => "fcmcentral"
-            ]),
-        ]);
+            ->columns(1)
+            ->components([
+                Livewire::make(LivretFcm::class, [
+                    'marinId' => $this->marin->id,
+                    'Marin' => Marin::class,
+                    'UserGeneratedEvent' => UserGeneratedEvent::class,
+                    'PermissionPrefix' => 'fcmcentral',
+                ]),
+            ])
+        ;
     }
 
     public function getTitle(): string
@@ -61,4 +62,3 @@ class MonLivretDeFcm extends Page
         return "Livret  FCM de {$this->marin->nom} {$this->marin->prenom}";
     }
 }
-

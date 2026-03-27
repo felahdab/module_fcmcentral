@@ -2,10 +2,10 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Exports;
 
-use Modules\FcmCentral\Models\Competence;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Modules\FcmCentral\Models\Competence;
 
 class CompetenceExporter extends Exporter
 {
@@ -22,15 +22,14 @@ class CompetenceExporter extends Exporter
             ExportColumn::make('color')->label('Couleur du Badge'),
             ExportColumn::make('ordre')->label('Ordre'),
         ];
-
     }
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = 'Export des compétences terminé : ' . number_format($export->successful_rows) . ' ' . str('ligne')->plural($export->successful_rows) . ' exportée(s).';
+        $body = 'Export des compétences terminé : '.number_format($export->successful_rows).' '.str('ligne')->plural($export->successful_rows).' exportée(s).';
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' en échec.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' en échec.';
         }
 
         return $body;

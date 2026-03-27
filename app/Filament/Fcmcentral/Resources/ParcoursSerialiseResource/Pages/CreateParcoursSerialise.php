@@ -2,9 +2,8 @@
 
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource\Pages;
 
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursSerialiseResource;
 
 class CreateParcoursSerialise extends CreateRecord
 {

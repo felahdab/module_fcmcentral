@@ -2,45 +2,32 @@
 
 namespace Modules\FcmCentral\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
 use Modules\FcmCentral\Database\Factories\SavoirfaireFactory;
-use Modules\FcmCentral\Models\ActiviteSavoirfairePivot;
-
 use Modules\FcmCentral\Traits\HasTablePrefix;
-
 
 class Savoirfaire extends Model
 {
     use HasFactory;
     use HasTablePrefix;
 
-
-
     /**
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        "uuid",
-        "code",
-        "libelle_long",
-        "libelle_court",
-        "code_sicomp",
-        "same",
-        "ordre",
-        "competence_id",
-        "domaine_id",
-        "color",
+        'uuid',
+        'code',
+        'libelle_long',
+        'libelle_court',
+        'code_sicomp',
+        'same',
+        'ordre',
+        'competence_id',
+        'domaine_id',
+        'color',
     ];
-
-
-
-    protected static function newFactory(): SavoirfaireFactory
-    {
-        return Savoirfairefactory::new();
-    }
 
     public function competence()
     {
@@ -61,19 +48,18 @@ class Savoirfaire extends Model
             'savoirfaire_id',
             'competence_id'
         )
-        ->withPivot([
-            'id',
-            'uuid',
-            'ordre',
-            'heures',
-            'jours',
-            'libelle_court',
-            'savoirfaire_type_id'
-        ])
-        ->withTimestamps();
+            ->withPivot([
+                'id',
+                'uuid',
+                'ordre',
+                'heures',
+                'jours',
+                'libelle_court',
+                'savoirfaire_type_id',
+            ])
+            ->withTimestamps()
+        ;
     }
-
-
 
     // Accès direct aux objets pivot
     public function competenceSavoirfaires()
@@ -82,19 +68,21 @@ class Savoirfaire extends Model
     }
 
     public function objectifs()
-{
-    return $this->hasManyThrough(
-        Objectif::class,
-        CompetenceSavoirfaire::class,
-        'savoirfaire_id', // Clé étrangère dans annee_savoirfaires
-        'competence_savoirfaire_id', // Clé étrangère dans objectifs
-        'id', // Clé locale dans savoirfaires
-        'id' // Clé locale dans annee_savoirfaires
-    );
-}
+    {
+        return $this->hasManyThrough(
+            Objectif::class,
+            CompetenceSavoirfaire::class,
+            'savoirfaire_id', // Clé étrangère dans annee_savoirfaires
+            'competence_savoirfaire_id', // Clé étrangère dans objectifs
+            'id', // Clé locale dans savoirfaires
+            'id' // Clé locale dans annee_savoirfaires
+        );
+    }
 
-
-
+    protected static function newFactory(): SavoirfaireFactory
+    {
+        return SavoirfaireFactory::new();
+    }
 
     // public function competences(): BelongsToMany
     // {
@@ -125,5 +113,4 @@ class Savoirfaire extends Model
     // {
     //     return $this->hasMany(Activite::class, 'savoirfaire_id');
     // }
-
 }
