@@ -128,5 +128,11 @@ class PermissionsSeeder extends Seeder
             "guard_name" => "web"
         ]);
 
+        /** Journal des évènements */
+        Permission::firstOrCreate([
+            "name" => "fcmcentral::voir_journal_des_evenements",
+            "guard_name" => "web"
+        ]);
+
     }
 }

@@ -37,6 +37,11 @@ class StoredEventResource extends Resource
         return $schema->components([]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return StoredEvent::filtre_par_unite();
+    }
+
     public static function table(Table $table): Table
     {
         return $table

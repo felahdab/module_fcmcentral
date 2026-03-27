@@ -12,12 +12,28 @@ class ListStoredEvents extends ListRecords
 {
     protected static string $resource = StoredEventResource::class;
 
+    /** La neutralisation des méthodes authorizeRecourseAccess et authorizeAccess renvoie tout le controle d'accès à la méthode
+     *  canAccess. Le comportement de la page est alors identique aux pages non intégrées à des Ressource.
+     */
+    public static function authorizeResourceAccess(): void
+    {
+        return;
+    }
+
+    protected function authorizeAccess(): void
+    {
+        return ;
+    }
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        return auth()->user()->can('fcmcentral::voir_journal_des_evenements');
+    }
+
     protected function getHeaderActions(): array
     {
         return [];
     }
-
-    
 
     protected function applySearchToTableQuery(Builder $query): Builder
     {

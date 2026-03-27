@@ -5,8 +5,11 @@ namespace Modules\FcmCentral\Models;
 use Carbon\Carbon;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Modules\FcmCommun\Models\StoredEvent as StoredEventBase;
 use Modules\FcmCentral\Traits\HasTablePrefix;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+
 
 class StoredEvent extends StoredEventBase
 {
@@ -21,4 +24,14 @@ class StoredEvent extends StoredEventBase
     {
         return $query->where('event_datetime', '<=', Carbon::parse($date));
     }
+
+    #[Scope]
+    protected  function filtre_par_unite(Builder $query)
+   {
+        $marins_visibles_uuids = Marin::pluck('uuid'); // Cette requête repose sur le modèle Marin, et applique donc le scope de filtrage par unité.
+
+        $query->whereNot('object_class', ObjectClasses::MARIN->value) // Tous les stored event qui ne parlent pas d'un marin en particulier
+            ->orWhereIn('object_uuid',$marins_visibles_uuids); // Les stored event qui parlent d'un marin dont le marin est dans la liste des marins accessibles.
+
+   }
 }
