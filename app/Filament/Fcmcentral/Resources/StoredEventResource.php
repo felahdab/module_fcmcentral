@@ -47,6 +47,13 @@ class StoredEventResource extends Resource
         return StoredEvent::filtre_par_unite();
     }
 
+    // ✅ Optionnel : Masquer aussi dans la navigation si pas admin
+    public static function shouldRegisterNavigation(): bool
+    {
+        
+        return auth()->user()?->can('fcmcentral::voir_journal_des_evenements') ?? false;
+    }
+
     public static function table(Table $table): Table
     {
         return $table
