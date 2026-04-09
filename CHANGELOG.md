@@ -1,3 +1,7 @@
+## 0.2.7 (April 09, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.6 –> 0.2.7
+- Implements artifact #740077: la création d'un marin depuis la recherche annudef entraine l'association automatique avec l'utilisateur lorsqu'on en identifie un qui correspond.
+
 ## 0.2.6 (April 01, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.5 –> 0.2.6
 - Implements art #727790 : Correction bug affichage  journal log: le lien vers le journal des évènements ne doit pas s'afficher si l'utilisateur n'a pas le droit d'y accéder.
