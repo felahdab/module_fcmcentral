@@ -23,6 +23,7 @@ use Modules\FcmCommun\Models\Marin;
 use Modules\RH\Events\UnMarinDoitEtreCreeEvent;
 use Modules\RH\Filament\RH\Pages\RechercheAnnuaireForms\RechercheAnnuaireCreateUserOrMarinForm;
 use Modules\RH\Services\AnnudefGradeService;
+use Modules\RH\Services\AnnudefUniteService;
 
 class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
 {
@@ -60,6 +61,7 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                 ->fillForm(fn ($record): array => [
                     'nid' => $record->nid,
                     'grade_id' => AnnudefGradeService::getGradeFromAnnudefRank($record->gradelong)?->id,
+                    'unite_id' => AnnudefUniteService::getUniteFromAnnudefBranch($record->unite)?->id
                 ])
                 ->schema([
                     Wizard::make(array_merge(
@@ -87,14 +89,13 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                     if (Arr::get($data, 'marin')) {
                         if (!Marin::where('nid', $record->nid)->first()) {
                             $creation_data = array_merge($record->toArray(), $data);
-                            if (Arr::get($data, 'user')) {
-                                /**
-                             * Si dans la partie précédente on a demandé à créer un utilisateur, on en récupère les informations
-                             * et on réalise l'association entre le Marin et l'utilisateur.
-                             */
-                                $newUser = User::where('email', $record->email)->first();
-                                $creation_data['user_id'] = $newUser->id;
+
+                            $existingUser = User::where('email', $record->email)->first();
+                            
+                            if ($existingUser) {
+                                 $creation_data['user_id'] = $existingUser->id;
                             }
+
                             UnMarinDoitEtreCreeEvent::dispatch($creation_data);
                         }
                     }
