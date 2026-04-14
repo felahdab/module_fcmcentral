@@ -24,7 +24,7 @@ class TypeNoteResource extends Resource
     // ✅ Vérifier si l'utilisateur est admin
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('admin') ?? false;
+        return auth()->user()?->admin ?? false;
     }
 
     // ✅ Optionnel : Masquer aussi dans la navigation si pas admin

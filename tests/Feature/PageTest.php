@@ -37,6 +37,8 @@ beforeEach(function () {
     $this->admin = User::factory()->create();
     $this->admin->admin = 1;
     $this->admin->save();
+
+    $this->user = User::factory()->create();
 });
 
 it('affiche le panneau principal FCM Central', function () {
@@ -96,14 +98,14 @@ it('affiche la page création de domaines', function () {
 });
 
 it('affiche PAS la page liste des parcours type', function () {
-    $this->actingAs($this->admin)
+    $this->actingAs($this->user)
         ->get(ParcoursTypeResource::getUrl('index'))
         ->assertStatus(403)
     ;
 });
 
 it('affiche PAS la page création de parcours type', function () {
-    $this->actingAs($this->admin)
+    $this->actingAs($this->user)
         ->get(ParcoursTypeResource::getUrl('create'))
         ->assertStatus(403)
     ;
@@ -138,14 +140,14 @@ it('affiche la page création de note', function () {
 });
 
 it('affiche PAS la page liste des types de notes', function () {
-    $this->actingAs($this->admin)
+    $this->actingAs($this->user)
         ->get(TypeNoteResource::getUrl('index'))
         ->assertStatus(403)
     ;
 });
 
 it('affiche PAS la page création de type de note', function () {
-    $this->actingAs($this->admin)
+    $this->actingAs($this->user)
         ->get(TypeNoteResource::getUrl('create'))
         ->assertStatus(403)
     ;
@@ -166,14 +168,14 @@ it('affiche la page création de etat', function () {
 });
 
 it('affiche PAS la page liste des types etats', function () {
-    $this->actingAs($this->admin)
+    $this->actingAs($this->user)
         ->get(TypeGelResource::getUrl('index'))
         ->assertStatus(403)
     ;
 });
 
 it('affiche PAS la page création de type etat', function () {
-    $this->actingAs($this->admin)
+    $this->actingAs($this->user)
         ->get(TypeGelResource::getUrl('create'))
         ->assertStatus(403)
     ;
