@@ -247,7 +247,7 @@ class FcmCentralServiceProvider extends ServiceProvider
     protected function registerDocumentation()
     {
         $this->publishes([
-            module_path($this->moduleName, 'resources/docs') => base_path('resources/docs/FCM Central'),
+            module_path($this->moduleName, 'resources/docs') => base_path('resources/docs/docs/FCM Central'),
         ], 'doc');
         $this->publishes([
             module_path($this->moduleName, 'resources/pdfs') => public_path('pdfs/fcmcentral'),
