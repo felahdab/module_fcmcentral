@@ -1,3 +1,8 @@
+## 0.2.8 (April 15, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.7 –> 0.2.8
+- Implements artifact #742300: retire les usages de la méthode hasRole dans les 3 resources qui s'en servent. Remplacement par un test sur user->admin.
+- Ajustement du chemin de publication de la doc. Documentation générale du module Fcm Central
+
 ## 0.2.7 (April 09, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.6 –> 0.2.7
 - Implements artifact #740077: la création d'un marin depuis la recherche annudef entraine l'association automatique avec l'utilisateur lorsqu'on en identifie un qui correspond.
