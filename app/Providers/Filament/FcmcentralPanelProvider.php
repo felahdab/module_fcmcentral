@@ -37,6 +37,7 @@ use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MarinsSupervisesWidget
 use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorProgressionWidget;
 use Modules\FcmCentral\Filament\Fcmcentral\Widgets\Mentor\MentorStatsWidget;
 use Modules\FcmCentral\Filament\Fcmcentral\Widgets\TestMarinRolesPermissionsWidget;
+use Nwidart\Modules\Facades\Module;
 
 class FcmcentralPanelProvider extends PanelProvider
 {
@@ -131,6 +132,8 @@ class FcmcentralPanelProvider extends PanelProvider
                 ->label('API')
                 ->icon('heroicon-m-cloud')
                 ->url(fn () => url(route('l5-swagger.default.api')), shouldOpenInNewTab: true),
+            'version' => MenuItem::make()
+                ->label($this->module . ' v' . Module::find($this->module)?->get('version'))
         ];
     }
 }
