@@ -12,11 +12,11 @@ class RefreshQlicksenseExportCommand extends Command
 {
     protected $signature = 'fcmcentral:refresh-qlicksense';
     
-    protected $description = 'Rafraîchit la table fcmcentral_qlicksense_exports avec les données marins FCM pour QlikSense';
+    protected $description = 'Rafraîchit la table fcmcentral_qlicksense_exports avec les données marins FCM pour QlickSense';
 
     public function handle(): int
     {
-        $this->info('🔄 Début du rafraîchissement de la table QlikSense...');
+        $this->info('🔄 Début du rafraîchissement de la table QlickSense...');
 
         // Vider la table
         QlicksenseExport::query()->truncate();
