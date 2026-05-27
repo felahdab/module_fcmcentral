@@ -26,9 +26,10 @@ class DownloadCsvAction extends Action
                 ])->get();
 
                 $csvHeader = [
-                    'GRADE', 'NOM', 'PRENOM', 'SPECIALITE', 'AFFECTATION', 'COHORTE',
-                    'GEL FCM', 'VERT PPA DEPUIS LE', 'TEMPS DANS LE PPA',
+                    'UUID', 'GRADE', 'NOM', 'PRENOM', 'SPECIALITE', 'AFFECTATION', 'COHORTE',
+                    'PARCOURS','GEL FCM', 'VERT PPA DEPUIS LE', 'TEMPS DANS LE PPA',
                     'PROGRESSION GLOBALE', 'STAGE MANQUANTS',
+                    'MENTOR_UUID','MENTOR_GRADE','MENTOR_NOM','MENTOR_PRENOM','MENTOR_UNITE','MENTOR_EMAIL'
                 ];
 
                 $callback = function () use ($csvHeader, $marins) {
@@ -75,17 +76,25 @@ class DownloadCsvAction extends Action
                         }
 
                         fputcsv($file, [
+                            $marin->uuid ?? '',
                             $marin->grade?->libelle_court ?? '',
                             $marin->nom ?? '',
                             $marin->prenom ?? '',
                             $marin->specialite?->libelle_long ?? '',
                             $marin->unite?->libelle_long ?? '',
                             $marin->complementsFcm?->cohorte?->libelle_long ?? '',
+                            $marin->complementsFcm?->donnees_du_parcours?->parcours_serialise?->libelle_court ?? 'Non assigné',
                             $gelFcm ? Carbon::parse($gelFcm)->format('d/m/Y') : 'Non renseigné',
                             $vertPpa ? Carbon::parse($vertPpa)->format('d/m/Y') : 'Non renseigné',
                             $tempsPpa ?? '',
                             $progression ?? '',
                             $stagesManquants,
+                            $marin->complementsFcm?->mentor?->uuid ?? '',
+                            $marin->complementsFcm?->mentor?->grade?->libelle_court ?? '',
+                            $marin->complementsFcm?->mentor?->nom ?? '',
+                            $marin->complementsFcm?->mentor?->prenom ?? '',
+                            $marin->complementsFcm?->mentor?->unite?->libelle_long ?? '',
+                            $marin->complementsFcm?->mentor?->email ?? '',
                         ], ';');
                     }
                     fclose($file);

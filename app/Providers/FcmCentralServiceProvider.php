@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Modules\FcmCentral\Console\ChargeParcours;
+use Modules\FcmCentral\Console\RefreshQlicksenseExportCommand as ConsoleRefreshQlicksenseExportCommand;
 use Modules\FcmCentral\Console\SauvegardeParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
@@ -49,6 +50,7 @@ use Modules\FcmCentral\Policies\SavoirfairePolicy;
 use Modules\FcmCentral\Policies\SavoirfaireTypePolicy;
 use Modules\FcmCentral\Policies\TypeEtatPolicy;
 use Modules\FcmCentral\Policies\TypeNotePolicy;
+use Modules\Planificationgpd\Console\RefreshQlicksenseExportCommand;
 
 class FcmCentralServiceProvider extends ServiceProvider
 {
@@ -230,6 +232,7 @@ class FcmCentralServiceProvider extends ServiceProvider
         $this->commands([
             ChargeParcours::class,
             SauvegardeParcours::class,
+            ConsoleRefreshQlicksenseExportCommand::class,
         ]);
     }
 
