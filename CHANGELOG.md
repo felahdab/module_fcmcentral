@@ -1,3 +1,8 @@
+## 0.2.9 (June 08, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.8 –> 0.2.9
+- Modification du lien pointant vers la documentation pour éviter une erreur 403.
+- Introduction de l'information de version du module dans le menu de l'utilisateur.
+
 ## 0.2.8 (April 15, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.7 –> 0.2.8
 - Implements artifact #742300: retire les usages de la méthode hasRole dans les 3 resources qui s'en servent. Remplacement par un test sur user->admin.
