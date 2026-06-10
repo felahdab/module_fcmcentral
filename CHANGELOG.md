@@ -1,3 +1,7 @@
+## 0.2.10 (June 10, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.9 –> 0.2.10
+- Ajout d'une page d index dans la documentation.
+
 ## 0.2.9 (June 08, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.8 –> 0.2.9
 - Modification du lien pointant vers la documentation pour éviter une erreur 403.
