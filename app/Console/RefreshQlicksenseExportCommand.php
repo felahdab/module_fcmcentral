@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\QlicksenseExport;
 use Modules\FcmCommun\Services\CalculHeuresParcoursService;
+use Illuminate\Support\Facades\DB;
 
 class RefreshQlicksenseExportCommand extends Command
 {
@@ -57,6 +58,10 @@ class RefreshQlicksenseExportCommand extends Command
 
             // PROGRESSION
             $parcours = $marin->complementsFcm?->donnees_du_parcours?->parcoursmarin;
+
+            
+            
+           
             $progression = null;
             if ($parcours) {
                 try {
@@ -80,6 +85,15 @@ class RefreshQlicksenseExportCommand extends Command
                 }
             }
 
+            $mp = DB::table('fcmcentral_marin_parcours')
+                ->where('fcmmarin_id', $marin->id)
+                ->orderByDesc('updated_at')
+                ->orderByDesc('id')
+                ->first();
+
+            // Priorité : JSON brut depuis fcmcentral_marin_parcours, sinon encode $parcours
+            $parcoursmarin = $mp?->parcoursmarin ?? ($parcours ? json_encode($parcours) : null);
+
             // Insérer dans la table
             QlicksenseExport::create([
                 'marin_uuid' => $marin->uuid ?? '',
@@ -101,6 +115,7 @@ class RefreshQlicksenseExportCommand extends Command
                 'mentor_prenom' => $marin->complementsFcm?->mentor?->prenom ?? '',
                 'mentor_unite' => $marin->complementsFcm?->mentor?->unite?->libelle_long ?? '',
                 'mentor_email' => $marin->complementsFcm?->mentor?->email ?? '',
+                'parcoursmarin' => $parcoursmarin,
             ]);
 
             $progressBar->advance();
@@ -113,3 +128,5 @@ class RefreshQlicksenseExportCommand extends Command
         return self::SUCCESS;
     }
 }
+
+

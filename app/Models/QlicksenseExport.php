@@ -30,6 +30,7 @@ class QlicksenseExport extends Model
         'mentor_prenom',
         'mentor_unite',
         'mentor_email',
+        'parcoursmarin',
     ];
 
     protected $casts = [
