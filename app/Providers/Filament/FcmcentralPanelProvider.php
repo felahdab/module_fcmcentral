@@ -126,7 +126,7 @@ class FcmcentralPanelProvider extends PanelProvider
             'help' => MenuItem::make()
                 ->label('Aide')
                 ->icon('heroicon-m-question-mark-circle')
-                ->url(fn () => url(config('skeletor.prefixe_instance').'/docs/'.Filament::getCurrentOrDefaultPanel()->getId()).'/', shouldOpenInNewTab: true),
+                ->url(fn () => url(config('skeletor.prefixe_instance').'/docs/'.Filament::getCurrentOrDefaultPanel()->getId()).'/generalites/', shouldOpenInNewTab: true),
 
             'apidoc' => MenuItem::make()
                 ->label('API')
