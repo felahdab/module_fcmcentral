@@ -10,6 +10,7 @@ use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Illuminate\Support\Str;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource;
+use Modules\FcmCentral\Helpers\OutilsHelper;
 use Modules\FcmCentral\Models\Affectation;
 use Modules\FcmCentral\Models\ParcoursType;
 
@@ -46,6 +47,10 @@ class CreateParcours extends CreateRecord
                         ->options(ParcoursType::orderBy('libelle_court')->pluck('libelle_court', 'id'))
                         ->required()
                         ->searchable(),
+
+                    Select::make('color')
+                        ->label('Couleur du badge')
+                        ->options(OutilsHelper::selectColors()),
                 ]),
 
             // ── ÉTAPE 2 : Affectations ────────────────────────────────────
@@ -75,6 +80,11 @@ class CreateParcours extends CreateRecord
                             TextInput::make('nouvelle_libelle_long')
                                 ->label('Libellé long')
                                 ->hidden(fn ($get) => null !== $get('affectation_id')),
+
+                            Select::make('nouvelle_color')
+                                ->label('Couleur du badge')
+                                ->options(OutilsHelper::selectColors())
+                                ->hidden(fn ($get) => null !== $get('affectation_id')),
                         ]),
                 ]),
         ];
@@ -99,6 +109,7 @@ class CreateParcours extends CreateRecord
                     'code' => $aff['nouvelle_code'] ?? '',
                     'libelle_court' => $aff['nouvelle_libelle_court'] ?? '',
                     'libelle_long' => $aff['nouvelle_libelle_long'] ?? null,
+                    'color' => $aff['nouvelle_color'] ?? null,
                 ])->id;
             }
         }
@@ -106,3 +117,5 @@ class CreateParcours extends CreateRecord
         $parcours->affectations()->sync($affectationIds);
     }
 }
+
+
