@@ -286,7 +286,6 @@
 
 </style>
 
-
 {{-- VÉRIFICATION MARIN --}}
 @if(!$this->marin)
     <x-filament::section>
@@ -316,12 +315,11 @@
                         <div><strong>Unité:</strong> {{ $this->marin->unite?->libelle_long ?? 'N/A' }}</div>
                         <div><strong>Cohorte:</strong> {{ $this->marin->complementsFcm?->cohorte?->libelle_long ?? 'N/A' }}</div>
                     </div>
-                    @if($this->marin->complementsFcm?->mentor)
+                    @php $mentors = $this->marin->complementsFcm?->mentors ?? collect(); @endphp
+                    @if($mentors->isNotEmpty())
                         <div class="mt-2 text-sm opacity-90">
-                            <strong>Mentor:</strong>
-                            {{ $this->marin->complementsFcm->mentor->grade?->libelle_long }}
-                            {{ $this->marin->complementsFcm->mentor->prenom }}
-                            {{ $this->marin->complementsFcm->mentor->nom }}
+                            <strong>Mentor(s):</strong>
+                            {{ $mentors->map(fn($m) => trim(($m->grade?->libelle_long ?? '').' '.$m->prenom.' '.$m->nom))->join(', ') }}
                         </div>
                     @endif
                 </div>
@@ -568,7 +566,6 @@
 </div>
 @endif
 
-
   {{-- <x-filament::section class="section-card">
     <x-slot name="heading">Indicateurs Complémentaires</x-slot>
     <div class="grid grid-cols-1 md:grid-cols-3  gap-6">
@@ -615,7 +612,6 @@
     </div>
 </x-filament::section> --}}
 
-
         {{-- SECTIONS PRINCIPALES (3 COLONNES) --}}
         <div class="grid-sections-3 mb-6">
             
@@ -656,9 +652,9 @@
                     <div class="flex justify-between border-b pb-2">
                         <span class="text-sm font-medium text-gray-700">Mentor:</span>
                         <span class="text-sm text-gray-900">
-                            @if($this->marin->complementsFcm?->mentor)
-                                {{ $this->marin->complementsFcm->mentor->grade?->libelle_long }}
-                                {{ $this->marin->complementsFcm->mentor->nom }}
+                            @php $mentorsBilan = $this->marin->complementsFcm?->mentors ?? collect(); @endphp
+                            @if($mentorsBilan->isNotEmpty())
+                                {{ $mentorsBilan->map(fn($m) => trim(($m->grade?->libelle_long ?? '').' '.$m->nom))->join(', ') }}
                             @else
                                 N/A
                             @endif
@@ -838,7 +834,6 @@
         </div>
     @endif
 </x-filament::section>
-
 
 
 
@@ -1051,7 +1046,6 @@
     @livewire('Modules\FcmCentral\Http\Livewire\AddNoteForm', ['marinId' => $marinId], key('add-note-' . $marinId))
 </x-filament::modal> --}}
 
-
 {{-- MODAL ETAT --}}
 {{-- <x-filament::modal
     id="ajouterEtat"
@@ -1069,7 +1063,6 @@
 
     @livewire('Modules\FcmCentral\Http\Livewire\AddEtatForm', ['marinId' => $marinId], key('add-etat-form-' . $marinId))
 </x-filament::modal> --}}
-
 
 
 {{-- MODAL MODIFICATION JALONS --}}
@@ -1122,5 +1115,6 @@
 </x-filament::modal>
 
 
-
 </x-filament-panels::page>
+
+

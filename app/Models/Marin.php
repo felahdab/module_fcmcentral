@@ -4,8 +4,10 @@ namespace Modules\FcmCentral\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Modules\FcmCentral\Database\Factories\MarinFactory;
 use Modules\FcmCommun\Models\Cohorte;
 use Modules\FcmCommun\Models\Marin as BaseMarin;
 use Modules\RH\Models\Marin as RHMarin;
@@ -38,6 +40,13 @@ use Modules\RH\Models\Marin as RHMarin;
  */
 class Marin extends BaseMarin
 {
+    use HasFactory;
+
+    protected static function newFactory(): MarinFactory
+    {
+        return MarinFactory::new();
+    }
+
     // ========================================
     // RELATIONS
     // ========================================

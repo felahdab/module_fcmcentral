@@ -152,7 +152,7 @@ class FcmMarin extends Model
         $query->where('cohorte_id', $cohorte->id);
     }
 
-    public function scopeAvecMentor(Builder $query, Marin $mentor): void
+    public function scopeAvecMentor(Builder $query, RHMarin $mentor): void
     {
         $query->whereHas('mentors', fn ($q) => $q->where('marin_id', $mentor->id));
     }

@@ -184,16 +184,14 @@ class TestMarinsRolesSeeder extends Seeder
         $marin2 = $marins['fcmcentral::marin'][1] ?? null;
 
         if ($mentor && $marin1) {
-            FcmMarin::firstOrCreate([
-                'mentor_id' => $mentor->id,
-                'rh_marin_id' => $marin1->id,
-            ]);
+            $fcmMarin1 = FcmMarin::firstOrCreate(['rh_marin_id' => $marin1->id]);
+            $fcmMarin1->mentors()->syncWithoutDetaching([$mentor->id]);
         }
         if ($mentor && $marin2) {
-            FcmMarin::firstOrCreate([
-                'mentor_id' => $mentor->id,
-                'rh_marin_id' => $marin2->id,
-            ]);
+            $fcmMarin2 = FcmMarin::firstOrCreate(['rh_marin_id' => $marin2->id]);
+            $fcmMarin2->mentors()->syncWithoutDetaching([$mentor->id]);
         }
     }
 }
+
+

@@ -21,35 +21,43 @@ return new class extends Migration
             $table->foreign('marin_id')->references('id')->on('rh_marins')->onDelete('cascade');
         });
 
-        // 2. Migrer les mentor_id existants vers la table pivot
-        $nbAvant = DB::table('fcmcentral_fcm_marins')->whereNotNull('mentor_id')->count();
+        // 2. Migrer les mentor_id existants vers la table pivot (seulement si la colonne existe)
+        if (Schema::hasColumn('fcmcentral_fcm_marins', 'mentor_id')) {
+            $nbAvant = DB::table('fcmcentral_fcm_marins')->whereNotNull('mentor_id')->count();
 
-        DB::table('fcmcentral_fcm_marins')
-            ->whereNotNull('mentor_id')
-            ->select('id', 'mentor_id')
-            ->orderBy('id')
-            ->each(function ($row) {
-                DB::table('fcmcentral_fcm_marin_mentors')->insertOrIgnore([
-                    'fcm_marin_id' => $row->id,
-                    'marin_id'     => $row->mentor_id,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
-                ]);
+            DB::table('fcmcentral_fcm_marins')
+                ->whereNotNull('mentor_id')
+                ->select('id', 'mentor_id')
+                ->orderBy('id')
+                ->each(function ($row) {
+                    DB::table('fcmcentral_fcm_marin_mentors')->insertOrIgnore([
+                        'fcm_marin_id' => $row->id,
+                        'marin_id'     => $row->mentor_id,
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
+                    ]);
+                });
+
+            $nbApres = DB::table('fcmcentral_fcm_marin_mentors')->count();
+
+            echo "Migration mentors : {$nbAvant} mentor_id trouvés → {$nbApres} lignes dans la pivot.\n";
+
+            if ($nbAvant > 0 && $nbApres === 0) {
+                throw new \RuntimeException("Migration mentor : les données n'ont pas été transférées dans la pivot. Abandon.");
+            }
+
+            // 3. Supprimer mentor_id après transfert vérifié
+            Schema::table('fcmcentral_fcm_marins', function (Blueprint $table) {
+                try {
+                    $table->dropForeign(['mentor_id']);
+                } catch (\Throwable $e) {
+                    // Pas de FK sur cette colonne
+                }
+                $table->dropColumn('mentor_id');
             });
-
-        $nbApres = DB::table('fcmcentral_fcm_marin_mentors')->count();
-
-        echo "Migration mentors : {$nbAvant} mentor_id trouvés → {$nbApres} lignes dans la pivot.\n";
-
-        if ($nbAvant > 0 && $nbApres === 0) {
-            throw new \RuntimeException("Migration mentor : les données n'ont pas été transférées dans la pivot. Abandon.");
+        } else {
+            echo "Migration mentors : colonne mentor_id absente (base fraîche), rien à migrer.\n";
         }
-
-        // 3. Supprimer mentor_id seulement après transfert vérifié
-        Schema::table('fcmcentral_fcm_marins', function (Blueprint $table) {
-            $table->dropForeign(['mentor_id']);
-            $table->dropColumn('mentor_id');
-        });
     }
 
     public function down(): void
