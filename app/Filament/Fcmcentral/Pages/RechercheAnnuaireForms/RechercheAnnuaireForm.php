@@ -29,9 +29,9 @@ class RechercheAnnuaireForm
                             ->label('Cohorte de ce marin')
                             ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
 
-                        // Champ mentor visible seulement pour les admins
-                        Select::make('mentor_id')
-                            ->label('Choisir un mentor')
+                        Select::make('mentors')
+                            ->label('Choisir les mentors')
+                            ->multiple()
                             ->visible(fn (Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer.mentor'))
                             ->options(
                                 Marin::query()
@@ -48,10 +48,9 @@ class RechercheAnnuaireForm
                                     })
                             )
                             ->searchable()
-                            ->placeholder('Sélectionnez un mentor')
-                            ->helperText('Seuls les marins non en FCM peuvent être mentors')
-                            ->preload() // Charge les options au chargement de la page
-                            ->native(false), // Utilise le select stylé Filament
+                            ->placeholder('Sélectionnez un ou plusieurs mentors')
+                            ->preload()
+                            ->native(false),
 
                         Select::make('parcours_id')
                             ->visible(fn (Get $get) => $get('suivre_en_fcm') && auth()->user()?->can('fcmcentral::attribuer.parcours'))
@@ -63,3 +62,5 @@ class RechercheAnnuaireForm
         ];
     }
 }
+
+

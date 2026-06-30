@@ -49,7 +49,7 @@ class DocumentationMentorWidget extends Widget
     private static function getParcoursViaMenutore(Marin $mentor): ?Parcours
     {
         // Récupère le premier mentoré de ce mentor
-        $premierFcmMarin = FcmMarin::where('mentor_id', $mentor->id)->first();
+        $premierFcmMarin = FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $mentor->id))->first();
 
         if (null === $premierFcmMarin) {
             return null;
@@ -63,3 +63,5 @@ class DocumentationMentorWidget extends Widget
         ;
     }
 }
+
+

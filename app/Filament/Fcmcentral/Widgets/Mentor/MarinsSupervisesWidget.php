@@ -39,7 +39,7 @@ class MarinsSupervisesWidget extends BaseWidget
             return $table->query(Marin::whereRaw('1 = 0'));
         }
 
-        $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
+        $marinIds = FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $currentMarin->id))
             ->pluck('rh_marin_id')
             ->toArray()
         ;
@@ -249,3 +249,5 @@ class MarinsSupervisesWidget extends BaseWidget
         return $derniereDate?->toISOString();
     }
 }
+
+

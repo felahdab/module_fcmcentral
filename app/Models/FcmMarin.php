@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Collection;
 use Modules\FcmCentral\Database\Factories\FcmMarinFactory;
 use Modules\FcmCentral\Traits\HasTablePrefix;
 use Modules\FcmCommun\Models\Cohorte;
@@ -20,7 +21,6 @@ class FcmMarin extends Model
         'rh_marin_id',
         'data',
         'cohorte_id',
-        'mentor_id',
         'date_sedimentation',
         'date_fcm',
         'date_competence',
@@ -42,9 +42,14 @@ class FcmMarin extends Model
         return $this->belongsTo(Cohorte::class);
     }
 
-    public function mentor()
+    public function mentors(): BelongsToMany
     {
-        return $this->belongsTo(Marin::class, 'mentor_id');
+        return $this->belongsToMany(
+            Marin::class,
+            'fcmcentral_fcm_marin_mentors',
+            'fcm_marin_id',
+            'marin_id'
+        )->withTimestamps();
     }
 
     public function parcoursSerialises(): BelongsToMany
@@ -55,8 +60,7 @@ class FcmMarin extends Model
             'fcmmarin_id',
             'parcoursserialise_id'
         )->withPivot('id', 'taux_global', 'taux_stage', 'taux_activite', 'parcoursmarin')
-            ->withTimestamps()
-        ;
+            ->withTimestamps();
     }
 
     public function lignesDansMarinParcours()
@@ -73,7 +77,7 @@ class FcmMarin extends Model
     // Méthodes principales
     public function hasMentor(): bool
     {
-        return !is_null($this->mentor_id);
+        return $this->mentors()->exists();
     }
 
     public function hasCohorte(): bool
@@ -101,7 +105,7 @@ class FcmMarin extends Model
         return $this->donnees_du_parcours?->taux_activite;
     }
 
-    // Gestion cohorte/mentor
+    // Gestion cohorte/mentors
     public function assignerCohorte(Cohorte $cohorte): void
     {
         $this->cohorte_id = $cohorte->id;
@@ -112,18 +116,20 @@ class FcmMarin extends Model
 
     public function assignerMentor(Marin|RHMarin $mentor): void
     {
-        $this->mentor_id = $mentor->id;
-        $this->save();
-        $this->refresh();
-        $this->load('mentor');
+        $this->mentors()->syncWithoutDetaching([$mentor->id]);
+        $this->load('mentors');
     }
 
-    public function retirerMentor(): void
+    public function retirerMentor(Marin|RHMarin $mentor): void
     {
-        $this->mentor_id = null;
-        $this->save();
-        $this->refresh();
-        $this->load('mentor');
+        $this->mentors()->detach($mentor->id);
+        $this->load('mentors');
+    }
+
+    public function retirerTousLesMentors(): void
+    {
+        $this->mentors()->detach();
+        $this->load('mentors');
     }
 
     public function retirerCohorte(): void
@@ -140,25 +146,20 @@ class FcmMarin extends Model
         $this->assignerCohorte($cohorte);
     }
 
-    public function setMentorAttribute(Marin $mentor)
-    {
-        $this->assignerMentor($mentor);
-    }
-
     // Scopes
     public function scopeCohorte(Builder $query, Cohorte $cohorte): void
     {
         $query->where('cohorte_id', $cohorte->id);
     }
 
-    public function scopeMentor(Builder $query, Marin $mentor): void
+    public function scopeAvecMentor(Builder $query, Marin $mentor): void
     {
-        $query->where('mentor_id', $mentor->id);
+        $query->whereHas('mentors', fn ($q) => $q->where('marin_id', $mentor->id));
     }
 
     public function scopeSansMentor(Builder $query): void
     {
-        $query->whereNull('mentor_id');
+        $query->doesntHave('mentors');
     }
 
     public function scopeSansCohorte(Builder $query): void
@@ -172,7 +173,7 @@ class FcmMarin extends Model
         return [
             'marin' => $this->marin?->fullNameAndGrade,
             'cohorte' => $this->cohorte?->libelle_court,
-            'mentor' => $this->mentor?->fullNameAndGrade,
+            'mentors' => $this->mentors->map(fn ($m) => $m->fullNameAndGrade)->join(', '),
             'taux_global' => $this->getTauxGlobal(),
             'taux_stage' => $this->getTauxStage(),
             'taux_activite' => $this->getTauxActivite(),
@@ -204,3 +205,5 @@ class FcmMarin extends Model
         return FcmMarinFactory::new();
     }
 }
+
+

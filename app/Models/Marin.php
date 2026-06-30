@@ -163,7 +163,7 @@ class Marin extends BaseMarin
      */
     public function isMentor(): bool
     {
-        return FcmMarin::where('mentor_id', $this->id)->exists();
+        return FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $this->id))->exists();
     }
 
     /**
@@ -270,9 +270,9 @@ class Marin extends BaseMarin
      *     <p>{{ $marin->getMentor()?->fullNameAndGrade ?? 'Aucun mentor attribué' }}</p>
      * </div>
      */
-    public function getMentor(): ?self
+    public function getMentors(): \Illuminate\Support\Collection
     {
-        return $this->complementsFcm?->mentor;
+        return $this->complementsFcm?->mentors ?? collect();
     }
 
     /**
@@ -339,7 +339,7 @@ class Marin extends BaseMarin
      */
     public function nombreMarinsSupervises(): int
     {
-        return FcmMarin::where('mentor_id', $this->id)->count();
+        return FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $this->id))->count();
     }
 
     // ========================================
@@ -374,7 +374,7 @@ class Marin extends BaseMarin
             return false;
         }
 
-        return FcmMarin::where('mentor_id', $marin->id)->exists();
+        return FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $marin->id))->exists();
     }
 
     // ========================================
@@ -456,10 +456,10 @@ class Marin extends BaseMarin
         }
 
         $query->whereIn('id', function ($subQuery) use ($marin) {
-            $subQuery->select('rh_marin_id')
+            $subQuery->select('fcmcentral_fcm_marins.rh_marin_id')
                 ->from('fcmcentral_fcm_marins')
-                ->where('mentor_id', $marin->id)
-            ;
+                ->join('fcmcentral_fcm_marin_mentors', 'fcmcentral_fcm_marin_mentors.fcm_marin_id', '=', 'fcmcentral_fcm_marins.id')
+                ->where('fcmcentral_fcm_marin_mentors.marin_id', $marin->id);
         });
     }
 
@@ -494,11 +494,9 @@ class Marin extends BaseMarin
     public function scopeMentor(Builder $query): void
     {
         $query->whereIn('id', function ($subQuery) {
-            $subQuery->select('mentor_id')
-                ->from('fcmcentral_fcm_marins')
-                ->whereNotNull('mentor_id')
-                ->distinct()
-            ;
+            $subQuery->select('marin_id')
+                ->from('fcmcentral_fcm_marin_mentors')
+                ->distinct();
         });
     }
 
@@ -656,7 +654,7 @@ class Marin extends BaseMarin
             'en_fcm' => $this->estEnFcm(),
             'est_mentor' => $this->isMentor(),
             'cohorte' => $this->getCohorte()?->libelle_court,
-            'mentor' => $this->getMentor()?->nom.' '.$this->getMentor()?->prenom,
+            'mentors' => $this->getMentors()->map(fn ($m) => $m->nom.' '.$m->prenom)->join(', '),
             'nb_supervises' => $this->nombreMarinsSupervises(),
         ];
     }
@@ -767,9 +765,7 @@ class Marin extends BaseMarin
      */
     public function getEstMentorAttribute(): bool
     {
-        $nb_mentores = FcmMarin::where('mentor_id', $this->id)->count();
-
-        return $nb_mentores > 0;
+        return FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $this->id))->exists();
     }
 
     /**
@@ -781,22 +777,23 @@ class Marin extends BaseMarin
             return false;
         }
 
-        return FcmMarin::where('mentor_id', $this->id)
-            ->where('rh_marin_id', $marin->id)
-            ->exists()
-        ;
+        return FcmMarin::where('rh_marin_id', $marin->id)
+            ->whereHas('mentors', fn ($q) => $q->where('marin_id', $this->id))
+            ->exists();
     }
 
     /**
-     * Renvoit la collections des Marin dont le Marin est le mentor.
+     * Renvoit la collection des Marins dont ce Marin est le mentor.
      */
     public function getMarinsMentoresAttribute()
     {
         if (!$this->est_mentor) {
-            return false;
+            return collect();
         }
 
-        return Marin::whereIn('id', FcmMarin::where('mentor_id', $this->id)->pluck('id'))->get();
+        return Marin::whereIn('id',
+            FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $this->id))->pluck('rh_marin_id')
+        )->get();
     }
 
     /**
@@ -810,3 +807,5 @@ class Marin extends BaseMarin
             ?->parcoursModel;               // belongsTo Parcours (nom spécifique pour éviter le bug)
     }
 }
+
+
