@@ -242,6 +242,11 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             'parcours_serialise',
         ])->whereNotNull('parcoursmarin');
 
+        // Retourner 0 résultats si aucun filtre sélectionné
+        if (blank($this->selectedParcoursId) && blank($this->selectedStageUuid)) {
+            return $query->whereRaw('1 = 0');
+        }
+
         if (filled($this->selectedStageUuid)) {
             $uuid = $this->selectedStageUuid;
             $query->whereRaw(
@@ -285,7 +290,7 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
         };
     }
 
-    protected function computeStatut(MarinParcours $record): string
+    public function computeStatut(MarinParcours $record): string
     {
         $json = $record->parcoursmarin;
         if (!$json) return '—';
