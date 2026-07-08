@@ -17,7 +17,7 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-pest()->group('Fcm Central1');
+pest()->group('Fcm Central');
 
 // ─── Constantes du fichier parcours de test ────────────────────────────────────
 // Ces UUIDs proviennent de Modules/FcmCentral/tests/Feature/parcours_deasm.json
