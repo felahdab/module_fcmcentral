@@ -22,7 +22,9 @@ class QlicksenseExport extends Model
         'gel_fcm',
         'vert_ppa_depuis_le',
         'temps_dans_le_ppa',
-        'progression_globale',
+        'taux_global',
+        'taux_stage',
+        'taux_activite',
         'stage_manquants',
         'mentor_uuid',
         'mentor_grade',
@@ -30,12 +32,15 @@ class QlicksenseExport extends Model
         'mentor_prenom',
         'mentor_unite',
         'mentor_email',
-        'parcoursmarin',
     ];
 
     protected $casts = [
         'temps_dans_le_ppa' => 'integer',
-        'progression_globale' => 'decimal:2',
-        'stage_manquants' => 'integer',
+        'taux_global'      => 'decimal:2',
+        'taux_stage'       => 'decimal:2',
+        'taux_activite'    => 'decimal:2',
+        'stage_manquants'  => 'integer',
     ];
 }
+
+
