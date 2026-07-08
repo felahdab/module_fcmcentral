@@ -56,7 +56,7 @@ return new class extends Migration
                 $table->dropColumn('mentor_id');
             });
         } else {
-            echo "Migration mentors : colonne mentor_id absente (base fraîche), rien à migrer.\n";
+           // echo "Migration mentors : colonne mentor_id absente (base fraîche), rien à migrer.\n";
         }
     }
 
