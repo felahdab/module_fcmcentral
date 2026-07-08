@@ -11,12 +11,13 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Modules\FcmCentral\Helpers\OutilsHelper;
 use Modules\FcmCentral\Models\Competence;
 
 class CompetencesRelationManager extends RelationManager
 {
     protected static string $relationship = 'competences';
-    protected static ?string $title = 'Compétences';
+    protected static ?string $title = 'Compétences (étape 2/3)';
 
     public function table(Table $table): Table
     {
@@ -29,6 +30,7 @@ class CompetencesRelationManager extends RelationManager
         ;
 
         return $table
+            ->description('Les compétences sont filtrées par affectations et type de parcours. Chaque compétence regroupe des savoir-faires.')
             ->query(
                 Competence::where('parcours_type_id', $parcours->parcours_type_id)
                     ->whereIn('affectation_id', $parcours->affectations->pluck('id')->toArray())
@@ -42,8 +44,12 @@ class CompetencesRelationManager extends RelationManager
                 TextColumn::make('affectation.libelle_court')
                     ->label('Affectation')
                     ->badge()
-                    ->color('info'),
-                TextColumn::make('code')->searchable()->sortable(),
+                    ->color(fn ($record) => $record->affectation?->color ?? 'info'),
+                TextColumn::make('code')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn ($record) => $record->color ?? 'info'),
                 TextColumn::make('libelle_court')->searchable()->label('Libellé'),
                 // TextColumn::make('competenceSavoirfaires_count')
                 //     ->counts('competenceSavoirfaires')
@@ -98,6 +104,9 @@ class CompetencesRelationManager extends RelationManager
                         TextInput::make('code')->required()->maxLength(150),
                         TextInput::make('libelle_court')->required()->maxLength(150)->label('Libellé court'),
                         TextInput::make('libelle_long')->maxLength(1500)->label('Libellé long'),
+                        Select::make('color')
+                            ->label('Couleur du badge')
+                            ->options(OutilsHelper::selectColors()),
                     ])
                     ->action(function (array $data) use ($parcours): void {
                         // ✅ Crée la compétence liée à l'affectation et au type parcours
@@ -106,6 +115,7 @@ class CompetencesRelationManager extends RelationManager
                             'code' => $data['code'],
                             'libelle_court' => $data['libelle_court'],
                             'libelle_long' => $data['libelle_long'] ?? null,
+                            'color' => $data['color'] ?? null,
                             'affectation_id' => $data['affectation_id'],
                             'parcours_type_id' => $parcours->parcours_type_id,
                         ]);
@@ -128,6 +138,7 @@ class CompetencesRelationManager extends RelationManager
                         'code' => $record->code,
                         'libelle_court' => $record->libelle_court,
                         'libelle_long' => $record->libelle_long,
+                        'color' => $record->color,
                     ])
                     ->schema([
                         Select::make('affectation_id')
@@ -143,6 +154,9 @@ class CompetencesRelationManager extends RelationManager
                         TextInput::make('code')->required()->maxLength(150),
                         TextInput::make('libelle_court')->required()->maxLength(150)->label('Libellé court'),
                         TextInput::make('libelle_long')->maxLength(1500)->label('Libellé long'),
+                        Select::make('color')
+                            ->label('Couleur du badge')
+                            ->options(OutilsHelper::selectColors()),
                     ])
                     ->action(function (Model $record, array $data): void {
                         $record->update([
@@ -150,6 +164,7 @@ class CompetencesRelationManager extends RelationManager
                             'code' => $data['code'],
                             'libelle_court' => $data['libelle_court'],
                             'libelle_long' => $data['libelle_long'] ?? null,
+                            'color' => $data['color'] ?? null,
                         ]);
 
                         Notification::make()
@@ -170,3 +185,5 @@ class CompetencesRelationManager extends RelationManager
         ;
     }
 }
+
+
