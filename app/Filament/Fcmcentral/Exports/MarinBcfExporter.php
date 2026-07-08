@@ -16,6 +16,7 @@ class MarinBcfExporter extends Exporter
     public static function getColumns(): array
     {
         return [
+            ExportColumn::make('uuid')->label('UUID'),
             ExportColumn::make('grade.libelle_court')->label('GRADE'),
             ExportColumn::make('nom')->label('NOM'),
             ExportColumn::make('prenom')->label('PRENOM'),
