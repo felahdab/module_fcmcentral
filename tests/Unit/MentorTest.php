@@ -1,6 +1,5 @@
 <?php
 
-// filepath: tests/Unit/Models/MentorRelationTest.php
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Models\Marin;
@@ -22,150 +21,210 @@ beforeEach(function () {
 // TESTS BASIQUES MENTOR
 // ========================================
 
-it('peut savoir si un marin a un mentor', function () {
-    // Etant donné - Marin sans mentor
-    $this->assertNull($this->fcmMarin->mentor_id);
+it('un marin sans mentor : hasMentor() retourne false', function () {
     $this->assertFalse($this->fcmMarin->hasMentor());
+    $this->assertCount(0, $this->fcmMarin->mentors);
+});
 
-    // Quand - Assigner un mentor
+it('un marin avec un mentor : hasMentor() retourne true', function () {
     $mentor = Marin::factory()->create();
-    $this->fcmMarin->mentor_id = $mentor->id;
-    $this->fcmMarin->save();
 
-    // Alors
+    $this->fcmMarin->assignerMentor($mentor);
+
     $this->assertTrue($this->fcmMarin->hasMentor());
-    $this->assertEquals($mentor->id, $this->fcmMarin->mentor->id);
+    $this->assertCount(1, $this->fcmMarin->fresh()->mentors);
+    $this->assertEquals($mentor->id, $this->fcmMarin->fresh()->mentors->first()->id);
 });
 
-it('peut savoir si un marin n\'a pas de mentor', function () {
-    // Etant donné - Marin créé sans mentor
-    $this->assertNull($this->fcmMarin->mentor_id);
-    $this->assertFalse($this->fcmMarin->hasMentor());
+it('un marin peut avoir plusieurs mentors', function () {
+    $mentor1 = Marin::factory()->create();
+    $mentor2 = Marin::factory()->create();
+    $mentor3 = Marin::factory()->create();
 
-    // Quand - Vérifier explicitement
-    $marinsSansMentor = FcmMarin::sansMentor()->get();
+    $this->fcmMarin->assignerMentor($mentor1);
+    $this->fcmMarin->assignerMentor($mentor2);
+    $this->fcmMarin->assignerMentor($mentor3);
 
-    // Alors
-    $this->assertTrue($marinsSansMentor->contains($this->fcmMarin->id));
-    $this->assertNull($this->fcmMarin->mentor);
+    $mentors = $this->fcmMarin->fresh()->mentors;
+    $this->assertCount(3, $mentors);
+    $this->assertTrue($mentors->contains($mentor1->id));
+    $this->assertTrue($mentors->contains($mentor2->id));
+    $this->assertTrue($mentors->contains($mentor3->id));
 });
 
-// ========================================
-// TESTS RELATIONS MENTOR-MARINS
-// ========================================
+it('assigner le même mentor deux fois ne crée pas de doublon', function () {
+    $mentor = Marin::factory()->create();
 
-it('peut savoir si un mentor peut avoir plusieurs marins', function () {
-    // Etant donné - Un mentor
-    $mentor = Marin::factory()->create(['nom' => 'Capitaine Mentor']);
+    $this->fcmMarin->assignerMentor($mentor);
+    $this->fcmMarin->assignerMentor($mentor);
 
-    // Quand - Créer plusieurs marins avec le même mentor
-    $marin1 = Marin::factory()->create();
-    $marin2 = Marin::factory()->create();
-    $marin3 = Marin::factory()->create();
-
-    $fcmMarin1 = FcmMarin::factory()->create([
-        'rh_marin_id' => $marin1->id,
-        'mentor_id' => $mentor->id,
-    ]);
-    $fcmMarin2 = FcmMarin::factory()->create([
-        'rh_marin_id' => $marin2->id,
-        'mentor_id' => $mentor->id,
-    ]);
-    $fcmMarin3 = FcmMarin::factory()->create([
-        'rh_marin_id' => $marin3->id,
-        'mentor_id' => $mentor->id,
-    ]);
-
-    // Alors - Le mentor a bien plusieurs marins
-    $marinsmentores = Marin::mentorePar($mentor)->get();
-    $this->assertCount(3, $marinsmentores);
-    $this->assertTrue($marinsmentores->contains($marin1->id));
-    $this->assertTrue($marinsmentores->contains($marin2->id));
-    $this->assertTrue($marinsmentores->contains($marin3->id));
-
-    // Vérifier que tous pointent vers le même mentor
-    $this->assertEquals($mentor->id, $fcmMarin1->mentor->id);
-    $this->assertEquals($mentor->id, $fcmMarin2->mentor->id);
-    $this->assertEquals($mentor->id, $fcmMarin3->mentor->id);
-});
-
-it('peut savoir si un marin ne peut pas avoir plusieurs mentors (contrainte)', function () {
-    // Etant donné - Un marin avec un mentor
-    $mentor1 = Marin::factory()->create(['nom' => 'Premier Mentor']);
-    $mentor2 = Marin::factory()->create(['nom' => 'Deuxième Mentor']);
-
-    $this->fcmMarin->mentor_id = $mentor1->id;
-    $this->fcmMarin->save();
-    // Rafraichir pour charger la relation
-    $this->fcmMarin->refresh();
-    $this->fcmMarin->load('mentor');
-
-    // Alors - Le marin a bien un seul mentor
-    $this->assertEquals($mentor1->id, $this->fcmMarin->mentor_id);
-    $this->assertEquals('Premier Mentor', $this->fcmMarin->mentor->nom);
-
-    // Quand - Essayer de changer de mentor (remplace l'ancien)
-    $this->fcmMarin->mentor_id = $mentor2->id;
-    $this->fcmMarin->save();
-    // Rafraichir pour charger la relation
-    $this->fcmMarin->refresh();
-    $this->fcmMarin->load('mentor');
-
-    // Alors - Le nouveau mentor remplace l'ancien
-    $this->assertEquals($mentor2->id, $this->fcmMarin->mentor_id);
-    $this->assertEquals('Deuxième Mentor', $this->fcmMarin->mentor->nom);
-    $this->assertNotEquals($mentor1->id, $this->fcmMarin->mentor_id);
-
-    // Vérifier qu'il n'y a qu'un seul mentor_id dans la base
-    $fcmMarinRefresh = FcmMarin::find($this->fcmMarin->id);
-    $this->assertNotNull($fcmMarinRefresh->mentor_id);
-    $this->assertEquals($mentor2->id, $fcmMarinRefresh->mentor_id);
+    $this->assertCount(1, $this->fcmMarin->fresh()->mentors);
 });
 
 // ========================================
-// TESTS CONTRAINTES MÉTIER
+// TESTS RETRAIT DE MENTOR
 // ========================================
 
-it('peut valider la contrainte unicité mentor par marin', function () {
-    // Etant donné
+it('peut retirer un mentor spécifique sans toucher aux autres', function () {
     $mentor1 = Marin::factory()->create();
     $mentor2 = Marin::factory()->create();
 
-    // Quand - Un marin a un mentor
     $this->fcmMarin->assignerMentor($mentor1);
-    $this->assertTrue($this->fcmMarin->hasMentor());
-    $this->assertEquals($mentor1->id, $this->fcmMarin->mentor_id);
-
-    // Quand - Changer de mentor
     $this->fcmMarin->assignerMentor($mentor2);
 
-    // Alors - Seul le nouveau mentor est présent
-    $this->assertEquals($mentor2->id, $this->fcmMarin->mentor_id);
-    $this->assertNotEquals($mentor1->id, $this->fcmMarin->mentor_id);
+    $this->fcmMarin->retirerMentor($mentor1);
 
-    // Vérifier qu'il n'y a qu'un mentor dans la DB
-    $this->assertDatabaseHas('fcmcentral_fcm_marins', [
-        'id' => $this->fcmMarin->id,
-        'mentor_id' => $mentor2->id,
-    ]);
-
-    $this->assertDatabaseMissing('fcmcentral_fcm_marins', [
-        'id' => $this->fcmMarin->id,
-        'mentor_id' => $mentor1->id,
-    ]);
+    $mentors = $this->fcmMarin->fresh()->mentors;
+    $this->assertCount(1, $mentors);
+    $this->assertFalse($mentors->contains($mentor1->id));
+    $this->assertTrue($mentors->contains($mentor2->id));
 });
 
-it('peut retirer un mentor', function () {
-    // Etant donné - Marin avec mentor
+it('peut retirer tous les mentors d\'un coup', function () {
+    $mentor1 = Marin::factory()->create();
+    $mentor2 = Marin::factory()->create();
+
+    $this->fcmMarin->assignerMentor($mentor1);
+    $this->fcmMarin->assignerMentor($mentor2);
+
+    $this->fcmMarin->retirerTousLesMentors();
+
+    $this->assertFalse($this->fcmMarin->hasMentor());
+    $this->assertCount(0, $this->fcmMarin->fresh()->mentors);
+});
+
+// ========================================
+// TESTS SCOPE
+// ========================================
+
+it('scope sansMentor ne retourne que les marins sans mentor', function () {
     $mentor = Marin::factory()->create();
     $this->fcmMarin->assignerMentor($mentor);
-    $this->assertTrue($this->fcmMarin->hasMentor());
 
-    // Quand - Retirer le mentor
-    $this->fcmMarin->retirerMentor();
+    $fcmMarinSansMentor = FcmMarin::factory()->create([
+        'rh_marin_id' => Marin::factory()->create()->id,
+    ]);
 
-    // Alors
-    $this->assertFalse($this->fcmMarin->hasMentor());
-    $this->assertNull($this->fcmMarin->mentor_id);
-    $this->assertNull($this->fcmMarin->mentor);
+    $sansMentor = FcmMarin::sansMentor()->get();
+
+    $this->assertFalse($sansMentor->contains($this->fcmMarin->id));
+    $this->assertTrue($sansMentor->contains($fcmMarinSansMentor->id));
 });
+
+it('scope avecMentor filtre par mentor spécifique', function () {
+    $mentor1 = Marin::factory()->create();
+    $mentor2 = Marin::factory()->create();
+
+    $fcmMarin2 = FcmMarin::factory()->create([
+        'rh_marin_id' => Marin::factory()->create()->id,
+    ]);
+
+    $this->fcmMarin->assignerMentor($mentor1);
+    $fcmMarin2->assignerMentor($mentor2);
+
+    $supervises = FcmMarin::avecMentor($mentor1)->get();
+
+    $this->assertTrue($supervises->contains($this->fcmMarin->id));
+    $this->assertFalse($supervises->contains($fcmMarin2->id));
+});
+
+// ========================================
+// TESTS CÔTÉ MARIN (le mentor lui-même)
+// ========================================
+
+it('isMentor() retourne true si le marin supervise au moins un marin', function () {
+    $mentor = Marin::factory()->create();
+    $this->fcmMarin->assignerMentor($mentor);
+
+    $this->assertTrue($mentor->isMentor());
+});
+
+it('isMentor() retourne false si le marin ne supervise personne', function () {
+    $mentor = Marin::factory()->create();
+
+    $this->assertFalse($mentor->isMentor());
+});
+
+it('nombreMarinsSupervises() compte correctement', function () {
+    $mentor = Marin::factory()->create();
+
+    $fcmMarin2 = FcmMarin::factory()->create(['rh_marin_id' => Marin::factory()->create()->id]);
+    $fcmMarin3 = FcmMarin::factory()->create(['rh_marin_id' => Marin::factory()->create()->id]);
+
+    $this->fcmMarin->assignerMentor($mentor);
+    $fcmMarin2->assignerMentor($mentor);
+    $fcmMarin3->assignerMentor($mentor);
+
+    $this->assertEquals(3, $mentor->nombreMarinsSupervises());
+});
+
+it('est_mentor_de() retourne true si le marin supervise un marin donné', function () {
+    $mentor = Marin::factory()->create();
+    $this->fcmMarin->assignerMentor($mentor);
+
+    $this->assertTrue($mentor->est_mentor_de($this->marin));
+});
+
+it('est_mentor_de() retourne false pour un marin non supervisé', function () {
+    $mentor = Marin::factory()->create();
+    $autremarin = Marin::factory()->create();
+
+    $this->fcmMarin->assignerMentor($mentor);
+
+    $this->assertFalse($mentor->est_mentor_de($autremarin));
+});
+
+it('scope mentor sur Marin ne retourne que les marins qui sont mentors', function () {
+    $mentor = Marin::factory()->create();
+    $nonMentor = Marin::factory()->create();
+
+    $this->fcmMarin->assignerMentor($mentor);
+
+    $mentors = Marin::mentor()->get();
+
+    $this->assertTrue($mentors->contains($mentor->id));
+    $this->assertFalse($mentors->contains($nonMentor->id));
+});
+
+it('getMentors() retourne la collection des mentors du marin', function () {
+    $mentor1 = Marin::factory()->create();
+    $mentor2 = Marin::factory()->create();
+
+    $this->fcmMarin->assignerMentor($mentor1);
+    $this->fcmMarin->assignerMentor($mentor2);
+
+    $mentors = $this->marin->getMentors();
+
+    $this->assertCount(2, $mentors);
+    $this->assertTrue($mentors->contains($mentor1->id));
+    $this->assertTrue($mentors->contains($mentor2->id));
+});
+
+// ========================================
+// TEST TABLE PIVOT
+// ========================================
+
+it('la table pivot fcmcentral_fcm_marin_mentors est correctement alimentée', function () {
+    $mentor = Marin::factory()->create();
+
+    $this->fcmMarin->assignerMentor($mentor);
+
+    $this->assertDatabaseHas('fcmcentral_fcm_marin_mentors', [
+        'fcm_marin_id' => $this->fcmMarin->id,
+        'marin_id' => $mentor->id,
+    ]);
+});
+
+it('le retrait supprime bien la ligne pivot', function () {
+    $mentor = Marin::factory()->create();
+
+    $this->fcmMarin->assignerMentor($mentor);
+    $this->fcmMarin->retirerMentor($mentor);
+
+    $this->assertDatabaseMissing('fcmcentral_fcm_marin_mentors', [
+        'fcm_marin_id' => $this->fcmMarin->id,
+        'marin_id' => $mentor->id,
+    ]);
+});
+
+

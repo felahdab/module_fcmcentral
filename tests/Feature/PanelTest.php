@@ -225,7 +225,7 @@ it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', f
             TestAction::make('toggle_fcm')->table($marin),
             [
                 'cohorte_id' => $cohorte->uuid,
-                'mentor_id' => $mentor->uuid,
+                'mentors' => [$mentor->uuid],
             ]
         )
     ;
@@ -364,7 +364,7 @@ it('genere un  UserGeneratedEvent quand on assigne une cohorte a un marin suivi 
             $marin,
             [
                 'cohorte_id' => $cohorte->uuid,
-                'mentor_id' => null,
+                'mentors' => [],
                 'parcours_id' => null,
             ]
         )
@@ -402,7 +402,7 @@ it('genere un  UserGeneratedEvent quand on assigne un mentor a un marin suivi en
             $marin,
             [
                 'cohorte_id' => null,
-                'mentor_id' => $mentor->uuid,
+                'mentors' => [$mentor->uuid],
                 'parcours_id' => null,
             ]
         )
@@ -443,7 +443,7 @@ it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi e
             TestAction::make('toggle_fcm')->table($marin),
             [
                 'cohorte_id' => null,
-                'mentor_id' => null,
+                'mentors' => [],
                 'parcours_id' => $parcours->uuid,
             ]
         )
@@ -1430,7 +1430,7 @@ it('permet au mentor d acceeder au livret de FCM et à la fiche bilan de son men
         object_class: ObjectClasses::MARIN,
         object_uuid: $marin->uuid,
         detail: [
-            'mentor' => $mentor->uuid,
+            'mentors' => [$mentor->uuid],
         ]
     ));
 
@@ -1446,3 +1446,5 @@ it('permet au mentor d acceeder au livret de FCM et à la fiche bilan de son men
         ->test(FicheBilan::class, ['record' => $marin->id])
         ->assertSuccessful();
 });
+
+

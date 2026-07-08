@@ -116,7 +116,7 @@ class FicheBilan extends ViewRecord
             'specialite',
             'unite',
             'complementsFcm.cohorte',
-            'complementsFcm.mentor',
+            'complementsFcm.mentors',
             'etats.typeEtat',
         ])->find($this->marinId);
     }
@@ -928,3 +928,5 @@ class FicheBilan extends ViewRecord
         return $derniereDate;
     }
 }
+
+

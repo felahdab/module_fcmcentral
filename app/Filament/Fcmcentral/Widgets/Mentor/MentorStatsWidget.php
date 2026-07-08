@@ -59,7 +59,7 @@ class MentorStatsWidget extends BaseWidget
             return collect();
         }
 
-        $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
+        $marinIds = FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $currentMarin->id))
             ->pluck('rh_marin_id')
             ->toArray()
         ;
@@ -162,3 +162,5 @@ class MentorStatsWidget extends BaseWidget
         ];
     }
 }
+
+

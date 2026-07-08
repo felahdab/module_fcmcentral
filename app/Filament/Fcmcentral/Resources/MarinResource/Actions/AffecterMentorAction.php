@@ -3,7 +3,6 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Actions;
 
 use Filament\Actions\Action;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\Marin;
@@ -15,11 +14,12 @@ class AffecterMentorAction extends Action
     public static function make(?string $name = null): static
     {
         return parent::make($name)
-            ->modalHeading('Gestion du mentor')
+            ->modalHeading('Gestion des mentors')
             ->modalDescription(fn ($record) => $record->fullNameAndGrade)
             ->schema([
-                Select::make('mentor_id')
-                    ->label('Choisir un mentor')
+                Select::make('mentors')
+                    ->label('Choisir les mentors')
+                    ->multiple()
                     ->options(
                         Marin::query()
                             ->whereNull('deleted_at')
@@ -29,25 +29,19 @@ class AffecterMentorAction extends Action
                                 $m->uuid => ($m->grade?->libelle_court ?? '').' '.$m->prenom.' '.$m->nom,
                             ])
                     )
-                    ->searchable(),
-                // Forms\Components\Toggle::make('retirer_mentor')
-                //     ->label('Retirer le mentor')
-                //     ->visible(fn ($record) => $record->getMentor() !== null),
+                    ->searchable()
+                    ->default(fn ($record) => $record->complementsFcm?->mentors->pluck('uuid')->toArray() ?? []),
             ])
             ->action(function ($record, array $data) {
-                // if (!empty($data['retirer_mentor'])) {
-                //     $record->complementsFcm->update(['mentor_id' => null]);
-                // } elseif (!empty($data['mentor_id'])) {
-                if (!empty($data['mentor_id'])) {
+                if (isset($data['mentors'])) {
                     event(new UserGeneratedEvent(
                         UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
-                        auth()->user()->uuid,
+                        auth()->user()?->uuid,
                         ObjectClasses::MARIN,
                         $record->uuid,
-                        ['mentor' => $data['mentor_id']]
+                        ['mentors' => $data['mentors']]
                     ));
                 }
-            })
-        ;
+            });
     }
 }

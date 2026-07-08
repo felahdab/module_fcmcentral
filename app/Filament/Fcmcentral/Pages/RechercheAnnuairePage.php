@@ -145,14 +145,14 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                         );
                         event($event);
                     }
-                    if (Arr::get($data, 'mentor_id')) {
+                    if (!empty(Arr::get($data, 'mentors'))) {
                         $event = new UserGeneratedEvent(
                             UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
                             auth()->user()->uuid,
                             ObjectClasses::MARIN,
                             $marin->uuid,
                             [
-                                'mentor' => $data['mentor_id'],
+                                'mentors' => $data['mentors'],
                             ]
                         );
                         event($event);
@@ -205,3 +205,5 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
         ];
     }
 }
+
+

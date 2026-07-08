@@ -39,49 +39,17 @@ class FcmMarinFactory extends Factory
                 'date_inscription' => $this->faker->dateTimeBetween('-2 years', 'now')->format('Y-m-d'),
                 'objectifs' => $this->faker->sentences(3, true),
             ],
-            'cohorte_id' => null, // Sera assigné dans les tests si nécessaire
-            'mentor_id' => null,  // Sera assigné dans les tests si nécessaire
+            'cohorte_id' => null,
         ];
     }
 
     /**
      * Indicate that the FcmMarin has a mentor.
      */
-    public function avecMentor(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'mentor_id' => Marin::factory(),
-        ]);
-    }
-
-    /**
-     * Indicate that the FcmMarin belongs to a cohorte.
-     */
     public function avecCohorte(): static
     {
         return $this->state(fn (array $attributes) => [
             'cohorte_id' => Cohorte::factory(),
-        ]);
-    }
-
-    /**
-     * Indicate that the FcmMarin has both mentor and cohorte.
-     */
-    public function complet(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'mentor_id' => Marin::factory(),
-            'cohorte_id' => Cohorte::factory(),
-        ]);
-    }
-
-    /**
-     * Configure the factory for a specific mentor.
-     */
-    public function pourMentor(Marin $mentor): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'mentor_id' => $mentor->id,
         ]);
     }
 
@@ -177,3 +145,4 @@ class FcmMarinFactory extends Factory
 
 // // ✅ Créer plusieurs
 // $fcmMarins = FcmMarin::factory()->count(5)->avecMentor()->create();
+

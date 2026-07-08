@@ -57,7 +57,7 @@ class MarinResource extends Resource
         $currentMarin = Marin::fromCurrentUser();
 
         if ($currentMarin) {
-            return FcmMarin::where('mentor_id', $currentMarin->id)->count();
+            return FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $currentMarin->id))->count();
         }
 
         return '0';
@@ -178,18 +178,27 @@ class MarinResource extends Resource
                     ->toggleable()
                     ->placeholder('Non assignée'),
 
-                TextColumn::make('complementsFcm.mentor.nom')
-                    ->label('Mentor')
-                    ->formatStateUsing(
-                        fn ($record) => $record->getMentor()
-                        ? ($record->getMentor()->grade?->libelle_court ?? '').' '.$record->getMentor()->nom
-                        : 'Non assigné'
-                    )
-                   // ->searchable()
-                    ->placeholder('Non assigné')
+                TextColumn::make('mentors_affichage')
+                    ->label('Mentor(s)')
+                    ->state(function ($record) {
+                        $mentors = $record->complementsFcm?->mentors ?? collect();
+                        if ($mentors->isEmpty()) {
+                            return 'Non assigné';
+                        }
+
+                        return $mentors->map(fn ($m) => trim(($m->grade?->libelle_court ?? '').' '.$m->nom))->join(', ');
+                    })
                     ->badge()
-                    ->color(fn ($record) => $record->getMentor() ? 'success' : 'gray')
-                    ->icon(fn ($record) => $record->getMentor() ? 'heroicon-s-user-circle' : 'heroicon-o-user-circle')
+                    ->color(function ($record) {
+                        $mentors = $record->complementsFcm?->mentors ?? collect();
+
+                        return $mentors->isNotEmpty() ? 'success' : 'gray';
+                    })
+                    ->icon(function ($record) {
+                        $mentors = $record->complementsFcm?->mentors ?? collect();
+
+                        return $mentors->isNotEmpty() ? 'heroicon-s-user-circle' : 'heroicon-o-user-circle';
+                    })
                     ->action(
                         AffecterMentorAction::make('gerer_mentor')
                             ->visible(
@@ -385,3 +394,5 @@ class MarinResource extends Resource
         ];
     }
 }
+
+

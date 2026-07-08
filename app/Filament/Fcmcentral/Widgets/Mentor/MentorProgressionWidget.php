@@ -31,7 +31,7 @@ class MentorProgressionWidget extends ChartWidget
             return ['datasets' => [], 'labels' => []];
         }
 
-        $marinIds = FcmMarin::where('mentor_id', $currentMarin->id)
+        $marinIds = FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $currentMarin->id))
             ->pluck('rh_marin_id')
             ->toArray()
         ;
@@ -202,3 +202,5 @@ class MentorProgressionWidget extends ChartWidget
         };
     }
 }
+
+

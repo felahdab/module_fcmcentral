@@ -36,8 +36,9 @@ class ToggleFcmAction extends Action
                         ->label('Choisir la cohorte')
                         ->visible(fn () => auth()->user()->can('fcmcentral::attribuer.cohorte'))
                         ->options(Cohorte::query()->orderBy('libelle_long')->pluck('libelle_long', 'uuid')),
-                    Forms\Components\Select::make('mentor_id')
-                        ->label('Choisir un mentor')
+                    Forms\Components\Select::make('mentors')
+                        ->label('Choisir les mentors')
+                        ->multiple()
                         ->visible(fn () => auth()->user()->can('fcmcentral::attribuer.mentor'))
                         ->options(
                             Marin::query()
@@ -102,13 +103,13 @@ class ToggleFcmAction extends Action
                         ['cohorte' => $data['cohorte_id']]
                     ));
                 }
-                if (!empty($data['mentor_id'])) {
+                if (!empty($data['mentors'])) {
                     event(new UserGeneratedEvent(
                         UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
                         $record->uuid,
-                        ['mentor' => $data['mentor_id']]
+                        ['mentors' => $data['mentors']]
                     ));
                 }
                 if (!empty($data['parcours_id'])) {
@@ -124,3 +125,5 @@ class ToggleFcmAction extends Action
         ;
     }
 }
+
+
