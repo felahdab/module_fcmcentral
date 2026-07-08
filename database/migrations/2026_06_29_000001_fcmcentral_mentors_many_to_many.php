@@ -21,8 +21,8 @@ return new class extends Migration
             $table->foreign('marin_id')->references('id')->on('rh_marins')->onDelete('cascade');
         });
 
-        // 2. Migrer les mentor_id existants vers la table pivot (seulement si la colonne existe)
-        if (Schema::hasColumn('fcmcentral_fcm_marins', 'mentor_id')) {
+        // 2. Migrer les mentor_id existants vers la table pivot (ignoré en test, base toujours fraîche)
+        if (!app()->runningUnitTests() && Schema::hasColumn('fcmcentral_fcm_marins', 'mentor_id')) {
             $nbAvant = DB::table('fcmcentral_fcm_marins')->whereNotNull('mentor_id')->count();
 
             DB::table('fcmcentral_fcm_marins')
@@ -55,8 +55,6 @@ return new class extends Migration
                 }
                 $table->dropColumn('mentor_id');
             });
-        } else {
-           // echo "Migration mentors : colonne mentor_id absente (base fraîche), rien à migrer.\n";
         }
     }
 
