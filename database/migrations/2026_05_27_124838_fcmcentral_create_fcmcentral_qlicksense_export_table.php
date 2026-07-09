@@ -24,7 +24,9 @@ return new class extends Migration
             $table->string('gel_fcm', 50)->nullable();
             $table->string('vert_ppa_depuis_le', 50)->nullable();
             $table->integer('temps_dans_le_ppa')->nullable();
-            $table->decimal('progression_globale', 5, 2)->nullable();
+            $table->decimal('taux_global', 5, 2)->nullable()->default(0);
+            $table->decimal('taux_stage', 5, 2)->nullable()->default(0);
+            $table->decimal('taux_activite', 5, 2)->nullable()->default(0);
             $table->integer('stage_manquants')->nullable();
             $table->uuid('mentor_uuid')->nullable();
             $table->string('mentor_grade', 50)->nullable();

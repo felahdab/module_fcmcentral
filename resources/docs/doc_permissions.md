@@ -23,11 +23,16 @@ Ces permissions contrôlent des **fonctionnalités spécifiques** de l'interface
 
 | Permission | Effet dans l'interface |
 |---|---|
-| `fcmcentral::voir_tous_les_marins` | Dans la liste des marins, l'utilisateur voit **tous** les marins en FCM. Sans cette permission, il ne voit que les marins dont il est mentor ou qui sont dans sa cohorte. |
+| `rh::voir_tous_les_marins` | Dans la liste des marins, l'utilisateur voit **tous** les marins en FCM. Sans cette permission, il ne voit que les marins dont il est mentor ou qui sont dans sa cohorte. |
 | `fcmcentral::recherche_annuaire` | Accès à la page **Recherche Annuaire** (recherche LDAP d'un marin pour l'intégrer en FCM). |
 | `fcmcentral::change_configuration_module` | Accès à la page **Configuration** du module (paramètres globaux). Réservé administrateur. |
 | `fcmcentral::voir_journal_des_evenements` | Accès à la ressource **Journal des événements** (StoredEvent). Affiche l'historique de toutes les actions traçées. |
 | `fcmcentral::exporter_csv` | Bouton **Exporter CSV** visible dans la liste des marins. |
+
+!!! note "Remarque"
+
+    Le filtrage des marins affichés à l'utilisateur du module FCM est défini par les règles du module RH. Pour en savoir plus, voir la documentation
+    de ce module: [Module RH](https://pprod-ffast.intradef.gouv.fr/florian/docs/RH/architecture_logicielle/#attribution-dune-unite-a-un-utilisateur)
 
 ### Gestion FCM d'un marin
 
@@ -52,10 +57,10 @@ Ces permissions contrôlent des **fonctionnalités spécifiques** de l'interface
 |---|---|
 | `fcmcentral::livret.voir` | Accès à la page **Livret FCM** d'un marin. Sans cette permission, la page renvoie une erreur d'autorisation. |
 | `fcmcentral::livret.telecharger` | Bouton **Télécharger le livret PDF** visible dans la fiche marin. |
-| `fcmcentral::livret.proposer` | *(Déclaré dans le seeder, pas encore câblé dans l'interface — prévu pour la validation d'éléments du parcours marin).* |
-| `fcmcentral::livret.valider` | *(Déclaré dans le seeder, pas encore câblé — prévu pour la validation définitive d'un élément.)* |
-| `fcmcentral::livret.annuler` | *(Déclaré dans le seeder, pas encore câblé — prévu pour annuler une validation.)* |
-| `fcmcentral::livret.refuser` | *(Déclaré dans le seeder, pas encore câblé — prévu pour refuser un élément proposé.)* |
+| `fcmcentral::livret.proposer` | Permet à l'utilisateur de saisir des propositions de validation d'éléments du parcours depuis le livret |
+| `fcmcentral::livret.valider` | Permet à l'utilisateur de saisir des validations, ou d'accepter des propositions de validation dans le livret |
+| `fcmcentral::livret.annuler` | Permet à l'utilisateur de revenir sur la validation d'un élément du parcours depuis le livret |
+| `fcmcentral::livret.refuser` | Permet à l'utilisateur de refuser une proposition de validation faite précédemment |
 
 ### Fiche Bilan
 
@@ -157,7 +162,7 @@ fcmcentral::marin.index
 > Gère les marins en FCM : mise en FCM, attribution mentors/cohorte/parcours, jalons, notes, états.
 
 ```
-fcmcentral::voir_tous_les_marins
+rh::voir_tous_les_marins
 fcmcentral::recherche_annuaire
 fcmcentral::marin.suivreEnFcm
 fcmcentral::fcm.admin
@@ -217,28 +222,3 @@ fcmcentral::typeNote.update
 ```
 
 ---
-
-## Permissions déclarées mais non câblées (à ignorer pour l'instant)
-
-Ces permissions existent dans le seeder mais **ne sont vérifiées nulle part dans le code** :
-
-| Permission | Statut |
-|---|---|
-| `fcmcentral::livret.proposer` | Prévu, non implémenté |
-| `fcmcentral::livret.valider` | Prévu, non implémenté |
-| `fcmcentral::livret.annuler` | Prévu, non implémenté |
-| `fcmcentral::livret.refuser` | Prévu, non implémenté |
-| `fcmcentral::marin.suivreEnFcm` | **Attention** : le seeder déclare `fcmcentral::marin.suivreEnFcm` mais le code vérifie aussi `fcmcentral::suivre_en_fcm` (format ancien, dans un widget commenté). Utiliser `fcmcentral::marin.suivreEnFcm`. |
-
----
-
-## Permissions référencées dans le code mais absentes du seeder
-
-Ces permissions sont vérifiées dans l'interface mais **pas créées par le seeder** — elles doivent être ajoutées manuellement ou via migration si utilisées :
-
-| Permission | Où elle est vérifiée |
-|---|---|
-| `fcmcentral::admin` | Widget `TestMarinRolesPermissionsWidget` (commenté — peut être ignoré) |
-| `fcmcentral::suivre_en_fcm` | Widget `TestMarinRolesPermissionsWidget` (commenté — peut être ignoré) |
-
-

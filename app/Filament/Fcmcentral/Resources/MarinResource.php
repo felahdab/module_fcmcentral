@@ -50,17 +50,17 @@ class MarinResource extends Resource
      */
     public static function getNavigationBadge(): ?string
     {
-        if (auth()->user()->can('fcmcentral::voir_tous_les_marins')) {
-            return (string) Marin::enFcm()->count();
-        }
+        $firstPart = (string) Marin::enFcm()->count();
 
         $currentMarin = Marin::fromCurrentUser();
 
+        $nbMarinsMentores = 0;
         if ($currentMarin) {
-            return FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $currentMarin->id))->count();
+            $nbMarinsMentores = FcmMarin::whereHas('mentors', fn ($q) => $q->where('marin_id', $currentMarin->id))->count();
         }
+        $secondPart = $nbMarinsMentores ? '/' . (string)$nbMarinsMentores : '';
 
-        return '0';
+        return $firstPart . $secondPart;
     }
 
     public static function form(Schema $schema): Schema

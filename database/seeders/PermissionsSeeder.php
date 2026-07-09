@@ -18,11 +18,6 @@ class PermissionsSeeder extends Seeder
         ]);
 
         Permission::firstOrCreate([
-            'name' => 'fcmcentral::voir_tous_les_marins',
-            'guard_name' => 'web',
-        ]);
-
-        Permission::firstOrCreate([
             'name' => 'fcmcentral::change_configuration_module',
             'guard_name' => 'web',
         ]);

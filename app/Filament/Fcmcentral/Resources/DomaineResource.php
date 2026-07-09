@@ -40,6 +40,7 @@ class DomaineResource extends Resource
                 TextInput::make('code')
 
                     ->label('Code')
+                    ->required()
                 // ->maxLength(150)
                 ,
                 Select::make('color')
