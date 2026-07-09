@@ -4,6 +4,7 @@ namespace Modules\FcmCentral\Listeners\Save;
 
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Models\Marin;
@@ -29,8 +30,10 @@ class MentorMarinListener
 
         Log::info('MentorMarinListener appelé', ['marinUuid' => $marin->uuid]);
 
+        $mentorsUUIDs = Arr::wrap($data['mentor']);
+
         // Résoudre les UUIDs des mentors en IDs
-        $mentorIds = Marin::whereIn('uuid', $data['mentors'] ?? [])
+        $mentorIds = Marin::whereIn('uuid', $mentorsUUIDs)
             ->pluck('id')
             ->toArray();
 

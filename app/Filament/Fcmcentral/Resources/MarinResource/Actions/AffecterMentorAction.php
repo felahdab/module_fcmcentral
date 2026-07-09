@@ -39,7 +39,7 @@ class AffecterMentorAction extends Action
                         auth()->user()?->uuid,
                         ObjectClasses::MARIN,
                         $record->uuid,
-                        ['mentors' => $data['mentors']]
+                        ['mentor' => $data['mentors']]
                     ));
                 }
             });

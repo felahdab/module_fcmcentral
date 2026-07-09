@@ -109,7 +109,7 @@ class ToggleFcmAction extends Action
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
                         $record->uuid,
-                        ['mentors' => $data['mentors']]
+                        ['mentor' => $data['mentors']]
                     ));
                 }
                 if (!empty($data['parcours_id'])) {

@@ -1430,7 +1430,7 @@ it('permet au mentor d acceeder au livret de FCM et à la fiche bilan de son men
         object_class: ObjectClasses::MARIN,
         object_uuid: $marin->uuid,
         detail: [
-            'mentors' => [$mentor->uuid],
+            'mentor' => [$mentor->uuid],
         ]
     ));
 
@@ -1446,5 +1446,3 @@ it('permet au mentor d acceeder au livret de FCM et à la fiche bilan de son men
         ->test(FicheBilan::class, ['record' => $marin->id])
         ->assertSuccessful();
 });
-
-
