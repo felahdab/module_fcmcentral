@@ -88,6 +88,7 @@ class Parcours extends Model
         return $this->livret_pdf
             ? Storage::disk('public')->url($this->livret_pdf)
             : null;
+            
     }
 
     // //////////////////
