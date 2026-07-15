@@ -1,3 +1,25 @@
+## 0.2.11 (July 15, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.10 –> 0.2.11
+- Ajout des fichiers pour le pipeline de qualité du code sur PICSEL
+- Correction bug dans le formulaire d'édition et de création des Domaines. Suppresion de la permission fcmentral::voir_tous_les_marins. Ajustement des règles d'affichage du badge dans le menu Gestion des Marins. Rassemblement des 3 migrations qlik. Mise à jour de la documentation des permissions et déplacement de la documentation technique dans un sous dossier "Pour Le Développeur".
+- Ajustement pour garantir la compatibilité entre le listener et les évènements émis avant le passage à plusieurs mentors. Suppression des tests de migration inutiles. Passage à une migration de données en deux étapes: ici, on se contente de créer la nouvelle table et de copier les références aux mentors. La suppression de la colonne devenue inutile et des données qu'elle contient se fera lors de la montée vers la version suivante.
+- Implements art #849337 : test unitaire eviter de  faire test de veif si mentor id exist
+- Implement arts #849397 : Commit toutes les branches en 1 branche
+- Implements art #782532 : modification QLicksense  export
+- Implements art #807512 : corection group Test FcmCentral
+- Implements art #807512 : Test unitaire  page stages ok
+- Implements art #807512 : Creation page stats pour aide suivi FCM , export en csv data
+- Implements art #806605 : doc permissions
+- Implements art #806605 : Creation  revue des fonctions dans les models, etude des doublons et fonctions non utilisees a supprimer
+- Implements art #803243 : Ajout Test Unitaire pour le Parcours Resource avec Relations Manager e+ figer
+- Implement art #804831 : Suppression ancien SeederTestRole
+- Implements art #804831 : correction test unitaire pour les mentors + modifcations autres
+- Implements art #803243 : Modification relation ManyToMany MentorS + test Unitaires
+- Implements art  #803243 : Modification bug Affectations, Competences avec code couleur refonte UUI/UX concernant SavoirfaireRelationsManager
+- Implements art #782532 : Modification Qliksense avec ajout parcours JSON
+- Implements art #782532 : correction de fautes orthographe
+- Implements art #782532 : Creation d'une commande pour exporter les datas de la FCM pour BCF dans une table fcmcentral_qlicksense_exports
+
 ## 0.2.10 (June 10, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.9 –> 0.2.10
 - Ajout d'une page d index dans la documentation.
