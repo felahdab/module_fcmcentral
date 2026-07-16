@@ -83,13 +83,32 @@ class Parcours extends Model
     }
 
     // / PDF
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::updating(function (self $parcours) {
+            if ($parcours->isDirty('livret_pdf') && $parcours->getOriginal('livret_pdf')) {
+                Storage::disk('s3-public')->delete($parcours->getOriginal('livret_pdf'));
+            }
+        });
+
+        static::deleting(function (self $parcours) {
+            if ($parcours->livret_pdf) {
+                Storage::disk('s3-public')->delete($parcours->livret_pdf);
+            }
+        });
+    }
+
+    // / PDF
     public function getLivretPdfUrlAttribute(): ?string
     {
         return $this->livret_pdf
-            ? Storage::disk('public')->url($this->livret_pdf)
+            ? Storage::disk('s3-public')->url($this->livret_pdf)
             : null;
-            
     }
+
+
 
     // //////////////////
     // / Serialisation //
