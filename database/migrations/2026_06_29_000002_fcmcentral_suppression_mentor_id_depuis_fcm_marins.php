@@ -9,14 +9,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('fcmcentral_fcm_marins', function (Blueprint $table) {
-            try {
-                $table->dropForeign(['mentor_id']);
-            } catch (\Throwable $e) {
-                
-            }
-            $table->dropColumn('mentor_id');
-        });
+        if (Schema::hasColumn('fcmcentral_fcm_marins', 'mentor_id')) {
+            Schema::table('fcmcentral_fcm_marins', function (Blueprint $table) {
+                try {
+                    $table->dropForeign(['mentor_id']);
+                } catch (\Throwable) {
+                    //
+                }
+
+                $table->dropColumn('mentor_id');
+            });
+        }
     }
 
     public function down(): void
@@ -26,15 +29,13 @@ return new class extends Migration
         });
 
         DB::table('fcmcentral_fcm_marin_mentors')
-        ->select('fcm_marin_id', DB::raw('MIN(marin_id) as marin_id'))
-        ->groupBy('fcm_marin_id')
-        ->orderBy('fcm_marin_id')
-        ->each(function ($row) {
-            DB::table('fcmcentral_fcm_marins')
-                ->where('id', $row->fcm_marin_id)
-                ->update(['mentor_id' => $row->marin_id]);
-        });
+            ->select('fcm_marin_id', DB::raw('MIN(marin_id) as marin_id'))
+            ->groupBy('fcm_marin_id')
+            ->orderBy('fcm_marin_id')
+            ->each(function ($row) {
+                DB::table('fcmcentral_fcm_marins')
+                    ->where('id', $row->fcm_marin_id)
+                    ->update(['mentor_id' => $row->marin_id]);
+            });
     }
 };
-
-
