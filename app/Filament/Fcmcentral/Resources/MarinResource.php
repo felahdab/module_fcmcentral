@@ -78,7 +78,7 @@ class MarinResource extends Resource
     {
         return $table
             ->defaultSort('nom', 'asc')
-            ->defaultPaginationPageOption(50)
+            ->defaultPaginationPageOption(25)
             ->paginationPageOptions([25, 50, 100])
             ->headerActions([
                 // Telechargement CSV
