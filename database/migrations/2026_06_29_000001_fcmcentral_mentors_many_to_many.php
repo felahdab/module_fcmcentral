@@ -21,29 +21,30 @@ return new class extends Migration
             $table->foreign('marin_id')->references('id')->on('rh_marins')->onDelete('cascade');
         });
 
+        // 2. Migrer les mentor_id existants vers la table pivot (seulement si la colonne existe)
+        if (Schema::hasColumn('fcmcentral_fcm_marins', 'mentor_id')) {
+            $nbAvant = DB::table('fcmcentral_fcm_marins')->whereNotNull('mentor_id')->count();
 
-        // 2. Création des enregistrements correspondant au champs mentor_id dans la table pivot
-        $nbAvant = DB::table('fcmcentral_fcm_marins')->whereNotNull('mentor_id')->count();
+            DB::table('fcmcentral_fcm_marins')
+                ->whereNotNull('mentor_id')
+                ->select('id', 'mentor_id')
+                ->orderBy('id')
+                ->each(function ($row) {
+                    DB::table('fcmcentral_fcm_marin_mentors')->insertOrIgnore([
+                        'fcm_marin_id' => $row->id,
+                        'marin_id'     => $row->mentor_id,
+                        'created_at'   => now(),
+                        'updated_at'   => now(),
+                    ]);
+                });
 
-        DB::table('fcmcentral_fcm_marins')
-            ->whereNotNull('mentor_id')
-            ->select('id', 'mentor_id')
-            ->orderBy('id')
-            ->each(function ($row) {
-                DB::table('fcmcentral_fcm_marin_mentors')->insertOrIgnore([
-                    'fcm_marin_id' => $row->id,
-                    'marin_id'     => $row->mentor_id,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
-                ]);
-            });
+            $nbApres = DB::table('fcmcentral_fcm_marin_mentors')->count();
 
-        $nbApres = DB::table('fcmcentral_fcm_marin_mentors')->count();
+            echo "Migration mentors : {$nbAvant} mentor_id trouvés → {$nbApres} lignes dans la pivot.\n";
 
-        echo "Migration mentors : {$nbAvant} mentor_id trouvés → {$nbApres} lignes dans la pivot.\n";
-
-        if ($nbAvant > 0 && $nbApres === 0) {
-            logger()->error("Migration mentor : les données n'ont pas été transférées correctement.");
+            if ($nbAvant > 0 && $nbApres === 0) {
+                logger()->error("Migration mentor : les données n'ont pas été transférées correctement.");
+            }
         }
     }
 
@@ -52,5 +53,3 @@ return new class extends Migration
         Schema::dropIfExists('fcmcentral_fcm_marin_mentors');
     }
 };
-
-
