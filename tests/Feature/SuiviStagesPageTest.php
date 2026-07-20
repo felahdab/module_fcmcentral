@@ -5,9 +5,8 @@ use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
-use Modules\FcmCentral\Filament\Fcmcentral\Pages\SuiviStagesPage;
+use Modules\FcmCentral\Filament\Fcmcentral\Pages\Suivi\SuiviStagesPage;
 use Modules\FcmCentral\Models\FcmMarin;
 use Modules\FcmCentral\Models\MarinParcours;
 use Modules\FcmCentral\Models\Parcours;
@@ -119,8 +118,9 @@ function creerMarinParcoursAvecStage(
 
 beforeEach(function () {
     $this->admin = User::factory()->create();
+    $this->admin->admin = 1;
+    $this->admin->save();
     Filament::setCurrentPanel(Filament::getPanel('FCM Central'));
-    Gate::before(fn () => true);
 });
 
 // ============================================================
