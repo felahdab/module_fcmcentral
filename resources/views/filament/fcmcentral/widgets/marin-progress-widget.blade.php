@@ -38,17 +38,26 @@
             <p class="text-xs text-red-400">DEBUG → progress={{ $progress }} | total={{ $progressData['total'] }} | completed={{ $progressData['completed'] }}</p>
         @endif --}}
 
-            <div class="flex justify-center">
+            <div class="flex justify-center gap-3">
                 <x-filament::button
                     tag="a"
                     href="{{ \Modules\FcmCentral\Filament\Fcmcentral\Pages\MonLivretDeFcm::getUrl() }}"
                     color="primary">
                     Voir mon livret FCM
                 </x-filament::button>
+
+                @if ($pdfUrl = $this->getPdfUrl())
+                    <x-filament::button
+                        tag="a"
+                        href="{{ $pdfUrl }}"
+                        target="_blank"
+                        color="success"
+                        icon="heroicon-o-document-arrow-down">
+                        Livret PDF du parcours
+                    </x-filament::button>
+                @endif
             </div>
         </div>
 
     </x-filament::section>
 </x-filament-widgets::widget>
-
-

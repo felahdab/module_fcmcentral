@@ -28,6 +28,16 @@ class MarinProgressWidget extends Widget
         return null != $marin?->complements_fcm?->donnees_du_parcours;
     }
 
+    public function getPdfUrl(): ?string
+    {
+        return $this->getMarin()
+            ?->complements_fcm
+            ?->donnees_du_parcours
+            ?->parcours_serialise
+            ?->parcoursModel
+            ?->livret_pdf_url;
+    }
+
     public function getProgressData(): array
     {
         $marin = $this->getMarin();
