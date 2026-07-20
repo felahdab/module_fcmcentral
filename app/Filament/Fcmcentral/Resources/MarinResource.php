@@ -264,7 +264,7 @@ class MarinResource extends Resource
                     ->label('Unité')
                     ->options(Unite::query()->orderBy('libelle_long')->pluck('libelle_long', 'id')),
                 SelectFilter::make('lieu_unite')
-                    ->label('Lieu')
+                    ->label('FPS')
                     ->options(LieuUnite::query()->orderBy('libelle_long')->pluck('libelle_long', 'id'))
                     ->query(function (Builder $query, array $data): Builder {
                         if (empty($data['value'])) {

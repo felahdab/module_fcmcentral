@@ -3,6 +3,8 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages;
 
 use Filament\Resources\Pages\ViewRecord;
+//use Filament\Schemas\Components\Callout;
+use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -61,11 +63,15 @@ class LivretDeFcmLight extends ViewRecord
         return [];
     }
 
+     
     public function form(Schema $schema): Schema
     {
         return $schema
             ->columns(1)
             ->components([
+                Html::make('<div style="background-color:#f59e0b;color:#1c1917;padding:0.75rem 1rem;border-radius:0.5rem;font-weight:600;">⚠️ Ce marin est actuellement en gel.</div>')
+                    ->visible(fn () => $this->record->estGele()),
+
                 Section::make(fn () => 'Livret de '.($this->record->nom.' '.$this->record->prenom))
                     // ->columns(4)
                     // ->columnSpanFull()
@@ -80,6 +86,7 @@ class LivretDeFcmLight extends ViewRecord
             ])
         ;
     }
+
 
     protected function authorizeAccess(): void {}
 
