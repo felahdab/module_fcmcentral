@@ -20,6 +20,7 @@ class FcmMarin extends Model
     protected $fillable = [
         'rh_marin_id',
         'data',
+        'documents_annexes',
         'cohorte_id',
         'date_sedimentation',
         'date_fcm',
@@ -29,6 +30,7 @@ class FcmMarin extends Model
 
     protected $casts = [
         'data' => 'array',
+        'documents_annexes' => 'array',
     ];
 
     // Relations
@@ -205,5 +207,3 @@ class FcmMarin extends Model
         return FcmMarinFactory::new();
     }
 }
-
-
