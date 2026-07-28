@@ -119,5 +119,32 @@ class PermissionsSeeder extends Seeder
             'name' => 'fcmcentral::voir_journal_des_evenements',
             'guard_name' => 'web',
         ]);
+
+        // Pages de suivi / statistiques
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::suivi.stage',
+            'guard_name' => 'web',
+        ]);
+
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::suivi.ead',
+            'guard_name' => 'web',
+        ]);
+
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::suivi.savoirfaire',
+            'guard_name' => 'web',
+        ]);
+
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::suivi.competence',
+            'guard_name' => 'web',
+        ]);
+
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::suivi.objectif',
+            'guard_name' => 'web',
+        ]);
+        
     }
 }

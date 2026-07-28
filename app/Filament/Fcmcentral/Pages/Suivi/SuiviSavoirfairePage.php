@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\FcmCentral\Filament\Fcmcentral\Pages;
+namespace Modules\FcmCentral\Filament\Fcmcentral\Pages\Suivi;
 
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -16,23 +16,30 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Response;
 use Modules\FcmCentral\Models\MarinParcours;
 use Modules\FcmCentral\Models\Parcours;
+use Modules\RH\Models\LieuUnite;
 
-class SuiviStagesPage extends Page implements HasForms, HasTable
+class SuiviSavoirfairePage extends Page implements HasForms, HasTable
 {
     use InteractsWithForms;
     use InteractsWithTable;
 
-    protected string $view = 'fcmcentral::filament.fcmcentral.pages.suivi-stages';
-    protected static string|\UnitEnum|null $navigationGroup = 'Marins';
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-academic-cap';
-    protected static ?string $navigationLabel = 'Suivi des Stages';
-    protected static ?int $navigationSort = 5;
+    protected string $view = 'fcmcentral::filament.fcmcentral.pages.suivi.suivi-savoirfaire';
+    protected static string|\UnitEnum|null $navigationGroup = 'Suivi';
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-wrench-screwdriver';
+    protected static ?string $navigationLabel = 'Suivi des Savoirfaire';
+    protected static ?int $navigationSort = 7;
 
     public array $data = [];
     public ?string $selectedParcoursId = null;
-    public ?string $selectedStageUuid = null;
+    public ?string $selectedSavoirfaireUuid = null;
     public ?string $selectedStatut = null;
-    public string $activeTab = 'stages';
+    public ?string $selectedLieuId = null;
+    public string $activeTab = 'savoirfaire';
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        return auth()->check() && auth()->user()->can('fcmcentral::suivi.savoirfaire');
+    }
 
     public function mount(): void
     {
@@ -55,8 +62,8 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
                     ->live()
                     ->afterStateUpdated(function (mixed $state): void {
                         $this->selectedParcoursId = $state;
-                        $this->selectedStageUuid = null;
-                        $this->data['selectedStageUuid'] = null;
+                        $this->selectedSavoirfaireUuid = null;
+                        $this->data['selectedSavoirfaireUuid'] = null;
                         $this->resetTable();
                     }),
             ]);
@@ -66,7 +73,7 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
     {
         return $schema
             ->statePath('data')
-            ->columns(3)
+            ->columns(4)
             ->components([
                 Select::make('selectedParcoursId')
                     ->label('Parcours')
@@ -76,23 +83,34 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
                     ->live()
                     ->afterStateUpdated(function (mixed $state): void {
                         $this->selectedParcoursId = $state;
-                        $this->selectedStageUuid = null;
+                        $this->selectedSavoirfaireUuid = null;
                         $this->selectedStatut = null;
-                        $this->data['selectedStageUuid'] = null;
+                        $this->data['selectedSavoirfaireUuid'] = null;
                         $this->data['selectedStatut'] = null;
                         $this->resetTable();
                     }),
 
-                Select::make('selectedStageUuid')
-                    ->label('Stage')
-                    ->placeholder('Tous les stages')
-                    ->options(fn () => $this->buildStageOptions())
+                Select::make('selectedLieuId')
+                    ->label('FPS')
+                    ->placeholder('Tous les FPS')
+                    ->options(fn () => LieuUnite::orderBy('libelle_court')->pluck('libelle_court', 'id')->all())
+                    ->searchable()
+                    ->live()
+                    ->afterStateUpdated(function (mixed $state): void {
+                        $this->selectedLieuId = $state;
+                        $this->resetTable();
+                    }),
+
+                Select::make('selectedSavoirfaireUuid')
+                    ->label('Savoirfaire')
+                    ->placeholder('Tous les savoirfaire')
+                    ->options(fn () => $this->buildSavoirfaireOptions())
                     ->searchable()
                     ->live()
                     ->disabled(fn () => blank($this->selectedParcoursId))
                     ->helperText(fn () => blank($this->selectedParcoursId) ? 'Choisissez d\'abord un parcours' : null)
                     ->afterStateUpdated(function (mixed $state): void {
-                        $this->selectedStageUuid = $state;
+                        $this->selectedSavoirfaireUuid = $state;
                         $this->selectedStatut = null;
                         $this->data['selectedStatut'] = null;
                         $this->resetTable();
@@ -107,8 +125,8 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
                         'non_effectue' => 'Non effectué',
                     ])
                     ->live()
-                    ->disabled(fn () => blank($this->selectedStageUuid))
-                    ->helperText(fn () => blank($this->selectedStageUuid) ? 'Choisissez d\'abord un stage' : null)
+                    ->disabled(fn () => blank($this->selectedSavoirfaireUuid))
+                    ->helperText(fn () => blank($this->selectedSavoirfaireUuid) ? 'Choisissez d\'abord un savoirfaire' : null)
                     ->afterStateUpdated(function (mixed $state): void {
                         $this->selectedStatut = $state;
                         $this->resetTable();
@@ -116,7 +134,7 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             ]);
     }
 
-    public function buildStageOptions(): array
+    public function buildSavoirfaireOptions(): array
     {
         if (blank($this->selectedParcoursId)) {
             return [];
@@ -133,10 +151,10 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
         foreach ($parcours->affectations as $aff) {
             foreach ($aff->competences as $comp) {
                 foreach ($comp->competenceSavoirfaires as $csf) {
-                    if ($csf->savoirfaireType?->code !== 'S') continue;
                     if (!$csf->uuid) continue;
                     $options[$csf->uuid] = implode(' — ', array_filter([
                         $aff->code,
+                        $csf->savoirfaireType?->code,
                         $csf->savoirfaire?->code,
                         $csf->libelle_court ?: $csf->savoirfaire?->libelle_court,
                     ]));
@@ -154,19 +172,19 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
         $this->activeTab = $tab;
     }
 
-    public function selectStageAndShowMarins(string $uuid): void
+    public function selectSavoirfaireAndShowMarins(string $uuid): void
     {
-        $this->selectedStageUuid = $uuid;
-        $this->data['selectedStageUuid'] = $uuid;
+        $this->selectedSavoirfaireUuid = $uuid;
+        $this->data['selectedSavoirfaireUuid'] = $uuid;
         $this->activeTab = 'marins';
         $this->resetTable();
     }
 
-    public function clearStageFilter(): void
+    public function clearSavoirfaireFilter(): void
     {
-        $this->selectedStageUuid = null;
+        $this->selectedSavoirfaireUuid = null;
         $this->selectedStatut = null;
-        $this->data['selectedStageUuid'] = null;
+        $this->data['selectedSavoirfaireUuid'] = null;
         $this->data['selectedStatut'] = null;
         $this->resetTable();
     }
@@ -227,7 +245,7 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             ->emptyStateDescription(
                 blank($this->selectedParcoursId)
                     ? 'Sélectionnez un parcours pour voir les marins.'
-                    : 'Aucun marin ne possède ce stage dans son parcours.'
+                    : 'Aucun marin ne possède ce savoirfaire dans son parcours.'
             )
             ->emptyStateIcon('heroicon-o-user-group')
             ->paginated([25, 50, 100]);
@@ -242,13 +260,12 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             'parcours_serialise',
         ])->whereNotNull('parcoursmarin');
 
-        // Retourner 0 résultats si aucun filtre sélectionné
-        if (blank($this->selectedParcoursId) && blank($this->selectedStageUuid)) {
+        if (blank($this->selectedParcoursId) && blank($this->selectedSavoirfaireUuid)) {
             return $query->whereRaw('1 = 0');
         }
 
-        if (filled($this->selectedStageUuid)) {
-            $uuid = $this->selectedStageUuid;
+        if (filled($this->selectedSavoirfaireUuid)) {
+            $uuid = $this->selectedSavoirfaireUuid;
             $query->whereRaw(
                 "JSON_SEARCH(parcoursmarin, 'one', ?, null, '$.affectations[*].competences[*].competenceSavoirfaires[*].uuid') IS NOT NULL",
                 [$uuid]
@@ -257,8 +274,11 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             $query->whereHas('parcours_serialise', fn (Builder $q) => $q->where('parcours_id', $this->selectedParcoursId));
         }
 
-        // Filtre statut : PHP-level (JSON imbriqué non filtrable proprement en SQL)
-        if (filled($this->selectedStatut) && filled($this->selectedStageUuid)) {
+        if (filled($this->selectedLieuId)) {
+            $query->whereHas('fcmMarin.marin.unite.lieuUnite', fn (Builder $q) => $q->where('id', $this->selectedLieuId));
+        }
+
+        if (filled($this->selectedStatut) && filled($this->selectedSavoirfaireUuid)) {
             $matchingIds = $query->get(['id', 'parcoursmarin'])
                 ->filter(fn (MarinParcours $mp) => $this->matchesStatut($mp))
                 ->pluck('id')
@@ -272,14 +292,14 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
 
     protected function matchesStatut(MarinParcours $record): bool
     {
-        if (blank($this->selectedStatut) || blank($this->selectedStageUuid)) {
+        if (blank($this->selectedStatut) || blank($this->selectedSavoirfaireUuid)) {
             return true;
         }
 
         $json = $record->parcoursmarin;
         if (!$json) return $this->selectedStatut === 'non_effectue';
 
-        $csf = $this->findCsfByUuid($json, $this->selectedStageUuid);
+        $csf = $this->findCsfByUuid($json, $this->selectedSavoirfaireUuid);
         if (!$csf) return $this->selectedStatut === 'non_effectue';
 
         return match ($this->selectedStatut) {
@@ -295,8 +315,8 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
         $json = $record->parcoursmarin;
         if (!$json) return '—';
 
-        if (filled($this->selectedStageUuid)) {
-            $csf = $this->findCsfByUuid($json, $this->selectedStageUuid);
+        if (filled($this->selectedSavoirfaireUuid)) {
+            $csf = $this->findCsfByUuid($json, $this->selectedSavoirfaireUuid);
             if (!$csf) return '—';
             return match (true) {
                 ($csf['etat_valid'] ?? false) === true  => 'Effectué',
@@ -305,26 +325,25 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             };
         }
 
-        $stages = $this->extractStages($json);
-        $total = count($stages);
+        $items = $this->extractSavoirfaires($json);
+        $total = count($items);
         if ($total === 0) return '—';
-        $effectues = count(array_filter($stages, fn ($s) => ($s['etat_valid'] ?? false) === true));
-        return "{$effectues}/{$total} stages";
+        $effectues = count(array_filter($items, fn ($s) => ($s['etat_valid'] ?? false) === true));
+        return "{$effectues}/{$total} savoirfaire";
     }
 
     // ── Export CSV ────────────────────────────────────────────────────────────
 
     protected function streamCsvResponse(): mixed
     {
-        // Construire la requête selon les filtres actifs
         $query = MarinParcours::with([
             'fcmMarin.marin.grade',
             'fcmMarin.marin.specialite',
             'fcmMarin.marin.unite',
         ])->whereNotNull('parcoursmarin');
 
-        if (filled($this->selectedStageUuid)) {
-            $uuid = $this->selectedStageUuid;
+        if (filled($this->selectedSavoirfaireUuid)) {
+            $uuid = $this->selectedSavoirfaireUuid;
             $query->whereRaw(
                 "JSON_SEARCH(parcoursmarin, 'one', ?, null, '$.affectations[*].competences[*].competenceSavoirfaires[*].uuid') IS NOT NULL",
                 [$uuid]
@@ -333,8 +352,11 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             $query->whereHas('parcours_serialise', fn (Builder $q) => $q->where('parcours_id', $this->selectedParcoursId));
         }
 
-        // Appliquer le filtre statut en PHP (même logique que buildMarinsQuery)
-        if (filled($this->selectedStatut) && filled($this->selectedStageUuid)) {
+        if (filled($this->selectedLieuId)) {
+            $query->whereHas('fcmMarin.marin.unite.lieuUnite', fn (Builder $q) => $q->where('id', $this->selectedLieuId));
+        }
+
+        if (filled($this->selectedStatut) && filled($this->selectedSavoirfaireUuid)) {
             $matchingIds = $query->get(['id', 'parcoursmarin'])
                 ->filter(fn (MarinParcours $mp) => $this->matchesStatut($mp))
                 ->pluck('id')
@@ -351,13 +373,13 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             default        => 'tous',
         };
 
-        $filename = 'stages-marins-' . $statutLabel . '-' . now()->format('Y-m-d') . '.csv';
+        $filename = 'savoirfaire-marins-' . $statutLabel . '-' . now()->format('Y-m-d') . '.csv';
 
         $callback = function () use ($records): void {
             $file = fopen('php://output', 'w');
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
 
-            fputcsv($file, ['GRADE', 'NOM', 'PRÉNOM', 'EMAIL', 'MATRICULE', 'UNITÉ', 'STATUT STAGE'], ';');
+            fputcsv($file, ['GRADE', 'NOM', 'PRÉNOM', 'EMAIL', 'MATRICULE', 'UNITÉ', 'STATUT SAVOIRFAIRE'], ';');
 
             foreach ($records as $mp) {
                 $marin = $mp->fcmMarin?->marin;
@@ -383,9 +405,9 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
         ]);
     }
 
-    // ── Stats onglet Stages ───────────────────────────────────────────────────
+    // ── Stats onglet Savoirfaire ───────────────────────────────────────────────────
 
-    public function getStatsParStage(): array
+    public function getStatsParSavoirfaire(): array
     {
         if (blank($this->selectedParcoursId)) {
             return [];
@@ -400,7 +422,7 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             $json = $mp->parcoursmarin;
             if (!$json) continue;
 
-            foreach ($this->extractStages($json) as $csf) {
+            foreach ($this->extractSavoirfaires($json) as $csf) {
                 $uuid = $csf['uuid'] ?? null;
                 if (!$uuid) continue;
 
@@ -408,6 +430,7 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
                     $stats[$uuid] = [
                         'uuid'         => $uuid,
                         'libelle'      => implode(' — ', array_filter([
+                            $csf['savoirfaire_type']['code'] ?? null,
                             $csf['savoirfaire']['code'] ?? null,
                             $csf['libelle_court'] ?? ($csf['savoirfaire']['libelle_court'] ?? null),
                         ])),
@@ -434,19 +457,17 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
 
     // ── Helpers JSON ──────────────────────────────────────────────────────────
 
-    protected function extractStages(array $json): array
+    protected function extractSavoirfaires(array $json): array
     {
-        $stages = [];
+        $items = [];
         foreach ($json['affectations'] ?? [] as $aff) {
             foreach ($aff['competences'] ?? [] as $comp) {
                 foreach ($comp['competenceSavoirfaires'] ?? [] as $csf) {
-                    if (($csf['savoirfaire_type']['code'] ?? null) === 'S') {
-                        $stages[] = $csf;
-                    }
+                    $items[] = $csf;
                 }
             }
         }
-        return $stages;
+        return $items;
     }
 
     protected function findCsfByUuid(array $json, string $uuid): ?array
@@ -463,5 +484,3 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
         return null;
     }
 }
-
-
