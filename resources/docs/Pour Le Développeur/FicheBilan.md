@@ -109,7 +109,7 @@ Volontairement simplifié : soit il n'y a pas de pièce jointe → bouton "Ajout
 Disque `s3-public` (même disque que `ParcoursResource::livret_pdf`), classé par catégorie et date pour éviter un dossier unique avec des dizaines de milliers de fichiers :
 
 ```
-fcmcommun/livretfcm/pieces-jointes/savoirfaire/{année}/{mois}/xxxxx.pdf
+fcmcentral/livretfcm/pieces-jointes/savoirfaire/{année}/{mois}/xxxxx.pdf
 ```
 
 ### Suppression vérifiée

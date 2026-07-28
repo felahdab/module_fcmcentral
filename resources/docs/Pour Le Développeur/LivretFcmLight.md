@@ -67,7 +67,7 @@ valider()
 Disque `s3-public`, classé par catégorie (`savoirfaire` ou `objectif`, selon ce qui est présent dans le lot validé) et par année/mois pour éviter d'accumuler des dizaines de milliers de fichiers dans un seul dossier :
 
 ```
-fcmcommun/livretfcm/pieces-jointes/{savoirfaire|objectif}/{année}/{mois}/xxxxx.pdf
+fcmcentral/livretfcm/pieces-jointes/{savoirfaire|objectif}/{année}/{mois}/xxxxx.pdf
 ```
 
 ### Ce composant ne supprime jamais de fichier
@@ -128,3 +128,4 @@ Sur cette base, chaque `can...()` applique en plus une règle de rôle :
 3. **`#TODO: vérifier les dépendances avec FcmCentral et FcmUnite`** (en haut du fichier, non résolu) — ce composant est censé être réutilisable par plusieurs modules mais son couplage réel (permissions, listeners attendus) n'a jamais été formellement vérifié pour FcmUnite.
 
 4. **Aucun test automatisé** n'existe pour ce composant à ce jour. Si vous touchez aux filtres ou à la validation, testez manuellement dans le navigateur.
+

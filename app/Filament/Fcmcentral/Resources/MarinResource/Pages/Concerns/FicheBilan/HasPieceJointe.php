@@ -3,7 +3,9 @@
 namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\Concerns\FicheBilan;
 
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Storage;
+use Modules\FcmCentral\Events\UserGeneratedEvent;
+use Modules\FcmCommun\DataObjects\Enums\ObjectClasses;
+use Modules\FcmCommun\DataObjects\Enums\UserGeneratedEventTypes;
 
 trait HasPieceJointe
 {
@@ -63,23 +65,20 @@ trait HasPieceJointe
             return;
         }
 
-        if (!$this->supprimerFichierS3($this->savoirFaires->first(fn (array $sf) => ($sf['csf_uuid'] ?? null) === $csfUuid)['piece_jointe'] ?? null)) {
-            Notification::make()
-                ->title('Échec de la suppression')
-                ->body('Le fichier n\'a pas pu être supprimé du stockage. Réessayez.')
-                ->danger()
-                ->send()
-            ;
+        // ✅ Passe par l'event/listener (même schéma fiable que valider()/devalider()), qui
+        // retrouve le chemin S3 actuel, le supprime et retire la référence du JSON.
+        event(new UserGeneratedEvent(
+            UserGeneratedEventTypes::SUPPR_PIECE_JOINTE_MARIN_PARCOURS,
+            auth()->user()->uuid,
+            ObjectClasses::MARIN,
+            $this->marin->uuid,
+            [
+                'type_element' => 'savoirfaire',
+                'uuid_element' => $csfUuid,
+            ]
+        ));
 
-            return;
-        }
-
-        $this->mutateCsfParUuid($csfUuid, function (array &$csf): void {
-            unset($csf['piece_jointe']);
-        });
-
-        Notification::make()->title('Pièce jointe supprimée')->success()->send();
-
+        $this->marin->refresh();
         unset($this->parcours);
         unset($this->savoirFaires);
         $this->dispatch('$refresh');
@@ -108,22 +107,31 @@ trait HasPieceJointe
         }
 
         $directory = sprintf(
-            'fcmcommun/livretfcm/pieces-jointes/savoirfaire/%s/%s',
+            'fcmcentral/livretfcm/pieces-jointes/savoirfaire/%s/%s',
             now()->format('Y'),
             now()->format('m')
         );
         $nouveauChemin = $this->nouvellePieceJointe->store($directory, 's3-public');
 
-        $this->mutateCsfParUuid($this->pieceJointeEnEditionUuid, function (array &$csf) use ($nouveauChemin): void {
-            $csf['piece_jointe'] = $nouveauChemin;
-        });
+        // ✅ Passe par l'event/listener (même schéma fiable que valider()/devalider()), qui fait
+        // la mutation JSON du parcours en base et nettoie l'éventuel ancien fichier remplacé.
+        event(new UserGeneratedEvent(
+            UserGeneratedEventTypes::AJOUT_PIECE_JOINTE_MARIN_PARCOURS,
+            auth()->user()->uuid,
+            ObjectClasses::MARIN,
+            $this->marin->uuid,
+            [
+                'type_element' => 'savoirfaire',
+                'uuid_element' => $this->pieceJointeEnEditionUuid,
+                'piece_jointe' => $nouveauChemin,
+            ]
+        ));
 
         $this->pieceJointeEnEditionType = null;
         $this->pieceJointeEnEditionUuid = null;
         $this->nouvellePieceJointe = null;
 
-        Notification::make()->title('Pièce jointe ajoutée')->success()->send();
-
+        $this->marin->refresh();
         unset($this->parcours);
         unset($this->savoirFaires);
         $this->dispatch('close-modal', id: 'ajouter-piece-jointe');
@@ -141,55 +149,4 @@ trait HasPieceJointe
         return (bool) ($savoirFaire['etat_valid'] ?? false);
     }
 
-    /**
-     * Trouve le competenceSavoirfaire correspondant à $uuid dans le parcours du marin
-     * et applique $callback dessus par référence, puis sauvegarde.
-     */
-    private function mutateCsfParUuid(string $uuid, callable $callback): bool
-    {
-        $donneesDuParcours = $this->marin->complementsFcm?->donnees_du_parcours;
-        $parcoursMarin = $donneesDuParcours?->parcoursmarin ?? null;
-
-        if (!is_array($parcoursMarin)) {
-            return false;
-        }
-
-        foreach ($parcoursMarin['affectations'] ?? [] as &$affectation) {
-            foreach ($affectation['competences'] ?? [] as &$competence) {
-                foreach ($competence['competenceSavoirfaires'] ?? [] as &$csf) {
-                    if (($csf['uuid'] ?? null) === $uuid) {
-                        $callback($csf);
-
-                        $donneesDuParcours->parcoursmarin = $parcoursMarin;
-                        $donneesDuParcours->save();
-
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Supprime un fichier du disque s3-public et vérifie que la suppression a bien eu lieu.
-     * Retourne true si le fichier n'existe plus (ou n'existait pas), false si la suppression a échoué.
-     */
-    private function supprimerFichierS3(?string $chemin): bool
-    {
-        if (!$chemin) {
-            return true;
-        }
-
-        $disk = Storage::disk('s3-public');
-
-        if (!$disk->exists($chemin)) {
-            return true;
-        }
-
-        $disk->delete($chemin);
-
-        return !$disk->exists($chemin);
-    }
 }

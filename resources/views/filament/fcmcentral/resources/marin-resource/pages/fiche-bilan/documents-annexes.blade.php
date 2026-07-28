@@ -23,7 +23,7 @@
                 <div class="flex items-center justify-between p-2 rounded-lg border border-gray-100 dark:border-gray-700">
                     <a href="{{ $document['url'] }}" target="_blank" rel="noopener"
                        class="text-sm text-primary-600 hover:underline flex items-center gap-2">
-                        <x-filament::icon icon="heroicon-o-paper-clip" class="w-4 h-4 flex-shrink-0" />
+                        @include('fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan.pdf-icon', ['class' => 'w-4 h-4'])
                         <span>
                             {{ $document['nom'] }}
                             <span class="text-xs text-gray-400 block">

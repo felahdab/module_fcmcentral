@@ -51,7 +51,7 @@ trait HasDocumentsAnnexes
         ]);
 
         $directory = sprintf(
-            'fcmcommun/documents-annexes/marins/%s/%s/%s',
+            'fcmcentral/documents-annexes/marins/%s/%s/%s',
             $this->marinId,
             now()->format('Y'),
             now()->format('m')
