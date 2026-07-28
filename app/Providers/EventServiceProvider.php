@@ -10,6 +10,7 @@ use Modules\FcmCentral\Listeners\Save\DefinirJalonFcmListener;
 use Modules\FcmCentral\Listeners\Save\FcmMarinListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\AnnulElementMarinParcoursListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\AnnulProposElementMarinParcoursListener;
+use Modules\FcmCentral\Listeners\Save\MarinParcours\PieceJointeMarinParcoursListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\ProposElementMarinParcoursListener;
 use Modules\FcmCentral\Listeners\Save\MarinParcours\ValidElementMarinParcoursListener;
 use Modules\FcmCentral\Listeners\Save\MentorMarinListener;
@@ -32,6 +33,8 @@ class EventServiceProvider extends ServiceProvider
             ProposElementMarinParcoursListener::class,
             AnnulProposElementMarinParcoursListener::class,
             DefinirJalonFcmListener::class,
+            PieceJointeMarinParcoursListener::class,
+
             // TransmitUserGeneratedEventListener::class,
         ],
 

@@ -17,6 +17,7 @@ class ValidElementMarinParcoursListener
 {
     public string $comment = '';
     public Carbon $dateValidation;
+    public ?string $pieceJointe = null;
 
     public function handle(UserGeneratedEvent $event): void
     {
@@ -33,6 +34,7 @@ class ValidElementMarinParcoursListener
 
         $data = $event->detail ?? [];
         $this->comment = $this->sanitizeComment($data['commentaire'] ?? '');
+        $this->pieceJointe = $data['piece_jointe'] ?? null;
 
         // Date pour antidater
         $this->dateValidation = !empty($data['date'])
@@ -361,6 +363,10 @@ class ValidElementMarinParcoursListener
         $element['date_validation'] = $this->dateValidation->toDateTimeString();
         $element['valideur'] = $displayName;
         $element['date_proposition'] = null;
+
+        if ($this->pieceJointe) {
+            $element['piece_jointe'] = $this->pieceJointe;
+        }
 
         Log::debug('Élément validé avec succès');
     }

@@ -20,6 +20,7 @@ class FcmMarin extends Model
     protected $fillable = [
         'rh_marin_id',
         'data',
+        'documents_annexes',
         'cohorte_id',
         'date_sedimentation',
         'date_fcm',
@@ -29,6 +30,7 @@ class FcmMarin extends Model
 
     protected $casts = [
         'data' => 'array',
+        'documents_annexes' => 'array',
     ];
 
     // Relations
@@ -71,7 +73,11 @@ class FcmMarin extends Model
     // Attributs calculés
     public function getDonneesDuParcoursAttribute()
     {
-        return $this->lignesDansMarinParcours->first();
+        // Tri explicite : sans ORDER BY, MySQL ne garantit pas l'ordre de retour.
+        // S'il existe plusieurs lignes MarinParcours pour ce marin (réaffectation, historique),
+        // on veut systématiquement la plus récente, de façon déterministe pour tous les appelants
+        // (affichage ET mutation doivent toujours cibler la même ligne).
+        return $this->lignesDansMarinParcours->sortByDesc('id')->first();
     }
 
     // Méthodes principales
@@ -205,5 +211,3 @@ class FcmMarin extends Model
         return FcmMarinFactory::new();
     }
 }
-
-
