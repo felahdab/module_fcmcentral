@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\FcmCentral\Http\Controllers\FcmCentralController;
+use Modules\FcmCentral\Http\Controllers\PieceJointeDownloadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,9 @@ use Modules\FcmCentral\Http\Controllers\FcmCentralController;
 Route::group([], function () {
     // Route::resource('fcmcentral', FcmCentralController::class)->names('fcmcentral');
 });
+
+Route::middleware('auth')->get(
+    '/fcmcentral/piece-jointe/{marinUuid}/{type}/{uuid}',
+    PieceJointeDownloadController::class
+)->name('fcmcentral.piece-jointe.telecharger');
+

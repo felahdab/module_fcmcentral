@@ -91,7 +91,11 @@ trait HasSavoirFaireProgression
                         'intitule' => $csf['libelle_court'],
                         'objectifs' => $objectifs->toArray(),
                         'piece_jointe' => $pieceJointe,
-                        'piece_jointe_url' => $pieceJointe ? Storage::disk('s3-public')->url($pieceJointe) : null,
+                        'piece_jointe_url' => $pieceJointe ? route('fcmcentral.piece-jointe.telecharger', [
+                            'marinUuid' => $this->marin->uuid,
+                            'type' => 'savoirfaire',
+                            'uuid' => $csf['uuid'] ?? '',
+                        ]) : null,
                     ];
                 }
             }

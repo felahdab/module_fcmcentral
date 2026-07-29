@@ -107,11 +107,12 @@ trait HasPieceJointe
         }
 
         $directory = sprintf(
-            'fcmcentral/livretfcm/pieces-jointes/savoirfaire/%s/%s',
+            'fcmcentral/livretfcm/pieces-jointes/savoirfaire/%s/%s/%s',
+            $this->marin->uuid,
             now()->format('Y'),
             now()->format('m')
         );
-        $nouveauChemin = $this->nouvellePieceJointe->store($directory, 's3-public');
+        $nouveauChemin = $this->nouvellePieceJointe->store($directory, 's3-private');
 
         // ✅ Passe par l'event/listener (même schéma fiable que valider()/devalider()), qui fait
         // la mutation JSON du parcours en base et nettoie l'éventuel ancien fichier remplacé.

@@ -18,6 +18,12 @@ class PermissionsSeeder extends Seeder
         ]);
 
         Permission::firstOrCreate([
+            'name' => 'fcmcentral::voir_tous_les_marins',
+            'guard_name' => 'web',
+        ]);
+
+
+        Permission::firstOrCreate([
             'name' => 'fcmcentral::change_configuration_module',
             'guard_name' => 'web',
         ]);
@@ -95,6 +101,12 @@ class PermissionsSeeder extends Seeder
         ]);
 
         Permission::firstOrCreate([
+            'name' => 'fcmcentral::livret.telecharger',
+            'guard_name' => 'web',
+        ]);
+
+
+        Permission::firstOrCreate([
             'name' => 'fcmcentral::note.valider',
             'guard_name' => 'web',
         ]);
@@ -113,6 +125,13 @@ class PermissionsSeeder extends Seeder
             'name' => 'fcmcentral::fcm.admin',
             'guard_name' => 'web',
         ]);
+
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::piece_jointe.voir',
+            'guard_name' => 'web',
+        ]);
+
+
 
         // Journal des évènements
         Permission::firstOrCreate([
