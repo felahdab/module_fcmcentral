@@ -1,357 +1,255 @@
-# Documentation Technique — Module FcmCentral
+# Permissions — Module FcmCentral
 
-> **But de ce document** : référence technique pour éviter les doublons de fonctions et comprendre ce qui existe déjà avant d'en créer de nouvelles.
-
----
-
-## Architecture des modèles
-
-```
-RH\Models\Marin (base, table rh_marins)
-    └── FcmCommun\Models\Marin
-            └── FcmCentral\Models\Marin        ← modèle principal côté marin
-
-FcmCommun\Models\FcmMarin (base)
-    └── FcmCentral\Models\FcmMarin             ← données FCM d'un marin (1 ligne par marin en FCM)
-
-FcmCommun\Models\MarinParcours (base)
-    └── FcmCentral\Models\MarinParcours        ← affectation marin ↔ parcours sérialisé
-
-FcmCommun\Models\ParcoursSerialise (base)
-    └── FcmCentral\Models\ParcoursSerialise    ← version figée d'un parcours
-```
-
-**Règle importante** : `Marin` contient les infos RH + méthodes FCM de haut niveau. `FcmMarin` contient les données FCM brutes (cohorte, mentors, taux, gel, jalons).
+> **But de ce document** : référence complète des permissions disponibles dans FcmCentral, leur effet concret dans l'interface, et comment les combiner pour construire un rôle cohérent.
 
 ---
 
-## Tables et préfixes
+## Comment fonctionnent les permissions
 
-| Table | Modèle |
+Les permissions FcmCentral utilisent le système Spatie `laravel-permission`.
+
+- Chaque permission est une chaîne préfixée `fcmcentral::`.
+- Elles sont créées en base par le seeder : `php artisan db:seed --class="Modules\FcmCentral\Database\Seeders\PermissionsSeeder"`.
+- On les attribue à un **rôle**, puis le rôle à un ou plusieurs **utilisateurs**.
+- Les **Policies** (CRUD sur les modèles) génèrent automatiquement des permissions de la forme `fcmcentral::<modele>.<action>` (voir section dédiée plus bas).
+
+---
+
+## Permissions métier (définies dans le seeder)
+
+Ces permissions contrôlent des **fonctionnalités spécifiques** de l'interface, indépendamment du CRUD sur les modèles.
+
+### Accès général
+
+| Permission | Effet dans l'interface |
 |---|---|
-| `rh_marins` | `RH\Models\Marin` / `FcmCentral\Models\Marin` |
-| `fcmcentral_fcm_marins` | `FcmCentral\Models\FcmMarin` |
-| `fcmcentral_fcm_marin_mentors` | table pivot mentors (fcm_marin_id, marin_id) |
-| `fcmcentral_marin_parcours` | `FcmCentral\Models\MarinParcours` |
-| `fcmcentral_parcours_serialises` | `FcmCentral\Models\ParcoursSerialise` |
-| `fcmcentral_parcours` | `FcmCentral\Models\Parcours` |
-| `fcmcentral_affectations` | `FcmCentral\Models\Affectation` |
-| `fcmcentral_competences` | `FcmCentral\Models\Competence` |
-| `fcmcentral_competence_savoirfaires` | `FcmCentral\Models\CompetenceSavoirfaire` |
-| `fcmcentral_objectifs` | `FcmCentral\Models\Objectif` |
+| `fcmcentral::voir_tous_les_marins` | Dans la liste des marins, l'utilisateur voit **tous** les marins en FCM. Sans cette permission, il ne voit que les marins dont il est mentor ou qui sont dans sa cohorte. |
+| `fcmcentral::recherche_annuaire` | Accès à la page **Recherche Annuaire** (recherche LDAP d'un marin pour l'intégrer en FCM). |
+| `fcmcentral::change_configuration_module` | Accès à la page **Configuration** du module (paramètres globaux). Réservé administrateur. |
+| `fcmcentral::voir_journal_des_evenements` | Accès à la ressource **Journal des événements** (StoredEvent). Affiche l'historique de toutes les actions traçées. |
+| `fcmcentral::exporter_csv` | Bouton **Exporter CSV** visible dans la liste des marins. |
 
----
+### Gestion FCM d'un marin
 
-## Modèle `FcmMarin`
-
-Représente **les données FCM d'un marin** (1 enregistrement = 1 marin suivi en FCM).
-
-### Relations
-
-| Méthode | Type | Cible | Utilisée |
-|---|---|---|---|
-| `marin()` | `belongsTo` | `Marin` via `rh_marin_id` | ✅ oui |
-| `cohorte()` | `belongsTo` | `Cohorte` | ✅ oui |
-| `mentors()` | `belongsToMany` | `Marin` via `fcmcentral_fcm_marin_mentors` | ✅ oui |
-| `parcoursSerialises()` | `belongsToMany` | `ParcoursSerialise` via `fcmcentral_marin_parcours` | ✅ oui |
-| `lignesDansMarinParcours()` | `hasMany` | `MarinParcours` | ✅ via `donnees_du_parcours` |
-
-### Attributs calculés
-
-| Attribut | Retourne | Utilisé |
-|---|---|---|
-| `$fcmMarin->donnees_du_parcours` | `?MarinParcours` — première ligne de parcours | ✅ oui |
-
-### Méthodes métier — **utilisées**
-
-```php
-$fcmMarin->hasParcours(): bool          // a un parcours sérialisé attribué
-$fcmMarin->getJalonFcmLibelle(): ?string // 'SED', 'FCM', 'FIN' selon les dates jalons
-```
-
-### Méthodes métier — **non utilisées dans le code applicatif**
-
-> Ces méthodes existent mais ne sont appelées nulle part (hors tests). À garder si besoin futur, à supprimer si nettoyage souhaité.
-
-```php
-$fcmMarin->hasMentor(): bool            // vérifie si au moins un mentor assigné
-$fcmMarin->hasCohorte(): bool           // vérifie si cohorte assignée
-$fcmMarin->getTauxGlobal(): ?float      // taux global depuis donnees_du_parcours
-$fcmMarin->getTauxStage(): ?float
-$fcmMarin->getTauxActivite(): ?float
-$fcmMarin->getInfosFcm(): array         // résumé complet sous forme de tableau
-$fcmMarin->assignerCohorte(Cohorte)     // assigne une cohorte et save
-$fcmMarin->retirerCohorte()
-$fcmMarin->assignerMentor(Marin|RHMarin) // ajoute un mentor (syncWithoutDetaching)
-$fcmMarin->retirerMentor(Marin|RHMarin) // détache un mentor
-$fcmMarin->retirerTousLesMentors()
-$fcmMarin->setCohorteAttribute(Cohorte) // setter Eloquent → appelle assignerCohorte()
-```
-
-### Scopes — **non utilisés**
-
-```php
-FcmMarin::cohorte($cohorte)       // filtre par cohorte_id
-FcmMarin::avecMentor($mentor)     // whereHas('mentors', where marin_id)
-FcmMarin::sansMentor()            // doesntHave('mentors')
-FcmMarin::sansCohorte()           // whereNull('cohorte_id')
-```
-
----
-
-## Modèle `Marin` (FcmCentral)
-
-Étend `FcmCommun\Marin` qui étend `RH\Marin`. Contient les méthodes FCM de haut niveau.
-
-> ⚠️ Ce modèle est **volumineux** (819 lignes). Beaucoup de méthodes ont une documentation interne détaillée mais sont peu utilisées en pratique.
-
-### Relations
-
-| Méthode | Retourne | Utilisée |
-|---|---|---|
-| `complementsFcm()` | `hasOne(FcmMarin)` — données FCM (1ère ligne) | ✅ massivement |
-| `lignes_dans_fcm_marin()` | `hasMany(FcmMarin)` — toutes les lignes FCM | ⚠️ via `complements_fcm` attribut |
-| `etats()` | `hasMany(Etat)` | ✅ oui |
-
-### Attributs calculés — **utilisés**
-
-```php
-$marin->suivi_en_fcm        // bool — est en FCM (getSuiviEnFcmAttribute)
-$marin->complements_fcm     // ?FcmMarin — accès via lignes_dans_fcm_marin->first()
-$marin->est_mentor          // bool — getEstMentorAttribute (alias de isMentor())
-$marin->full_name_and_grade // string — grade + prénom + nom
-$marin->marins_mentores     // Collection<Marin> — marins dont ce marin est mentor
-$marin->parcours            // ?Parcours — accès direct au Parcours via compléments FCM
-```
-
-### Méthodes métier — **utilisées**
-
-```php
-$marin->estEnFcm(): bool                       // alias de complementsFcm()->exists()
-$marin->est_mentor_de(Marin $autre): bool      // ce marin est-il mentor de $autre ?
-$marin->estGele(): bool                        // a un gel actif (date_fin null)
-$marin->gelActif(): ?Etat                      // récupère le gel actif
-$marin->historiserEtat(string $code, ...): void // crée un enregistrement Etat
-$marin->getDernierTypeEtat()                   // dernier Etat
-$marin->getDernierTypeEtatCode(): ?string
-$marin->getDernierTypeEtatLibelle(): ?string
-$marin->getDernierTypeEtatId(): ?int
-```
-
-### Méthodes métier — **non utilisées dans le code applicatif**
-
-```php
-$marin->isMentor(): bool               // FcmMarin::whereHas('mentors')... même chose que est_mentor
-$marin->getGrade(): ?string            // grade->libelle_court ?? libelle_long
-$marin->getUniteAsString(): ?string    // unite->libelle_court ?? libelle_long
-$marin->getCohorte(): ?Cohorte         // complementsFcm?->cohorte
-$marin->getMentors(): Collection       // complementsFcm?->mentors ?? collect()
-$marin->marinsSupervises(): Collection // Marin::mentorePar($this)->get()
-$marin->nombreMarinsSupervises(): int  // compte FcmMarin whereHas mentors
-$marin->getInfosResume(): array        // résumé complet
-
-Marin::estMentor(?Model $m): bool      // méthode statique (doublon de est_mentor)
-```
-
-### Scopes — **utilisés**
-
-```php
-Marin::cohorte($cohorte)      // whereIn(id, fcm_marins where cohorte_id)
-Marin::mentorePar($marin)     // marins dont $marin est le mentor (via pivot)
-Marin::mentor()               // marins présents dans fcmcentral_fcm_marin_mentors
-Marin::enFcm()                // whereHas('complementsFcm')
-```
-
-### Scopes — **non utilisés**
-
-```php
-Marin::pasEnFcm()             // whereNotIn(id, fcm_marins)
-Marin::avecGrade(string)      // whereHas('grade', where libelle)
-Marin::dansUnite(string)      // whereHas('unite', where libelle LIKE)
-```
-
----
-
-## Modèle `MarinParcours`
-
-Pivot entre `FcmMarin` et `ParcoursSerialise`. Stocke la structure JSON du parcours marin (`parcoursmarin`) et les taux.
-
-### Relations
-
-| Méthode | Retourne | Utilisée |
-|---|---|---|
-| `fcmMarin()` | `belongsTo(FcmMarin)` via `fcmmarin_id` | ✅ oui |
-| `parcours_serialise()` | `belongsTo(ParcoursSerialise)` via `parcoursserialise_id` | ✅ oui |
-| `marin()` | `hasOneThrough(Marin, FcmMarin)` | ✅ oui |
-| `ligne_dans_fcm_marins()` | `belongsTo(FcmMarin)` (doublon de `fcmMarin()`) | ⚠️ doublon |
-
----
-
-## Modèle `ParcoursSerialise`
-
-Version figée d'un parcours. Contient la structure JSON complète dans `parcours`.
-
-### Relations
-
-| Méthode | Retourne | Utilisée |
-|---|---|---|
-| `fcmMarins()` | `belongsToMany(FcmMarin)` via `fcmcentral_marin_parcours` | ✅ oui |
-| `parcoursModel()` | `belongsTo(Parcours)` via `parcours_id` | ✅ oui |
-| `marins()` | `belongsToMany(Marin)` — **incomplète/commentée** | ⚠️ à supprimer |
-| `marinparcours()` | `hasMany(MarinParcours)` | ❌ non utilisée |
-
-> **Note** : `marins()` utilise un `foreignPivotKey` incorrect (`'parcours_id'` au lieu de `'parcoursserialise_id'`). Elle est marquée "À SUPP" dans le code. Ne pas l'utiliser.
-
----
-
-## Modèle `Parcours`
-
-### Relations — toutes utilisées
-
-```php
-$parcours->affectations()          // belongsToMany(Affectation) via affectation_parcours
-$parcours->competences()           // hasMany(Competence) filtrées par type et affectations
-$parcours->competenceSavoirfaires() // hasMany(CompetenceSavoirfaire) filtrées
-$parcours->parcoursSerialise()     // hasMany(ParcoursSerialise)
-$parcours->parcoursType()          // belongsTo(ParcoursType)
-```
-
-### Méthodes
-
-```php
-$parcours->getLatestSerializedVersion(): int  // version max des ParcoursSerialise
-$parcours->livret_pdf_url: ?string            // URL Storage du PDF (❌ non utilisé en dehors de la vue)
-```
-
----
-
-## Doublons identifiés
-
-| Doublon | Explication |
+| Permission | Effet dans l'interface |
 |---|---|
-| `Marin::isMentor()` et `$marin->est_mentor` | Font la même chose — utiliser l'attribut `est_mentor` |
-| `Marin::estMentor(?Model)` (statique) et `$marin->est_mentor` | Doublon — utiliser l'attribut |
-| `MarinParcours::ligne_dans_fcm_marins()` et `MarinParcours::fcmMarin()` | Même relation, noms différents — utiliser `fcmMarin()` |
-| `Marin::getMentors()` et `$marin->complementsFcm?->mentors` | Même résultat — utiliser la relation directement |
-| `Marin::getCohorte()` et `$marin->complementsFcm?->cohorte` | Même résultat |
-| `Marin::nombreMarinsSupervises()` et `FcmMarin::whereHas('mentors')` direct | Fonction utilitaire peu utilisée |
+| `fcmcentral::marin.suivreEnFcm` | Bouton **Mettre en FCM / Retirer du FCM** visible dans la fiche marin et dans la recherche annuaire. Permet d'activer ou désactiver le suivi FCM d'un marin. |
+| `fcmcentral::fcm.admin` | Donne accès aux actions avancées de la section FCM dans la fiche marin (jalons, mentors, cohorte, parcours). Agit comme un **verrou de niveau supérieur** : même si les permissions `attribuer.*` sont présentes, certaines sections ne s'affichent que si `fcm.admin` est aussi accordé. |
+| `fcmcentral::definir_jalons_de_fcm` | Champs **Date de début / Date de fin FCM** (jalons) éditables dans la fiche marin. |
+| `fcmcentral::attribuer.mentor` | Champ **Mentor(s)** visible et modifiable dans la fiche marin et la recherche annuaire. |
+| `fcmcentral::attribuer.cohorte` | Champ **Cohorte** visible et modifiable dans la fiche marin et la recherche annuaire. |
+| `fcmcentral::attribuer.parcours` | Champ **Parcours** visible et modifiable dans la fiche marin et la recherche annuaire. |
 
----
+### Parcours
 
-## Méthodes à supprimer (candidates)
-
-> Vérifiez qu'elles ne sont pas appelées dans des modules externes avant suppression.
-
-### `FcmMarin`
-- `getInfosFcm()` — résumé tableau jamais utilisé
-- `setCohorteAttribute()` — setter Eloquent dangereux (side-effect silencieux)
-
-### `Marin`
-- `isMentor()` → remplacé par `$marin->est_mentor`
-- `estMentor(?Model)` (statique) → doublon
-- `getInfosResume()` → jamais appelé
-- `scopePasEnFcm()` → jamais utilisé
-- `scopeAvecGrade()` → jamais utilisé
-- `scopeDansUnite()` → jamais utilisé
-- `historiqueGels()` → jamais utilisé
-- `getMentors()` / `getCohorte()` / `getGrade()` / `getUniteAsString()` → accès direct préférable
-- `marinsSupervises()` → utiliser `Marin::mentorePar($this)->get()` directement
-
-### `ParcoursSerialise`
-- `marins()` → relation cassée, marquée À SUPPRIMER dans le code
-- `marinparcours()` → jamais utilisée (utiliser `fcmMarins()`)
-
-### `MarinParcours`
-- `ligne_dans_fcm_marins()` → doublon de `fcmMarin()`
-
----
-
-## Accès rapide aux données courantes
-
-### Savoir si un marin est en FCM
-```php
-$marin->suivi_en_fcm           // attribut (bool)
-$marin->estEnFcm()             // méthode (bool) — même chose
-$marin->complementsFcm         // accès à FcmMarin (null si pas en FCM)
-```
-
-### Mentors d'un marin
-```php
-$marin->complementsFcm?->mentors           // Collection<Marin> via pivot
-$marin->getMentors()                       // idem (wrapper)
-```
-
-### Marins supervisés par un mentor
-```php
-$marin->marins_mentores                    // attribut Collection<Marin>
-Marin::mentorePar($mentor)->get()          // scope SQL (plus efficace pour grandes listes)
-$marin->nombreMarinsSupervises()           // count uniquement
-```
-
-### Parcours d'un marin
-```php
-$marin->parcours                           // ?Parcours — accès direct
-$marin->complementsFcm?->donnees_du_parcours  // ?MarinParcours — avec taux et JSON
-$marin->complementsFcm?->donnees_du_parcours?->parcours_serialise  // ?ParcoursSerialise
-```
-
-### Cohorte d'un marin
-```php
-$marin->complementsFcm?->cohorte           // relation Eloquent (recommandé)
-$marin->getCohorte()                       // wrapper (même résultat)
-```
-
-### Taux de progression
-```php
-$marin->complementsFcm?->donnees_du_parcours?->taux_global   // float|null
-$marin->complementsFcm?->getTauxGlobal()                     // même chose via FcmMarin
-```
-
-### Vérifier si mentor
-```php
-$marin->est_mentor             // attribut bool (recommandé)
-$marin->isMentor()             // méthode (doublon)
-$marin->est_mentor_de($autre)  // ce marin supervise-t-il $autre ?
-```
-
----
-
-## Événements disponibles (`UserGeneratedEventTypes`)
-
-| Enum | Description |
+| Permission | Effet dans l'interface |
 |---|---|
-| `MARIN_EN_FCM` | Mise en FCM d'un marin |
-| `RETRAIT_FCM` | Retrait du suivi FCM |
-| `CREATION_PARCOURS_SERIALISE` | Figer un parcours (créer une version) |
-| `ATTRIBUER_PARCOURS_SERIALISE_MARIN` | Affecter un parcours sérialisé à un marin |
-| `ATTRIBUER_MENTOR_MARIN` | Assigner un/des mentors à un marin — payload : `['mentors' => [uuid, ...]]` |
-| `ATTRIBUER_COHORTE_MARIN` | Assigner une cohorte à un marin |
-| `PROPOS_ELMT_MARIN_PARCOURS` | Proposer un élément (SF, compétence...) |
-| `VALID_ELMT_MARIN_PARCOURS` | Valider un élément |
-| `ANNUL_ELMT_MARIN_PARCOURS` | Annuler une validation |
-| `ANNUL_PROPOS_ELMT_MARIN_PARCOURS` | Annuler une proposition |
+| `fcmcentral::parcours.figer` | Bouton **Figer** visible dans la page d'édition d'un parcours (`EditParcours`) et dans la liste des parcours. Permet de créer une version sérialisée (snapshot figé). |
 
-**Format d'appel :**
-```php
-event(new UserGeneratedEvent(
-    event_type: UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
-    user_uuid: auth()->user()->uuid,
-    object_class: ObjectClasses::MARIN,
-    object_uuid: $marin->uuid,
-    detail: ['mentors' => [$mentor->uuid]]   // tableau d'UUIDs depuis refactoring many-to-many
-));
+### Livret FCM
+
+| Permission | Effet dans l'interface |
+|---|---|
+| `fcmcentral::livret.voir` | Accès à la page **Livret FCM** d'un marin. Sans cette permission, la page renvoie une erreur d'autorisation. |
+| `fcmcentral::livret.telecharger` | Bouton **Télécharger le livret PDF** visible dans la fiche marin. |
+| `fcmcentral::livret.proposer` | *(Déclaré dans le seeder, pas encore câblé dans l'interface — prévu pour la validation d'éléments du parcours marin).* |
+| `fcmcentral::livret.valider` | *(Déclaré dans le seeder, pas encore câblé — prévu pour la validation définitive d'un élément.)* |
+| `fcmcentral::livret.annuler` | *(Déclaré dans le seeder, pas encore câblé — prévu pour annuler une validation.)* |
+| `fcmcentral::livret.refuser` | *(Déclaré dans le seeder, pas encore câblé — prévu pour refuser un élément proposé.)* |
+
+### Fiche Bilan
+
+| Permission | Effet dans l'interface |
+|---|---|
+| `fcmcentral::ficheBilan.voir` | Accès à la page **Fiche Bilan** d'un marin. |
+
+### Pièces jointes et documents annexes (téléchargement)
+
+Contrôlent l'accès en **lecture** aux fichiers privés (`s3-private`) via `PieceJointeDownloadController`/`DocumentAnnexeDownloadController` — voir `DOC_STOCKAGE_S3.md`. Sans ces permissions, un utilisateur peut quand même accéder aux fichiers d'un marin dont il est **le marin lui-même** ou **le mentor** (vérifié directement dans le contrôleur, indépendamment de toute permission Spatie).
+
+| Permission | Effet |
+|---|---|
+| `fcmcentral::piece_jointe.voir` | Accès en téléchargement à la pièce jointe (savoir-faire/objectif) de **n'importe quel marin**, même sans lien (ni marin lui-même, ni mentor). Pensé pour les gestionnaires/admins FCM. |
+| `fcmcentral::document_annexe.voir` | Même chose pour les documents annexes. **Permission distincte de `piece_jointe.voir`** — avoir l'une ne donne pas accès à l'autre. |
+
+> Ces deux permissions ne contrôlent que la **lecture/téléchargement**. L'ajout/suppression d'une pièce jointe réutilise la permission existante `fcmcentral::livret.valider` (pas de permission dédiée à l'écriture à ce jour).
+
+### Notes
+
+| Permission | Effet dans l'interface |
+|---|---|
+| `fcmcentral::note.voir` | Onglet **Notes** visible dans la fiche bilan. |
+| `fcmcentral::note.creer` | Bouton **Créer une note** visible dans la fiche bilan et la fiche marin. |
+| `fcmcentral::note.valider` | Bouton **Valider** visible dans le formulaire de note (marque la note comme officielle). |
+
+### États (gel, jalons)
+
+| Permission | Effet dans l'interface |
+|---|---|
+| `fcmcentral::etat.create` | Formulaire d'ajout d'un état (ex: gel) accessible dans la fiche bilan via `AddEtatForm`. |
+
+---
+
+## Permissions CRUD (générées par les Policies)
+
+Chaque modèle dispose d'une `Policy` héritant de `GenericSkeletorPolicy`. Elle génère automatiquement les permissions suivantes selon le slug du modèle :
+
+```
+<slug>.index       → voir la liste (viewAny + view)
+<slug>.create      → créer un enregistrement
+<slug>.store       → alias create (accepté aussi)
+<slug>.update      → modifier un enregistrement
+<slug>.delete      → supprimer un enregistrement
+<slug>.deleteAny   → supprimer en masse
+<slug>.restore     → restaurer (soft delete)
+<slug>.forceDelete → suppression définitive
+<slug>.reorder     → réordonner
+```
+
+### Slugs par modèle
+
+| Modèle | Slug de la Policy | Exemple de permission |
+|---|---|---|
+| `Marin` | `fcmcentral::marin` | `fcmcentral::marin.index` |
+| `Parcours` | `fcmcentral::parcours` | `fcmcentral::parcours.create` |
+| `ParcoursSerialise` | `fcmcentral::parcoursSerialise` | `fcmcentral::parcoursSerialise.index` |
+| `ParcoursType` | `fcmcentral::parcoursType` | `fcmcentral::parcoursType.create` |
+| `Affectation` | `fcmcentral::affectation` | `fcmcentral::affectation.update` |
+| `Competence` | `fcmcentral::competence` | `fcmcentral::competence.index` |
+| `CompetenceSavoirfaire` | `fcmcentral::competenceSavoirfaire` | `fcmcentral::competenceSavoirfaire.update` |
+| `Savoirfaire` | `fcmcentral::savoirfaire` | `fcmcentral::savoirfaire.index` |
+| `SavoirfaireType` | `fcmcentral::savoirfaireType` | `fcmcentral::savoirfaireType.create` |
+| `Domaine` | `fcmcentral::domaine` | `fcmcentral::domaine.index` |
+| `Cohorte` | `fcmcentral::cohorte` | `fcmcentral::cohorte.create` |
+| `Etat` | `fcmcentral::etat` | `fcmcentral::etat.create` |
+| `TypeEtat` | `fcmcentral::typeEtat` | `fcmcentral::typeEtat.index` |
+| `Note` | `fcmcentral::note` | `fcmcentral::note.index` |
+| `TypeNote` | `fcmcentral::typeNote` | `fcmcentral::typeNote.create` |
+| `Objectif` | `fcmcentral::objectif` | `fcmcentral::objectif.update` |
+
+> **Note** : `fcmcentral::marin.index` est utilisé explicitement dans `ListMarins` pour contrôler l'accès à la liste des marins.
+
+---
+
+## Rôles suggérés
+
+### Rôle : `Consultant FCM` (lecture seule)
+
+> Peut consulter les marins dont il est mentor ou dans sa cohorte, voir les livrets, télécharger les bilans.
+
+```
+fcmcentral::livret.voir
+fcmcentral::livret.telecharger
+fcmcentral::ficheBilan.voir
+fcmcentral::note.voir
+fcmcentral::marin.index
 ```
 
 ---
 
-## Notes importantes
+### Rôle : `Mentor`
 
-- **`complementsFcm` vs `complements_fcm`** : `complementsFcm()` est la *relation* Eloquent (`hasOne`). `complements_fcm` est l'*attribut calculé* (`getComplementsFcmAttribute` → `lignes_dans_fcm_marin->first()`). Préférer `complementsFcm` (relation Eloquent, eager-loadable).
+> Peut voir ses marins supervisés, consulter les livrets, proposer/valider des éléments du parcours (quand câblé), créer des notes.
 
-- **Mentors** : depuis la migration many-to-many (juin 2026), `mentor_id` n'existe plus sur `fcmcentral_fcm_marins`. Les mentors sont dans la table pivot `fcmcentral_fcm_marin_mentors`. Le payload des événements utilise `mentors` (pluriel, tableau d'UUIDs).
+```
+fcmcentral::livret.voir
+fcmcentral::livret.telecharger
+fcmcentral::livret.proposer
+fcmcentral::ficheBilan.voir
+fcmcentral::note.voir
+fcmcentral::note.creer
+fcmcentral::marin.index
+```
 
-- **`ParcoursSerialise::parcoursModel()`** : nommé ainsi (pas `parcours()`) pour éviter un conflit avec le champ JSON `parcours` stocké dans la table.
+---
 
-- **`MarinParcours::parcoursmarin`** : champ JSON (colonne `longText`) contenant la structure complète du parcours marin avec tous les états de validation.
+### Rôle : `Gestionnaire FCM`
 
+> Gère les marins en FCM : mise en FCM, attribution mentors/cohorte/parcours, jalons, notes, états.
 
+```
+fcmcentral::voir_tous_les_marins
+fcmcentral::recherche_annuaire
+fcmcentral::marin.suivreEnFcm
+fcmcentral::fcm.admin
+fcmcentral::definir_jalons_de_fcm
+fcmcentral::attribuer.mentor
+fcmcentral::attribuer.cohorte
+fcmcentral::attribuer.parcours
+fcmcentral::livret.voir
+fcmcentral::livret.telecharger
+fcmcentral::livret.proposer
+fcmcentral::livret.valider
+fcmcentral::livret.annuler
+fcmcentral::ficheBilan.voir
+fcmcentral::note.voir
+fcmcentral::note.creer
+fcmcentral::note.valider
+fcmcentral::etat.create
+fcmcentral::exporter_csv
+fcmcentral::marin.index
+fcmcentral::piece_jointe.voir
+fcmcentral::document_annexe.voir
+```
+
+---
+
+### Rôle : `Administrateur FCM`
+
+> Accès complet : tout ce que le Gestionnaire a, plus la configuration du module, la gestion des référentiels (parcours, domaines, cohortes…) et le journal des événements.
+
+```
+# Tout le rôle Gestionnaire FCM, plus :
+fcmcentral::change_configuration_module
+fcmcentral::voir_journal_des_evenements
+fcmcentral::parcours.figer
+fcmcentral::parcours.create
+fcmcentral::parcours.update
+fcmcentral::parcours.delete
+fcmcentral::parcoursType.index
+fcmcentral::parcoursType.create
+fcmcentral::parcoursType.update
+fcmcentral::parcoursType.delete
+fcmcentral::cohorte.index
+fcmcentral::cohorte.create
+fcmcentral::cohorte.update
+fcmcentral::cohorte.delete
+fcmcentral::domaine.index
+fcmcentral::domaine.create
+fcmcentral::domaine.update
+fcmcentral::affectation.index
+fcmcentral::affectation.create
+fcmcentral::affectation.update
+fcmcentral::affectation.delete
+fcmcentral::typeEtat.index
+fcmcentral::typeEtat.create
+fcmcentral::typeEtat.update
+fcmcentral::typeNote.index
+fcmcentral::typeNote.create
+fcmcentral::typeNote.update
+```
+
+---
+
+## Permissions déclarées mais non câblées (à ignorer pour l'instant)
+
+Ces permissions existent dans le seeder mais **ne sont vérifiées nulle part dans le code** :
+
+| Permission | Statut |
+|---|---|
+| `fcmcentral::livret.proposer` | Prévu, non implémenté |
+| `fcmcentral::livret.valider` | Prévu, non implémenté |
+| `fcmcentral::livret.annuler` | Prévu, non implémenté |
+| `fcmcentral::livret.refuser` | Prévu, non implémenté |
+| `fcmcentral::marin.suivreEnFcm` | **Attention** : le seeder déclare `fcmcentral::marin.suivreEnFcm` mais le code vérifie aussi `fcmcentral::suivre_en_fcm` (format ancien, dans un widget commenté). Utiliser `fcmcentral::marin.suivreEnFcm`. |
+
+---
+
+## Permissions référencées dans le code mais absentes du seeder
+
+Ces permissions sont vérifiées dans l'interface mais **pas créées par le seeder** — elles doivent être ajoutées manuellement ou via migration si utilisées :
+
+| Permission | Où elle est vérifiée |
+|---|---|
+| `fcmcentral::admin` | Widget `TestMarinRolesPermissionsWidget` (commenté — peut être ignoré) |
+| `fcmcentral::suivre_en_fcm` | Widget `TestMarinRolesPermissionsWidget` (commenté — peut être ignoré) |
