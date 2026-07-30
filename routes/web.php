@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\FcmCentral\Http\Controllers\DocumentAnnexeDownloadController;
 use Modules\FcmCentral\Http\Controllers\FcmCentralController;
 use Modules\FcmCentral\Http\Controllers\PieceJointeDownloadController;
 
@@ -28,3 +29,7 @@ Route::middleware('auth')->get(
     PieceJointeDownloadController::class
 )->name('fcmcentral.piece-jointe.telecharger');
 
+Route::middleware('auth')->get(
+    '/fcmcentral/document-annexe/{marinUuid}/{documentUuid}',
+    DocumentAnnexeDownloadController::class
+)->name('fcmcentral.document-annexe.telecharger');

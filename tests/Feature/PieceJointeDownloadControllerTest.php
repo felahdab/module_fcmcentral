@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Permission;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
@@ -16,7 +17,7 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-pest()->group('Fcm Central1');
+pest()->group('Fcm Central');
 
 const DOWNLOAD_SF_UUID = 'deasm1b1-1234-5678-cosf-11aa1c1c1sf1';
 const DOWNLOAD_OBJECTIFS = [
@@ -85,8 +86,7 @@ function creerMarinAvecPieceJointeStockee(): array
 
     $marin->refresh();
 
-    // Injection directe de la pièce jointe dans le JSON du parcours (contourne les composants
-    // Livewire, dont le montage souffre d'un bug préexistant sans rapport avec ce contrôleur).
+    
     $chemin = sprintf('fcmcentral/livretfcm/pieces-jointes/savoirfaire/%s/2026/07/justificatif.pdf', $marin->uuid);
     Storage::disk('s3-private')->put($chemin, 'contenu-pdf-de-test');
 
@@ -114,9 +114,13 @@ function creerMarinAvecPieceJointeStockee(): array
 
 function urlPieceJointe(Marin $marin, string $type = 'savoirfaire', string $uuid = DOWNLOAD_SF_UUID): string
 {
-    // Chemin construit manuellement SANS le préfixe "apps" : le helper de test $this->get()
-    // préfixe déjà l'URI avec config('app.url'), qui contient lui-même "/apps" — passer par
-    // route() ici doublerait ce préfixe ("/apps/apps/...") et produirait un faux 404.
+    
+    return route('fcmcentral.piece-jointe.telecharger', [
+        'marinUuid' => $marin->uuid,
+        'type' => $type,
+        'uuid' => $uuid
+    ]);
+
     return sprintf(
         '/fcmcentral/piece-jointe/%s/%s/%s',
         $marin->uuid,
@@ -127,6 +131,7 @@ function urlPieceJointe(Marin $marin, string $type = 'savoirfaire', string $uuid
 
 describe('PieceJointeDownloadController - Autorisations', function () {
     it('refuse l\'accès à un utilisateur non connecté', function () {
+        
         [$marin] = creerMarinAvecPieceJointeStockee();
 
         $this->get(urlPieceJointe($marin))
@@ -138,6 +143,8 @@ describe('PieceJointeDownloadController - Autorisations', function () {
         [$marin] = creerMarinAvecPieceJointeStockee();
 
         $intrus = User::factory()->create(['admin' => 0]);
+        $voir_tous_les_marins = Permission::create(['name' => 'rh::voir_tous_les_marins', 'guard_name' => 'web']);
+        $intrus->givePermissionTo($voir_tous_les_marins);
 
         $this->actingAs($intrus)
             ->get(urlPieceJointe($marin))
@@ -179,7 +186,7 @@ describe('PieceJointeDownloadController - Autorisations', function () {
             user_uuid: 'test-user',
             object_class: ObjectClasses::MARIN,
             object_uuid: $marin->uuid,
-            detail: ['mentors' => [$mentor->uuid]]
+            detail: ['mentor' => [$mentor->uuid]]
         ));
 
         $this->actingAs($userMentor)

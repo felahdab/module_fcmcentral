@@ -4,11 +4,15 @@ namespace Modules\FcmCentral\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use Modules\FcmCentral\Http\Controllers\Concerns\VerifieAccesMarinTrait;
 use Modules\FcmCentral\Models\Marin;
+use Modules\RH\Models\Scopes\MarinFiltreParUniteScope;
 use Symfony\Component\HttpFoundation\Response;
 
 class PieceJointeDownloadController extends Controller
 {
+    use VerifieAccesMarinTrait;
+
     /**
      * Sert le fichier d'une pièce jointe (savoirfaire/objectif) du parcours d'un marin,
      * stockée sur le disque privé s3-private.
@@ -20,9 +24,16 @@ class PieceJointeDownloadController extends Controller
      */
     public function __invoke(string $marinUuid, string $type, string $uuid): Response
     {
-        $marin = Marin::where('uuid', $marinUuid)->firstOrFail();
+        // ⚠️ Sans le retrait de ce scope, un mentor ou un utilisateur avec la permission
+        // fcmcentral::piece_jointe.voir ne pourrait même pas trouver le marin ciblé dès lors
+        // qu'il n'est pas dans la même unité (le scope filtre par unité de l'utilisateur
+        // connecté) : l'autorisation réelle est vérifiée juste après, indépendamment de ce scope.
+        $marin = Marin::withoutGlobalScope(MarinFiltreParUniteScope::class)
+            ->where('uuid', $marinUuid)
+            ->firstOrFail()
+        ;
 
-        abort_unless($this->utilisateurPeutVoir($marin), 403);
+        abort_unless($this->marinEstAccessiblePour($marin, 'fcmcentral::piece_jointe.voir'), 403);
 
         $chemin = $this->trouverCheminPieceJointe($marin, $type, $uuid);
 
@@ -33,27 +44,6 @@ class PieceJointeDownloadController extends Controller
         abort_unless($disk->exists($chemin), 404, 'Fichier introuvable sur le stockage.');
 
         return $disk->response($chemin);
-    }
-
-    private function utilisateurPeutVoir(Marin $marin): bool
-    {
-        if (auth()->user()?->can('fcmcentral::piece_jointe.voir')) {
-            return true;
-        }
-
-        $marinConnecte = Marin::fromCurrentUser();
-
-        if (!$marinConnecte) {
-            return false;
-        }
-
-        $marinConnecte = cast_as_eloquent_descendant($marinConnecte, Marin::class);
-
-        if ($marinConnecte->id === $marin->id) {
-            return true;
-        }
-
-        return $marinConnecte->est_mentor_de($marin);
     }
 
     private function trouverCheminPieceJointe(Marin $marin, string $type, string $uuid): ?string
