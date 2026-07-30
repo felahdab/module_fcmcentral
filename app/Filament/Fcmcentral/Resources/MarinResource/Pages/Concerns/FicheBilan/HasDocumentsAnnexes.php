@@ -19,7 +19,10 @@ trait HasDocumentsAnnexes
         $documents = collect($this->marin->complementsFcm?->documents_annexes ?? []);
 
         return $documents->map(function (array $doc) {
-            $doc['url'] = Storage::disk('s3-public')->url($doc['chemin']);
+            $doc['url'] = route('fcmcentral.document-annexe.telecharger', [
+                'marinUuid' => $this->marin->uuid,
+                'documentUuid' => $doc['uuid'],
+            ]);
 
             return $doc;
         })->sortByDesc('ajoute_le')->values();
@@ -56,7 +59,7 @@ trait HasDocumentsAnnexes
             now()->format('Y'),
             now()->format('m')
         );
-        $chemin = $this->nouveauDocumentAnnexe->store($directory, 's3-public');
+        $chemin = $this->nouveauDocumentAnnexe->store($directory, 's3-private');
 
         $fcmMarin = $this->marin->complementsFcm;
         $documents = $fcmMarin->documents_annexes ?? [];
@@ -108,5 +111,26 @@ trait HasDocumentsAnnexes
 
         unset($this->documentsAnnexes);
         $this->dispatch('$refresh');
+    }
+
+    /**
+     * Supprime un fichier du disque s3-private et vérifie que la suppression a bien eu lieu.
+     * Retourne true si le fichier n'existe plus (ou n'existait pas), false si la suppression a échoué.
+     */
+    private function supprimerFichierS3(?string $chemin): bool
+    {
+        if (!$chemin) {
+            return true;
+        }
+
+        $disk = Storage::disk('s3-private');
+
+        if (!$disk->exists($chemin)) {
+            return true;
+        }
+
+        $disk->delete($chemin);
+
+        return !$disk->exists($chemin);
     }
 }

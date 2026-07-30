@@ -89,7 +89,7 @@ class PieceJointeMarinParcoursListener
 
             // On vient de stocker un nouveau fichier sur S3 sans pouvoir l'attacher : on nettoie l'orphelin.
             if ($estAjout && $cheminPieceJointe) {
-                Storage::disk('s3-public')->delete($cheminPieceJointe);
+                Storage::disk('s3-private')->delete($cheminPieceJointe);
             }
 
             return;
@@ -112,9 +112,9 @@ class PieceJointeMarinParcoursListener
 
         // Suppression physique du fichier S3 devenu orphelin (suppression, ou remplacement d'un ancien fichier).
         if (!$estAjout && $ancienChemin) {
-            Storage::disk('s3-public')->delete($ancienChemin);
+            Storage::disk('s3-private')->delete($ancienChemin);
         } elseif ($estAjout && $ancienChemin && $ancienChemin !== $cheminPieceJointe) {
-            Storage::disk('s3-public')->delete($ancienChemin);
+            Storage::disk('s3-private')->delete($ancienChemin);
         }
 
         $notificationType = $estAjout
