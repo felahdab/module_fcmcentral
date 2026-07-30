@@ -25,7 +25,7 @@ Avant refactorisation : un seul fichier de plus de 1100 lignes. Après : la clas
 | `HasPermissions` | Tous les `can...()` : qui peut proposer/valider/dévalider/refuser, et les 4 états du marin (gelé, en sédimentation, en FCM, peut proposer/valider) |
 | `HasParcoursData` | Chargement du marin et de son parcours brut (`marin()`, `parcours()`, `parcoursFiltre()`) |
 | `HasFiltres` | Tout ce qui concerne le filtrage de l'arbre affiché : propriétés de filtre, `queryString` (filtres dans l'URL), listes disponibles pour les dropdowns, logique de filtrage récursive, calcul des statistiques |
-| `HasPieceJointe` | Upload de la pièce jointe PDF (propriété `pieceJointe`, validation, stockage) |
+| `HasPieceJointe` | Upload de pièce jointe PDF au moment de la validation (`stockerPieceJointe`), **et** gestion indépendante ajout/suppression sur un élément déjà validé (`ouvrirGestionPieceJointe`, `ajouterPieceJointeSurElement`, `supprimerPieceJointeSurElement`) — voir section dédiée |
 | `HasValidationActions` | Les 4 actions métier : `proposer`, `valider`, `devalider`, `annulerProposition` — chacune dispatche un `UserGeneratedEvent` |
 | `HasDisplayHelpers` | Nettoyage de texte pour tooltips/JS (échappement, accents, caractères spéciaux) |
 
@@ -50,9 +50,11 @@ Marin
 
 ---
 
-## Pièce jointe à la validation
+## Pièce jointe
 
-### Règle métier
+Deux mécanismes distincts cohabitent, avec des rôles différents. Les deux stockent sur `s3-private` (jamais `s3-public` — voir `DOC_STOCKAGE_S3.md` dans `Modules/FcmCentral`).
+
+### 1. Pièce jointe au moment de la validation
 
 Quand un mentor valide un ou plusieurs éléments (`valider()`), il peut joindre un PDF (5 Mo max) qui sera attaché à **tous les éléments validés dans ce même appel**. Le fichier est stocké **avant** que les événements ne soient dispatchés :
 
@@ -62,21 +64,41 @@ valider()
        └─ createValidationEvent(..., $pieceJointePath) ← un événement par élément, avec le même chemin
 ```
 
-### Stockage
+Stockage : `fcmcentral/livretfcm/pieces-jointes/{savoirfaire|objectif}/{uuid_marin}/{année}/{mois}/xxxxx.pdf`.
 
-Disque `s3-public`, classé par catégorie (`savoirfaire` ou `objectif`, selon ce qui est présent dans le lot validé) et par année/mois pour éviter d'accumuler des dizaines de milliers de fichiers dans un seul dossier :
+**Point d'attention : qui écrit `piece_jointe` dans le JSON ?** Ce mécanisme transmet juste le chemin dans le `detail` de l'événement `VALID_ELMT_MARIN_PARCOURS`. C'est le **listener** du module appelant qui doit lire `detail['piece_jointe']` et l'écrire sur l'élément correspondant dans le JSON (voir `ValidElementMarinParcoursListener::updateElement()` côté FcmCentral). **Si un module intègre ce composant sans que son listener sache lire cette clé, la pièce jointe sera uploadée sur S3 mais jamais reliée à rien** — vérifiez que le listener cible gère bien `piece_jointe` avant de considérer la fonctionnalité opérationnelle pour un nouveau module.
+
+### 2. Gestion après validation (ajout/suppression indépendante)
+
+Contrairement au mécanisme ci-dessus (upload uniquement, au moment de la validation), ce second mécanisme permet d'ajouter ou de retirer une pièce jointe sur un élément **déjà validé**, à tout moment, depuis la modale "Infos" :
 
 ```
-fcmcentral/livretfcm/pieces-jointes/{savoirfaire|objectif}/{année}/{mois}/xxxxx.pdf
+ouvrirGestionPieceJointe($type, $uuid)      ← ouvre la modale si canGererPieceJointe() ET elementEstValide()
+  └─ ajouterPieceJointeSurElement()         ← upload + dispatch AJOUT_PIECE_JOINTE_MARIN_PARCOURS
+  └─ supprimerPieceJointeSurElement($type, $uuid) ← dispatch SUPPR_PIECE_JOINTE_MARIN_PARCOURS (pas d'upload)
 ```
 
-### Ce composant ne supprime jamais de fichier
+Comme pour `valider()`/`devalider()` (`HasValidationActions`), ce composant ne mute jamais le JSON lui-même : c'est `PieceJointeMarinParcoursListener` (module `FcmCentral`) qui reçoit l'événement, retrouve l'élément dans le JSON par `type`+`uuid`, écrit ou retire `piece_jointe`, et **nettoie le fichier S3 devenu orphelin** (ancien fichier remplacé, ou suppression). C'est le même listener que celui utilisé par `FicheBilan` pour sa propre gestion de pièce jointe — un seul point de mutation du JSON pour les deux composants.
 
-Contrairement à `FicheBilan` (côté FcmCentral) qui a une action dédiée de suppression avec vérification S3, `LivretFcmLight` ne fait qu'**ajouter** une pièce jointe au moment de la validation. La suppression/remplacement se gère ailleurs (page Fiche Bilan).
+**Condition d'accès** : `canGererPieceJointe()` (dans `HasPermissions`) — actuellement la même permission que la validation (`{PermissionPrefix}::livret.valider`), pas de permission dédiée à la gestion de pièce jointe côté Livewire.
 
-### Point d'attention : qui écrit `piece_jointe` dans le JSON ?
+### Téléchargement sécurisé
 
-Ce composant transmet juste le chemin dans le `detail` de l'événement `VALID_ELMT_MARIN_PARCOURS`. C'est le **listener** du module appelant qui doit lire `detail['piece_jointe']` et l'écrire sur l'élément correspondant dans le JSON (voir `ValidElementMarinParcoursListener::updateElement()` côté FcmCentral). **Si un module intègre ce composant sans que son listener sache lire cette clé, la pièce jointe sera uploadée sur S3 mais jamais reliée à rien** — vérifiez que le listener cible gère bien `piece_jointe` avant de considérer la fonctionnalité opérationnelle pour un nouveau module.
+Comme pour `FicheBilan`, le lien affiché (`pieceJointeUrl`, calculé dans `item.blade.php`) n'est jamais une URL S3 directe : c'est une route applicative, résolue côté `FcmCentral` (`PieceJointeDownloadController`) même si l'upload a lieu ici, dans `FcmCommun` :
+
+```php
+route('fcmcentral.piece-jointe.telecharger', [
+    'marinUuid' => $this->marin->uuid,
+    'type' => $type,      // uniquement pour 'savoirfaire'/'objectif' — pas pour 'affectation'/'competence'
+    'uuid' => $uuid,
+])
+```
+
+Ce composant vit dans `FcmCommun`, mais **dépend directement d'une route nommée définie dans le module `FcmCentral`** (`fcmcentral.piece-jointe.telecharger`). Si `LivretFcmLight` est un jour intégré dans un module qui n'enregistre pas cette route (ex. un futur `FcmUnite` sans dépendance vers `FcmCentral`), le lien de téléchargement cassera silencieusement (`route()` lève une exception si le nom n'existe pas). À vérifier explicitement le jour où ce composant sera réellement partagé au-delà de `FcmCentral`.
+
+### Ce composant ne supprime jamais de fichier directement
+
+Ni le mécanisme 1 (validation), ni le mécanisme 2 (gestion après validation) ne suppriment eux-mêmes un fichier S3 — l'upload se fait ici, mais toute suppression physique passe systématiquement par `PieceJointeMarinParcoursListener` côté `FcmCentral`.
 
 ---
 
@@ -116,16 +138,3 @@ Sur cette base, chaque `can...()` applique en plus une règle de rôle :
 - **Le marin lui-même** peut toujours proposer/annuler ses propres éléments, sans permission Spatie explicite
 - **Un mentor** (`est_mentor_de()`) peut toujours valider/refuser, sans permission Spatie explicite
 - **Sinon**, il faut la permission `{PermissionPrefix}::livret.xxx` (proposer/valider/annuler/refuser), où `PermissionPrefix` est injecté par le module appelant (ex. `fcmcentral`)
-
----
-
-## Pièges connus / points d'attention
-
-1. **Ce composant est un contrat implicite avec ses listeners.** Il ne modifie jamais le parcours lui-même — tout passe par des `UserGeneratedEvent`. Si vous ajoutez un nouveau type d'action ici, il ne se passera rien tant qu'un listener côté module appelant ne sait pas le traiter.
-
-2. **`stockerPieceJointe()` attache le même fichier à tous les éléments validés en un seul appel.** Si un mentor valide 3 savoir-faire d'un coup avec une seule pièce jointe, les 3 événements `VALID_ELMT_MARIN_PARCOURS` recevront le même chemin S3 dans leur `detail`. Ce n'est pas un bug — c'est voulu pour l'usage "un diplôme couvre plusieurs validations" — mais gardez ça en tête si vous devez un jour distinguer les pièces jointes par élément.
-
-3. **`#TODO: vérifier les dépendances avec FcmCentral et FcmUnite`** (en haut du fichier, non résolu) — ce composant est censé être réutilisable par plusieurs modules mais son couplage réel (permissions, listeners attendus) n'a jamais été formellement vérifié pour FcmUnite.
-
-4. **Aucun test automatisé** n'existe pour ce composant à ce jour. Si vous touchez aux filtres ou à la validation, testez manuellement dans le navigateur.
-

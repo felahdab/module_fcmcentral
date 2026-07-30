@@ -36,7 +36,7 @@ Ce découpage a été fait volontairement : à l'origine, tout tenait dans un se
 | `HasPieceJointe` | Ajout/suppression d'un document PDF sur un savoir-faire **validé** |
 | `HasDocumentsAnnexes` | Documents PDF libres attachés au marin, indépendants du parcours |
 
-**Piège à connaître** : `supprimerFichierS3()` est défini une seule fois, dans `HasPieceJointe`, mais utilisé aussi par `HasDocumentsAnnexes`. Ça fonctionne parce que les deux traits sont combinés dans la même classe — mais si un jour `HasDocumentsAnnexes` est extrait dans un contexte où `HasPieceJointe` n'est pas `use`, ça cassera avec une erreur "Call to undefined method".
+**Historique d'un piège maintenant corrigé** : `supprimerFichierS3()` était défini une seule fois dans `HasPieceJointe`, mais utilisé aussi par `HasDocumentsAnnexes` en comptant sur le fait que les deux traits sont combinés dans la même classe. Lors du passage de `HasPieceJointe` au schéma event/listener, cette méthode a été supprimée du trait piège (elle n'était plus utilisée en interne) — ce qui a cassé silencieusement `HasDocumentsAnnexes::supprimerDocumentAnnexe()` ("Call to undefined method"). **Chaque trait définit maintenant sa propre copie locale de `supprimerFichierS3()`, self-contained.** Ne recomptez pas sur le partage implicite de méthodes privées entre traits d'une même classe — trop fragile aux refactors ultérieurs.
 
 ### Les 10 partials blade (`fiche-bilan/`)
 
@@ -86,11 +86,11 @@ affectations[]
 
 **Conséquence importante** : modifier un savoir-faire (validation, pièce jointe...) ne se fait jamais avec une requête `UPDATE ... WHERE id = ...`. Il faut :
 1. Charger tout le JSON (`$donneesDuParcours->parcoursmarin`)
-2. Retrouver l'élément par son `uuid` en itérant les trois niveaux (voir `mutateCsfParUuid()` dans `HasPieceJointe`)
+2. Retrouver l'élément par son `uuid` en itérant les trois niveaux
 3. Modifier le tableau PHP en mémoire (par référence, avec `&`)
 4. Réassigner tout le tableau à `$donneesDuParcours->parcoursmarin` et faire `->save()`
 
-C'est ce que fait aussi le listener `ValidElementMarinParcoursListener` (dans `Modules/FcmCentral/app/Listeners/Save/MarinParcours/`) quand un mentor valide un élément depuis le livret — c'est lui qui écrit `etat_valid`, `valideur`, `commentaire`, et depuis peu `piece_jointe`.
+**`HasPieceJointe` ne fait plus cette mutation lui-même.** Depuis le passage au schéma event/listener (voir section dédiée plus bas), `ajouterPieceJointe()`/`supprimerPieceJointe()` se contentent d'uploader le fichier puis de dispatcher un `UserGeneratedEvent` (`AJOUT_PIECE_JOINTE_MARIN_PARCOURS` / `SUPPR_PIECE_JOINTE_MARIN_PARCOURS`). C'est `PieceJointeMarinParcoursListener` (`Modules/FcmCentral/app/Listeners/Save/MarinParcours/`) qui fait réellement les 4 étapes ci-dessus. Même schéma que `ValidElementMarinParcoursListener`, qui écrit `etat_valid`, `valideur`, `commentaire` quand un mentor valide un élément depuis le livret.
 
 ---
 
@@ -104,34 +104,58 @@ Une pièce jointe (PDF, 5 Mo max) ne peut être ajoutée ou supprimée **que sur
 
 Volontairement simplifié : soit il n'y a pas de pièce jointe → bouton "Ajouter un document" ; soit il y en a une → uniquement "Supprimer". Pour changer de document, l'utilisateur doit supprimer puis ré-ajouter. Ça évite la logique de remplacement (suppression de l'ancien + upload du nouveau en une seule action, avec gestion d'échec partiel).
 
-### Stockage
+### Stockage : `s3-private`, pas `s3-public`
 
-Disque `s3-public` (même disque que `ParcoursResource::livret_pdf`), classé par catégorie et date pour éviter un dossier unique avec des dizaines de milliers de fichiers :
+Disque `s3-private` (voir `DOC_STOCKAGE_S3.md` à la racine du module pour le détail), classé par marin/année/mois pour éviter un dossier unique avec des dizaines de milliers de fichiers :
 
 ```
-fcmcentral/livretfcm/pieces-jointes/savoirfaire/{année}/{mois}/xxxxx.pdf
+fcmcentral/livretfcm/pieces-jointes/savoirfaire/{uuid_marin}/{année}/{mois}/xxxxx.pdf
 ```
 
-### Suppression vérifiée
+Aucune URL directe n'existe sur ce disque — voir "Téléchargement sécurisé" ci-dessous.
 
-`supprimerFichierS3()` ne se contente pas d'appeler `Storage::delete()` — elle vérifie **avant et après** que le fichier existe/n'existe plus :
+### Ajout/suppression : passe par un event/listener
+
+`ajouterPieceJointe()` upload le fichier puis dispatche `UserGeneratedEvent(AJOUT_PIECE_JOINTE_MARIN_PARCOURS)` ; `supprimerPieceJointe()` dispatche `SUPPR_PIECE_JOINTE_MARIN_PARCOURS` (sans re-uploader). C'est `PieceJointeMarinParcoursListener` qui fait la mutation réelle du JSON **et** la suppression du fichier S3 devenu orphelin (ancien fichier remplacé, ou suppression demandée) — le trait `HasPieceJointe` ne touche plus jamais lui-même au fichier lors d'une suppression.
+
+Ce même listener est aussi utilisé par `LivretFcmLight` (module `FcmCommun`) pour sa propre fonctionnalité d'ajout/suppression de pièce jointe après validation — un seul point de mutation du JSON pour les deux composants.
+
+### Téléchargement sécurisé
+
+Le lien affiché dans l'UI (`piece_jointe_url`, calculé dans `HasSavoirFaireProgression::savoirFaires()`) n'est **jamais** une URL S3 directe — c'est une route applicative :
+
+```php
+route('fcmcentral.piece-jointe.telecharger', [
+    'marinUuid' => $this->marin->uuid,
+    'type' => 'savoirfaire',
+    'uuid' => $csf['uuid'] ?? '',
+])
+```
+
+`PieceJointeDownloadController` vérifie que l'utilisateur connecté est le marin lui-même, un de ses mentors, ou détient la permission `fcmcentral::piece_jointe.voir`, avant de streamer le fichier depuis `s3-private`. Détail complet (autorisation, pièges) dans `DOC_STOCKAGE_S3.md`.
+
+### Documents annexes (hors parcours)
+
+Fonctionnalité voisine mais indépendante du parcours : des documents PDF libres attachés directement au marin (attestations, courriers...), stockés dans une colonne JSON dédiée `documents_annexes` sur `fcmcentral_fcm_marins` (migration `2026_07_23_000001_fcmcentral_add_documents_annexes_to_fcm_marins.php`). Contrairement aux pièces jointes de savoir-faire, il peut y en avoir un nombre illimité, sans condition de validation.
+
+Même traitement que les pièces jointes : stockage sur `s3-private` (`fcmcentral/documents-annexes/marins/{marinId}/{année}/{mois}/`), et téléchargement via un contrôleur dédié `DocumentAnnexeDownloadController` (route `fcmcentral.document-annexe.telecharger`, permission `fcmcentral::document_annexe.voir`) — **une permission séparée de `piece_jointe.voir`**, les deux ne se substituent pas l'une à l'autre.
+
+Contrairement aux pièces jointes, `ajouterDocumentAnnexe()`/`supprimerDocumentAnnexe()` mutent directement le tableau `documents_annexes` (pas d'event/listener ici — c'est un tableau plat sans validation métier associée, donc pas besoin du schéma event/listener utilisé pour le JSON du parcours).
+
+`supprimerFichierS3()` (locale à `HasDocumentsAnnexes`, voir piège plus haut) vérifie **avant et après** que le fichier existe/n'existe plus, sur `s3-private` :
 
 ```php
 private function supprimerFichierS3(?string $chemin): bool
 {
     if (!$chemin) return true;
-    $disk = Storage::disk('s3-public');
+    $disk = Storage::disk('s3-private');
     if (!$disk->exists($chemin)) return true;
     $disk->delete($chemin);
     return !$disk->exists($chemin);
 }
 ```
 
-Si la suppression échoue réellement (le fichier existe toujours après `delete()`), l'action s'arrête avec une notification "Échec de la suppression" — **la référence JSON n'est pas retirée**, pour ne jamais désynchroniser "il y a un lien dans l'UI" et "le fichier existe sur S3".
-
-### Documents annexes (hors parcours)
-
-Fonctionnalité voisine mais indépendante du parcours : des documents PDF libres attachés directement au marin (attestations, courriers...), stockés dans une colonne JSON dédiée `documents_annexes` sur `fcmcentral_fcm_marins` (migration `2026_07_23_000001_fcmcentral_add_documents_annexes_to_fcm_marins.php`). Contrairement aux pièces jointes de savoir-faire, il peut y en avoir un nombre illimité, sans condition de validation.
+Si la suppression échoue réellement, l'action s'arrête avec une notification "Échec de la suppression" — **la référence JSON n'est pas retirée**, pour ne jamais désynchroniser "il y a un lien dans l'UI" et "le fichier existe sur S3".
 
 ---
 
@@ -143,16 +167,4 @@ Deux menus déroulants indépendants, combinés en `AND` :
 - **Statut** : Tous / Validés / Non validés
 
 Les deux sont appliqués dans `savoirFaires()` (`HasSavoirFaireProgression`), donc **tout ce qui dépend de cette collection** (statistiques, `csfEstValide()`, la liste affichée) reflète les filtres actifs. Attention si vous ajoutez une nouvelle fonctionnalité qui doit voir *tous* les savoir-faire indépendamment du filtre : il faudra requêter le JSON brut directement plutôt que passer par `$this->savoirFaires`.
-
----
-
-## Pièges connus / points d'attention
-
-1. **`csf_uuid` peut être `null` sur d'anciens parcours.** Le format historique identifiait un savoir-faire par une combinaison `savoirfaire_uuid + id` (voir `buildCsfPivotUuid()` dans `ValidElementMarinParcoursListener`) plutôt qu'un `uuid` direct sur le csf. Si `csf_uuid` est `null`, le bloc pièce jointe ne s'affiche pas du tout (`@if($savoirFaire['csf_uuid'] && ...)`).
-
-2. **Bug d'environnement connu (pas dans ce code)** : sur cet environnement de dev, `APP_URL` contient déjà `/apps`, et les PanelProvider Filament ajoutent un second `/apps` par-dessus, ce qui casse les requêtes AJAX Livewire (double préfixe). Symptôme observé : une action Livewire (ex. suppression d'une pièce jointe) peut échouer à rafraîchir l'affichage même si elle a réussi côté serveur. À corriger dans `.env`, pas dans le code de cette page.
-
-3. **`estGele()`** vient du modèle `Marin` (`Modules/FcmCentral/app/Models/Marin.php`) — vérifie l'existence d'un `Etat` sans `date_fin`. La bannière GEL de cette page réutilise cette même méthode (cohérent avec l'alerte GEL de `LivretDeFcmLight`).
-
-4. **Les traits ne remplacent pas des tests.** Aucun test automatisé n'existe pour `FicheBilan` à ce jour (contrairement aux pages `Suivi*` dans `Modules/FcmCentral/tests/Feature/`). Si vous touchez à la logique de pièce jointe ou de filtres, il n'y a pas de filet de sécurité — testez manuellement dans le navigateur.
 
