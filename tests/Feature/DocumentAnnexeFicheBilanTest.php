@@ -17,7 +17,7 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-pest()->group('Tata3');
+pest()->group('Fcm Central');
 
 beforeEach(function () {
     Filament::setCurrentPanel(Filament::getPanel('FCM Central'));
