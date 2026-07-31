@@ -23,16 +23,14 @@ Ces permissions contrôlent des **fonctionnalités spécifiques** de l'interface
 
 | Permission | Effet dans l'interface |
 |---|---|
-| `rh::voir_tous_les_marins` | Dans la liste des marins, l'utilisateur voit **tous** les marins en FCM. Sans cette permission, il ne voit que les marins dont il est mentor ou qui sont dans sa cohorte. |
+| `fcmcentral::voir_tous_les_marins` | Dans la liste des marins (`MarinResource`), lève la restriction du scope de la table Filament : l'utilisateur voit **tous** les marins en FCM, pas seulement ceux qu'il gère. |
+| `rh::voir_tous_les_marins` | **Permission distincte de la précédente**, définie côté module `RH` (`MarinFiltreParUniteScope`) — s'applique globalement à **toute requête Eloquent sur `Marin`**, pas seulement à la liste Filament. Sans elle, un utilisateur ne voit que les marins de sa propre unité (ou uniquement lui-même s'il n'a pas d'unité). Voir la documentation du module RH pour le détail de cette logique de filtrage par unité. |
 | `fcmcentral::recherche_annuaire` | Accès à la page **Recherche Annuaire** (recherche LDAP d'un marin pour l'intégrer en FCM). |
 | `fcmcentral::change_configuration_module` | Accès à la page **Configuration** du module (paramètres globaux). Réservé administrateur. |
 | `fcmcentral::voir_journal_des_evenements` | Accès à la ressource **Journal des événements** (StoredEvent). Affiche l'historique de toutes les actions traçées. |
 | `fcmcentral::exporter_csv` | Bouton **Exporter CSV** visible dans la liste des marins. |
 
-!!! note "Remarque"
-
-    Le filtrage des marins affichés à l'utilisateur du module FCM est défini par les règles du module RH. Pour en savoir plus, voir la documentation
-    de ce module: [Module RH](https://pprod-ffast.intradef.gouv.fr/florian/docs/RH/architecture_logicielle/#attribution-dune-unite-a-un-utilisateur)
+> Les deux permissions `voir_tous_les_marins` (`fcmcentral::` et `rh::`) sont indépendantes et **ne se remplacent pas l'une l'autre** — un utilisateur peut avoir besoin des deux pour un accès sans restriction (voir la liste ET requêter tous les marins ailleurs dans l'app).
 
 ### Gestion FCM d'un marin
 
@@ -57,16 +55,27 @@ Ces permissions contrôlent des **fonctionnalités spécifiques** de l'interface
 |---|---|
 | `fcmcentral::livret.voir` | Accès à la page **Livret FCM** d'un marin. Sans cette permission, la page renvoie une erreur d'autorisation. |
 | `fcmcentral::livret.telecharger` | Bouton **Télécharger le livret PDF** visible dans la fiche marin. |
-| `fcmcentral::livret.proposer` | Permet à l'utilisateur de saisir des propositions de validation d'éléments du parcours depuis le livret |
-| `fcmcentral::livret.valider` | Permet à l'utilisateur de saisir des validations, ou d'accepter des propositions de validation dans le livret |
-| `fcmcentral::livret.annuler` | Permet à l'utilisateur de revenir sur la validation d'un élément du parcours depuis le livret |
-| `fcmcentral::livret.refuser` | Permet à l'utilisateur de refuser une proposition de validation faite précédemment |
+| `fcmcentral::livret.proposer` | Permet de proposer la validation d'un élément du parcours depuis le livret (`LivretFcmLight::canProposer()`). Sans permission, seul le marin lui-même peut proposer ses propres éléments. |
+| `fcmcentral::livret.valider` | Permet de valider un élément (ou d'accepter une proposition) depuis le livret (`canValider()`). Sans permission, seul un mentor du marin peut valider. Réutilisée aussi pour gérer les pièces jointes du livret et de la fiche bilan (voir plus bas — pas de permission dédiée à l'écriture des pièces jointes). |
+| `fcmcentral::livret.annuler` | Permet de revenir sur la validation d'un élément, ou d'annuler une proposition (`canAnnuler()`/`canDevalider()`). Sans permission, seul un mentor peut dévalider. |
+| `fcmcentral::livret.refuser` | Permet de refuser une proposition de validation faite précédemment (`canRefuser()`). |
 
 ### Fiche Bilan
 
 | Permission | Effet dans l'interface |
 |---|---|
 | `fcmcentral::ficheBilan.voir` | Accès à la page **Fiche Bilan** d'un marin. |
+
+### Pièces jointes et documents annexes (téléchargement)
+
+Contrôlent l'accès en **lecture** aux fichiers privés (`s3-private`) via `PieceJointeDownloadController`/`DocumentAnnexeDownloadController` — voir `DOC_STOCKAGE_S3.md`. Sans ces permissions, un utilisateur peut quand même accéder aux fichiers d'un marin dont il est **le marin lui-même** ou **le mentor** (vérifié directement dans le contrôleur, indépendamment de toute permission Spatie).
+
+| Permission | Effet |
+|---|---|
+| `fcmcentral::piece_jointe.voir` | Accès en téléchargement à la pièce jointe (savoir-faire/objectif) de **n'importe quel marin**, même sans lien (ni marin lui-même, ni mentor). Pensé pour les gestionnaires/admins FCM. |
+| `fcmcentral::document_annexe.voir` | Même chose pour les documents annexes. **Permission distincte de `piece_jointe.voir`** — avoir l'une ne donne pas accès à l'autre. |
+
+> Ces deux permissions ne contrôlent que la **lecture/téléchargement**. L'ajout/suppression d'une pièce jointe réutilise la permission existante `fcmcentral::livret.valider` (pas de permission dédiée à l'écriture à ce jour).
 
 ### Notes
 
@@ -143,7 +152,7 @@ fcmcentral::marin.index
 
 ### Rôle : `Mentor`
 
-> Peut voir ses marins supervisés, consulter les livrets, proposer/valider des éléments du parcours (quand câblé), créer des notes.
+> Peut voir ses marins supervisés, consulter les livrets, proposer des éléments du parcours, créer des notes.
 
 ```
 fcmcentral::livret.voir
@@ -162,7 +171,7 @@ fcmcentral::marin.index
 > Gère les marins en FCM : mise en FCM, attribution mentors/cohorte/parcours, jalons, notes, états.
 
 ```
-rh::voir_tous_les_marins
+fcmcentral::voir_tous_les_marins
 fcmcentral::recherche_annuaire
 fcmcentral::marin.suivreEnFcm
 fcmcentral::fcm.admin
@@ -175,6 +184,7 @@ fcmcentral::livret.telecharger
 fcmcentral::livret.proposer
 fcmcentral::livret.valider
 fcmcentral::livret.annuler
+fcmcentral::livret.refuser
 fcmcentral::ficheBilan.voir
 fcmcentral::note.voir
 fcmcentral::note.creer
@@ -182,6 +192,8 @@ fcmcentral::note.valider
 fcmcentral::etat.create
 fcmcentral::exporter_csv
 fcmcentral::marin.index
+fcmcentral::piece_jointe.voir
+fcmcentral::document_annexe.voir
 ```
 
 ---
