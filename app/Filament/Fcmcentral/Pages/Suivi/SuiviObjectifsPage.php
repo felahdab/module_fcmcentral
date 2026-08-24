@@ -260,7 +260,14 @@ class SuiviObjectifsPage extends Page implements HasForms, HasTable
             'fcmMarin.marin.unite',
             'fcmMarin.cohorte',
             'parcours_serialise',
-        ])->whereNotNull('parcoursmarin');
+        ])->whereNotNull('parcoursmarin')
+            ->whereHas('fcmMarin', fn (Builder $q) => $q
+                ->whereNotNull('date_sedimentation')
+                ->whereNotNull('date_fcm')
+                ->whereNull('date_competence'));
+
+
+
 
         if (blank($this->selectedParcoursId) && blank($this->selectedObjectifUuid)) {
             return $query->whereRaw('1 = 0');
@@ -342,7 +349,11 @@ class SuiviObjectifsPage extends Page implements HasForms, HasTable
             'fcmMarin.marin.grade',
             'fcmMarin.marin.specialite',
             'fcmMarin.marin.unite',
-        ])->whereNotNull('parcoursmarin');
+        ])->whereNotNull('parcoursmarin')
+        ->whereHas('fcmMarin', fn (Builder $q) => $q
+            ->whereNotNull('date_sedimentation')
+            ->whereNotNull('date_fcm')
+            ->whereNull('date_competence'));
 
         if (filled($this->selectedObjectifUuid)) {
             $uuid = $this->selectedObjectifUuid;
