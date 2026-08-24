@@ -170,6 +170,12 @@ class PermissionsSeeder extends Seeder
             'name' => 'fcmcentral::suivi.objectif',
             'guard_name' => 'web',
         ]);
+
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::suivi.mentor',
+            'guard_name' => 'web',
+        ]);
+
         
     }
 }

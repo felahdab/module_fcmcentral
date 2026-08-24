@@ -258,7 +258,11 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             'fcmMarin.marin.unite',
             'fcmMarin.cohorte',
             'parcours_serialise',
-        ])->whereNotNull('parcoursmarin');
+        ])->whereNotNull('parcoursmarin')
+            ->whereHas('fcmMarin', fn (Builder $q) => $q
+                ->whereNotNull('date_sedimentation')
+                ->whereNotNull('date_fcm')
+                ->whereNull('date_competence'));
 
         // Retourner 0 résultats si aucun filtre sélectionné
         if (blank($this->selectedParcoursId) && blank($this->selectedStageUuid)) {
@@ -343,7 +347,11 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             'fcmMarin.marin.grade',
             'fcmMarin.marin.specialite',
             'fcmMarin.marin.unite',
-        ])->whereNotNull('parcoursmarin');
+        ])->whereNotNull('parcoursmarin')
+            ->whereHas('fcmMarin', fn (Builder $q) => $q
+                ->whereNotNull('date_sedimentation')
+                ->whereNotNull('date_fcm')
+                ->whereNull('date_competence'));
 
         if (filled($this->selectedStageUuid)) {
             $uuid = $this->selectedStageUuid;
