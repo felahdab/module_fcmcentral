@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
-pest()->group('Fcm Central1');
+pest()->group('Fcm Central');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

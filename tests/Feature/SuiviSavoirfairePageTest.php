@@ -36,11 +36,14 @@ function creerFcmMarinSf(): FcmMarin
     $rhMarin = RhMarin::factory()->create();
 
     $id = DB::table('fcmcentral_fcm_marins')->insertGetId([
-        'rh_marin_id' => $rhMarin->id,
-        'data'        => json_encode(['statut_fcm' => 'actif']),
-        'cohorte_id'  => null,
-        'created_at'  => now(),
-        'updated_at'  => now(),
+        'rh_marin_id'        => $rhMarin->id,
+        'data'               => json_encode(['statut_fcm' => 'actif']),
+        'cohorte_id'         => null,
+        'date_sedimentation' => now()->subYear(),
+        'date_fcm'           => now()->subMonths(6),
+        'date_competence'    => null,
+        'created_at'         => now(),
+        'updated_at'         => now(),
     ]);
 
     return FcmMarin::findOrFail($id);
