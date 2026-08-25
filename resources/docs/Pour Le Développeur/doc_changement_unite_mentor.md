@@ -1,6 +1,6 @@
-# Suivi des Mentors & Observer d'unité — Module FcmCentral
+# Suivi des Mentors — Module FcmCentral
 
-> **But de ce document** : expliquer la page « Suivi des Mentors » et l'observer qui détecte les décalages d'unité entre mentor et mentoré, leur fonctionnement, et comment les faire évoluer.
+> **But de ce document** : expliquer la page « Suivi des Mentors » (vue d'ensemble + détection des décalages d'unité entre mentor et mentoré) et le filtre préventif à l'attribution, leur fonctionnement, et comment les faire évoluer.
 
 ---
 
@@ -8,10 +8,12 @@
 
 Un marin mentoré peut être suivi par un ou plusieurs mentors, et un mentor peut suivre plusieurs marins. Ces relations sont indépendantes de l'unité d'affectation. Quand un marin **change d'unité** (mutation), rien n'empêchait jusqu'ici le lien mentor/mentoré de rester en place alors que les deux personnes ne sont plus dans la même unité — situation qui n'est en général plus pertinente et passait inaperçue faute de vue d'ensemble.
 
-Deux briques répondent à ce besoin :
+Deux briques répondent à ce besoin, toutes deux dans la page **Suivi des Mentors** :
 
-1. **La page « Suivi des Mentors »** — vue d'ensemble manuelle, consultée à la demande.
-2. **`MarinUniteObserver`** — détection automatique au moment du changement d'unité, avec notification.
+1. **Filtre préventif à l'attribution** — quand on choisit un mentor pour un marin, seuls les mentors de la même unité sont proposés par défaut.
+2. **Vue d'ensemble + alerte visuelle** — pour repérer les décalages déjà existants (marin muté après coup, mentor attribué avant un déménagement, etc.), qui ne peuvent pas être empêchés à la source.
+
+> Un `MarinUniteObserver` avait été envisagé pour notifier automatiquement au moment du changement d'unité, mais a été retiré : il faisait doublon avec la vue d'ensemble ci-dessous et ajoutait de la complexité (observer sur 3 classes Eloquent différentes, garde-fous fragiles) pour un gain limité. Le choix retenu est le filtre préventif décrit plus bas, complété par une revue manuelle via la page.
 
 ---
 
@@ -54,6 +56,30 @@ Menu : groupe **Suivi**, comme les autres pages `Suivi*Page`.
 - **Filtre** « Uniquement les décalages d'unité » : filtre à bascule (`Filter::make('decalage_unite')`) qui compare les unités via une sous-requête SQL directement sur la table pivot, pour rester compatible avec la pagination.
 - **Action « Gérer les mentors »** : ouvre une modale de sélection multiple des mentors pour le mentoré de la ligne, et déclenche l'événement `UserGeneratedEvent` de type `ATTRIBUER_MENTOR_MARIN` (même mécanisme que `AffecterMentorAction` sur la fiche marin), traité par `MentorMarinListener` qui fait `sync()` sur la relation `mentors()`.
 
+### Filtre préventif : proposer d'abord les mentors de la même unité
+
+Dans l'action « Gérer les mentors », le `Select::make('mentors')` filtre ses options par défaut sur l'unité du mentoré :
+
+```php
+->options(function (MentorAssignment $record) {
+    $uniteId = $record->fcmMarin?->marin?->unite_id;
+    $mentorsActuels = $record->fcmMarin?->mentors->pluck('id')->all() ?? [];
+
+    return Marin::query()
+        ->withoutGlobalScope(MarinFiltreParUniteScope::class)
+        ->whereNull('deleted_at')
+        ->where(fn ($q) => $q->when($uniteId, fn ($q) => $q->where('unite_id', $uniteId))
+            ->when($mentorsActuels, fn ($q) => $q->orWhereIn('id', $mentorsActuels)))
+        ->orderBy('nom')
+        ->get()
+        ->mapWithKeys(...);
+})
+```
+
+Point important : les mentors **déjà attribués** restent toujours dans la liste, même s'ils sont dans une autre unité (`orWhereIn('id', $mentorsActuels)`). Sans ce filet de sécurité, ouvrir la modale sur un couple déjà en décalage aurait fait disparaître silencieusement l'ancien mentor de la liste des options — et enregistrer sans y prêter attention l'aurait retiré (`sync()` remplace toute la liste). Le filtre ne fait donc que **restreindre les nouveaux choix**, jamais **masquer un état existant**.
+
+Ce filtre ne couvre que le moment de l'attribution. Si un marin change d'unité *après* qu'un mentor cohérent lui a été attribué, rien ne l'empêche — d'où le second mécanisme :
+
 ### ⚠️ Piège : `->searchable()` sur une colonne relationnelle
 
 Ne **jamais** faire `->searchable(['relation.colonne'])` sur une `TextColumn::make('relation.colonne')` : Filament traite chaque entrée du tableau comme une **colonne JSON brute** de la table courante, pas comme un chemin de relation — ce qui produit des requêtes du type :
@@ -72,51 +98,7 @@ et lève `SQLSTATE[42S22]: Column not found: 1054 Unknown column 'mentor'`.
 
 ---
 
-## 3. `MarinUniteObserver` — détection automatique
-
-Fichier : `Modules/FcmCentral/app/Observers/MarinUniteObserver.php`
-Enregistrement : `Modules/FcmCentral/app/Providers/EventServiceProvider.php` → méthode `boot()` → `::observe(MarinUniteObserver::class)` appelé sur **les trois classes** `RH\Models\Marin`, `FcmCommun\Models\Marin` et `FcmCentral\Models\Marin` (voir piège n°1 plus bas).
-
-### Pourquoi l'observer est enregistré côté FcmCentral et pas côté RH
-
-Le module `RH` est une dépendance de base : `FcmCentral` en dépend, jamais l'inverse. Un observer qui a besoin de connaître les notions de mentor/mentoré (propres à FcmCentral) ne doit donc pas être déclaré sur le modèle RH lui-même (ni via l'attribut `#[ObservedBy]` sur `Modules/RH/Models/Marin`, qui importerait une classe FcmCentral dans RH). Il est enregistré **depuis FcmCentral**, qui a le droit de connaître RH, via `Marin::observe()` dans son propre `EventServiceProvider::boot()`.
-
-### Déclenchement
-
-```php
-public function updated(Marin $marin): void
-{
-    if (!$marin->isDirty('unite_id')) {
-        return;
-    }
-    // ...
-}
-```
-
-- Ne se déclenche que sur un `save()` qui **modifie effectivement** `unite_id` (pas à chaque sauvegarde).
-- Caste le `Marin` RH en `Modules\FcmCentral\Models\Marin` via le helper global `cast_as_eloquent_descendant()` pour accéder aux méthodes FCM (`isMentor()`, `marinsSupervises()`, `getMentors()`).
-- Vérifie les décalages **dans les deux sens** :
-  - si le marin est **mentor**, compare son unité (la nouvelle) à celle de chacun de ses mentorés ;
-  - si le marin est **mentoré**, compare son unité à celle de chacun de ses mentors.
-- S'il y a au moins un décalage, envoie une **notification Filament en base de données** (`Notification::make()->sendToDatabase(...)`) à tous les utilisateurs ayant la permission `fcmcentral::suivi.mentor` (via le scope Spatie `User::permission(...)`).
-
-### ⚠️ Deux pièges trouvés en écrivant les tests (`MarinUniteObserverTest.php`)
-
-1. **Les événements Eloquent sont scopés à la classe réellement instanciée, pas héritée.** `RH\Models\Marin`, `FcmCommun\Models\Marin` et `FcmCentral\Models\Marin` représentent la même ligne de table par héritage Eloquent, mais un `Marin::observe()` enregistré sur une seule de ces classes ne se déclenche **que** pour les sauvegardes faites via cette classe précise — pas via ses sous-classes ni ses classes parentes. `EventServiceProvider::boot()` observe donc **les trois classes** pour couvrir tous les points d'entrée (`RH\MarinResource`, actions FcmCentral, etc.).
-
-2. **`suivi_en_fcm` ne convient pas comme garde-fou générique.** `FcmCentral\Models\Marin::getSuiviEnFcmAttribute()` renvoie `$this->complementsFcm()->exists()` — donc `true` seulement si le marin a sa **propre** ligne `fcmcentral_fcm_marins`. Un **mentor** n'a pas forcément cette ligne (ce n'est pas lui qui est suivi, c'est son mentoré) : un premier jet de l'observer qui filtrait sur `suivi_en_fcm` avant toute vérification ratait donc systématiquement le cas « le mentor change d'unité ». L'observer ne fait plus cette vérification en amont : `isMentor()`/`getMentors()` renvoient naturellement `false`/vide quand ils ne s'appliquent pas, ce qui suffit à éviter les faux positifs.
-
-### Ce que l'observer ne fait PAS
-
-- Il ne bloque pas le changement d'unité (pas de `updating` qui empêcherait le `save()`).
-- Il ne réaffecte rien automatiquement — la résolution se fait manuellement sur la page **Suivi des Mentors**.
-- Il n'envoie qu'une notification en base (cloche Filament) : pas d'email, pas de SMS.
-
----
-
 ## Pour aller plus loin
 
-- Étendre l'action « Gérer les mentors » pour proposer aussi les mentors d'une autre unité de façon plus visible (actuellement la liste des mentors possibles contourne déjà le scope par unité, donc c'est déjà possible, mais l'UX ne le met pas particulièrement en avant).
-- Ajouter un lien direct depuis la notification vers la page Suivi des Mentors, filtrée sur le couple concerné.
+- Ajouter un job planifié (cron) qui recense périodiquement les décalages et envoie un résumé, si la revue manuelle de la page s'avère insuffisante en pratique.
 - Voir `DOC_PERMISSIONS.md` pour le détail de `MarinFiltreParUniteScope` et des permissions `voir_tous_les_marins`.
-

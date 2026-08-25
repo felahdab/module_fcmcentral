@@ -43,14 +43,15 @@ class SuiviMentorsPage extends Page implements HasForms, HasTable
         return $table
             ->query(fn (): Builder => $this->buildQuery())
             ->groups([
-                Group::make('marin_id')
+                Group::make('mentor.nom')
                     ->label('Mentor')
                     ->getTitleFromRecordUsing(fn (MentorAssignment $record): string => trim(
                         ($record->mentor?->grade?->libelle_court ?? '').' '.$record->mentor?->prenom.' '.$record->mentor?->nom
                     ))
                     ->collapsible(),
             ])
-            ->defaultGroup('marin_id')
+            ->defaultGroup('mentor.nom')
+            ->defaultSort('mentor.nom')
             ->columns([
                 TextColumn::make('mentor.grade.libelle_court')
                     ->label('Grade mentor')
@@ -132,17 +133,25 @@ class SuiviMentorsPage extends Page implements HasForms, HasTable
                     ->schema([
                         Select::make('mentors')
                             ->label('Choisir les mentors')
+                            ->helperText('Par défaut, seuls les marins de la même unité que le mentoré sont proposés, pour éviter les décalages. Les mentors déjà attribués restent visibles même s\'ils sont dans une autre unité.')
                             ->multiple()
-                            ->options(
-                                Marin::query()
+                            ->options(function (MentorAssignment $record) {
+                                $uniteId = $record->fcmMarin?->marin?->unite_id;
+                                $mentorsActuels = $record->fcmMarin?->mentors->pluck('id')->all() ?? [];
+
+                                return Marin::query()
                                     ->withoutGlobalScope(MarinFiltreParUniteScope::class)
                                     ->whereNull('deleted_at')
+                                    // On garde aussi les mentors déjà attribués, même hors de l'unité,
+                                    // pour ne pas les faire disparaître silencieusement du formulaire.
+                                    ->where(fn ($q) => $q->when($uniteId, fn ($q) => $q->where('unite_id', $uniteId))
+                                        ->when($mentorsActuels, fn ($q) => $q->orWhereIn('id', $mentorsActuels)))
                                     ->orderBy('nom')
                                     ->get()
                                     ->mapWithKeys(fn ($m) => [
                                         $m->uuid => ($m->grade?->libelle_court ?? '').' '.$m->prenom.' '.$m->nom,
-                                    ])
-                            )
+                                    ]);
+                            })
                             ->searchable()
                             ->default(fn (MentorAssignment $record) => $record->fcmMarin?->mentors->pluck('uuid')->toArray() ?? []),
                     ])

@@ -4,9 +4,6 @@ namespace Modules\FcmCentral\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Modules\FcmCentral\Events\UserGeneratedEvent;
-use Modules\FcmCentral\Models\Marin as FcmCentralMarin;
-use Modules\FcmCentral\Observers\MarinUniteObserver;
-
 use Modules\FcmCentral\Listeners\Save\CohorteMarinListener;
 use Modules\FcmCentral\Listeners\Save\CreationParcoursSerialiseListener;
 use Modules\FcmCentral\Listeners\Save\DefinirJalonFcmListener;
@@ -60,16 +57,4 @@ class EventServiceProvider extends ServiceProvider
         //     SaveSerializeParcoursListener::class,
         // ],
     ];
-
-    public function boot(): void
-    {
-        parent::boot();
-
-        // Les modèles RH\Marin, FcmCommun\Marin et FcmCentral\Marin représentent la même
-        // ligne en base (héritage Eloquent), mais les événements Eloquent sont scopés à la
-        // classe réellement instanciée : il faut donc observer chacune des 3 classes pour
-        // détecter un changement d'unité quel que soit le modèle utilisé pour le sauvegarder.
-      
-        FcmCentralMarin::observe(MarinUniteObserver::class);
-    }
 }
