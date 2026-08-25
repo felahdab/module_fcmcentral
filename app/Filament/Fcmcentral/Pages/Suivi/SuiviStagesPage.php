@@ -259,18 +259,10 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             'fcmMarin.cohorte',
             'parcours_serialise',
         ])->whereNotNull('parcoursmarin')
-<<<<<<< HEAD
-        ->whereHas('fcmMarin', fn (Builder $q) => $q
-            ->whereNotNull('date_sedimentation')
-            ->whereNotNull('date_fcm')
-            ->whereNull('date_competence'));
-
-=======
             ->whereHas('fcmMarin', fn (Builder $q) => $q
                 ->whereNotNull('date_sedimentation')
                 ->whereNotNull('date_fcm')
                 ->whereNull('date_competence'));
->>>>>>> tuleap-944282-fcmcentral-suivi-mentors
 
         // Retourner 0 résultats si aucun filtre sélectionné
         if (blank($this->selectedParcoursId) && blank($this->selectedStageUuid)) {
@@ -356,18 +348,10 @@ class SuiviStagesPage extends Page implements HasForms, HasTable
             'fcmMarin.marin.specialite',
             'fcmMarin.marin.unite',
         ])->whereNotNull('parcoursmarin')
-<<<<<<< HEAD
-        ->whereHas('fcmMarin', fn (Builder $q) => $q
-            ->whereNotNull('date_sedimentation')
-            ->whereNotNull('date_fcm')
-            ->whereNull('date_competence'));
-
-=======
             ->whereHas('fcmMarin', fn (Builder $q) => $q
                 ->whereNotNull('date_sedimentation')
                 ->whereNotNull('date_fcm')
                 ->whereNull('date_competence'));
->>>>>>> tuleap-944282-fcmcentral-suivi-mentors
 
         if (filled($this->selectedStageUuid)) {
             $uuid = $this->selectedStageUuid;
