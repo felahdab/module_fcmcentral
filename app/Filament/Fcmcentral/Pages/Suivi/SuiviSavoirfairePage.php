@@ -259,11 +259,10 @@ class SuiviSavoirfairePage extends Page implements HasForms, HasTable
             'fcmMarin.cohorte',
             'parcours_serialise',
         ])->whereNotNull('parcoursmarin')
-        ->whereHas('fcmMarin', fn (Builder $q) => $q
-            ->whereNotNull('date_sedimentation')
-            ->whereNotNull('date_fcm')
-            ->whereNull('date_competence'));
-
+            ->whereHas('fcmMarin', fn (Builder $q) => $q
+                ->whereNotNull('date_sedimentation')
+                ->whereNotNull('date_fcm')
+                ->whereNull('date_competence'));
 
         if (blank($this->selectedParcoursId) && blank($this->selectedSavoirfaireUuid)) {
             return $query->whereRaw('1 = 0');
@@ -346,11 +345,10 @@ class SuiviSavoirfairePage extends Page implements HasForms, HasTable
             'fcmMarin.marin.specialite',
             'fcmMarin.marin.unite',
         ])->whereNotNull('parcoursmarin')
-        ->whereHas('fcmMarin', fn (Builder $q) => $q
-            ->whereNotNull('date_sedimentation')
-            ->whereNotNull('date_fcm')
-            ->whereNull('date_competence'));
-
+            ->whereHas('fcmMarin', fn (Builder $q) => $q
+                ->whereNotNull('date_sedimentation')
+                ->whereNotNull('date_fcm')
+                ->whereNull('date_competence'));
 
         if (filled($this->selectedSavoirfaireUuid)) {
             $uuid = $this->selectedSavoirfaireUuid;

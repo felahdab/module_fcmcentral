@@ -259,11 +259,10 @@ class SuiviEadPage extends Page implements HasForms, HasTable
             'fcmMarin.cohorte',
             'parcours_serialise',
         ])->whereNotNull('parcoursmarin')
-        ->whereHas('fcmMarin', fn (Builder $q) => $q
-            ->whereNotNull('date_sedimentation')
-            ->whereNotNull('date_fcm')
-            ->whereNull('date_competence'));
-
+            ->whereHas('fcmMarin', fn (Builder $q) => $q
+                ->whereNotNull('date_sedimentation')
+                ->whereNotNull('date_fcm')
+                ->whereNull('date_competence'));
 
         // Retourner 0 résultats si aucun filtre sélectionné
         if (blank($this->selectedParcoursId) && blank($this->selectedEadUuid)) {
@@ -348,10 +347,10 @@ class SuiviEadPage extends Page implements HasForms, HasTable
             'fcmMarin.marin.specialite',
             'fcmMarin.marin.unite',
         ])->whereNotNull('parcoursmarin')
-        ->whereHas('fcmMarin', fn (Builder $q) => $q
-            ->whereNotNull('date_sedimentation')
-            ->whereNotNull('date_fcm')
-            ->whereNull('date_competence'));
+            ->whereHas('fcmMarin', fn (Builder $q) => $q
+                ->whereNotNull('date_sedimentation')
+                ->whereNotNull('date_fcm')
+                ->whereNull('date_competence'));
 
         if (filled($this->selectedEadUuid)) {
             $uuid = $this->selectedEadUuid;

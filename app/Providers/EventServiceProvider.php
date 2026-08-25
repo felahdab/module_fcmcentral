@@ -34,7 +34,6 @@ class EventServiceProvider extends ServiceProvider
             AnnulProposElementMarinParcoursListener::class,
             DefinirJalonFcmListener::class,
             PieceJointeMarinParcoursListener::class,
-
             // TransmitUserGeneratedEventListener::class,
         ],
 
