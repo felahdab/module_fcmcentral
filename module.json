@@ -1,7 +1,7 @@
 {
     "name": "FcmCentral",
     "alias": "fcmcentral",
-    "description": "",
+    "description": "Module de gestion de la FCM destine au niveau de synthese et de pilotage",
     "keywords": [],
     "priority": 0,
     "providers": [
