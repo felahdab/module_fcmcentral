@@ -176,6 +176,12 @@ class PermissionsSeeder extends Seeder
             'guard_name' => 'web',
         ]);
 
+        // Édition du bloc de présentation (texte + logos) du dashboard FCM Central
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::dashboard',
+            'guard_name' => 'web',
+        ]);
+    
         
     }
 }
