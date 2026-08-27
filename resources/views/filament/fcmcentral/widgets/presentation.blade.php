@@ -25,7 +25,7 @@
         @endphp
 
         @if($logos->isNotEmpty())
-            <div class="mt-4 grid gap-3 justify-start" style="grid-template-columns: repeat(4, 5rem);">
+            <div class="mt-4 grid gap-3 justify-start" style="grid-template-columns: repeat(4, 12rem);">
                 @foreach($logos as $logo)
                     @php
                         $src = \Illuminate\Support\Facades\Storage::disk('s3-public')->url($logo['image']);
