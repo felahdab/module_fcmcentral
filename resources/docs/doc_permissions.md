@@ -91,6 +91,27 @@ Contrôlent l'accès en **lecture** aux fichiers privés (`s3-private`) via `Pie
 |---|---|
 | `fcmcentral::etat.create` | Formulaire d'ajout d'un état (ex: gel) accessible dans la fiche bilan via `AddEtatForm`. |
 
+### Pages de suivi
+
+Chacune de ces permissions donne accès à **une seule** page du groupe de navigation « Suivi ». Elles sont indépendantes les unes des autres — avoir l'une ne donne pas accès aux autres.
+
+| Permission | Effet dans l'interface |
+|---|---|
+| `fcmcentral::suivi.stage` | Accès à la page **Suivi des Stages**. |
+| `fcmcentral::suivi.savoirfaire` | Accès à la page **Suivi des Savoirfaire**. |
+| `fcmcentral::suivi.competence` | Accès à la page **Suivi des Compétences**. |
+| `fcmcentral::suivi.ead` | Accès à la page **Suivi EAD**. |
+| `fcmcentral::suivi.objectif` | Accès à la page **Suivi des Objectifs**. |
+| `fcmcentral::suivi.mentor` | Accès à la page **Suivi des Mentors** (vue par mentor, alerte de décalage d'unité entre mentor et mentoré, action « Gérer les mentors »). |
+
+> Ces 6 pages appliquent en plus un filtre commun : seuls les marins effectivement « en FCM » (`date_sedimentation` + `date_fcm` renseignées, `date_competence` non renseignée) apparaissent dans les tableaux et les exports CSV — ce filtre s'applique automatiquement, il n'est piloté par aucune permission séparée.
+
+### Tableau de bord
+
+| Permission | Effet dans l'interface |
+|---|---|
+| `fcmcentral::dashboard` | Accès à la page **Présentation du dashboard** (`PresentationSettings`) permettant de modifier le texte et les logos affichés dans le bloc « Présentation » du tableau de bord. Sans cette permission, le bloc reste visible en lecture seule pour tout le monde (texte + logos), mais le bouton **Modifier** n'apparaît pas. |
+
 ---
 
 ## Permissions CRUD (générées par les Policies)
@@ -194,6 +215,12 @@ fcmcentral::exporter_csv
 fcmcentral::marin.index
 fcmcentral::piece_jointe.voir
 fcmcentral::document_annexe.voir
+fcmcentral::suivi.stage
+fcmcentral::suivi.savoirfaire
+fcmcentral::suivi.competence
+fcmcentral::suivi.ead
+fcmcentral::suivi.objectif
+fcmcentral::suivi.mentor
 ```
 
 ---
@@ -206,6 +233,7 @@ fcmcentral::document_annexe.voir
 # Tout le rôle Gestionnaire FCM, plus :
 fcmcentral::change_configuration_module
 fcmcentral::voir_journal_des_evenements
+fcmcentral::dashboard
 fcmcentral::parcours.figer
 fcmcentral::parcours.create
 fcmcentral::parcours.update
