@@ -1,3 +1,32 @@
+## 0.2.12 (September 03, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.11 –> 0.2.12
+- Implements art  #945114 : Modification  et guide uitlisateurs des nouvelles modifications  de la release
+- Implements art #945114 : Augmentation de la taille des logos pour le dasboard FcmCentral
+- Implements art #945114 : Creation widget Presentation + Ajout Permission seeder +  Test Unitaire
+- Develop OK ; petit bug suite a un conflit merge avec une page ( travaux sur une branche annexe en parallele)
+- Implements art #944282 : Modification test unitaires suivant les nouvelles modifications des pages Suivi
+- Implements art #944282 : Suppression Observer, rajout filtre unite sur selec marin mentors, modification du .md
+- Implements art #944282 : Debut de creation de suivi  Mentors + test unitaires + Doc + debut verification Observers pour veification Marins
+- FcmCentral : Rajout statut en fcm dans la requete pour le suivi stats des marins
+- Implements art #927735 : ajout et modification doc techniques
+- Impelements art #927735 : Modifcation et ajout doc technique
+- Implements art #927735 : Correctif groupe sur Test Unitaire
+- Implements art #927735 : Passage des documents annexe en S3-private creation nouvelle permission pour les documents annexe creation controller pour les acces Documents Annexe Modification route pour le controller DocuemenAnnexe Creation Test unitaire pour les document annexs ok modification Test unitaire pour Piece Jointe OK
+- Implements art  #927735 :   MOdification S3-PRivate creation controller et route creation permission piece_jointe creation Nouvea Test Controller (ne marche pas encore)
+- Implements art #926744 : Modification stored event en rajoutant ajout/supp pour les pieces jointes dans les logs
+- Implements art #927335 : Ajout  Icon PDF ajout Method pour event LIsteners ajout/supp pour fiche Bilan modification methodes pour ajouter et supprimer piece jointe dans le Parcours Modification Doc Developpeur
+- Implements art #927735 : rajout doc pour developpeur  ; FcmLight et FicheBilan
+- Implement art #927735 : Refactorisation de la page FicheBilan modification model pour  suppression piece jointe S3 migration : ajout champ pour les  pieces jointes d'une fiche bilan marin creation doc pour fiche bilan developpeur modification listener pour ajout piece jointe
+- Implements art #923628 :  Modification page Suivi stats ajout page XXX stat ajout permission rajout filtre FPS creation test unitiaires
+- Implements art #874652 : modification pagination 25 au lieu de  50
+- Implements art #874562 : Rajout bandeau Alert sur Livret FCM quand le marin est en GEL
+- Implements art #874652 :  modification page ressource Ajout et modification filtre ajout Colonne modification export CSV
+- Implements art #921511 : modification des migrations pour les Test Unitaires Resa
+- Implements art  #905889 : suppression pdf sur S3
+- Implements art #905889 : Creation function pour supp pdf dans s3
+- Implements art #905889 : PDF sur S3 Public pour les les livrets mentor
+- Terminer la conversion vers plusieurs mentors: supprime la colone mentor_id de la table fcm_marins. La migration de rollback selectionne le premier marin designe comme mentor et replace son id dans la table.
+
 ## 0.2.11 (July 15, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.10 –> 0.2.11
 - Ajout des fichiers pour le pipeline de qualité du code sur PICSEL
