@@ -22,7 +22,6 @@ class PermissionsSeeder extends Seeder
             'guard_name' => 'web',
         ]);
 
-
         Permission::firstOrCreate([
             'name' => 'fcmcentral::change_configuration_module',
             'guard_name' => 'web',
@@ -101,18 +100,17 @@ class PermissionsSeeder extends Seeder
         ]);
 
         Permission::firstOrCreate([
-            'name' => 'fcmcentral::livret.telecharger',
-            'guard_name' => 'web',
-        ]);
-
-
-        Permission::firstOrCreate([
             'name' => 'fcmcentral::note.valider',
             'guard_name' => 'web',
         ]);
 
         Permission::firstOrCreate([
             'name' => 'fcmcentral::note.creer',
+            'guard_name' => 'web',
+        ]);
+
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::note.modifier',
             'guard_name' => 'web',
         ]);
 
@@ -135,9 +133,6 @@ class PermissionsSeeder extends Seeder
             'name' => 'fcmcentral::document_annexe.voir',
             'guard_name' => 'web',
         ]);
-
-
-
 
         // Journal des évènements
         Permission::firstOrCreate([
@@ -181,7 +176,5 @@ class PermissionsSeeder extends Seeder
             'name' => 'fcmcentral::dashboard',
             'guard_name' => 'web',
         ]);
-    
-        
     }
 }

@@ -4,6 +4,7 @@ namespace Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\C
 
 use Filament\Notifications\Notification;
 use Livewire\Attributes\Computed;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
 use Modules\FcmCentral\Models\Note;
 
 trait HasNotes
@@ -13,9 +14,24 @@ trait HasNotes
         return auth()->user()->can('fcmcentral::note.creer');
     }
 
+    public function canEditNote(): bool
+    {
+        return auth()->user()->can('fcmcentral::note.modifier');
+    }
+
     public function canViewNotes(): bool
     {
         return auth()->user()->can('fcmcentral::note.voir');
+    }
+
+    public function noteCreateUrl(): string
+    {
+        return NoteResource::getUrl('create', ['marin_id' => $this->marinId]);
+    }
+
+    public function noteEditUrl(Note $note): string
+    {
+        return NoteResource::getUrl('edit', ['record' => $note, 'marin_id' => $this->marinId]);
     }
 
     #[Computed]

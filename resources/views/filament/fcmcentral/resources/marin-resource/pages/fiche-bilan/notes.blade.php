@@ -4,6 +4,18 @@
             <span>Commentaires et observations ({{ $this->notes->count() }})</span>
         </div>
     </x-slot>
+    @if($this->canCreateNote())
+        <x-slot name="afterHeader">
+            <x-filament::button
+                tag="a"
+                href="{{ $this->noteCreateUrl() }}"
+                icon="heroicon-m-plus"
+                size="sm"
+            >
+                Ajouter une note
+            </x-filament::button>
+        </x-slot>
+    @endif
     @if($this->notes->isEmpty())
         <div class="text-center py-8 text-gray-500">
             <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -37,9 +49,14 @@
                                     ✓ Validé BCF
                                 </span>
                             @endif
+                            @if($this->canEditNote())
+                                <a href="{{ $this->noteEditUrl($note) }}" class="text-xs text-primary-600 hover:text-primary-800 hover:underline mt-1 inline-block">
+                                    ✏️ Modifier
+                                </a>
+                            @endif
                         </div>
                     </div>
-                    <p class="text-sm text-gray-700 leading-relaxed">{{ $note->libelle }}</p>
+                    <div class="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">{!! $note->libelle !!}</div>
                     @if($note->lienurl)
                         <a href="{{ $note->lienurl }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 hover:underline mt-2 inline-block">
                             🔗 Voir le lien associé ↗
@@ -50,3 +67,4 @@
         </div>
     @endif
 </x-filament::section>
+

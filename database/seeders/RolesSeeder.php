@@ -57,6 +57,7 @@ class RolesSeeder extends Seeder
                 'fcmcentral::livret.valider',
                 'fcmcentral::livret.commentaire',
                 'fcmcentral::note.creer',
+                'fcmcentral::note.modifier',
             ];
 
             // Permissions dynamiques
@@ -95,6 +96,7 @@ class RolesSeeder extends Seeder
                 'fcmcentral::marin.suivreEnFcm',
                 'fcmcentral::parcours.figer',
                 'fcmcentral::note.creer',
+                'fcmcentral::note.modifier',
                 'fcmcentral::note.valider',
             ];
 
@@ -153,6 +155,7 @@ class RolesSeeder extends Seeder
                 'fcmcentral::marin.suivreEnFcm',
                 'fcmcentral::parcours.figer',
                 'fcmcentral::note.creer',
+                'fcmcentral::note.modifier',
                 'fcmcentral::note.valider',
             ];
 

@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -39,19 +40,26 @@ class NoteResource extends Resource
     {
         return $schema
             ->components([
-                Textarea::make('libelle')
+                RichEditor::make('libelle')
                     ->required()
                     ->label('Libellé')
-                    ->rows(4)
-                // ->maxLength(1000)
-                ,
+                    ->toolbarButtons([
+                        'bold',
+                        'italic',
+                        'underline',
+                        'bulletList',
+                        'orderedList',
+                    ])
+                    ->columnSpanFull(),
 
-                Select::make('marin_id')
+                Select::make('rh_marin_id')
                     ->label('Marin')
                     ->relationship('marin', 'nom')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->disabled(fn () => filled(request()->query('marin_id')))
+                    ->dehydrated(),
 
                 Group::make([
                     Select::make('type_note_id')
@@ -83,11 +91,9 @@ class NoteResource extends Resource
                     ->default(now())
                     ->nullable(),
 
-                Select::make('redacteur_id')
+                TextInput::make('redacteur')
                     ->label('Rédacteur')
-                    ->relationship('redacteur', 'nom')
-                    ->searchable()
-                    ->preload()
+                    ->default(fn () => auth()->user()?->display_name)
                     ->required(),
 
                 Toggle::make('valide_bcf')
@@ -126,7 +132,8 @@ class NoteResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Libellé')
-                    // ->limit(100)
+                    ->html()
+                    ->limit(150)
                     ->wrap(),
 
                 TextColumn::make('marin.nom')
