@@ -82,7 +82,8 @@ Contrôlent l'accès en **lecture** aux fichiers privés (`s3-private`) via `Pie
 | Permission | Effet dans l'interface |
 |---|---|
 | `fcmcentral::note.voir` | Onglet **Notes** visible dans la fiche bilan. |
-| `fcmcentral::note.creer` | Bouton **Créer une note** visible dans la fiche bilan et la fiche marin. |
+| `fcmcentral::note.creer` | Bouton **Créer une note** visible dans la fiche bilan et la fiche marin, redirige vers la page dédiée de création. |
+| `fcmcentral::note.modifier` | Lien **Modifier** visible sur chaque note existante dans la fiche bilan, et accès à la page d'édition de la note. |
 | `fcmcentral::note.valider` | Bouton **Valider** visible dans le formulaire de note (marque la note comme officielle). |
 
 ### États (gel, jalons)
@@ -182,6 +183,7 @@ fcmcentral::livret.proposer
 fcmcentral::ficheBilan.voir
 fcmcentral::note.voir
 fcmcentral::note.creer
+fcmcentral::note.modifier
 fcmcentral::marin.index
 ```
 
@@ -209,6 +211,7 @@ fcmcentral::livret.refuser
 fcmcentral::ficheBilan.voir
 fcmcentral::note.voir
 fcmcentral::note.creer
+fcmcentral::note.modifier
 fcmcentral::note.valider
 fcmcentral::etat.create
 fcmcentral::exporter_csv
@@ -262,3 +265,4 @@ fcmcentral::typeNote.update
 ```
 
 ---
+
