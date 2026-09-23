@@ -1,3 +1,7 @@
+## 0.2.14 (September 22, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.13 –> 0.2.14
+- implements art #967298 : Modification des notes
+
 ## 0.2.13 (September 18, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.12 –> 0.2.13
 - Changement du midleware d'authentification du panneau pour éviter les 401 lors d'un accès non authentifié et bien renvoyer l'utilisateur vers la page de login.
