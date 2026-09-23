@@ -13,6 +13,16 @@ trait HasDocumentsAnnexes
     public $nouveauDocumentAnnexe = null;
     public string $nomDocumentAnnexe = '';
 
+    public function canAjouterDocumentAnnexe(): bool
+    {
+        return auth()->user()->can('fcmcentral::document_annexe.creer');
+    }
+
+    public function canSupprimerDocumentAnnexe(): bool
+    {
+        return auth()->user()->can('fcmcentral::document_annexe.supprimer');
+    }
+
     #[Computed]
     public function documentsAnnexes()
     {
@@ -40,6 +50,17 @@ trait HasDocumentsAnnexes
 
     public function ajouterDocumentAnnexe(): void
     {
+        if (!$this->canAjouterDocumentAnnexe()) {
+            Notification::make()
+                ->title('Accès refusé')
+                ->body('Vous n\'avez pas les droits pour ajouter un document annexe')
+                ->warning()
+                ->send()
+            ;
+
+            return;
+        }
+
         if (!$this->nouveauDocumentAnnexe) {
             return;
         }
@@ -85,6 +106,17 @@ trait HasDocumentsAnnexes
 
     public function supprimerDocumentAnnexe(string $uuid): void
     {
+        if (!$this->canSupprimerDocumentAnnexe()) {
+            Notification::make()
+                ->title('Accès refusé')
+                ->body('Vous n\'avez pas les droits pour supprimer un document annexe')
+                ->warning()
+                ->send()
+            ;
+
+            return;
+        }
+
         $fcmMarin = $this->marin->complementsFcm;
         $documents = collect($fcmMarin->documents_annexes ?? []);
         $document = $documents->firstWhere('uuid', $uuid);

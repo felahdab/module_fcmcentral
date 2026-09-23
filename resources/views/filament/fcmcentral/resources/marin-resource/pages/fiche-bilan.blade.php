@@ -35,7 +35,6 @@
         </x-filament::section>
     @else
 
-        @include('fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan.statistiques')
         @include('fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan.informations')
 
         {{-- SECTIONS 2 COLONNES --}}
@@ -43,6 +42,8 @@
             @include('fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan.savoir-faire')
             @include('fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan.notes')
         </div>
+
+        @include('fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan.statistiques')
 
         @include('fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan.documents-annexes')
         @include('fcmcentral::filament.fcmcentral.resources.marin-resource.pages.fiche-bilan.objectifs-attente')

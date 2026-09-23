@@ -56,7 +56,9 @@
                             @endif
                         </div>
                     </div>
-                    <div class="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none">{!! $note->libelle !!}</div>
+                    <div class="text-sm text-gray-700 leading-relaxed fi-prose note-content max-w-none">
+                        {!! \Filament\Forms\Components\RichEditor\RichContentRenderer::make($note->libelle)->toHtml() !!}
+                    </div>
                     @if($note->lienurl)
                         <a href="{{ $note->lienurl }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 hover:underline mt-2 inline-block">
                             🔗 Voir le lien associé ↗
@@ -67,4 +69,3 @@
         </div>
     @endif
 </x-filament::section>
-

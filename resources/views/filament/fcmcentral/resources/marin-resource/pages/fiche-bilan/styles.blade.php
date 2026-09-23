@@ -282,4 +282,26 @@
     font-size: 30px;
 }
 
+/* Contenu riche des notes (gras/italique/souligné rendent nativement,
+   mais les listes ont besoin de leur list-style — la classe utilitaire
+   Filament "fi-prose" n'est pas garantie d'être compilée dans le theme
+   CSS de ce module, donc on la force ici explicitement). */
+.note-content ul {
+    list-style-type: disc;
+    padding-inline-start: 1.5rem;
+}
+
+.note-content ol {
+    list-style-type: decimal;
+    padding-inline-start: 1.5rem;
+}
+
+.note-content li {
+    padding-inline-start: 0.25rem;
+}
+
+.note-content li + li {
+    margin-top: 0.25rem;
+}
+
 </style>

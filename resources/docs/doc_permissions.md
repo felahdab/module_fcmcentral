@@ -74,8 +74,10 @@ Contrôlent l'accès en **lecture** aux fichiers privés (`s3-private`) via `Pie
 |---|---|
 | `fcmcentral::piece_jointe.voir` | Accès en téléchargement à la pièce jointe (savoir-faire/objectif) de **n'importe quel marin**, même sans lien (ni marin lui-même, ni mentor). Pensé pour les gestionnaires/admins FCM. |
 | `fcmcentral::document_annexe.voir` | Même chose pour les documents annexes. **Permission distincte de `piece_jointe.voir`** — avoir l'une ne donne pas accès à l'autre. |
+| `fcmcentral::document_annexe.creer` | Bouton **Ajouter** visible sur le bloc « Documents annexes » de la fiche bilan. |
+| `fcmcentral::document_annexe.supprimer` | Lien **Supprimer** visible sur chaque document annexe existant. **Permission distincte de `document_annexe.creer`** — avoir l'une ne donne pas l'autre. |
 
-> Ces deux permissions ne contrôlent que la **lecture/téléchargement**. L'ajout/suppression d'une pièce jointe réutilise la permission existante `fcmcentral::livret.valider` (pas de permission dédiée à l'écriture à ce jour).
+> Ces permissions `.voir` ne contrôlent que la **lecture/téléchargement**. L'ajout/suppression d'une pièce jointe (savoir-faire/objectif) réutilise elle la permission existante `fcmcentral::livret.valider` (pas de permission dédiée à l'écriture pour les pièces jointes à ce jour) — contrairement aux documents annexes qui ont désormais leurs propres permissions d'écriture ci-dessus.
 
 ### Notes
 
@@ -213,6 +215,8 @@ fcmcentral::note.voir
 fcmcentral::note.creer
 fcmcentral::note.modifier
 fcmcentral::note.valider
+fcmcentral::document_annexe.creer
+fcmcentral::document_annexe.supprimer
 fcmcentral::etat.create
 fcmcentral::exporter_csv
 fcmcentral::marin.index
@@ -265,4 +269,3 @@ fcmcentral::typeNote.update
 ```
 
 ---
-
