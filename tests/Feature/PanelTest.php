@@ -16,7 +16,6 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\CohorteResource\Pages\ListC
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\FicheBilan;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\ListMarins;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\MarinResource\Pages\LivretDeFcmLight;
-use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\CreateNote;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\EditParcours;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\ParcoursResource\Pages\ListParcours;
@@ -33,7 +32,7 @@ use function Pest\Livewire\livewire;
 uses(RefreshDatabase::class);
 uses(TestCase::class);
 
-pest()->group('Fcm Central1');
+pest()->group('Fcm Central');
 
 beforeEach(function () {
     Filament::setCurrentPanel(Filament::getPanel('FCM Central'));
@@ -1350,8 +1349,10 @@ it('les widgets ne provoquent pas d\'exception quand l\'utilisateur n\'est pas u
     $this->assertTrue(false == Widgets\Marin\MarinStatsWidget::canView());
 });
 
-it('affiche un bouton "Créer une note" qui redirige vers la page de création avec le marin présélectionné', function () {
+it('permet de creer une note pour un marin depuis le modal de la liste des marins', function () {
     $marin = Models\Marin::factory()->create();
+
+    $this->assertTrue(0 == Models\Note::where('rh_marin_id', $marin->id)->count());
 
     event(new UserGeneratedEvent(
         UserGeneratedEventTypes::MARIN_EN_FCM,
@@ -1364,12 +1365,17 @@ it('affiche un bouton "Créer une note" qui redirige vers la page de création a
     Livewire::actingAs($this->admin)
         ->test(ListMarins::class)
         ->assertCanSeeTableRecords([$marin])
-        ->assertTableActionHasUrl(
-            'create-note',
-            NoteResource::getUrl('create', ['marin_id' => $marin->id]),
-            $marin,
+        ->callAction(
+            TestAction::make('create-note')->table($marin),
+            [
+                'libelle' => 'libelle',
+                'date' => now(),
+            ]
         )
+        ->assertHasNoActionErrors()
     ;
+
+    $this->assertTrue(1 == Models\Note::where('rh_marin_id', $marin->id)->count());
 });
 
 it('permet de creer une note pour un marin en FCM', function () {

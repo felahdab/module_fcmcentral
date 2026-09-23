@@ -2,14 +2,16 @@
     <x-slot name="heading">
         <div class="flex items-center justify-between">
             <span>Documents annexes ({{ $this->documentsAnnexes->count() }})</span>
-            <x-filament::button
-                size="sm"
-                color="primary"
-                icon="heroicon-o-plus-circle"
-                wire:click="$dispatch('open-modal', { id: 'ajouter-document-annexe' })"
-            >
-                Ajouter
-            </x-filament::button>
+            @if($this->canAjouterDocumentAnnexe())
+                <x-filament::button
+                    size="sm"
+                    color="primary"
+                    icon="heroicon-o-plus-circle"
+                    wire:click="$dispatch('open-modal', { id: 'ajouter-document-annexe' })"
+                >
+                    Ajouter
+                </x-filament::button>
+            @endif
         </div>
     </x-slot>
 
@@ -31,11 +33,13 @@
                             </span>
                         </span>
                     </a>
-                    <button type="button" class="text-xs text-danger-600 hover:underline flex-shrink-0"
-                            wire:click="supprimerDocumentAnnexe('{{ $document['uuid'] }}')"
-                            wire:confirm="Supprimer définitivement ce document ?">
-                        Supprimer
-                    </button>
+                    @if($this->canSupprimerDocumentAnnexe())
+                        <button type="button" class="text-xs text-danger-600 hover:underline flex-shrink-0"
+                                wire:click="supprimerDocumentAnnexe('{{ $document['uuid'] }}')"
+                                wire:confirm="Supprimer définitivement ce document ?">
+                            Supprimer
+                        </button>
+                    @endif
                 </div>
             @endforeach
         </div>

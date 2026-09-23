@@ -98,6 +98,8 @@ class RolesSeeder extends Seeder
                 'fcmcentral::note.creer',
                 'fcmcentral::note.modifier',
                 'fcmcentral::note.valider',
+                'fcmcentral::document_annexe.creer',
+                'fcmcentral::document_annexe.supprimer',
             ];
 
             // Permissions dynamiques
@@ -157,6 +159,8 @@ class RolesSeeder extends Seeder
                 'fcmcentral::note.creer',
                 'fcmcentral::note.modifier',
                 'fcmcentral::note.valider',
+                'fcmcentral::document_annexe.creer',
+                'fcmcentral::document_annexe.supprimer',
             ];
 
             // Permissions dynamiques

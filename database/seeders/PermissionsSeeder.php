@@ -134,6 +134,16 @@ class PermissionsSeeder extends Seeder
             'guard_name' => 'web',
         ]);
 
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::document_annexe.creer',
+            'guard_name' => 'web',
+        ]);
+
+        Permission::firstOrCreate([
+            'name' => 'fcmcentral::document_annexe.supprimer',
+            'guard_name' => 'web',
+        ]);
+
         // Journal des évènements
         Permission::firstOrCreate([
             'name' => 'fcmcentral::voir_journal_des_evenements',
