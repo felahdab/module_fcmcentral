@@ -1,3 +1,8 @@
+## 0.2.15 (September 23, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.14 –> 0.2.15
+- Implements art #967298 : modification des css car bug afficahge sur les puces et liste ( tailwind soucis)
+- Implements art #967298 :  Modification  des Notes, amelioration  UX/UI depuis ajout Note Modal , modification du templates fiche Bilan, fiche bilan rajout des permissions document annexes, modif Roles seeder,  modifcation doc
+
 ## 0.2.14 (September 22, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.13 –> 0.2.14
 - implements art #967298 : Modification des notes
