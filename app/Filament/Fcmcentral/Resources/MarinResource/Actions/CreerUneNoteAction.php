@@ -26,7 +26,7 @@ class CreerUneNoteAction extends Action
             ])
             ->modalHeading('Créer une note')
             ->modalDescription(fn ($record) => "Créer une note pour {$record->prenom} {$record->nom}")
-            ->modalWidth('lg')
+            ->modalWidth('4xl')
             ->modalSubmitActionLabel('Créer la note')
             ->modalCancelActionLabel('Annuler')
             ->schema([
@@ -37,7 +37,8 @@ class CreerUneNoteAction extends Action
                 RichEditor::make('libelle')
                     ->required()
                     ->label('Contenu de la note')
-                    ->toolbarButtons(NoteResource::TOOLBAR_LIBELLE),
+                    ->toolbarButtons(NoteResource::TOOLBAR_LIBELLE)
+                    ->extraInputAttributes(['style' => 'min-height: 300px']),
 
                 DatePicker::make('date')
                     ->label('Date')
