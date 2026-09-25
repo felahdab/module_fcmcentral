@@ -74,7 +74,7 @@ class AddNoteForm extends Component
                 'type_note_id' => $this->typeNote,
                 'libelle' => trim($this->libelle),
                 'date' => $this->date,
-                'lien_url' => $this->lienUrl ?: null,
+                'lienurl' => $this->lienUrl ?: null,
                 // 'redacteur_id' => auth()->id(),
                 'redacteur_id' => $this->redacteurId,
                 'valide_bcf' => $this->valide_bcf,
