@@ -1,3 +1,7 @@
+## 0.2.16 (September 25, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.15 –> 0.2.16
+- Merge branch 'develop'
+
 ## 0.2.15 (September 23, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.14 –> 0.2.15
 - Implements art #967298 : modification des css car bug afficahge sur les puces et liste ( tailwind soucis)
