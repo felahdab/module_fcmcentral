@@ -55,6 +55,7 @@ class NoteResource extends Resource
                     ->required()
                     ->label('Libellé')
                     ->toolbarButtons(self::TOOLBAR_LIBELLE)
+                    ->extraInputAttributes(['style' => 'min-height: 300px'])
                     ->columnSpanFull(),
 
                 Select::make('rh_marin_id')
