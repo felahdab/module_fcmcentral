@@ -304,4 +304,44 @@
     margin-top: 0.25rem;
 }
 
+.note-content h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0.5rem 0 0.25rem;
+}
+
+.note-content h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0.5rem 0 0.25rem;
+}
+
+.note-content blockquote {
+    border-left: 3px solid #9ca3af;
+    padding-left: 0.75rem;
+    margin: 0.5rem 0;
+    font-style: italic;
+    color: #4b5563;
+}
+
+.note-content a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.note-content mark {
+    background-color: #fef08a;
+    padding: 0 0.15rem;
+}
+
+.note-content hr {
+    border: 0;
+    border-top: 1px solid #d1d5db;
+    margin: 0.75rem 0;
+}
+
+.note-content p + p {
+    margin-top: 0.4rem;
+}
+
 </style>

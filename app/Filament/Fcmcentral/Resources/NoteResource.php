@@ -27,11 +27,22 @@ use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\CreateNote;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\EditNote;
 use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource\Pages\ListNotes;
+use Modules\FcmCentral\Models\Marin;
 use Modules\FcmCentral\Models\Note;
 use Modules\FcmCentral\Models\TypeNote;
 
 class NoteResource extends Resource
 {
+    /** Barre d'outils de l'éditeur riche du libellé (partagée avec le modal de création depuis la liste des marins). */
+    public const TOOLBAR_LIBELLE = [
+        ['bold', 'italic', 'underline', 'strike', 'highlight'],
+        ['h2', 'h3'],
+        ['alignStart', 'alignCenter', 'alignEnd'],
+        ['bulletList', 'orderedList', 'blockquote', 'horizontalRule'],
+        ['link', 'clearFormatting'],
+        ['undo', 'redo'],
+    ];
+
     protected static ?string $model = Note::class;
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
     protected static string|\UnitEnum|null $navigationGroup = 'Gestion';
@@ -43,13 +54,8 @@ class NoteResource extends Resource
                 RichEditor::make('libelle')
                     ->required()
                     ->label('Libellé')
-                    ->toolbarButtons([
-                        'bold',
-                        'italic',
-                        'underline',
-                        'bulletList',
-                        'orderedList',
-                    ])
+                    ->toolbarButtons(self::TOOLBAR_LIBELLE)
+                    ->extraInputAttributes(['style' => 'min-height: 300px'])
                     ->columnSpanFull(),
 
                 Select::make('rh_marin_id')
@@ -91,8 +97,10 @@ class NoteResource extends Resource
                     ->default(now())
                     ->nullable(),
 
-                TextInput::make('redacteur')
+                Select::make('redacteur')
                     ->label('Rédacteur')
+                    ->options(fn (?Note $record) => self::redacteurOptions($record?->redacteur))
+                    ->searchable()
                     ->default(fn () => auth()->user()?->display_name)
                     ->required(),
 
@@ -100,7 +108,7 @@ class NoteResource extends Resource
                     ->label('Validé BCF')
                     ->default(false),
 
-                TextInput::make('lien_url')
+                TextInput::make('lienurl')
                     ->label('Lien URL')
                     ->url()
                     ->nullable(),
@@ -111,6 +119,30 @@ class NoteResource extends Resource
                     ->default(0),
             ])
         ;
+    }
+
+    /**
+     * Options du rédacteur, indexées par le libellé stocké en base (colonne texte).
+     * On y ajoute l'utilisateur connecté et la valeur actuelle de la note, pour qu'elle
+     * reste sélectionnée en édition même si elle ne correspond à aucun marin.
+     */
+    public static function redacteurOptions(?string $current = null): array
+    {
+        $options = Marin::with('grade')
+            ->orderBy('nom')
+            ->get()
+            ->map(fn (Marin $marin) => trim($marin->grade?->libelle_court.' '.$marin->prenom.' '.$marin->nom))
+            ->filter()
+            ->mapWithKeys(fn (string $libelle) => [$libelle => $libelle])
+            ->all();
+
+        foreach ([auth()->user()?->display_name, $current] as $valeur) {
+            if (filled($valeur) && ! isset($options[$valeur])) {
+                $options = [$valeur => $valeur] + $options;
+            }
+        }
+
+        return $options;
     }
 
     public static function table(Table $table): Table
@@ -162,10 +194,10 @@ class NoteResource extends Resource
                     ->boolean()
                     ->toggleable(),
 
-                TextColumn::make('lien_url')
+                TextColumn::make('lienurl')
                     ->label('Lien')
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->url(fn ($record) => $record->lien_url)
+                    ->url(fn ($record) => $record->lienurl)
                     ->openUrlInNewTab()
                 // ->limit(30)
                 ,

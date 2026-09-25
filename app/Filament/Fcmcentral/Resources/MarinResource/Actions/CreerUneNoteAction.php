@@ -9,6 +9,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Modules\FcmCentral\Filament\Fcmcentral\Resources\NoteResource;
 use Modules\FcmCentral\Models\Note;
 
 class CreerUneNoteAction extends Action
@@ -25,7 +26,7 @@ class CreerUneNoteAction extends Action
             ])
             ->modalHeading('Créer une note')
             ->modalDescription(fn ($record) => "Créer une note pour {$record->prenom} {$record->nom}")
-            ->modalWidth('lg')
+            ->modalWidth('4xl')
             ->modalSubmitActionLabel('Créer la note')
             ->modalCancelActionLabel('Annuler')
             ->schema([
@@ -36,13 +37,8 @@ class CreerUneNoteAction extends Action
                 RichEditor::make('libelle')
                     ->required()
                     ->label('Contenu de la note')
-                    ->toolbarButtons([
-                        'bold',
-                        'italic',
-                        'underline',
-                        'bulletList',
-                        'orderedList',
-                    ]),
+                    ->toolbarButtons(NoteResource::TOOLBAR_LIBELLE)
+                    ->extraInputAttributes(['style' => 'min-height: 300px']),
 
                 DatePicker::make('date')
                     ->label('Date')
@@ -53,7 +49,7 @@ class CreerUneNoteAction extends Action
                     ->default(fn () => auth()->user()?->display_name)
                     ->required(),
 
-                TextInput::make('lien_url')
+                TextInput::make('lienurl')
                     ->label('Lien URL (optionnel)')
                     ->url()
                     ->nullable()
@@ -67,7 +63,7 @@ class CreerUneNoteAction extends Action
                         'date' => $data['date'] ?? now(),
                         'redacteur' => $data['redacteur'],
                         'valide_bcf' => false,
-                        'lien_url' => $data['lien_url'] ?? null,
+                        'lienurl' => $data['lienurl'] ?? null,
                         'objet_type' => 'marin',
                         'objet_id' => $record->id,
                     ]);
