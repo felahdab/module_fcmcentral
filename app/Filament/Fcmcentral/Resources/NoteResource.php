@@ -111,6 +111,7 @@ class NoteResource extends Resource
                 TextInput::make('lienurl')
                     ->label('Lien URL')
                     ->url()
+                    ->maxLength(255)
                     ->nullable(),
 
                 // Champs cachés pour objet_type et objet_id
@@ -184,7 +185,7 @@ class NoteResource extends Resource
                     ->date('d/m/Y')
                     ->sortable(),
 
-                TextColumn::make('redacteur.nom')
+                TextColumn::make('redacteur')
                     ->label('Rédacteur')
                     ->searchable()
                     ->toggleable(),
@@ -212,10 +213,10 @@ class NoteResource extends Resource
                     ->relationship('marin', 'nom')
                     ->searchable(),
 
-                SelectFilter::make('redacteur_id')
-                    ->label('Rédacteur')
-                    ->relationship('redacteur', 'nom')
-                    ->searchable(),
+                // SelectFilter::make('redacteur')
+                //     ->label('Rédacteur')
+                //     ->options(fn () => Note::query()->whereNotNull('redacteur')->distinct()->orderBy('redacteur')->pluck('redacteur', 'redacteur')->all())
+                //     ->searchable(),
 
                 TernaryFilter::make('valide_bcf')
                     ->label('Validé BCF'),

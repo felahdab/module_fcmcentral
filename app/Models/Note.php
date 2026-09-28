@@ -22,6 +22,6 @@ class Note extends BaseNote
 
     public function redacteur(): BelongsTo
     {
-        return $this->belongsTo(Marin::class, 'redacteur_id');
+        return $this->belongsTo(Marin::class, 'redacteur');
     }
 }
