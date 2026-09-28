@@ -80,6 +80,87 @@
         box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
     }
 
+    /* Liste compacte des notes (le contenu complet s'ouvre en modale) */
+    .note-liste {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .note-ligne + .note-ligne {
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .note-ligne__bouton {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 0.6rem 0.875rem;
+        border-left: 3px solid #3b82f6;
+        transition: background-color 0.15s ease;
+    }
+
+    .note-ligne--validee .note-ligne__bouton {
+        border-left-color: #22c55e;
+    }
+
+    .note-ligne__bouton:hover,
+    .note-ligne__bouton:focus-visible {
+        background-color: #f9fafb;
+        outline: none;
+    }
+
+    .note-ligne__meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+
+    .note-ligne__redacteur {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .note-ligne__icones {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-left: auto;
+        color: #9ca3af;
+        flex-shrink: 0;
+    }
+
+    .note-ligne__extrait {
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #374151;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .note-impression {
+        display: none;
+    }
+
+    .dark .note-liste,
+    .dark .note-ligne + .note-ligne {
+        border-color: #374151;
+    }
+
+    .dark .note-ligne__bouton:hover,
+    .dark .note-ligne__bouton:focus-visible {
+        background-color: #1f2937;
+    }
+
+    .dark .note-ligne__extrait {
+        color: #d1d5db;
+    }
+
     .custom-scrollbar::-webkit-scrollbar {
         width: 8px;
     }
@@ -177,6 +258,17 @@
     @media print {
         .no-print {
             display: none !important;
+        }
+
+        /* À l'impression : toutes les notes, en entier */
+        .note-ligne {
+            display: block !important;
+        }
+
+        .note-impression {
+            display: block;
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
         }
 
         .section-card {
