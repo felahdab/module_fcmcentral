@@ -60,7 +60,7 @@ class AddNoteForm extends Component
                 'rh_marin_id' => $this->marinId,
                 'type_note_id' => $this->typeNote,
                 'user_id' => auth()->id(),
-                'redacteur_id' => $this->redacteurId,
+                'redacteur' => $this->libelleRedacteur(),
                 'data' => [
                     'libelle' => $this->libelle,
                     'date' => $this->date,
@@ -75,8 +75,7 @@ class AddNoteForm extends Component
                 'libelle' => trim($this->libelle),
                 'date' => $this->date,
                 'lienurl' => $this->lienUrl ?: null,
-                // 'redacteur_id' => auth()->id(),
-                'redacteur_id' => $this->redacteurId,
+                'redacteur' => $this->libelleRedacteur(),
                 'valide_bcf' => $this->valide_bcf,
             ]);
 
@@ -114,6 +113,16 @@ class AddNoteForm extends Component
                 ->send()
             ;
         }
+    }
+
+    /** La colonne redacteur est un texte : on y stocke le libellé du marin choisi (même format que NoteResource). */
+    private function libelleRedacteur(): ?string
+    {
+        $redacteur = Marin::with('grade')->find($this->redacteurId);
+
+        return $redacteur
+            ? trim($redacteur->grade?->libelle_court.' '.$redacteur->prenom.' '.$redacteur->nom)
+            : auth()->user()?->display_name;
     }
 
     public function cancel()

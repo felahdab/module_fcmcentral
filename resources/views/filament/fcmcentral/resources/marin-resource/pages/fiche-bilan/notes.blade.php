@@ -24,48 +24,95 @@
             <p class="text-sm">Aucun commentaire enregistré</p>
         </div>
     @else
-        <div class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
-            @foreach($this->notes as $note)
-                <div class="border-l-4 {{ $note->valide_bcf ? 'border-green-200 bg-green-200' : 'border-blue-500 bg-blue-50' }} p-4 rounded-r note-card">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex-1">
-                            <h5 class="font-medium text-sm text-gray-900">
-                                {{ $note->typeNote?->libelle_court ?? 'Commentaire' }}
-                            </h5>
-                            @if($note->date)
-                                <p class="text-xs text-gray-500 mt-1">
-                                    📅 {{ \Carbon\Carbon::parse($note->date)->format('d/m/Y') }}
-                                </p>
-                            @endif
-                        </div>
-                        <div class="text-right ml-4">
-                            @if($note->redacteur)
-                                <div class="text-xs text-gray-600 mb-1">
-                                    {{ $note->redacteur ?? 'Inconnu' }}
-                                </div>
-                            @endif
-                            @if($note->valide_bcf)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success-100 text-success-800">
-                                    ✓ Validé BCF
+        {{-- Liste compacte : un extrait par note, le contenu complet s'ouvre dans une modale. --}}
+        @php $notesVisibles = 5; @endphp
+        <div x-data="{ toutAfficher: false }">
+            <ul class="note-liste">
+                @foreach($this->notes as $note)
+                    @php $contenu = \Filament\Forms\Components\RichEditor\RichContentRenderer::make($note->libelle)->toHtml(); @endphp
+                    <li
+                        class="note-ligne {{ $note->valide_bcf ? 'note-ligne--validee' : '' }}"
+                        @if($loop->index >= $notesVisibles) x-show="toutAfficher" x-cloak @endif
+                    >
+                        <button
+                            type="button"
+                            class="note-ligne__bouton no-print"
+                            x-on:click="$dispatch('open-modal', { id: 'note-{{ $note->id }}' })"
+                        >
+                            <div class="note-ligne__meta">
+                                <x-filament::badge size="sm" :color="$note->valide_bcf ? 'success' : 'info'">
+                                    {{ $note->typeNote?->libelle_court ?? 'Commentaire' }}
+                                </x-filament::badge>
+                                @if($note->date)
+                                    <span>{{ \Carbon\Carbon::parse($note->date)->format('d/m/Y') }}</span>
+                                @endif
+                                @if($note->redacteur)
+                                    <span class="note-ligne__redacteur">· {{ $note->redacteur }}</span>
+                                @endif
+                                <span class="note-ligne__icones">
+                                    @if($note->lienurl)
+                                        <x-filament::icon icon="heroicon-m-link" class="h-4 w-4" />
+                                    @endif
+                                    @if($note->valide_bcf)
+                                        <x-filament::icon icon="heroicon-m-check-badge" class="h-4 w-4 text-success-600" />
+                                    @endif
+                                    <x-filament::icon icon="heroicon-m-chevron-right" class="h-4 w-4" />
                                 </span>
-                            @endif
-                            @if($this->canEditNote())
-                                <a href="{{ $this->noteEditUrl($note) }}" class="text-xs text-primary-600 hover:text-primary-800 hover:underline mt-1 inline-block">
-                                    ✏️ Modifier
-                                </a>
-                            @endif
+                            </div>
+                            <p class="note-ligne__extrait">{{ \Illuminate\Support\Str::limit(trim(html_entity_decode(strip_tags(str_replace('<', ' <', $contenu)))), 220) }}</p>
+                        </button>
+
+                        {{-- Version complète, uniquement à l'impression --}}
+                        <div class="note-impression">
+                            <strong>{{ $note->typeNote?->libelle_court ?? 'Commentaire' }}</strong>
+                            @if($note->date) — {{ \Carbon\Carbon::parse($note->date)->format('d/m/Y') }} @endif
+                            @if($note->redacteur) — {{ $note->redacteur }} @endif
+                            @if($note->valide_bcf) — ✓ Validé BCF @endif
+                            <div class="note-content">{!! $contenu !!}</div>
                         </div>
-                    </div>
-                    <div class="text-sm text-gray-700 leading-relaxed fi-prose note-content max-w-none">
-                        {!! \Filament\Forms\Components\RichEditor\RichContentRenderer::make($note->libelle)->toHtml() !!}
-                    </div>
-                    @if($note->lienurl)
-                        <a href="{{ $note->lienurl }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 hover:underline mt-2 inline-block">
-                            🔗 Voir le lien associé ↗
-                        </a>
-                    @endif
+
+                        <x-filament::modal id="note-{{ $note->id }}" width="3xl" teleport="body">
+                            <x-slot name="heading">
+                                {{ $note->typeNote?->libelle_court ?? 'Commentaire' }}
+                            </x-slot>
+                            <x-slot name="description">
+                                {{ $note->date ? \Carbon\Carbon::parse($note->date)->format('d/m/Y') : 'Sans date' }}
+                                @if($note->redacteur) · {{ $note->redacteur }} @endif
+                                @if($note->valide_bcf) · ✓ Validé BCF @endif
+                            </x-slot>
+
+                            <div class="text-sm leading-relaxed fi-prose note-content max-w-none">
+                                {!! $contenu !!}
+                            </div>
+
+                            <x-slot name="footerActions">
+                                @if($this->canEditNote())
+                                    <x-filament::button tag="a" href="{{ $this->noteEditUrl($note) }}" icon="heroicon-m-pencil-square">
+                                        Modifier
+                                    </x-filament::button>
+                                @endif
+                                @if($note->lienurl)
+                                    <x-filament::button tag="a" href="{{ $note->lienurl }}" target="_blank" color="gray" icon="heroicon-m-arrow-top-right-on-square">
+                                        Lien associé
+                                    </x-filament::button>
+                                @endif
+                                <x-filament::button color="gray" x-on:click="close">
+                                    Fermer
+                                </x-filament::button>
+                            </x-slot>
+                        </x-filament::modal>
+                    </li>
+                @endforeach
+            </ul>
+
+            @if($this->notes->count() > $notesVisibles)
+                <div class="text-center mt-3 no-print">
+                    <x-filament::link tag="button" type="button" size="sm" x-on:click="toutAfficher = !toutAfficher">
+                        <span x-show="!toutAfficher">Afficher les {{ $this->notes->count() - $notesVisibles }} commentaires plus anciens</span>
+                        <span x-show="toutAfficher" x-cloak>Masquer les commentaires plus anciens</span>
+                    </x-filament::link>
                 </div>
-            @endforeach
+            @endif
         </div>
     @endif
 </x-filament::section>
