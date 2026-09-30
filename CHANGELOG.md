@@ -1,3 +1,10 @@
+## 0.2.17 (September 30, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.16 –> 0.2.17
+- Implements art #972484 : Redesign des Notes sur la Fiche Bilan, suppression du choix  select user dans Edit
+- Implements art #972484 : Correction bug avec user pour les notes (bloquant sur edit)
+- Implements art #971058 : Retex et modification de BCF sur UI
+- Implements art #971058 : Rajout de fonctions text Editor pour les Notes BCF
+
 ## 0.2.16 (September 25, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.15 –> 0.2.16
 - Merge branch 'develop'
