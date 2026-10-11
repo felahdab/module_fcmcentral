@@ -71,7 +71,7 @@ trait HasPieceJointe
             UserGeneratedEventTypes::SUPPR_PIECE_JOINTE_MARIN_PARCOURS,
             auth()->user()->uuid,
             ObjectClasses::MARIN,
-            $this->marin->uuid,
+            $this->marin->nid,
             [
                 'type_element' => 'savoirfaire',
                 'uuid_element' => $csfUuid,
@@ -120,7 +120,7 @@ trait HasPieceJointe
             UserGeneratedEventTypes::AJOUT_PIECE_JOINTE_MARIN_PARCOURS,
             auth()->user()->uuid,
             ObjectClasses::MARIN,
-            $this->marin->uuid,
+            $this->marin->nid,
             [
                 'type_element' => 'savoirfaire',
                 'uuid_element' => $this->pieceJointeEnEditionUuid,

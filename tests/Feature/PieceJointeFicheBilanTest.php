@@ -44,7 +44,7 @@ function creerMarinAvecSavoirFaireValideFicheBilan(): \Modules\FcmCentral\Models
         event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
         user_uuid: 'test-user',
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'cohorte_id' => 1,
             'date_de_debut' => Carbon::tomorrow(),
@@ -69,7 +69,7 @@ function creerMarinAvecSavoirFaireValideFicheBilan(): \Modules\FcmCentral\Models
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid: 'test-user',
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: ['parcours' => $parcours->uuid]
     ));
 
@@ -78,7 +78,7 @@ function creerMarinAvecSavoirFaireValideFicheBilan(): \Modules\FcmCentral\Models
             event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
             user_uuid: 'test-user',
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin->uuid,
+            object_uuid: $marin->nid,
             detail: [
                 'type_element' => 'objectif',
                 'uuid_element' => $objectif,
@@ -144,7 +144,7 @@ describe('FicheBilan - Pièce jointe', function () {
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: 'test-user',
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin->uuid,
+            object_uuid: $marin->nid,
             detail: ['cohorte_id' => 1, 'date_de_debut' => Carbon::tomorrow()]
         ));
 
@@ -163,7 +163,7 @@ describe('FicheBilan - Pièce jointe', function () {
             event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
             user_uuid: 'test-user',
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin->uuid,
+            object_uuid: $marin->nid,
             detail: ['parcours' => $parcours->uuid]
         ));
 

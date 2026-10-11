@@ -24,7 +24,7 @@ class AnnulProposElementMarinParcoursListener
             return;
         }
 
-        $marin = Marin::where('uuid', $event->object_uuid)->first();
+        $marin = Marin::findByEventReference($event->object_uuid);
         if (!$marin) {
             Log::error('Marin non trouvé avec UUID: '.$event->object_uuid);
 

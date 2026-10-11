@@ -46,13 +46,16 @@ class ListStoredEvents extends ListRecords
                 }
 
                 // Recherche par nom de marin (objet concerné)
-                $marinUuids = RHMarin::where('nom', 'like', "%{$search}%")
+                $marinReferences = RHMarin::where('nom', 'like', "%{$search}%")
                     ->orWhere('prenom', 'like', "%{$search}%")
-                    ->pluck('uuid')
+                    ->get(['id', 'nid', 'uuid'])
+                    ->flatMap(fn (RHMarin $marin) => [$marin->nid, $marin->uuid, (string) $marin->id])
+                    ->filter()
+                    ->unique()
                 ;
 
-                if ($marinUuids->isNotEmpty()) {
-                    $q->orWhereIn('object_uuid', $marinUuids);
+                if ($marinReferences->isNotEmpty()) {
+                    $q->orWhereIn('object_uuid', $marinReferences);
                 }
 
                 // Recherche directe sur le type d'événement

@@ -62,7 +62,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin1->uuid,
+            object_uuid: $marin1->nid,
             detail: [
                 'cohorte_id' => 1,
                 'date_de_debut' => Carbon::tomorrow(),
@@ -79,7 +79,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin2->uuid,
+            object_uuid: $marin2->nid,
             detail: [
                 'cohorte_id' => 1,
                 'date_de_debut' => Carbon::tomorrow(),
@@ -119,7 +119,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin1->uuid,
+            object_uuid: $marin1->nid,
             detail: [
                 'parcours' => $parcours->uuid,
             ]
@@ -130,7 +130,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin2->uuid,
+            object_uuid: $marin2->nid,
             detail: [
                 'parcours' => $parcours->uuid,
             ]
@@ -264,7 +264,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin1->uuid,
+            object_uuid: $marin1->nid,
             detail: [
                 'cohorte_id' => 1,
                 'date_de_debut' => Carbon::tomorrow(),
@@ -281,7 +281,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin2->uuid,
+            object_uuid: $marin2->nid,
             detail: [
                 'cohorte_id' => 1,
                 'date_de_debut' => Carbon::tomorrow(),
@@ -330,7 +330,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin1->uuid,
+            object_uuid: $marin1->nid,
             detail: ['parcours' => $parcours1->uuid]
         ));
 
@@ -339,7 +339,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin2->uuid,
+            object_uuid: $marin2->nid,
             detail: ['parcours' => $parcours2->uuid]
         ));
 
@@ -421,7 +421,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin1->uuid,
+            object_uuid: $marin1->nid,
             detail: [
                 'cohorte_id' => 1,
                 'date_de_debut' => Carbon::tomorrow(),
@@ -438,7 +438,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin2->uuid,
+            object_uuid: $marin2->nid,
             detail: [
                 'cohorte_id' => 1,
                 'date_de_debut' => Carbon::tomorrow(),
@@ -455,7 +455,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin3->uuid,
+            object_uuid: $marin3->nid,
             detail: [
                 'cohorte_id' => 1,
                 'date_de_debut' => Carbon::tomorrow(),
@@ -489,7 +489,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin1->uuid,
+            object_uuid: $marin1->nid,
             detail: ['parcours' => $parcours->uuid]
         ));
 
@@ -497,7 +497,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin2->uuid,
+            object_uuid: $marin2->nid,
             detail: ['parcours' => $parcours->uuid]
         ));
 
@@ -526,7 +526,7 @@ describe('Création Parcours Sérialisé - FcmCentral', function () {
             event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin3->uuid,
+            object_uuid: $marin3->nid,
             detail: ['parcours' => $parcours->uuid]
         ));
 

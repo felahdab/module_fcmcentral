@@ -38,7 +38,7 @@ class AffecterMentorAction extends Action
                         UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
                         auth()->user()?->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         ['mentor' => $data['mentors']]
                     ));
                 }

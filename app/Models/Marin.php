@@ -42,6 +42,17 @@ class Marin extends BaseMarin
 {
     use HasFactory;
 
+    public static function findByEventReference(?string $reference): ?self
+    {
+        if (null === $reference) {
+            return null;
+        }
+
+        return static::where('nid', $reference)->first()
+            ?? static::where('uuid', $reference)->first()
+            ?? (ctype_digit($reference) ? static::find($reference) : null);
+    }
+
     protected static function newFactory(): MarinFactory
     {
         return MarinFactory::new();
@@ -816,5 +827,3 @@ class Marin extends BaseMarin
             ?->parcoursModel;               // belongsTo Parcours (nom spécifique pour éviter le bug)
     }
 }
-
-

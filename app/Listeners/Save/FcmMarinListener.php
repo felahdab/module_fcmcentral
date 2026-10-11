@@ -25,7 +25,7 @@ class FcmMarinListener
             return;
         }
 
-        $marin = Marin::where('uuid', $event->object_uuid)->first();
+        $marin = Marin::findByEventReference($event->object_uuid);
 
         if ($marin) {
             Log::info('Marin trouvé :', ['id' => $marin->id]);

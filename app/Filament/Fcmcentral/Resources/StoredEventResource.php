@@ -126,7 +126,9 @@ class StoredEventResource extends Resource
                         $class = strtolower(class_basename($record->object_class ?? ''));
 
                         return match (true) {
-                            str_contains($class, 'marin') => RHMarin::where('uuid', $state)->first()?->fullNameAndGrade ?? $state,
+                            str_contains($class, 'marin') => RHMarin::where('nid', $state)->first()?->fullNameAndGrade
+                                ?? RHMarin::where('uuid', $state)->first()?->fullNameAndGrade
+                                ?? $state,
 
                             str_contains($class, 'parcours') => Parcours::where('uuid', $state)->value('libelle_court') ?? $state,
 

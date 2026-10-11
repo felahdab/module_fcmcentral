@@ -65,7 +65,7 @@ class JalonFcmAction extends Action
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         ['date_sedimentation' => $data['date_sedimentation']]
                     ));
                 }
@@ -76,7 +76,7 @@ class JalonFcmAction extends Action
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         ['date_fcm' => $data['date_fcm']]
                     ));
                 }
@@ -87,7 +87,7 @@ class JalonFcmAction extends Action
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         ['date_competence' => $data['date_competence']]
                     ));
                 }

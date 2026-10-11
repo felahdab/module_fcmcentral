@@ -42,7 +42,7 @@ class AttribuerParcoursAction extends Action
                         UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         ['parcours' => $data['parcours_id']] // ✅ UUID du Parcours
                     ));
                 }

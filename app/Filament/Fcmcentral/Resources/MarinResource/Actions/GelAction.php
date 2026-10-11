@@ -83,7 +83,7 @@ class GelAction extends Action
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         [
                             'date_debut_gel'          => $data['date_debut_gel'],
                             'type_gel_uuid'           => $typeGel?->uuid,
@@ -100,7 +100,7 @@ class GelAction extends Action
                         UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         [
                             'uuid_gel'     => $gelActif->uuid,
                             'date_fin_gel' => $data['date_fin_gel'],

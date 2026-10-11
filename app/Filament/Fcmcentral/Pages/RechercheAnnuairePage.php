@@ -128,7 +128,7 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                             UserGeneratedEventTypes::MARIN_EN_FCM,
                             auth()->user()->uuid,
                             ObjectClasses::MARIN,
-                            $marin->uuid,
+                            $marin->nid,
                             []
                         );
                         event($event);
@@ -138,7 +138,7 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                             UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
                             auth()->user()->uuid,
                             ObjectClasses::MARIN,
-                            $marin->uuid,
+                            $marin->nid,
                             [
                                 'cohorte' => $data['cohorte_id'],
                             ]
@@ -150,7 +150,7 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                             UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
                             auth()->user()->uuid,
                             ObjectClasses::MARIN,
-                            $marin->uuid,
+                            $marin->nid,
                             [
                                 'mentors' => $data['mentors'],
                             ]
@@ -162,7 +162,7 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
                             UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
                             auth()->user()->uuid,
                             ObjectClasses::MARIN,
-                            $marin->uuid,
+                            $marin->nid,
                             [
                                 'parcours' => $data['parcours_id'],
                             ]
@@ -205,5 +205,4 @@ class RechercheAnnuairePage extends RechercheAnnuairePageTemplate
         ];
     }
 }
-
 
