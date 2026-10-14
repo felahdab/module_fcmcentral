@@ -22,6 +22,7 @@ class AffecterMentorAction extends Action
                     ->multiple()
                     ->options(
                         Marin::query()
+                            ->with('grade')
                             ->whereNull('deleted_at')
                             ->orderBy('nom')
                             ->get()

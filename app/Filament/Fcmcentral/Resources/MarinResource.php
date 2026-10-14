@@ -44,6 +44,15 @@ class MarinResource extends Resource
         static::canAccess();
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->select('id', 'nom', 'prenom', 'grade_id', 'email', 'nid', 'matricule', 'specialite_id', 'brevet_id', 'unite_id')
+            ->with('grade')
+            ->with('complementsFcm.mentors');
+    }
+
+
     /**
      * Badge de navigation avec comptage selon les droits.
      */
@@ -72,10 +81,14 @@ class MarinResource extends Resource
             Select::make('brevet_id')->relationship('brevet', 'libelle_long'),
             Select::make('unite_id')->relationship('unite', 'libelle_long'),
         ]);
+
+        
     }
 
     public static function table(Table $table): Table
     {
+        $currentMarin_id = Marin::fromCurrentUser()?->id;
+
         return $table
             ->defaultSort('nom', 'asc')
             ->defaultPaginationPageOption(25)
@@ -372,7 +385,7 @@ class MarinResource extends Resource
                         'title' => 'Livret FCM',
                         'class' => 'btn-livret',
                     ])
-                    ->visible(fn($record) => $record->id == Marin::fromCurrentUser()?->id && MonLivretDeFcm::canAccess())
+                    ->visible(fn($record) => $record->id == $currentMarin_id && MonLivretDeFcm::canAccess())
                     ->url(fn($record) => MonLivretDeFcm::getUrl()),
                 Action::make('fiche-bilan')
                     ->iconButton()
