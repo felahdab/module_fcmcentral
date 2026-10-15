@@ -11,7 +11,7 @@ use App\Http\Middleware\SetTenantCookieMiddleware;
 use App\Http\Middleware\SetTenantDefaultForRoutesMiddleware;
 use App\Providers\Filament\Traits\UsesSkeletorPrefixAndMultitenancyTrait;
 use Filament\Facades\Filament;
-use App\Http\Middleware\FilamentAuthenticate;
+use App\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
@@ -79,7 +79,7 @@ class FcmcentralPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                FilamentAuthenticate::class,
+                Authenticate::class,
             ])
 
             ->topNavigation()
