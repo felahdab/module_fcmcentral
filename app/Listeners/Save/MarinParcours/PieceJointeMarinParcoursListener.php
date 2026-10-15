@@ -30,7 +30,7 @@ class PieceJointeMarinParcoursListener
 
         $estAjout = $event->isOfType(UserGeneratedEventTypes::AJOUT_PIECE_JOINTE_MARIN_PARCOURS);
 
-        $marin = Marin::where('uuid', $event->object_uuid)->first();
+        $marin = Marin::findByEventReference($event->object_uuid);
         if (!$marin) {
             Log::error('[PieceJointeMarinParcoursListener] Marin non trouvé: '.$event->object_uuid);
 

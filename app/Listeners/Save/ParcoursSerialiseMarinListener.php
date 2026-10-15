@@ -25,7 +25,7 @@ class ParcoursSerialiseMarinListener
         }
 
         // Récupérer le marin et les données
-        $marin = Marin::where('uuid', $event->object_uuid)->first();
+        $marin = Marin::findByEventReference($event->object_uuid);
         $data = $event->detail;
 
         // Récupérer le parcours serialisé

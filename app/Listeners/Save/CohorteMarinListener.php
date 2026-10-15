@@ -22,7 +22,7 @@ class CohorteMarinListener
             return;
         }
 
-        $marin = Marin::where('uuid', $event->object_uuid)->first();
+        $marin = Marin::findByEventReference($event->object_uuid);
 
         $detail = $event->detail;
         $cohorte = Cohorte::where('uuid', $detail['cohorte'])->first();

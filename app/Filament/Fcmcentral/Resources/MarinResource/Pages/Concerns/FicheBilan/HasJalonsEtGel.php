@@ -173,7 +173,7 @@ trait HasJalonsEtGel
                     UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                     auth()->user()->uuid,
                     ObjectClasses::MARIN,
-                    $this->marin->uuid,
+                    $this->marin->nid,
                     ['date_sedimentation' => $this->jalonForm['date_sedimentation']]
                 ));
             }
@@ -182,7 +182,7 @@ trait HasJalonsEtGel
                     UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                     auth()->user()->uuid,
                     ObjectClasses::MARIN,
-                    $this->marin->uuid,
+                    $this->marin->nid,
                     ['date_fcm' => $this->jalonForm['date_fcm']]
                 ));
             }
@@ -191,7 +191,7 @@ trait HasJalonsEtGel
                     UserGeneratedEventTypes::DEFINIR_JALON_FCM,
                     auth()->user()->uuid,
                     ObjectClasses::MARIN,
-                    $this->marin->uuid,
+                    $this->marin->nid,
                     ['date_competence' => $this->jalonForm['date_competence']]
                 ));
             }

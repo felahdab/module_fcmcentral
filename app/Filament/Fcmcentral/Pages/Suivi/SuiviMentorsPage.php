@@ -166,7 +166,7 @@ class SuiviMentorsPage extends Page implements HasForms, HasTable
                             UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
                             auth()->user()?->uuid,
                             ObjectClasses::MARIN,
-                            $marin->uuid,
+                            $marin->nid,
                             // 'mentors' ET 'mentor' : MentorMarinListener a existé sous deux formes
                             // (clé plurielle avec ??[], clé singulière avec Arr::wrap) selon l'environnement.
                             ['mentors' => $data['mentors'], 'mentor' => $data['mentors']]

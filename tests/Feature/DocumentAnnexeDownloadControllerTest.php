@@ -35,7 +35,7 @@ function creerMarinAvecDocumentAnnexeStocke(): array
         event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
         user_uuid: 'test-user',
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: ['cohorte_id' => 1, 'date_de_debut' => \Carbon\Carbon::tomorrow()]
     ));
 
@@ -128,7 +128,7 @@ describe('DocumentAnnexeDownloadController - Autorisations', function () {
             event_type: UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
             user_uuid: 'test-user',
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin->uuid,
+            object_uuid: $marin->nid,
             detail: ['mentor' => [$mentor->uuid]]
         ));
 

@@ -22,7 +22,7 @@ class ProposElementMarinParcoursListener
             return;
         }
 
-        $marin = Marin::where('uuid', $event->object_uuid)->first();
+        $marin = Marin::findByEventReference($event->object_uuid);
         if (!$marin) {
             Log::error('Marin non trouvé: '.$event->object_uuid);
 

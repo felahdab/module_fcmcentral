@@ -191,13 +191,13 @@ it('dispatch manuel fonctionne', function () {
         UserGeneratedEventTypes::MARIN_EN_FCM,
         $this->admin->uuid,
         ObjectClasses::MARIN,
-        $marin->uuid,
+        $marin->nid,
         ['test' => 'data']
     ));
 
     Event::assertDispatched(UserGeneratedEvent::class, function ($event) use ($marin) {
         return $event->event_type == UserGeneratedEventTypes::MARIN_EN_FCM->value
-            && $event->object_uuid == $marin->uuid;
+            && $event->object_uuid == $marin->nid;
     });
 });
 
@@ -234,7 +234,7 @@ it('genere un  UserGeneratedEvent quand on demande à suivre un marin en FCM', f
     Event::assertDispatched(UserGeneratedEvent::class, function ($event) use ($marin) {
         return $event->event_type == UserGeneratedEventTypes::MARIN_EN_FCM->value
                 && $event->object_class == ObjectClasses::MARIN->value
-                && $event->object_uuid == $marin->uuid;
+                && $event->object_uuid == $marin->nid;
     });
 });
 
@@ -274,7 +274,7 @@ it('ajoute la date_sedimentation lors de l\'activation FCM', function () {
         event_type: UserGeneratedEventTypes::MARIN_EN_FCM,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'cohorte_id' => 1,
             'date_de_debut' => Carbon::tomorrow(),
@@ -318,7 +318,7 @@ it('génère un UserGeneratedEvent quand on modifie les jalons FCM', function ()
     Event::assertDispatched(UserGeneratedEvent::class, function ($event) use ($marin, $dateSedimentation) {
         return $event->event_type == UserGeneratedEventTypes::DEFINIR_JALON_FCM->value
                 && $event->object_class == ObjectClasses::MARIN->value
-                && $event->object_uuid == $marin->uuid
+                && $event->object_uuid == $marin->nid
                 && isset($event->detail['date_sedimentation'])
                 && $event->detail['date_sedimentation'] == $dateSedimentation;
     });
@@ -326,7 +326,7 @@ it('génère un UserGeneratedEvent quand on modifie les jalons FCM', function ()
     Event::assertDispatched(UserGeneratedEvent::class, function ($event) use ($marin, $dateFcm) {
         return $event->event_type == UserGeneratedEventTypes::DEFINIR_JALON_FCM->value
                 && $event->object_class == ObjectClasses::MARIN->value
-                && $event->object_uuid == $marin->uuid
+                && $event->object_uuid == $marin->nid
                 && isset($event->detail['date_fcm'])
                 && $event->detail['date_fcm'] == $dateFcm;
     });
@@ -334,7 +334,7 @@ it('génère un UserGeneratedEvent quand on modifie les jalons FCM', function ()
     Event::assertDispatched(UserGeneratedEvent::class, function ($event) use ($marin, $dateCompetence) {
         return $event->event_type == UserGeneratedEventTypes::DEFINIR_JALON_FCM->value
                 && $event->object_class == ObjectClasses::MARIN->value
-                && $event->object_uuid == $marin->uuid
+                && $event->object_uuid == $marin->nid
                 && isset($event->detail['date_competence'])
                 && $event->detail['date_competence'] == $dateCompetence;
     });
@@ -377,7 +377,7 @@ it('genere un  UserGeneratedEvent quand on assigne une cohorte a un marin suivi 
     Event::assertDispatched(UserGeneratedEvent::class, function ($event) use ($marin) {
         return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN->value
                 && $event->object_class == ObjectClasses::MARIN->value
-                && $event->object_uuid == $marin->uuid;
+                && $event->object_uuid == $marin->nid;
     });
 });
 
@@ -415,7 +415,7 @@ it('genere un  UserGeneratedEvent quand on assigne un mentor a un marin suivi en
     Event::assertDispatched(UserGeneratedEvent::class, function ($event) use ($marin) {
         return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN->value
                 && $event->object_class == ObjectClasses::MARIN->value
-                && $event->object_uuid == $marin->uuid;
+                && $event->object_uuid == $marin->nid;
     });
 });
 
@@ -455,7 +455,7 @@ it('genere un UserGeneratedEvent quand on assigne un parcours a un marin suivi e
     Event::assertDispatched(UserGeneratedEvent::class, function ($event) use ($marin) {
         return $event->event_type == UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN->value
                 && $event->object_class == ObjectClasses::MARIN->value
-                && $event->object_uuid == $marin->uuid;
+                && $event->object_uuid == $marin->nid;
     });
 })->skip();
 
@@ -499,7 +499,7 @@ it('affiche le livret FCM', function () {
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'parcours' => $parcours->uuid,
         ]
@@ -558,7 +558,7 @@ it('met à jour le parcours en cas de validation', function () {
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'parcours' => $parcours->uuid,
         ]
@@ -576,7 +576,7 @@ it('met à jour le parcours en cas de validation', function () {
             event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin->uuid,
+            object_uuid: $marin->nid,
             detail: [
                 'type_element' => 'objectif',
                 'uuid_element' => $objectif,
@@ -642,7 +642,7 @@ it('met à jour le parcours en cas d\'annulation', function () {
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'parcours' => $parcours->uuid,
         ]
@@ -663,7 +663,7 @@ it('met à jour le parcours en cas d\'annulation', function () {
             event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
             user_uuid: $this->admin->uuid,
             object_class: ObjectClasses::MARIN,
-            object_uuid: $marin->uuid,
+            object_uuid: $marin->nid,
             detail: [
                 'type_element' => 'objectif',
                 'uuid_element' => $objectif,
@@ -678,7 +678,7 @@ it('met à jour le parcours en cas d\'annulation', function () {
         event_type: UserGeneratedEventTypes::ANNUL_ELMT_MARIN_PARCOURS,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'type_element' => 'objectif',
             'uuid_element' => $objectifs[0],
@@ -745,7 +745,7 @@ it('met à jour le parcours en cas de proposition', function () {
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'parcours' => $parcours->uuid,
         ]
@@ -764,7 +764,7 @@ it('met à jour le parcours en cas de proposition', function () {
         event_type: UserGeneratedEventTypes::PROPOS_ELMT_MARIN_PARCOURS,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'type_element' => 'objectif',
             'uuid_element' => $objectifs[0],
@@ -830,7 +830,7 @@ it('met a jour le parcours en cas de validation d une proposition', function () 
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid : $marin->uuid,
+        object_uuid : $marin->nid,
         detail: [
             'parcours' => $parcours->uuid,
         ]
@@ -851,7 +851,7 @@ it('met a jour le parcours en cas de validation d une proposition', function () 
         event_type: UserGeneratedEventTypes::PROPOS_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid : $marin->uuid,
+        object_uuid : $marin->nid,
         detail: [
             'type_element' => 'objectif', // ✅ CORRECTION
             'uuid_element' => $objectifs[0],
@@ -866,7 +866,7 @@ it('met a jour le parcours en cas de validation d une proposition', function () 
         event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid : $marin->uuid,
+        object_uuid : $marin->nid,
         detail: [
             'type_element' => 'objectif', // ✅ CORRECTION
             'uuid_element' => $objectifs[0],
@@ -933,7 +933,7 @@ it('met a jour le parcours en cas de refus d une proposition', function () {
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid : $marin->uuid,
+        object_uuid : $marin->nid,
         detail: [
             'parcours' => $parcours->uuid,
         ]
@@ -954,7 +954,7 @@ it('met a jour le parcours en cas de refus d une proposition', function () {
         event_type: UserGeneratedEventTypes::PROPOS_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid : $marin->uuid,
+        object_uuid : $marin->nid,
         detail: [
             'type_element' => 'objectif', // ✅ CORRECTION
             'uuid_element' => $objectifs[0],
@@ -969,7 +969,7 @@ it('met a jour le parcours en cas de refus d une proposition', function () {
         event_type: UserGeneratedEventTypes::ANNUL_PROPOS_ELMT_MARIN_PARCOURS,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid : $marin->uuid,
+        object_uuid : $marin->nid,
         detail: [
             'type_element' => 'objectif', // ✅ CORRECTION
             'uuid_element' => $objectifs[0],
@@ -1036,7 +1036,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid : $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid : $marin->uuid,
+        object_uuid : $marin->nid,
         detail: [
             'parcours' => $parcours->uuid,
         ]
@@ -1112,7 +1112,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
         event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'type_element' => 'objectif',
             'uuid_element' => $objectifsUuids[0],
@@ -1130,7 +1130,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
                 event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
                 user_uuid: $this->admin->uuid,
                 object_class: ObjectClasses::MARIN,
-                object_uuid: $marin->uuid,
+                object_uuid: $marin->nid,
                 detail: [
                     'type_element' => 'objectif',
                     'uuid_element' => $actUuid,
@@ -1152,7 +1152,7 @@ it('valide automatiquement toutes les activites a false quand on valide un savoi
         event_type: UserGeneratedEventTypes::VALID_ELMT_MARIN_PARCOURS,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'type_element' => 'savoirfaire',
             'uuid_element' => $savoirfaireUuid,
@@ -1358,7 +1358,7 @@ it('permet de creer une note pour un marin depuis le modal de la liste des marin
         UserGeneratedEventTypes::MARIN_EN_FCM,
         $this->admin->uuid,
         ObjectClasses::MARIN,
-        $marin->uuid,
+        $marin->nid,
         ['test' => 'data']
     ));
 
@@ -1387,7 +1387,7 @@ it('permet de creer une note pour un marin en FCM', function () {
         UserGeneratedEventTypes::MARIN_EN_FCM,
         $this->admin->uuid,
         ObjectClasses::MARIN,
-        $marin->uuid,
+        $marin->nid,
         ['test' => 'data']
     ));
 
@@ -1446,7 +1446,7 @@ it('permet au mentor d acceeder au livret de FCM et à la fiche bilan de son men
         event_type: UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'parcours' => $parcours->uuid,
         ]
@@ -1456,7 +1456,7 @@ it('permet au mentor d acceeder au livret de FCM et à la fiche bilan de son men
         event_type: UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
         user_uuid: $this->admin->uuid,
         object_class: ObjectClasses::MARIN,
-        object_uuid: $marin->uuid,
+        object_uuid: $marin->nid,
         detail: [
             'mentor' => [$mentor->uuid],
         ]

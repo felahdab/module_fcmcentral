@@ -73,7 +73,7 @@ class ToggleFcmAction extends Action
                         UserGeneratedEventTypes::MARIN_PAS_FCM,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         []
                     ));
                     Notification::make()
@@ -90,7 +90,7 @@ class ToggleFcmAction extends Action
                     UserGeneratedEventTypes::MARIN_EN_FCM,
                     auth()->user()->uuid,
                     ObjectClasses::MARIN,
-                    $record->uuid,
+                    $record->nid,
                     ['statut_fcm' => 'En validation']
                 ));
                 // Attribution cohorte/mentor/parcours
@@ -99,7 +99,7 @@ class ToggleFcmAction extends Action
                         UserGeneratedEventTypes::ATTRIBUER_COHORTE_MARIN,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         ['cohorte' => $data['cohorte_id']]
                     ));
                 }
@@ -108,7 +108,7 @@ class ToggleFcmAction extends Action
                         UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         ['mentor' => $data['mentors']]
                     ));
                 }
@@ -117,7 +117,7 @@ class ToggleFcmAction extends Action
                         UserGeneratedEventTypes::ATTRIBUER_PARCOURS_SERIALISE_MARIN,
                         auth()->user()->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         ['parcours' => $data['parcours_id']]
                     ));
                 }
@@ -125,5 +125,4 @@ class ToggleFcmAction extends Action
         ;
     }
 }
-
 

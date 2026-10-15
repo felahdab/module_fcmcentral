@@ -26,10 +26,15 @@ class StoredEvent extends StoredEventBase
     #[Scope]
     protected function filtre_par_unite(Builder $query)
     {
-        $marins_visibles_uuids = Marin::pluck('uuid'); // Cette requête repose sur le modèle Marin, et applique donc le scope de filtrage par unité.
+        $marins_visibles_references = Marin::query()
+            ->get(['id', 'nid', 'uuid'])
+            ->flatMap(fn (Marin $marin) => [$marin->nid, $marin->uuid, (string) $marin->id])
+            ->filter()
+            ->unique()
+        ; // Cette requête repose sur le modèle Marin, et applique donc le scope de filtrage par unité.
 
         $query->whereNot('object_class', ObjectClasses::MARIN->value) // Tous les stored event qui ne parlent pas d'un marin en particulier
-            ->orWhereIn('object_uuid', $marins_visibles_uuids) // Les stored event qui parlent d'un marin dont le marin est dans la liste des marins accessibles.
+            ->orWhereIn('object_uuid', $marins_visibles_references) // Les stored event qui parlent d'un marin dont le marin est dans la liste des marins accessibles.
         ;
     }
 }

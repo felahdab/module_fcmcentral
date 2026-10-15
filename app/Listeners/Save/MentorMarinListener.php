@@ -19,7 +19,7 @@ class MentorMarinListener
             return;
         }
 
-        $marin = Marin::where('uuid', $event->object_uuid)->first();
+        $marin = Marin::findByEventReference($event->object_uuid);
         $data = $event->detail;
 
         if (!$marin) {
@@ -52,5 +52,4 @@ class MentorMarinListener
             ->send();
     }
 }
-
 

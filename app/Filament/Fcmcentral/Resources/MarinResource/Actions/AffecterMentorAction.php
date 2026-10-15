@@ -22,6 +22,7 @@ class AffecterMentorAction extends Action
                     ->multiple()
                     ->options(
                         Marin::query()
+                            ->with('grade')
                             ->whereNull('deleted_at')
                             ->orderBy('nom')
                             ->get()
@@ -38,7 +39,7 @@ class AffecterMentorAction extends Action
                         UserGeneratedEventTypes::ATTRIBUER_MENTOR_MARIN,
                         auth()->user()?->uuid,
                         ObjectClasses::MARIN,
-                        $record->uuid,
+                        $record->nid,
                         ['mentor' => $data['mentors']]
                     ));
                 }

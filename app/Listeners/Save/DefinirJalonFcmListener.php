@@ -23,7 +23,7 @@ class DefinirJalonFcmListener
         }
 
         // Recupere le Marin et les données
-        $marin = Marin::where('uuid', $event->object_uuid)->first();
+        $marin = Marin::findByEventReference($event->object_uuid);
         $data = $event->detail;
         $fcmMarin = $marin->complementsFcm;
 
