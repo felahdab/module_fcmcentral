@@ -1,3 +1,9 @@
+## 0.2.18 (November 02, 2026)
+- Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.17 –> 0.2.18
+- BugBounty Rémédiation https://forge.intradef.gouv.fr/plugins/tracker/?aid=988574 Retrait des endpoints d'API inutiles et non sécurisés
+- Précision de getEloquentQuery pour éviter les N+1
+- Transition vers l'utilisation du NID comme référence unique des marins. Migration pour mettre à jour les StoredEvent de façon rétroactive.
+
 ## 0.2.17 (September 30, 2026)
 - Updated VERSION, Updated CHANGELOG.md, Bumped 0.2.16 –> 0.2.17
 - Implements art #972484 : Redesign des Notes sur la Fiche Bilan, suppression du choix  select user dans Edit
